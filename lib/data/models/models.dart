@@ -122,3 +122,23 @@ class SiteDetail {
   final int live;
   final List<LivePage> livePages;
 }
+
+/// Données d'événements personnalisés pour un site sur une fenêtre.
+@immutable
+class EventsData {
+  const EventsData({
+    required this.total,
+    required this.series,
+    required this.breakdown,
+    required this.unit,
+  });
+
+  /// Total d'événements sur la fenêtre (le nombre par bucket est porté par
+  /// [SeriesPoint.visitors] de [series] — champ réutilisé comme « compte »).
+  final int total;
+  final List<SeriesPoint> series;
+  final List<MetricRow> breakdown; // nom d'événement → nombre
+  final String unit;
+
+  bool get isEmpty => breakdown.isEmpty;
+}

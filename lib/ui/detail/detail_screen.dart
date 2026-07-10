@@ -24,10 +24,13 @@ class DetailScreen extends ConsumerStatefulWidget {
   ConsumerState<DetailScreen> createState() => _DetailScreenState();
 }
 
+enum _DetailTab { overview, events }
+
 class _DetailScreenState extends ConsumerState<DetailScreen> {
   Period _period = Period.d7;
   DateTime? _customStart;
   DateTime? _customEnd;
+  _DetailTab _tab = _DetailTab.overview;
   Timer? _timer;
 
   // Fenêtre figée : recalculée seulement au changement de période / refresh,
@@ -57,6 +60,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
       if (!mounted) return;
       setState(() => _window = _computeWindow());
       ref.invalidate(detailProvider((widget.site, _window)));
+      ref.invalidate(eventsProvider((widget.site, _window)));
     });
   }
 
@@ -100,6 +104,8 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
     final detail =
         async.value ?? (_lastDetailWindow == window ? _lastDetail : null);
     final refreshing = async.isLoading && detail != null;
+    final hasEvents =
+        ref.watch(siteHasEventsProvider(widget.site)).value ?? false;
 
     return Scaffold(
       body: Stack(
@@ -166,9 +172,23 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 22),
+            const SizedBox(height: 18),
 
-            if (async.hasError && detail == null)
+            // Onglets Vue d'ensemble / Événements (le 2e uniquement si events).
+            if (hasEvents) ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: _SegTabs(
+                  current: _tab,
+                  onChanged: (t) => setState(() => _tab = t),
+                ),
+              ),
+              const SizedBox(height: 20),
+            ],
+
+            if (_tab == _DetailTab.events && hasEvents)
+              _EventsTab(site: widget.site, window: window)
+            else if (async.hasError && detail == null)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
                 child: Center(
@@ -416,6 +436,128 @@ class _MetricCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Segmenté à 2 onglets (Vue d'ensemble / Événements).
+class _SegTabs extends StatelessWidget {
+  const _SegTabs({required this.current, required this.onChanged});
+  final _DetailTab current;
+  final ValueChanged<_DetailTab> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.glance;
+    Widget seg(_DetailTab tab, String label) {
+      final on = tab == current;
+      return Expanded(
+        child: GestureDetector(
+          onTap: () => onChanged(tab),
+          behavior: HitTestBehavior.opaque,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            height: 38,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: on ? p.surface : Colors.transparent,
+              borderRadius: BorderRadius.circular(9),
+              boxShadow: on ? p.shadow : null,
+            ),
+            child: Text(
+              label,
+              style: GT.body(14, weight: on ? 600 : 400,
+                  color: on ? p.fg : p.fg2),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        color: p.chip,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          seg(_DetailTab.overview, "Vue d'ensemble"),
+          seg(_DetailTab.events, 'Événements'),
+        ],
+      ),
+    );
+  }
+}
+
+/// Contenu de l'onglet Événements : total + graphe + répartition par nom.
+class _EventsTab extends ConsumerWidget {
+  const _EventsTab({required this.site, required this.window});
+  final Site site;
+  final DateWindow window;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final p = context.glance;
+    final async = ref.watch(eventsProvider((site, window)));
+    final data = async.value;
+
+    if (data == null) {
+      if (async.hasError) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+          child: Center(
+            child: Text('Chargement impossible.',
+                style: GT.body(15, color: p.fg2)),
+          ),
+        );
+      }
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 60),
+        child: Center(child: CircularProgressIndicator(strokeWidth: 2.4)),
+      );
+    }
+
+    if (data.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 50),
+        child: Column(
+          children: [
+            Icon(Icons.bolt_outlined, size: 34, color: p.fg3),
+            const SizedBox(height: 12),
+            Text('Aucun événement sur cette période',
+                style: GT.body(15, color: p.fg2)),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SectionLabel('Événements déclenchés'),
+              const SizedBox(height: 8),
+              Text(fmtInt(data.total), style: GT.stat(54, color: p.fg)),
+              const SizedBox(height: 14),
+              GlanceChart(series: data.series, unit: data.unit, height: 172),
+            ],
+          ),
+        ),
+        const SizedBox(height: 20),
+        _MetricCard(
+          title: 'Par événement',
+          mono: true,
+          rows: data.breakdown
+              .map((r) => MetricBarRow(label: r.label, value: r.value))
+              .toList(),
+        ),
+        const SizedBox(height: 24),
+      ],
     );
   }
 }

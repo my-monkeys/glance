@@ -25,4 +25,6 @@ class FathomProvider extends AnalyticsProvider {
       _todo();
   @override
   Future<List<LivePage>> livePages(Site site) => _todo();
+  @override
+  Future<List<SeriesPoint>> eventSeries(Site site, DateWindow w) => _todo();
 }

@@ -181,22 +181,56 @@ class PlausibleProvider extends AnalyticsProvider {
       MetricType.pages => 'event:page',
       MetricType.sources => 'visit:source',
       MetricType.countries => 'visit:country',
+      MetricType.events => 'event:name',
     };
+    final metric = type == MetricType.events ? 'events' : 'visitors';
     final res = await _query({
       'site_id': _siteId,
-      'metrics': ['visitors'],
+      'metrics': [metric],
       'date_range': [_dateFmt.format(w.start), _dateFmt.format(w.end)],
       'dimensions': [dim],
-      'limit': limit,
+      'limit': limit + (type == MetricType.events ? 1 : 0),
     });
-    return _rows(res).map((r) {
+    final rows = _rows(res).map((r) {
       final label = (r['dimensions'] as List).first.toString();
       final value = ((r['metrics'] as List).first as num).round();
       if (type == MetricType.countries) {
         return MetricRow(label: countryName(label), value: value, code: label);
       }
       return MetricRow(label: label.isEmpty ? '/' : label, value: value);
-    }).toList(growable: false);
+    }).toList();
+    if (type == MetricType.events) {
+      // « pageview » n'est pas un événement personnalisé.
+      return rows.where((r) => r.label != 'pageview').take(limit).toList();
+    }
+    return rows;
+  }
+
+  @override
+  Future<List<SeriesPoint>> eventSeries(Site site, DateWindow w) async {
+    final dim = switch (w.unit) {
+      TimeUnit.hour => 'time:hour',
+      TimeUnit.day => 'time:day',
+      TimeUnit.month => 'time:month',
+    };
+    final res = await _query({
+      'site_id': _siteId,
+      'metrics': ['events'],
+      'date_range': [_dtFmt.format(w.start), _dtFmt.format(w.end)],
+      'dimensions': [dim],
+      'timezone': await _timezone(),
+    });
+    return _rows(res)
+        .map((r) {
+          final dims = r['dimensions'] as List;
+          final t = DateTime.tryParse(dims.first.toString()) ??
+              DateTime.tryParse('${dims.first}T00:00:00');
+          if (t == null) return null;
+          final v = ((r['metrics'] as List).first as num).toDouble();
+          return SeriesPoint(t, v, 0);
+        })
+        .whereType<SeriesPoint>()
+        .toList(growable: false);
   }
 
   @override

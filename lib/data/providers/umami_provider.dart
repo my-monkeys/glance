@@ -187,6 +187,7 @@ class UmamiProvider extends AnalyticsProvider {
       MetricType.pages => 'path', // v3 : `url` a été renommé `path`
       MetricType.sources => 'referrer',
       MetricType.countries => 'country',
+      MetricType.events => 'event',
     };
     final d = await _get('/api/websites/${site.id}/metrics', {
       'startAt': w.startMs,
@@ -210,6 +211,32 @@ class UmamiProvider extends AnalyticsProvider {
     );
     final rows = await metric(site, w, MetricType.pages, limit: 5);
     return rows.map((r) => LivePage(r.label, r.value)).toList(growable: false);
+  }
+
+  @override
+  Future<List<SeriesPoint>> eventSeries(Site site, DateWindow w) async {
+    final tz = await _timezone();
+    final d = await _get('/api/websites/${site.id}/events/series', {
+      'startAt': w.startMs,
+      'endAt': w.endMs,
+      'unit': w.unit.api,
+      'timezone': tz,
+    });
+    // La série renvoie {x:nom, t:date, y:nombre} : on somme par bucket temporel
+    // (le champ date est `t`, pas `x`).
+    final byBucket = <int, double>{};
+    if (d is List) {
+      for (final e in d) {
+        final t = _parseX((e['t'] ?? '').toString());
+        if (t == null) continue;
+        final key = _truncate(t, w.unit).millisecondsSinceEpoch;
+        final y = (e['y'] as num?)?.toDouble() ?? 0;
+        byBucket.update(key, (v) => v + y, ifAbsent: () => y);
+      }
+    }
+    return _buckets(w)
+        .map((b) => SeriesPoint(b, byBucket[b.millisecondsSinceEpoch] ?? 0, 0))
+        .toList(growable: false);
   }
 
   // --- helpers ---------------------------------------------------------------
@@ -236,6 +263,8 @@ class UmamiProvider extends AnalyticsProvider {
         return MetricRow(label: host.isEmpty ? 'Accès direct' : host, value: y);
       case MetricType.countries:
         return MetricRow(label: countryName(x), value: y, code: x);
+      case MetricType.events:
+        return MetricRow(label: x.isEmpty ? '(sans nom)' : x, value: y);
     }
   }
 

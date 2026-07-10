@@ -196,3 +196,38 @@ final detailProvider =
     livePages: r[6] as List<LivePage>,
   );
 });
+
+/// Données d'événements d'un site pour une fenêtre (série + répartition).
+final eventsProvider =
+    FutureProvider.autoDispose.family<EventsData, (Site, DateWindow)>((ref, key) async {
+  final (site, w) = key;
+  final gate = ref.watch(fetchGateProvider);
+  final p = await _providerFor(ref, site);
+  return gate.run(() async {
+    final r = await Future.wait([
+      p.eventSeries(site, w),
+      p.metric(site, w, MetricType.events, limit: 8),
+    ]);
+    final breakdown = r[1] as List<MetricRow>;
+    final total = breakdown.fold<int>(0, (a, b) => a + b.value);
+    return EventsData(
+      total: total,
+      series: r[0] as List<SeriesPoint>,
+      breakdown: breakdown,
+      unit: w.unit.api,
+    );
+  });
+});
+
+/// Un site a-t-il des événements ? Vérifié sur ~30 jours (indépendant de la
+/// période sélectionnée) → visibilité stable de l'onglet Événements.
+final siteHasEventsProvider =
+    FutureProvider.autoDispose.family<bool, Site>((ref, site) async {
+  final gate = ref.watch(fetchGateProvider);
+  final p = await _providerFor(ref, site);
+  final w = Period.d30.window();
+  final rows = await gate
+      .run(() => p.metric(site, w, MetricType.events, limit: 1))
+      .catchError((_) => <MetricRow>[]);
+  return rows.isNotEmpty;
+});

@@ -2,7 +2,7 @@ import '../models/account.dart';
 import '../models/models.dart';
 import '../models/period.dart';
 
-enum MetricType { pages, sources, countries }
+enum MetricType { pages, sources, countries, events }
 
 /// Contrat que chaque fournisseur d'analytics implémente. La couche UI ne parle
 /// qu'à cette interface — brancher un nouveau fournisseur = une nouvelle classe.
@@ -33,6 +33,9 @@ abstract class AnalyticsProvider {
 
   /// Pages consultées dans les dernières minutes.
   Future<List<LivePage>> livePages(Site site);
+
+  /// Nombre total d'événements par bucket (porté par [SeriesPoint.visitors]).
+  Future<List<SeriesPoint>> eventSeries(Site site, DateWindow w);
 }
 
 /// Champs d'identifiants demandés à l'écran d'ajout, par fournisseur.
