@@ -7,27 +7,31 @@ import '../data/models/period.dart';
 /// qu'ils restent synchronisés.
 @immutable
 class PeriodState {
-  const PeriodState({this.period = Period.d7, this.customStart, this.customEnd});
+  const PeriodState({
+    this.period = Period.d7,
+    this.customStart,
+    this.customEnd,
+    this.dayOffset = 0,
+  });
 
   final Period period;
   final DateTime? customStart;
   final DateTime? customEnd;
 
+  /// Décalage en jours, uniquement pour [Period.today] (0 = aujourd'hui,
+  /// -1 = hier, …). Permet de naviguer jour par jour.
+  final int dayOffset;
+
   /// Fenêtre résolue. Alignée sur la grille temporelle (cf. [Period.window]),
   /// donc stable entre deux builds d'une même heure/journée → pas de reload.
-  DateWindow window() =>
-      period.window(customStart: customStart, customEnd: customEnd);
-
-  PeriodState copyWith({
-    Period? period,
-    DateTime? customStart,
-    DateTime? customEnd,
-  }) =>
-      PeriodState(
-        period: period ?? this.period,
-        customStart: customStart ?? this.customStart,
-        customEnd: customEnd ?? this.customEnd,
+  DateWindow window() => period.window(
+        customStart: customStart,
+        customEnd: customEnd,
+        dayOffset: dayOffset,
       );
+
+  /// La navigation par jour n'a de sens que pour « Aujourd'hui ».
+  bool get canNavigateDays => period == Period.today;
 }
 
 class PeriodNotifier extends Notifier<PeriodState> {
@@ -41,6 +45,13 @@ class PeriodNotifier extends Notifier<PeriodState> {
         customStart: start,
         customEnd: end,
       );
+
+  /// Décale d'un jour (borné : on ne va pas dans le futur).
+  void shiftDay(int delta) {
+    if (state.period != Period.today) return;
+    final next = (state.dayOffset + delta).clamp(-3650, 0);
+    state = PeriodState(period: Period.today, dayOffset: next);
+  }
 }
 
 final periodProvider =

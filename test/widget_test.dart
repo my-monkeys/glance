@@ -26,6 +26,13 @@ void main() {
       expect(a, b); // même clé → pas de rechargement / flash
     });
 
+    test('dayOffset = jour passé complet, granularité heure', () {
+      final w = Period.today.window(now: now, dayOffset: -1);
+      expect(w.unit, TimeUnit.hour);
+      expect(w.start, DateTime(2026, 7, 9));
+      expect(w.end, DateTime(2026, 7, 10)); // journée entière d'hier
+    });
+
     test('12 mois remonte 11 mois, granularité mois', () {
       final w = Period.m12.window(now: now);
       expect(w.unit, TimeUnit.month);

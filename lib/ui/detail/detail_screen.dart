@@ -14,6 +14,7 @@ import '../../theme/palette.dart';
 import '../../theme/type.dart';
 import '../widgets/chip.dart';
 import '../widgets/common.dart';
+import '../widgets/day_nav.dart';
 import '../widgets/events_chart.dart';
 import '../widgets/glance_chart.dart';
 import '../widgets/pulse_dot.dart';
@@ -167,6 +168,13 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                 ],
               ),
             ),
+            if (periodState.canNavigateDays) ...[
+              const SizedBox(height: 14),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: DayNav(),
+              ),
+            ],
             const SizedBox(height: 18),
 
             // Onglets Vue d'ensemble / Événements (le 2e uniquement si events).

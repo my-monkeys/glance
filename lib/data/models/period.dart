@@ -60,10 +60,23 @@ enum Period {
   };
 
   /// Résout la fenêtre. Pour [custom], passer [customStart]/[customEnd].
-  DateWindow window({DateTime? now, DateTime? customStart, DateTime? customEnd}) {
+  /// [dayOffset] décale d'un nombre de jours pour [today] (0 = aujourd'hui).
+  DateWindow window({
+    DateTime? now,
+    DateTime? customStart,
+    DateTime? customEnd,
+    int dayOffset = 0,
+  }) {
     final n = now ?? DateTime.now();
     switch (this) {
       case Period.today:
+        if (dayOffset < 0) {
+          // Jour passé complet : [00:00, 00:00 lendemain).
+          final day =
+              DateTime(n.year, n.month, n.day + dayOffset);
+          final end = DateTime(day.year, day.month, day.day + 1);
+          return DateWindow(day, end, TimeUnit.hour);
+        }
         return DateWindow(_startOfDay(n), _ceil(n, TimeUnit.hour), TimeUnit.hour);
       case Period.h24:
         final end = _ceil(n, TimeUnit.hour);

@@ -16,6 +16,7 @@ import '../../theme/type.dart';
 import '../root_scaffold.dart';
 import '../widgets/chip.dart';
 import '../widgets/common.dart';
+import '../widgets/day_nav.dart';
 import '../widgets/site_avatar.dart';
 import '../widgets/field.dart';
 import '../widgets/glance_chart.dart';
@@ -129,6 +130,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 onAdd: () => openAddSource(context),
                 onSettings: widget.onGoSettings,
               ),
+              if (periodState.canNavigateDays) ...[
+                const SizedBox(height: 14),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: DayNav(),
+                ),
+              ],
               const SizedBox(height: 18),
 
               if (sitesAsync.hasError && sites.isEmpty)
