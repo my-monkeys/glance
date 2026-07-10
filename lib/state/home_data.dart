@@ -1,5 +1,30 @@
 import '../data/models/models.dart';
 
+/// Stats d'un site sur une fenêtre (chargées indépendamment du live).
+class SiteStats {
+  const SiteStats({required this.summary, required this.series});
+  final StatsSummary summary;
+  final List<SeriesPoint> series;
+}
+
+/// Agrégat de la home pendant le chargement incrémental : totaux calculés sur
+/// les sites déjà chargés + nombre de sites encore en attente.
+class HomeTotals {
+  const HomeTotals({
+    required this.data,
+    required this.pending,
+    required this.siteCount,
+    required this.loading,
+  });
+
+  final HomeData data;
+  final int pending; // sites dont les stats ne sont pas encore arrivées
+  final int siteCount;
+  final bool loading;
+
+  bool get hasAny => data.cards.isNotEmpty;
+}
+
 /// Données d'une carte de site sur la home.
 class SiteCard {
   SiteCard({

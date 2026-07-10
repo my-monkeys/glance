@@ -16,10 +16,29 @@ class PulseDot extends StatefulWidget {
 
 class _PulseDotState extends State<PulseDot>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _c = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 1900),
-  )..repeat();
+  // Toujours créé dans initState (jamais en lazy) : sinon un `late` non initialisé
+  // se construirait au dispose() sur un élément désactivé → crash Ticker.
+  late final AnimationController _c;
+
+  @override
+  void initState() {
+    super.initState();
+    _c = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1900),
+    );
+    if (widget.pulse) _c.repeat();
+  }
+
+  @override
+  void didUpdateWidget(PulseDot old) {
+    super.didUpdateWidget(old);
+    if (widget.pulse && !_c.isAnimating) {
+      _c.repeat();
+    } else if (!widget.pulse && _c.isAnimating) {
+      _c.stop();
+    }
+  }
 
   @override
   void dispose() {

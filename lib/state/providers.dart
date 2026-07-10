@@ -8,7 +8,7 @@ import '../data/models/period.dart';
 import '../data/providers/analytics_provider.dart';
 import '../data/providers/provider_factory.dart';
 import '../data/repository/accounts_repository.dart';
-import '../core/pool.dart';
+import '../core/semaphore.dart';
 import 'home_data.dart';
 
 /// Injecté au démarrage (voir main.dart).
@@ -110,33 +110,65 @@ final accountSitesProvider =
 Future<AnalyticsProvider> _providerFor(Ref ref, Site site) =>
     ref.read(providerRegistryProvider).forAccount(site.accountId);
 
-/// Agrégat de la home pour une fenêtre donnée.
-final homeProvider = FutureProvider.family<HomeData, DateWindow>((ref, w) async {
-  final sites = await ref.watch(sitesProvider.future);
-  final reg = ref.watch(providerRegistryProvider);
+/// Plafonne la concurrence des requêtes analytics (chargement incrémental).
+final fetchGateProvider = Provider<Semaphore>((ref) => Semaphore(6));
 
-  final cards = await mapPool<SiteCard>(
-    6,
-    sites.map((s) {
-      return () async {
-        final p = await reg.forAccount(s.accountId);
-        final results = await Future.wait([
-          p.summary(s, w),
-          p.series(s, w),
-          p.active(s).catchError((_) => 0),
-        ]);
-        return SiteCard(
-          site: s,
-          summary: results[0] as StatsSummary,
-          series: results[1] as List<SeriesPoint>,
-          live: results[2] as int,
-        );
-      };
-    }).toList(),
+/// Visiteurs en direct d'un site (indépendant de la période sélectionnée).
+final siteLiveProvider = FutureProvider.autoDispose.family<int, Site>((ref, site) async {
+  final gate = ref.watch(fetchGateProvider);
+  final p = await _providerFor(ref, site);
+  return gate.run(() => p.active(site)).catchError((_) => 0);
+});
+
+/// Stats (résumé + série) d'un site sur une fenêtre. Chargé indépendamment des
+/// autres sites → chaque carte apparaît dès que SA donnée arrive.
+final siteStatsProvider =
+    FutureProvider.autoDispose.family<SiteStats, (Site, DateWindow)>((ref, key) async {
+  final (site, w) = key;
+  final gate = ref.watch(fetchGateProvider);
+  final p = await _providerFor(ref, site);
+  return gate.run(() async {
+    final r = await Future.wait([p.summary(site, w), p.series(site, w)]);
+    return SiteStats(
+      summary: r[0] as StatsSummary,
+      series: r[1] as List<SeriesPoint>,
+    );
+  });
+});
+
+/// Agrégat vivant de la home : recalculé à chaque site qui se charge (watch de
+/// tous les providers par site). Fournit les totaux sur les sites déjà chargés.
+final homeTotalsProvider =
+    Provider.autoDispose.family<HomeTotals, DateWindow>((ref, w) {
+  final sitesAsync = ref.watch(sitesProvider);
+  final sites = sitesAsync.value ?? const <Site>[];
+  final cards = <SiteCard>[];
+  var pending = 0;
+  var loading = sitesAsync.isLoading;
+
+  for (final s in sites) {
+    final stats = ref.watch(siteStatsProvider((s, w)));
+    final live = ref.watch(siteLiveProvider(s));
+    if (stats.isLoading || live.isLoading) loading = true;
+    final sv = stats.value;
+    if (sv != null) {
+      cards.add(SiteCard(
+        site: s,
+        summary: sv.summary,
+        series: sv.series,
+        live: live.value ?? 0,
+      ));
+    } else {
+      pending++;
+    }
+  }
+
+  return HomeTotals(
+    data: HomeData.fromCards(cards),
+    pending: pending,
+    siteCount: sites.length,
+    loading: loading,
   );
-
-  cards.sort((a, b) => b.summary.visitors.compareTo(a.summary.visitors));
-  return HomeData.fromCards(cards);
 });
 
 /// Détail complet d'un site (tout en parallèle).

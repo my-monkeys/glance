@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/format.dart';
+import '../../data/models/models.dart';
 import '../../data/models/period.dart';
 import '../../state/home_data.dart';
 import '../../state/providers.dart';
@@ -36,7 +37,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   // Fenêtre figée : recalculée seulement au changement de période / refresh,
   // sinon la borne `now` bougerait à chaque build et rechargerait en boucle.
   late DateWindow _window = _computeWindow();
-  HomeData? _lastData;
 
   DateWindow _computeWindow() =>
       _period.window(customStart: _customStart, customEnd: _customEnd);
@@ -77,7 +77,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     _timer = Timer.periodic(Duration(seconds: secs), (_) {
       if (!mounted) return;
       setState(() => _window = _computeWindow());
-      ref.invalidate(homeProvider(_window));
+      ref.invalidate(siteStatsProvider);
+      ref.invalidate(siteLiveProvider);
     });
   }
 
@@ -95,134 +96,98 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       return _WelcomeEmpty(onAdd: () => openAddSource(context));
     }
 
-    final async = ref.watch(homeProvider(_window));
-    // Garde la dernière donnée affichée pendant un rechargement en fond : la
-    // mise à jour se fait en place, sans masquer puis réafficher l'écran.
-    if (async.hasValue) _lastData = async.value;
-    final data = async.value ?? _lastData;
+    final sitesAsync = ref.watch(sitesProvider);
+    final sites = sitesAsync.value ?? const <Site>[];
+    final totals = ref.watch(homeTotalsProvider(_window));
     final now = DateTime.now();
     final viewMode = ref.watch(settingsProvider.select((s) => s.homeView));
-    // Rechargement en fond (donnée déjà affichée) → fine barre en haut.
-    final refreshing = async.isLoading && data != null;
+    // Barre de chargement tant que des sites arrivent encore.
+    final refreshing = totals.loading && sites.isNotEmpty;
 
     return Stack(
       children: [
         RefreshIndicator(
-      color: p.accent,
-      backgroundColor: p.surface,
-      onRefresh: () async {
-        ref.invalidate(homeProvider(_window));
-        await ref.read(homeProvider(_window).future);
-      },
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(
-          parent: BouncingScrollPhysics(),
-        ),
-        padding: EdgeInsets.fromLTRB(
-          0,
-          MediaQuery.of(context).padding.top + 14,
-          0,
-          120,
-        ),
-        children: [
-          // En-tête.
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${DateFormat('EEE d MMM', 'fr_FR').format(now)} · ${_period.label}'
-                            .toUpperCase(),
-                        style: GT.label(color: p.fg2),
-                      ),
-                      const SizedBox(height: 9),
-                      Text('Mes sites', style: GT.display(34, color: p.fg)),
-                    ],
-                  ),
-                ),
-                GlanceIconButton(
-                  icon: Icons.add,
-                  onTap: () => openAddSource(context),
-                ),
-                const SizedBox(width: 8),
-                GestureDetector(
-                  onTap: widget.onGoSettings,
-                  child: const Mark('M', circle: true),
-                ),
-              ],
+          color: p.accent,
+          backgroundColor: p.surface,
+          onRefresh: () async {
+            ref.invalidate(siteStatsProvider);
+            ref.invalidate(siteLiveProvider);
+            await ref.read(sitesProvider.future);
+          },
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics(),
             ),
-          ),
-          const SizedBox(height: 16),
-          // Sélecteur de période + bascule liste/grille.
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 16, 0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: ChipRow(
-                    children: [
-                      for (final per in Period.values)
-                        GlanceChip(
-                          label: per.label,
-                          selected: _period == per,
-                          onTap: () {
-                            if (per == Period.custom) {
-                              _pickCustom();
-                            } else {
-                              _setPeriod(per);
-                            }
-                          },
-                        ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 10),
-                _ViewToggle(
-                  mode: viewMode,
-                  onChanged: (v) =>
-                      ref.read(settingsProvider.notifier).setHomeView(v),
-                ),
-              ],
+            padding: EdgeInsets.fromLTRB(
+              0,
+              MediaQuery.of(context).padding.top + 14,
+              0,
+              120,
             ),
-          ),
-          const SizedBox(height: 18),
+            children: [
+              _Header(
+                period: _period,
+                now: now,
+                viewMode: viewMode,
+                onPeriod: (per) =>
+                    per == Period.custom ? _pickCustom() : _setPeriod(per),
+                onViewMode: (v) =>
+                    ref.read(settingsProvider.notifier).setHomeView(v),
+                onAdd: () => openAddSource(context),
+                onSettings: widget.onGoSettings,
+              ),
+              const SizedBox(height: 18),
 
-          if (async.hasError && data == null)
-            _ErrorBox(
-              message: 'Chargement impossible.',
-              onRetry: () => ref.invalidate(homeProvider(_window)),
-            )
-          else if (data == null)
-            const _HomeSkeleton()
-          else if (data.isEmpty)
-            _EmptyBox(onAdd: () => openAddSource(context))
-          else ...[
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: _TotalCard(data: data, unit: _window.unit.api),
-            ),
-            const SizedBox(height: 22),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: viewMode == HomeViewMode.grid
-                  ? _SiteGrid(cards: data.cards)
-                  : Column(
-                      children: [
-                        for (final c in data.cards) ...[
-                          _SiteCardTile(card: c),
-                          const SizedBox(height: 12),
-                        ],
-                      ],
-                    ),
-            ),
-          ],
-        ],
-      ),
+              if (sitesAsync.hasError && sites.isEmpty)
+                _ErrorBox(
+                  message: 'Chargement impossible.',
+                  onRetry: () => ref.invalidate(sitesProvider),
+                )
+              else if (sites.isEmpty && sitesAsync.isLoading)
+                const _HomeSkeleton()
+              else if (sites.isEmpty)
+                _EmptyBox(onAdd: () => openAddSource(context))
+              else ...[
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: totals.hasAny
+                      ? _TotalCard(data: totals.data, unit: _window.unit.api)
+                      : const _TotalCardSkeleton(),
+                ),
+                const SizedBox(height: 22),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: viewMode == HomeViewMode.grid
+                      ? GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          padding: EdgeInsets.zero,
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            mainAxisSpacing: 12,
+                            crossAxisSpacing: 12,
+                            childAspectRatio: 1.12,
+                          ),
+                          itemCount: sites.length,
+                          itemBuilder: (context, i) => _SiteStatSlot(
+                            site: sites[i],
+                            window: _window,
+                            grid: true,
+                          ),
+                        )
+                      : Column(
+                          children: [
+                            for (final s in sites) ...[
+                              _SiteStatSlot(site: s, window: _window),
+                              const SizedBox(height: 12),
+                            ],
+                          ],
+                        ),
+                ),
+              ],
+            ],
+          ),
         ),
         Positioned(
           top: MediaQuery.of(context).padding.top,
@@ -232,6 +197,123 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
       ],
     );
+  }
+}
+
+/// En-tête : date + titre, boutons, périodes, bascule liste/grille.
+class _Header extends StatelessWidget {
+  const _Header({
+    required this.period,
+    required this.now,
+    required this.viewMode,
+    required this.onPeriod,
+    required this.onViewMode,
+    required this.onAdd,
+    required this.onSettings,
+  });
+
+  final Period period;
+  final DateTime now;
+  final HomeViewMode viewMode;
+  final ValueChanged<Period> onPeriod;
+  final ValueChanged<HomeViewMode> onViewMode;
+  final VoidCallback onAdd;
+  final VoidCallback onSettings;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.glance;
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${DateFormat('EEE d MMM', 'fr_FR').format(now)} · ${period.label}'
+                          .toUpperCase(),
+                      style: GT.label(color: p.fg2),
+                    ),
+                    const SizedBox(height: 9),
+                    Text('Mes sites', style: GT.display(34, color: p.fg)),
+                  ],
+                ),
+              ),
+              GlanceIconButton(icon: Icons.add, onTap: onAdd),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: onSettings,
+                child: const Mark('M', circle: true),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 16, 0),
+          child: Row(
+            children: [
+              Expanded(
+                child: ChipRow(
+                  children: [
+                    for (final per in Period.values)
+                      GlanceChip(
+                        label: per.label,
+                        selected: period == per,
+                        onTap: () => onPeriod(per),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 10),
+              _ViewToggle(mode: viewMode, onChanged: onViewMode),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Emplacement d'un site : charge ses stats + son live indépendamment, montre
+/// un squelette tant que les stats ne sont pas arrivées.
+class _SiteStatSlot extends ConsumerWidget {
+  const _SiteStatSlot({
+    required this.site,
+    required this.window,
+    this.grid = false,
+  });
+
+  final Site site;
+  final DateWindow window;
+  final bool grid;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final stats = ref.watch(siteStatsProvider((site, window)));
+    final live = ref.watch(siteLiveProvider(site));
+    final sv = stats.value;
+
+    if (sv == null) {
+      // Pas encore de stats : squelette (ou état d'erreur discret).
+      if (stats.hasError) {
+        return _SiteErrorCard(site: site, grid: grid);
+      }
+      return grid ? const _GridSkeleton() : const _TileSkeleton();
+    }
+
+    final card = SiteCard(
+      site: site,
+      summary: sv.summary,
+      series: sv.series,
+      live: live.value ?? 0,
+    );
+    return grid ? _SiteGridCard(card: card) : _SiteCardTile(card: card);
   }
 }
 
@@ -405,28 +487,6 @@ class _ViewToggle extends StatelessWidget {
 }
 
 /// Grille 2 colonnes de cartes de sites.
-class _SiteGrid extends StatelessWidget {
-  const _SiteGrid({required this.cards});
-  final List<SiteCard> cards;
-
-  @override
-  Widget build(BuildContext context) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: EdgeInsets.zero,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
-        childAspectRatio: 1.12, // un peu moins haut que carré
-      ),
-      itemCount: cards.length,
-      itemBuilder: (context, i) => _SiteGridCard(card: cards[i]),
-    );
-  }
-}
-
 class _SiteGridCard extends StatelessWidget {
   const _SiteGridCard({required this.card});
   final SiteCard card;
@@ -626,6 +686,131 @@ class _WelcomeEmpty extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Petit rectangle « placeholder » grisé (squelettes de chargement).
+class _Skel extends StatelessWidget {
+  const _Skel({required this.w, required this.h, this.radius = 6});
+  final double w;
+  final double h;
+  final double radius;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: w,
+      height: h,
+      decoration: BoxDecoration(
+        color: context.glance.chip,
+        borderRadius: BorderRadius.circular(radius),
+      ),
+    );
+  }
+}
+
+class _TotalCardSkeleton extends StatelessWidget {
+  const _TotalCardSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return GlanceCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _Skel(w: 160, h: 11),
+          const SizedBox(height: 14),
+          _Skel(w: 130, h: 44, radius: 10),
+          const SizedBox(height: 18),
+          _Skel(w: double.infinity, h: 150, radius: 12),
+        ],
+      ),
+    );
+  }
+}
+
+class _GridSkeleton extends StatelessWidget {
+  const _GridSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return GlanceCard(
+      padding: const EdgeInsets.fromLTRB(15, 15, 15, 13),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _Skel(w: 90, h: 11),
+          const SizedBox(height: 14),
+          _Skel(w: 70, h: 26, radius: 8),
+          const SizedBox(height: 8),
+          _Skel(w: 46, h: 10),
+          const Spacer(),
+          const _Skel(w: double.infinity, h: 28, radius: 8),
+        ],
+      ),
+    );
+  }
+}
+
+class _TileSkeleton extends StatelessWidget {
+  const _TileSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return GlanceCard(
+      padding: const EdgeInsets.fromLTRB(15, 16, 15, 16),
+      child: Row(
+        children: [
+          _Skel(w: 38, h: 38, radius: 10),
+          const SizedBox(width: 13),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _Skel(w: 120, h: 12),
+              const SizedBox(height: 8),
+              _Skel(w: 50, h: 10),
+            ],
+          ),
+          const Spacer(),
+          _Skel(w: 54, h: 22, radius: 8),
+        ],
+      ),
+    );
+  }
+}
+
+/// Carte discrète en cas d'échec de chargement d'un site (le reste continue).
+class _SiteErrorCard extends StatelessWidget {
+  const _SiteErrorCard({required this.site, required this.grid});
+  final Site site;
+  final bool grid;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.glance;
+    return GlanceCard(
+      padding: const EdgeInsets.fromLTRB(15, 15, 15, 15),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            site.name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GT.body(14, weight: 500, color: p.fg),
+          ),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              Icon(Icons.cloud_off_rounded, size: 15, color: p.fg3),
+              const SizedBox(width: 6),
+              Text('Indisponible', style: GT.body(13, color: p.fg3)),
+            ],
+          ),
+        ],
       ),
     );
   }

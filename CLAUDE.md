@@ -34,6 +34,17 @@ lib/
 
 La sélection de sites est éditable après coup : Réglages → tap sur le compte → « Choisir les sites ».
 
+## Chargement des données (incrémental)
+
+**Un provider par site**, pas un gros lot. Chaque carte s'affiche/s'actualise dès que SA donnée arrive :
+- `siteStatsProvider((site, window))` (autoDispose) : résumé + série d'un site.
+- `siteLiveProvider(site)` (autoDispose) : visiteurs en direct (indépendant de la période).
+- `homeTotalsProvider(window)` : `Provider` qui `watch` tous les providers par site et recompose les totaux **au fil de l'eau** (le total monte pendant le chargement).
+- La concurrence est plafonnée par un **sémaphore** partagé (`fetchGateProvider`, 6) — sinon N sites = 3N requêtes simultanées.
+- Les cartes non chargées montrent un **squelette** (`_GridSkeleton`/`_TileSkeleton`) ; une carte en échec devient `_SiteErrorCard` sans bloquer les autres.
+- Ordre **stable** (ordre des sites, pas de tri par trafic) → les cartes se remplissent sans réordonner. Direct trie par live (parmi les chargés).
+- Auto-refresh / pull : `ref.invalidate(siteStatsProvider)` + `ref.invalidate(siteLiveProvider)` (familles entières) → refetch en place, valeurs précédentes conservées (pas de flash). Une fine `RefreshBar` en haut tant que `homeTotals.loading`.
+
 ## Le graphique (point clé de la demande)
 
 `ui/widgets/glance_chart.dart` (fl_chart) : courbe **lissée** (`isCurved`, `curveSmoothness`, `isStrokeCapRound/JoinRound`), **aire dégradée**, **échelle Y arrondie** (`_niceMax`), labels X selon la granularité, grille discrète, tooltip tactile. Remplace la simple barre de la maquette par un vrai graphe à échelles. Mini-courbe des cartes = `ui/widgets/sparkline.dart` (CustomPaint Catmull-Rom).
