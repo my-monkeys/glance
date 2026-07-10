@@ -22,6 +22,7 @@ class DirectScreen extends ConsumerStatefulWidget {
 
 class _DirectScreenState extends ConsumerState<DirectScreen> {
   late final DateWindow _window = Period.d7.window();
+  bool _onlyLive = false;
   Timer? _timer;
 
   @override
@@ -43,7 +44,10 @@ class _DirectScreenState extends ConsumerState<DirectScreen> {
   Widget build(BuildContext context) {
     final p = context.glance;
     final data = ref.watch(homeProvider(_window)).value;
-    final cards = [...?data?.cards]..sort((a, b) => b.live.compareTo(a.live));
+    final allCards = [...?data?.cards]..sort((a, b) => b.live.compareTo(a.live));
+    final cards =
+        _onlyLive ? allCards.where((c) => c.live > 0).toList() : allCards;
+    final hiddenCount = allCards.length - cards.length;
 
     return RefreshIndicator(
       color: p.accent,
@@ -87,8 +91,18 @@ class _DirectScreenState extends ConsumerState<DirectScreen> {
           ),
           const SizedBox(height: 22),
           Padding(
-            padding: const EdgeInsets.only(left: 4, bottom: 10),
-            child: SectionLabel('Par site'),
+            padding: const EdgeInsets.only(left: 4, right: 2, bottom: 10),
+            child: Row(
+              children: [
+                Expanded(child: SectionLabel('Par site')),
+                Text('Actifs seulement', style: GT.body(12, color: p.fg2)),
+                const SizedBox(width: 8),
+                GlanceToggle(
+                  value: _onlyLive,
+                  onTap: () => setState(() => _onlyLive = !_onlyLive),
+                ),
+              ],
+            ),
           ),
           if (data == null)
             Padding(
@@ -100,11 +114,33 @@ class _DirectScreenState extends ConsumerState<DirectScreen> {
                 ),
               ),
             )
-          else
+          else if (cards.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 30),
+              child: Center(
+                child: Text(
+                  _onlyLive
+                      ? 'Aucun visiteur en direct pour l\'instant.'
+                      : 'Aucun site.',
+                  style: GT.body(14, color: p.fg3),
+                ),
+              ),
+            )
+          else ...[
             for (final c in cards) ...[
               _LiveRow(card: c),
               const SizedBox(height: 10),
             ],
+            if (hiddenCount > 0)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  '$hiddenCount site${hiddenCount > 1 ? 's' : ''} sans visiteur masqué${hiddenCount > 1 ? 's' : ''}',
+                  textAlign: TextAlign.center,
+                  style: GT.body(12, color: p.fg3),
+                ),
+              ),
+          ],
         ],
       ),
     );

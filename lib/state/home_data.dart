@@ -24,6 +24,8 @@ class HomeData {
     required this.cards,
     required this.totalVisitors,
     required this.prevTotalVisitors,
+    required this.totalVisits,
+    required this.totalPageviews,
     required this.totalLive,
     required this.totalSeries,
   });
@@ -31,6 +33,8 @@ class HomeData {
   final List<SiteCard> cards;
   final int totalVisitors;
   final int? prevTotalVisitors;
+  final int totalVisits;
+  final int totalPageviews;
   final int totalLive;
   final List<SeriesPoint> totalSeries;
 
@@ -49,9 +53,13 @@ class HomeData {
     var totalVisitors = 0;
     var prevTotal = 0;
     var hasPrev = false;
+    var totalVisits = 0;
+    var totalPageviews = 0;
     var totalLive = 0;
     for (final c in cards) {
       totalVisitors += c.summary.visitors;
+      totalVisits += c.summary.visits;
+      totalPageviews += c.summary.pageviews;
       if (c.summary.prevVisitors != null) {
         prevTotal += c.summary.prevVisitors!;
         hasPrev = true;
@@ -78,6 +86,8 @@ class HomeData {
       cards: cards,
       totalVisitors: totalVisitors,
       prevTotalVisitors: hasPrev ? prevTotal : null,
+      totalVisits: totalVisits,
+      totalPageviews: totalPageviews,
       totalLive: totalLive,
       totalSeries: total,
     );

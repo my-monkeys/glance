@@ -12,6 +12,7 @@ import '../../state/settings.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
 import '../root_scaffold.dart';
+import '../widgets/chip.dart';
 import '../widgets/common.dart';
 import '../widgets/field.dart';
 import '../widgets/glance_chart.dart';
@@ -27,15 +28,55 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  late final DateWindow _window = Period.d7.window();
+  Period _period = Period.d7;
+  DateTime? _customStart;
+  DateTime? _customEnd;
   Timer? _timer;
+
+  // Fenêtre figée : recalculée seulement au changement de période / refresh,
+  // sinon la borne `now` bougerait à chaque build et rechargerait en boucle.
+  late DateWindow _window = _computeWindow();
+
+  DateWindow _computeWindow() =>
+      _period.window(customStart: _customStart, customEnd: _customEnd);
+
+  void _setPeriod(Period p, {DateTime? start, DateTime? end}) {
+    setState(() {
+      _period = p;
+      _customStart = start ?? _customStart;
+      _customEnd = end ?? _customEnd;
+      _window = _computeWindow();
+    });
+  }
+
+  Future<void> _pickCustom() async {
+    final now = DateTime.now();
+    final range = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(now.year - 3),
+      lastDate: now,
+      initialDateRange: DateTimeRange(
+        start: now.subtract(const Duration(days: 29)),
+        end: now,
+      ),
+    );
+    if (range != null) {
+      _setPeriod(
+        Period.custom,
+        start: range.start,
+        end: range.end.add(const Duration(hours: 23, minutes: 59)),
+      );
+    }
+  }
 
   @override
   void initState() {
     super.initState();
     final secs = ref.read(settingsProvider).refreshSeconds;
     _timer = Timer.periodic(Duration(seconds: secs), (_) {
-      if (mounted) ref.invalidate(homeProvider(_window));
+      if (!mounted) return;
+      setState(() => _window = _computeWindow());
+      ref.invalidate(homeProvider(_window));
     });
   }
 
@@ -86,7 +127,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${DateFormat('EEE d MMM', 'fr_FR').format(now)} · 7 jours'
+                        '${DateFormat('EEE d MMM', 'fr_FR').format(now)} · ${_period.label}'
                             .toUpperCase(),
                         style: GT.label(color: p.fg2),
                       ),
@@ -107,6 +148,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ],
             ),
           ),
+          const SizedBox(height: 16),
+          // Sélecteur de période.
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: ChipRow(
+              children: [
+                for (final per in Period.values)
+                  GlanceChip(
+                    label: per.label,
+                    selected: _period == per,
+                    onTap: () {
+                      if (per == Period.custom) {
+                        _pickCustom();
+                      } else {
+                        _setPeriod(per);
+                      }
+                    },
+                  ),
+              ],
+            ),
+          ),
           const SizedBox(height: 18),
 
           if (async.hasError && data == null)
@@ -121,7 +183,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           else ...[
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: _TotalCard(data: data),
+              child: _TotalCard(data: data, unit: _window.unit.api),
             ),
             const SizedBox(height: 22),
             Padding(
@@ -143,8 +205,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 }
 
 class _TotalCard extends StatelessWidget {
-  const _TotalCard({required this.data});
+  const _TotalCard({required this.data, required this.unit});
   final HomeData data;
+  final String unit;
 
   @override
   Widget build(BuildContext context) {
@@ -181,7 +244,14 @@ class _TotalCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 14),
-          GlanceChart(series: data.totalSeries, unit: 'day', height: 156),
+          GlanceChart(
+            series: data.totalSeries,
+            unit: unit,
+            height: 156,
+            showPageviews: true,
+            visitorsTotal: data.totalVisitors,
+            pageviewsTotal: data.totalPageviews,
+          ),
         ],
       ),
     );

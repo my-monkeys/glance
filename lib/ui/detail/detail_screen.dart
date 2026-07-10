@@ -219,6 +219,9 @@ class _DetailBody extends StatelessWidget {
                 series: detail.series,
                 unit: detail.unit,
                 height: 172,
+                showPageviews: true,
+                visitorsTotal: s.visitors,
+                pageviewsTotal: s.pageviews,
               ),
             ],
           ),
@@ -229,7 +232,7 @@ class _DetailBody extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Row(
             children: [
-              _Kpi(label: 'Pages vues', value: fmtInt(s.pageviews)),
+              _Kpi(label: 'Visites', value: fmtInt(s.visits)),
               const SizedBox(width: 10),
               _Kpi(label: 'Durée moy.', value: fmtDuration(s.avgVisit)),
               const SizedBox(width: 10),

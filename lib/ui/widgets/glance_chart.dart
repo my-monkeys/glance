@@ -18,13 +18,19 @@ class GlanceChart extends StatelessWidget {
     required this.series,
     required this.unit,
     this.height = 168,
-    this.showAverage = false,
+    this.showPageviews = false,
+    this.visitorsTotal,
+    this.pageviewsTotal,
   });
 
   final List<SeriesPoint> series;
   final String unit; // 'hour' | 'day' | 'month'
   final double height;
-  final bool showAverage;
+
+  /// Superpose une seconde courbe « pages vues » + une légende.
+  final bool showPageviews;
+  final int? visitorsTotal;
+  final int? pageviewsTotal;
 
   @override
   Widget build(BuildContext context) {
@@ -32,21 +38,30 @@ class GlanceChart extends StatelessWidget {
     if (series.isEmpty) {
       return SizedBox(height: height);
     }
+    final altColor = p.fg2;
 
-    final values = series.map((e) => e.visitors).toList();
-    final rawMax = values.fold<double>(0, math.max);
+    final visitors = series.map((e) => e.visitors).toList();
+    final views = series.map((e) => e.pageviews).toList();
+    // Échelle partagée : le max doit couvrir la plus haute des deux courbes.
+    final rawMax = [
+      ...visitors,
+      if (showPageviews) ...views,
+    ].fold<double>(0, math.max);
     final maxY = _niceMax(rawMax);
     final yInterval = maxY / 4;
 
-    final spots = [
-      for (var i = 0; i < series.length; i++) FlSpot(i.toDouble(), values[i]),
+    final visitorSpots = [
+      for (var i = 0; i < series.length; i++) FlSpot(i.toDouble(), visitors[i]),
+    ];
+    final viewSpots = [
+      for (var i = 0; i < series.length; i++) FlSpot(i.toDouble(), views[i]),
     ];
     final lastX = (series.length - 1).toDouble();
 
     // Nombre de labels X visés selon la largeur.
     final labelStep = math.max(1, (series.length / 6).ceil());
 
-    return SizedBox(
+    final chart = SizedBox(
       height: height,
       child: LineChart(
         LineChartData(
@@ -123,17 +138,49 @@ class GlanceChart extends StatelessWidget {
                 horizontal: 10,
                 vertical: 7,
               ),
-              getTooltipItems: (touched) => touched.map((t) {
-                final i = t.x.round().clamp(0, series.length - 1);
+              getTooltipItems: (touched) {
+                for (var k = 0; k < touched.length; k++) {
+                  final t = touched[k];
+                  final i = t.x.round().clamp(0, series.length - 1);
+                  final date = _tooltipDate(series[i].t, unit);
+                  // Une seule courbe : gros chiffre + date.
+                  if (!showPageviews) {
+                    return [
+                      LineTooltipItem(
+                        '${fmtInt(t.y)}\n',
+                        GT.stat(15, color: p.bg),
+                        children: [
+                          TextSpan(text: date, style: GT.mono(10, color: p.fg3)),
+                        ],
+                      ),
+                    ];
+                  }
+                }
+                // Deux courbes : date en tête, puis « visiteurs · pages vues ».
+                final i = touched.isEmpty
+                    ? 0
+                    : touched.first.x.round().clamp(0, series.length - 1);
                 final date = _tooltipDate(series[i].t, unit);
-                return LineTooltipItem(
-                  '${fmtInt(series[i].visitors)}\n',
-                  GT.stat(15, color: p.bg),
-                  children: [
-                    TextSpan(text: date, style: GT.mono(10, color: p.fg3)),
-                  ],
-                );
-              }).toList(),
+                return [
+                  for (var k = 0; k < touched.length; k++)
+                    LineTooltipItem(
+                      k == 0 ? '$date\n' : '',
+                      GT.mono(10, color: p.fg3),
+                      children: [
+                        TextSpan(
+                          text: '${fmtInt(touched[k].y)} ',
+                          style: GT.stat(14, color: p.bg),
+                        ),
+                        TextSpan(
+                          text: touched[k].barIndex == (showPageviews ? 1 : 0)
+                              ? 'visiteurs'
+                              : 'pages vues',
+                          style: GT.mono(9, color: p.fg3),
+                        ),
+                      ],
+                    ),
+                ];
+              },
             ),
             getTouchedSpotIndicator: (bar, indexes) => indexes
                 .map(
@@ -152,8 +199,22 @@ class GlanceChart extends StatelessWidget {
                 .toList(),
           ),
           lineBarsData: [
+            // Pages vues (secondaire) — tracée dessous, sans remplissage.
+            if (showPageviews)
+              LineChartBarData(
+                spots: viewSpots,
+                isCurved: true,
+                curveSmoothness: 0.32,
+                preventCurveOverShooting: true,
+                color: altColor,
+                barWidth: 1.8,
+                isStrokeCapRound: true,
+                isStrokeJoinRound: true,
+                dotData: const FlDotData(show: false),
+              ),
+            // Visiteurs (primaire) — accent + aire dégradée.
             LineChartBarData(
-              spots: spots,
+              spots: visitorSpots,
               isCurved: true,
               curveSmoothness: 0.32,
               preventCurveOverShooting: true,
@@ -189,6 +250,33 @@ class GlanceChart extends StatelessWidget {
         curve: Curves.easeOutCubic,
       ),
     );
+
+    if (!showPageviews) return chart;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 10, left: 2),
+          child: Row(
+            children: [
+              _LegendItem(
+                color: p.accent,
+                label: 'Visiteurs',
+                value: visitorsTotal,
+              ),
+              const SizedBox(width: 16),
+              _LegendItem(
+                color: altColor,
+                label: 'Pages vues',
+                value: pageviewsTotal,
+              ),
+            ],
+          ),
+        ),
+        chart,
+      ],
+    );
   }
 
   static String _tooltipDate(DateTime t, String unit) {
@@ -221,5 +309,33 @@ class GlanceChart extends StatelessWidget {
       nice = 10;
     }
     return nice * mag;
+  }
+}
+
+class _LegendItem extends StatelessWidget {
+  const _LegendItem({required this.color, required this.label, this.value});
+  final Color color;
+  final String label;
+  final int? value;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.glance;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 9,
+          height: 9,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 6),
+        if (value != null) ...[
+          Text(fmtInt(value!), style: GT.mono(12, weight: 600, color: p.fg)),
+          const SizedBox(width: 4),
+        ],
+        Text(label, style: GT.body(12, color: p.fg2)),
+      ],
+    );
   }
 }
