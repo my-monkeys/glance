@@ -123,22 +123,37 @@ class SiteDetail {
   final List<LivePage> livePages;
 }
 
-/// Données d'événements personnalisés pour un site sur une fenêtre.
+/// Série temporelle d'un seul nom d'événement (nombre par bucket porté par
+/// [SeriesPoint.visitors] — champ réutilisé comme « compte »).
+@immutable
+class EventSeries {
+  const EventSeries({
+    required this.name,
+    required this.points,
+    required this.total,
+  });
+  final String name;
+  final List<SeriesPoint> points;
+  final int total;
+}
+
+/// Données d'événements personnalisés pour un site sur une fenêtre : une série
+/// par nom d'événement (triées par total décroissant).
 @immutable
 class EventsData {
   const EventsData({
     required this.total,
     required this.series,
-    required this.breakdown,
     required this.unit,
   });
 
-  /// Total d'événements sur la fenêtre (le nombre par bucket est porté par
-  /// [SeriesPoint.visitors] de [series] — champ réutilisé comme « compte »).
   final int total;
-  final List<SeriesPoint> series;
-  final List<MetricRow> breakdown; // nom d'événement → nombre
+  final List<EventSeries> series; // triées par total desc
   final String unit;
 
-  bool get isEmpty => breakdown.isEmpty;
+  bool get isEmpty => series.isEmpty;
+
+  /// Répartition par nom d'événement (dérivée des totaux).
+  List<MetricRow> get breakdown =>
+      series.map((e) => MetricRow(label: e.name, value: e.total)).toList();
 }

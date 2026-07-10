@@ -7,12 +7,14 @@ import '../../core/countries.dart';
 import '../../core/format.dart';
 import '../../data/models/models.dart';
 import '../../data/models/period.dart';
+import '../../state/period_state.dart';
 import '../../state/providers.dart';
 import '../../state/settings.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
 import '../widgets/chip.dart';
 import '../widgets/common.dart';
+import '../widgets/events_chart.dart';
 import '../widgets/glance_chart.dart';
 import '../widgets/pulse_dot.dart';
 
@@ -27,30 +29,13 @@ class DetailScreen extends ConsumerStatefulWidget {
 enum _DetailTab { overview, events }
 
 class _DetailScreenState extends ConsumerState<DetailScreen> {
-  Period _period = Period.d7;
-  DateTime? _customStart;
-  DateTime? _customEnd;
   _DetailTab _tab = _DetailTab.overview;
   Timer? _timer;
 
-  // Fenêtre figée : recalculée seulement au changement de période / refresh,
-  // sinon la borne `now` bougerait à chaque build et la family Riverpod
-  // rechargerait en boucle.
-  late DateWindow _window = _computeWindow();
+  // Cache anti-flash : garde le dernier détail affiché pendant un rechargement
+  // en fond de la même fenêtre.
   SiteDetail? _lastDetail;
   DateWindow? _lastDetailWindow;
-
-  DateWindow _computeWindow() =>
-      _period.window(customStart: _customStart, customEnd: _customEnd);
-
-  void _setPeriod(Period p, {DateTime? start, DateTime? end}) {
-    setState(() {
-      _period = p;
-      _customStart = start ?? _customStart;
-      _customEnd = end ?? _customEnd;
-      _window = _computeWindow();
-    });
-  }
 
   @override
   void initState() {
@@ -58,9 +43,9 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
     final secs = ref.read(settingsProvider).refreshSeconds;
     _timer = Timer.periodic(Duration(seconds: secs), (_) {
       if (!mounted) return;
-      setState(() => _window = _computeWindow());
-      ref.invalidate(detailProvider((widget.site, _window)));
-      ref.invalidate(eventsProvider((widget.site, _window)));
+      final w = ref.read(periodProvider).window();
+      ref.invalidate(detailProvider((widget.site, w)));
+      ref.invalidate(eventsProvider((widget.site, w)));
     });
   }
 
@@ -82,18 +67,18 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
       ),
     );
     if (range != null) {
-      _setPeriod(
-        Period.custom,
-        start: range.start,
-        end: range.end.add(const Duration(hours: 23, minutes: 59)),
-      );
+      ref.read(periodProvider.notifier).setCustom(
+            range.start,
+            range.end.add(const Duration(hours: 23, minutes: 59)),
+          );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final p = context.glance;
-    final window = _window;
+    final periodState = ref.watch(periodProvider);
+    final window = periodState.window();
     final async = ref.watch(detailProvider((widget.site, window)));
     if (async.hasValue) {
       _lastDetail = async.value;
@@ -160,12 +145,12 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                   for (final per in Period.values)
                     GlanceChip(
                       label: per.label,
-                      selected: _period == per,
+                      selected: periodState.period == per,
                       onTap: () {
                         if (per == Period.custom) {
                           _pickCustom();
                         } else {
-                          _setPeriod(per);
+                          ref.read(periodProvider.notifier).set(per);
                         }
                       },
                     ),
@@ -491,15 +476,27 @@ class _SegTabs extends StatelessWidget {
 }
 
 /// Contenu de l'onglet Événements : total + graphe + répartition par nom.
-class _EventsTab extends ConsumerWidget {
+class _EventsTab extends ConsumerStatefulWidget {
   const _EventsTab({required this.site, required this.window});
   final Site site;
   final DateWindow window;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_EventsTab> createState() => _EventsTabState();
+}
+
+class _EventsTabState extends ConsumerState<_EventsTab> {
+  // Événements masqués du graphique (décochés dans la légende).
+  final Set<String> _hidden = {};
+  // Au-delà de ce nombre, on masque par défaut les événements les moins
+  // fréquents pour garder le graphe lisible (ils restent activables).
+  static const _defaultVisible = 6;
+  bool _defaultsApplied = false;
+
+  @override
+  Widget build(BuildContext context) {
     final p = context.glance;
-    final async = ref.watch(eventsProvider((site, window)));
+    final async = ref.watch(eventsProvider((widget.site, widget.window)));
     final data = async.value;
 
     if (data == null) {
@@ -532,6 +529,21 @@ class _EventsTab extends ConsumerWidget {
       );
     }
 
+    // Couleur stable par nom (ordre global trié par total).
+    final colors = <String, Color>{
+      for (var i = 0; i < data.series.length; i++)
+        data.series[i].name: eventColorAt(i),
+    };
+
+    // Masquage par défaut au-delà de N événements (une seule fois).
+    if (!_defaultsApplied && data.series.length > _defaultVisible) {
+      _hidden.addAll(data.series.skip(_defaultVisible).map((e) => e.name));
+    }
+    _defaultsApplied = true;
+
+    final visible =
+        data.series.where((s) => !_hidden.contains(s.name)).toList();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -543,8 +555,30 @@ class _EventsTab extends ConsumerWidget {
               SectionLabel('Événements déclenchés'),
               const SizedBox(height: 8),
               Text(fmtInt(data.total), style: GT.stat(54, color: p.fg)),
-              const SizedBox(height: 14),
-              GlanceChart(series: data.series, unit: data.unit, height: 172),
+              const SizedBox(height: 16),
+              // Légende cliquable = filtre des courbes.
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final s in data.series)
+                    _EventChip(
+                      label: s.name,
+                      color: colors[s.name]!,
+                      on: !_hidden.contains(s.name),
+                      onTap: () => setState(() {
+                        if (!_hidden.remove(s.name)) _hidden.add(s.name);
+                      }),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              EventsChart(
+                series: visible,
+                colors: colors,
+                unit: data.unit,
+                height: 200,
+              ),
             ],
           ),
         ),
@@ -553,11 +587,65 @@ class _EventsTab extends ConsumerWidget {
           title: 'Par événement',
           mono: true,
           rows: data.breakdown
-              .map((r) => MetricBarRow(label: r.label, value: r.value))
+              .map((r) => MetricBarRow(
+                    label: r.label,
+                    value: r.value,
+                    color: colors[r.label],
+                  ))
               .toList(),
         ),
         const SizedBox(height: 24),
       ],
+    );
+  }
+}
+
+/// Puce de légende cliquable (couleur + nom) qui active/désactive une courbe.
+class _EventChip extends StatelessWidget {
+  const _EventChip({
+    required this.label,
+    required this.color,
+    required this.on,
+    required this.onTap,
+  });
+  final String label;
+  final Color color;
+  final bool on;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.glance;
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 150),
+        opacity: on ? 1 : 0.4,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+          decoration: BoxDecoration(
+            color: p.chip,
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(color: on ? color : Colors.transparent),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 9,
+                height: 9,
+                decoration: BoxDecoration(
+                  color: color,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 7),
+              Text(label, style: GT.mono(12, weight: 500, color: p.fg)),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

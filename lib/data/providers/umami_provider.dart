@@ -214,7 +214,7 @@ class UmamiProvider extends AnalyticsProvider {
   }
 
   @override
-  Future<List<SeriesPoint>> eventSeries(Site site, DateWindow w) async {
+  Future<List<EventSeries>> eventSeries(Site site, DateWindow w) async {
     final tz = await _timezone();
     final d = await _get('/api/websites/${site.id}/events/series', {
       'startAt': w.startMs,
@@ -222,21 +222,34 @@ class UmamiProvider extends AnalyticsProvider {
       'unit': w.unit.api,
       'timezone': tz,
     });
-    // La série renvoie {x:nom, t:date, y:nombre} : on somme par bucket temporel
-    // (le champ date est `t`, pas `x`).
-    final byBucket = <int, double>{};
+    // La série renvoie {x:nom, t:date, y:nombre} : on regroupe par nom
+    // d'événement, puis par bucket temporel (le champ date est `t`).
+    final byName = <String, Map<int, double>>{};
     if (d is List) {
       for (final e in d) {
+        final name = (e['x'] ?? '').toString();
         final t = _parseX((e['t'] ?? '').toString());
         if (t == null) continue;
         final key = _truncate(t, w.unit).millisecondsSinceEpoch;
         final y = (e['y'] as num?)?.toDouble() ?? 0;
-        byBucket.update(key, (v) => v + y, ifAbsent: () => y);
+        (byName[name] ??= {}).update(key, (v) => v + y, ifAbsent: () => y);
       }
     }
-    return _buckets(w)
-        .map((b) => SeriesPoint(b, byBucket[b.millisecondsSinceEpoch] ?? 0, 0))
-        .toList(growable: false);
+    final buckets = _buckets(w);
+    final out = byName.entries.map((entry) {
+      final points = buckets
+          .map((b) =>
+              SeriesPoint(b, entry.value[b.millisecondsSinceEpoch] ?? 0, 0))
+          .toList(growable: false);
+      final total = entry.value.values.fold<double>(0, (a, b) => a + b).round();
+      return EventSeries(
+        name: entry.key.isEmpty ? '(sans nom)' : entry.key,
+        points: points,
+        total: total,
+      );
+    }).toList()
+      ..sort((a, b) => b.total.compareTo(a.total));
+    return out;
   }
 
   // --- helpers ---------------------------------------------------------------

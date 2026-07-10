@@ -8,6 +8,7 @@ import '../../core/format.dart';
 import '../../data/models/models.dart';
 import '../../data/models/period.dart';
 import '../../state/home_data.dart';
+import '../../state/period_state.dart';
 import '../../state/providers.dart';
 import '../../state/settings.dart';
 import '../../theme/palette.dart';
@@ -29,26 +30,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  Period _period = Period.d7;
-  DateTime? _customStart;
-  DateTime? _customEnd;
   Timer? _timer;
-
-  // Fenêtre figée : recalculée seulement au changement de période / refresh,
-  // sinon la borne `now` bougerait à chaque build et rechargerait en boucle.
-  late DateWindow _window = _computeWindow();
-
-  DateWindow _computeWindow() =>
-      _period.window(customStart: _customStart, customEnd: _customEnd);
-
-  void _setPeriod(Period p, {DateTime? start, DateTime? end}) {
-    setState(() {
-      _period = p;
-      _customStart = start ?? _customStart;
-      _customEnd = end ?? _customEnd;
-      _window = _computeWindow();
-    });
-  }
 
   Future<void> _pickCustom() async {
     final now = DateTime.now();
@@ -62,11 +44,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
     );
     if (range != null) {
-      _setPeriod(
-        Period.custom,
-        start: range.start,
-        end: range.end.add(const Duration(hours: 23, minutes: 59)),
-      );
+      ref.read(periodProvider.notifier).setCustom(
+            range.start,
+            range.end.add(const Duration(hours: 23, minutes: 59)),
+          );
     }
   }
 
@@ -76,7 +57,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final secs = ref.read(settingsProvider).refreshSeconds;
     _timer = Timer.periodic(Duration(seconds: secs), (_) {
       if (!mounted) return;
-      setState(() => _window = _computeWindow());
       ref.invalidate(siteStatsProvider);
       ref.invalidate(siteLiveProvider);
     });
@@ -96,9 +76,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       return _WelcomeEmpty(onAdd: () => openAddSource(context));
     }
 
+    final periodState = ref.watch(periodProvider);
+    final window = periodState.window();
     final sitesAsync = ref.watch(sitesProvider);
     final sites = sitesAsync.value ?? const <Site>[];
-    final totals = ref.watch(homeTotalsProvider(_window));
+    final totals = ref.watch(homeTotalsProvider(window));
     final now = DateTime.now();
     final viewMode = ref.watch(settingsProvider.select((s) => s.homeView));
     // Barre de chargement tant que des sites arrivent encore.
@@ -135,11 +117,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             children: [
               _Header(
-                period: _period,
+                period: periodState.period,
                 now: now,
                 viewMode: viewMode,
-                onPeriod: (per) =>
-                    per == Period.custom ? _pickCustom() : _setPeriod(per),
+                onPeriod: (per) => per == Period.custom
+                    ? _pickCustom()
+                    : ref.read(periodProvider.notifier).set(per),
                 onViewMode: (v) =>
                     ref.read(settingsProvider.notifier).setHomeView(v),
                 onAdd: () => openAddSource(context),
@@ -160,7 +143,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: totals.hasAny
-                      ? _TotalCard(data: totals.data, unit: _window.unit.api)
+                      ? _TotalCard(data: totals.data, unit: window.unit.api)
                       : const _TotalCardSkeleton(),
                 ),
                 const SizedBox(height: 22),
@@ -182,7 +165,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           itemBuilder: (context, i) => _SiteStatSlot(
                             key: ValueKey(orderedSites[i]),
                             site: orderedSites[i],
-                            window: _window,
+                            window: window,
                             grid: true,
                           ),
                         )
@@ -192,7 +175,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               _SiteStatSlot(
                                 key: ValueKey(s),
                                 site: s,
-                                window: _window,
+                                window: window,
                               ),
                               const SizedBox(height: 12),
                             ],

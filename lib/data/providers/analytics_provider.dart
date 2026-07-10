@@ -34,8 +34,8 @@ abstract class AnalyticsProvider {
   /// Pages consultées dans les dernières minutes.
   Future<List<LivePage>> livePages(Site site);
 
-  /// Nombre total d'événements par bucket (porté par [SeriesPoint.visitors]).
-  Future<List<SeriesPoint>> eventSeries(Site site, DateWindow w);
+  /// Une série temporelle par nom d'événement (triées par total décroissant).
+  Future<List<EventSeries>> eventSeries(Site site, DateWindow w);
 }
 
 /// Champs d'identifiants demandés à l'écran d'ajout, par fournisseur.

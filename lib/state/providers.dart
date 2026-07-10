@@ -204,18 +204,9 @@ final eventsProvider =
   final gate = ref.watch(fetchGateProvider);
   final p = await _providerFor(ref, site);
   return gate.run(() async {
-    final r = await Future.wait([
-      p.eventSeries(site, w),
-      p.metric(site, w, MetricType.events, limit: 8),
-    ]);
-    final breakdown = r[1] as List<MetricRow>;
-    final total = breakdown.fold<int>(0, (a, b) => a + b.value);
-    return EventsData(
-      total: total,
-      series: r[0] as List<SeriesPoint>,
-      breakdown: breakdown,
-      unit: w.unit.api,
-    );
+    final series = await p.eventSeries(site, w);
+    final total = series.fold<int>(0, (a, b) => a + b.total);
+    return EventsData(total: total, series: series, unit: w.unit.api);
   });
 });
 

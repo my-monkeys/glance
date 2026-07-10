@@ -42,12 +42,18 @@ La sélection de sites est éditable après coup : Réglages → tap sur le comp
 - `homeTotalsProvider(window)` : `Provider` qui `watch` tous les providers par site et recompose les totaux **au fil de l'eau** (le total monte pendant le chargement).
 - La concurrence est plafonnée par un **sémaphore** partagé (`fetchGateProvider`, 6) — sinon N sites = 3N requêtes simultanées.
 - Les cartes non chargées montrent un **squelette** (`_GridSkeleton`/`_TileSkeleton`) ; une carte en échec devient `_SiteErrorCard` sans bloquer les autres.
-- Ordre **stable** (ordre des sites, pas de tri par trafic) → les cartes se remplissent sans réordonner. Direct trie par live (parmi les chargés).
+- Accueil : cartes **triées par visiteurs** (chargés en tête, squelettes à la suite) ; `ValueKey(site)` sur chaque slot → Flutter déplace au lieu de reconstruire. Direct trie par live.
 - Auto-refresh / pull : `ref.invalidate(siteStatsProvider)` + `ref.invalidate(siteLiveProvider)` (familles entières) → refetch en place, valeurs précédentes conservées (pas de flash). Une fine `RefreshBar` en haut tant que `homeTotals.loading`.
 
-## Le graphique (point clé de la demande)
+## Période partagée (synchro entre écrans)
 
-`ui/widgets/glance_chart.dart` (fl_chart) : courbe **lissée** (`isCurved`, `curveSmoothness`, `isStrokeCapRound/JoinRound`), **aire dégradée**, **échelle Y arrondie** (`_niceMax`), labels X selon la granularité, grille discrète, tooltip tactile. Remplace la simple barre de la maquette par un vrai graphe à échelles. Mini-courbe des cartes = `ui/widgets/sparkline.dart` (CustomPaint Catmull-Rom).
+`periodProvider` (`state/period_state.dart`, `NotifierProvider<PeriodNotifier, PeriodState>`) porte la période sélectionnée pour **tout** l'app. Accueil et détail lisent/écrivent le même état → ouvrir un site conserve la période de l'accueil, changer la période n'importe où se répercute partout. La fenêtre est **alignée sur la grille** (cf. `Period.window` : borne de fin plafonnée à l'unité suivante) donc `window()` renvoie une valeur **stable** entre deux builds d'une même heure/jour → la clé des `family` ne change pas, pas de reload en boucle (plus besoin de figer la fenêtre en state).
+
+## Graphiques (point clé de la demande)
+
+- `ui/widgets/glance_chart.dart` (fl_chart) : courbe **lissée** (`isCurved`, `curveSmoothness`, cap/join round), **aire dégradée**, **échelle Y arrondie**, labels X selon la granularité, tooltip tactile. Deux courbes (visiteurs + pages vues) avec légende sur home/détail. Remplace la barre de la maquette. Sparkline compacte des cartes = `ui/widgets/sparkline.dart`.
+- `ui/widgets/events_chart.dart` : **multi-lignes, une couleur par événement** (palette `kEventPalette`), échelle Y partagée, tooltip listant chaque événement. Onglet Événements du détail : légende = puces cliquables (cocher/décocher les courbes ; au-delà de 6 events les moins fréquents sont masqués par défaut), barres de répartition colorées assorties.
+- Helpers partagés dans `ui/widgets/chart_util.dart` (`chartNiceMax`, `chartTooltipDate`).
 
 ## API par fournisseur
 

@@ -207,8 +207,8 @@ class PlausibleProvider extends AnalyticsProvider {
   }
 
   @override
-  Future<List<SeriesPoint>> eventSeries(Site site, DateWindow w) async {
-    final dim = switch (w.unit) {
+  Future<List<EventSeries>> eventSeries(Site site, DateWindow w) async {
+    final timeDim = switch (w.unit) {
       TimeUnit.hour => 'time:hour',
       TimeUnit.day => 'time:day',
       TimeUnit.month => 'time:month',
@@ -217,20 +217,40 @@ class PlausibleProvider extends AnalyticsProvider {
       'site_id': _siteId,
       'metrics': ['events'],
       'date_range': [_dtFmt.format(w.start), _dtFmt.format(w.end)],
-      'dimensions': [dim],
+      'dimensions': [timeDim, 'event:name'],
       'timezone': await _timezone(),
     });
-    return _rows(res)
-        .map((r) {
-          final dims = r['dimensions'] as List;
-          final t = DateTime.tryParse(dims.first.toString()) ??
-              DateTime.tryParse('${dims.first}T00:00:00');
-          if (t == null) return null;
-          final v = ((r['metrics'] as List).first as num).toDouble();
-          return SeriesPoint(t, v, 0);
-        })
-        .whereType<SeriesPoint>()
-        .toList(growable: false);
+    // Regroupe par nom d'événement (exclut « pageview »).
+    final byName = <String, Map<int, double>>{};
+    for (final r in _rows(res)) {
+      final dims = r['dimensions'] as List;
+      final name = dims.length > 1 ? dims[1].toString() : '';
+      if (name == 'pageview') continue;
+      final t = DateTime.tryParse(dims.first.toString()) ??
+          DateTime.tryParse('${dims.first}T00:00:00');
+      if (t == null) continue;
+      final v = ((r['metrics'] as List).first as num).toDouble();
+      (byName[name] ??= {}).update(
+        t.millisecondsSinceEpoch,
+        (x) => x + v,
+        ifAbsent: () => v,
+      );
+    }
+    final out = byName.entries.map((entry) {
+      final points = entry.value.entries
+          .map((e) => SeriesPoint(
+              DateTime.fromMillisecondsSinceEpoch(e.key), e.value, 0))
+          .toList()
+        ..sort((a, b) => a.t.compareTo(b.t));
+      final total = entry.value.values.fold<double>(0, (a, b) => a + b).round();
+      return EventSeries(
+        name: entry.key.isEmpty ? '(sans nom)' : entry.key,
+        points: points,
+        total: total,
+      );
+    }).toList()
+      ..sort((a, b) => b.total.compareTo(a.total));
+    return out;
   }
 
   @override

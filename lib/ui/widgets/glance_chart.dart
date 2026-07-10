@@ -2,12 +2,12 @@ import 'dart:math' as math;
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../core/format.dart';
 import '../../data/models/models.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
+import 'chart_util.dart';
 
 /// Graphique de série temporelle « propre » : courbe lissée, extrémités
 /// arrondies, aire dégradée, échelle Y et labels X. C'est l'équivalent Flutter
@@ -47,7 +47,7 @@ class GlanceChart extends StatelessWidget {
       ...visitors,
       if (showPageviews) ...views,
     ].fold<double>(0, math.max);
-    final maxY = _niceMax(rawMax);
+    final maxY = chartNiceMax(rawMax);
     final yInterval = maxY / 4;
 
     final visitorSpots = [
@@ -142,7 +142,7 @@ class GlanceChart extends StatelessWidget {
                 for (var k = 0; k < touched.length; k++) {
                   final t = touched[k];
                   final i = t.x.round().clamp(0, series.length - 1);
-                  final date = _tooltipDate(series[i].t, unit);
+                  final date = chartTooltipDate(series[i].t, unit);
                   // Une seule courbe : gros chiffre + date.
                   if (!showPageviews) {
                     return [
@@ -160,7 +160,7 @@ class GlanceChart extends StatelessWidget {
                 final i = touched.isEmpty
                     ? 0
                     : touched.first.x.round().clamp(0, series.length - 1);
-                final date = _tooltipDate(series[i].t, unit);
+                final date = chartTooltipDate(series[i].t, unit);
                 return [
                   for (var k = 0; k < touched.length; k++)
                     LineTooltipItem(
@@ -277,38 +277,6 @@ class GlanceChart extends StatelessWidget {
         chart,
       ],
     );
-  }
-
-  static String _tooltipDate(DateTime t, String unit) {
-    switch (unit) {
-      case 'hour':
-        return DateFormat("d MMM · HH'h'", 'fr_FR').format(t);
-      case 'month':
-        return DateFormat('MMMM yyyy', 'fr_FR').format(t);
-      default:
-        return DateFormat('EEE d MMM', 'fr_FR').format(t);
-    }
-  }
-
-  /// Arrondit le max vers une valeur « ronde » avec un peu de marge.
-  static double _niceMax(double m) {
-    if (m <= 0) return 10;
-    final v = m * 1.15;
-    final mag = math.pow(10, (math.log(v) / math.ln10).floor()).toDouble();
-    final norm = v / mag;
-    double nice;
-    if (norm <= 1) {
-      nice = 1;
-    } else if (norm <= 2) {
-      nice = 2;
-    } else if (norm <= 2.5) {
-      nice = 2.5;
-    } else if (norm <= 5) {
-      nice = 5;
-    } else {
-      nice = 10;
-    }
-    return nice * mag;
   }
 }
 

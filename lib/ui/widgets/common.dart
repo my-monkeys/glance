@@ -213,7 +213,10 @@ class MetricBars extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 6),
-                _Bar(fraction: (r.value / maxV).clamp(0.02, 1.0)),
+                _Bar(
+                  fraction: (r.value / maxV).clamp(0.02, 1.0),
+                  color: r.color,
+                ),
               ],
             ),
           ),
@@ -275,16 +278,19 @@ class MetricBarRow {
     required this.value,
     this.flag,
     this.pctText,
+    this.color,
   });
   final String label;
   final int value;
   final String? flag;
   final String? pctText;
+  final Color? color; // couleur de barre (ex. par événement)
 }
 
 class _Bar extends StatelessWidget {
-  const _Bar({required this.fraction});
+  const _Bar({required this.fraction, this.color});
   final double fraction;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -299,7 +305,7 @@ class _Bar extends StatelessWidget {
           widthFactor: fraction,
           child: Container(
             decoration: BoxDecoration(
-              color: p.accent.withValues(alpha: 0.85),
+              color: (color ?? p.accent).withValues(alpha: 0.85),
               borderRadius: BorderRadius.circular(99),
             ),
           ),
