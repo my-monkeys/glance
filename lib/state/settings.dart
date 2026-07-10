@@ -14,6 +14,9 @@ enum ThemeChoice {
   final ThemeMode mode;
 }
 
+/// Disposition de la liste des sites sur l'accueil.
+enum HomeViewMode { list, grid }
+
 @immutable
 class Settings {
   const Settings({
@@ -22,6 +25,7 @@ class Settings {
     this.spike = true,
     this.daily = true,
     this.goals = false,
+    this.homeView = HomeViewMode.list,
   });
 
   final ThemeChoice theme;
@@ -29,6 +33,7 @@ class Settings {
   final bool spike;
   final bool daily;
   final bool goals;
+  final HomeViewMode homeView;
 
   Settings copyWith({
     ThemeChoice? theme,
@@ -36,12 +41,14 @@ class Settings {
     bool? spike,
     bool? daily,
     bool? goals,
+    HomeViewMode? homeView,
   }) => Settings(
     theme: theme ?? this.theme,
     refreshSeconds: refreshSeconds ?? this.refreshSeconds,
     spike: spike ?? this.spike,
     daily: daily ?? this.daily,
     goals: goals ?? this.goals,
+    homeView: homeView ?? this.homeView,
   );
 }
 
@@ -51,6 +58,7 @@ class SettingsNotifier extends Notifier<Settings> {
   static const _kSpike = 'glance.notif.spike';
   static const _kDaily = 'glance.notif.daily';
   static const _kGoals = 'glance.notif.goals';
+  static const _kHomeView = 'glance.homeView';
 
   SharedPreferences get _p => ref.read(sharedPrefsProvider);
 
@@ -65,7 +73,16 @@ class SettingsNotifier extends Notifier<Settings> {
       spike: _p.getBool(_kSpike) ?? true,
       daily: _p.getBool(_kDaily) ?? true,
       goals: _p.getBool(_kGoals) ?? false,
+      homeView: HomeViewMode.values.firstWhere(
+        (v) => v.name == _p.getString(_kHomeView),
+        orElse: () => HomeViewMode.list,
+      ),
     );
+  }
+
+  void setHomeView(HomeViewMode v) {
+    _p.setString(_kHomeView, v.name);
+    state = state.copyWith(homeView: v);
   }
 
   void setTheme(ThemeChoice t) {

@@ -5,9 +5,10 @@ import '../../theme/type.dart';
 
 /// Point « live » avec anneau qui pulse (comme la maquette).
 class PulseDot extends StatefulWidget {
-  const PulseDot({super.key, this.size = 9, this.color});
+  const PulseDot({super.key, this.size = 9, this.color, this.pulse = true});
   final double size;
   final Color? color;
+  final bool pulse;
 
   @override
   State<PulseDot> createState() => _PulseDotState();
@@ -29,6 +30,9 @@ class _PulseDotState extends State<PulseDot>
   @override
   Widget build(BuildContext context) {
     final color = widget.color ?? context.glance.accent;
+    if (!widget.pulse) {
+      return _dot(color);
+    }
     return SizedBox(
       width: widget.size,
       height: widget.size,

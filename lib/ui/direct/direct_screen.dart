@@ -23,6 +23,7 @@ class DirectScreen extends ConsumerStatefulWidget {
 class _DirectScreenState extends ConsumerState<DirectScreen> {
   late final DateWindow _window = Period.d7.window();
   bool _onlyLive = false;
+  HomeData? _lastData;
   Timer? _timer;
 
   @override
@@ -43,7 +44,9 @@ class _DirectScreenState extends ConsumerState<DirectScreen> {
   @override
   Widget build(BuildContext context) {
     final p = context.glance;
-    final data = ref.watch(homeProvider(_window)).value;
+    final async = ref.watch(homeProvider(_window));
+    if (async.hasValue) _lastData = async.value;
+    final data = async.value ?? _lastData;
     final allCards = [...?data?.cards]..sort((a, b) => b.live.compareTo(a.live));
     final cards =
         _onlyLive ? allCards.where((c) => c.live > 0).toList() : allCards;

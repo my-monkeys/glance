@@ -34,6 +34,8 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
   // sinon la borne `now` bougerait à chaque build et la family Riverpod
   // rechargerait en boucle.
   late DateWindow _window = _computeWindow();
+  SiteDetail? _lastDetail;
+  DateWindow? _lastDetailWindow;
 
   DateWindow _computeWindow() =>
       _period.window(customStart: _customStart, customEnd: _customEnd);
@@ -89,7 +91,14 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
     final p = context.glance;
     final window = _window;
     final async = ref.watch(detailProvider((widget.site, window)));
-    final detail = async.value;
+    if (async.hasValue) {
+      _lastDetail = async.value;
+      _lastDetailWindow = window;
+    }
+    // Rechargement en fond de la même période → on garde l'affichage précédent.
+    // Changement de période → on montre bien le chargement (données différentes).
+    final detail =
+        async.value ?? (_lastDetailWindow == window ? _lastDetail : null);
 
     return Scaffold(
       body: RefreshIndicator(

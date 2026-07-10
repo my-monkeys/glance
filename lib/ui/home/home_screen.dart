@@ -36,6 +36,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   // Fenêtre figée : recalculée seulement au changement de période / refresh,
   // sinon la borne `now` bougerait à chaque build et rechargerait en boucle.
   late DateWindow _window = _computeWindow();
+  HomeData? _lastData;
 
   DateWindow _computeWindow() =>
       _period.window(customStart: _customStart, customEnd: _customEnd);
@@ -95,8 +96,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
 
     final async = ref.watch(homeProvider(_window));
-    final data = async.value;
+    // Garde la dernière donnée affichée pendant un rechargement en fond : la
+    // mise à jour se fait en place, sans masquer puis réafficher l'écran.
+    if (async.hasValue) _lastData = async.value;
+    final data = async.value ?? _lastData;
     final now = DateTime.now();
+    final viewMode = ref.watch(settingsProvider.select((s) => s.homeView));
 
     return RefreshIndicator(
       color: p.accent,
@@ -149,23 +154,35 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          // Sélecteur de période.
+          // Sélecteur de période + bascule liste/grille.
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: ChipRow(
+            padding: const EdgeInsets.fromLTRB(20, 0, 16, 0),
+            child: Row(
               children: [
-                for (final per in Period.values)
-                  GlanceChip(
-                    label: per.label,
-                    selected: _period == per,
-                    onTap: () {
-                      if (per == Period.custom) {
-                        _pickCustom();
-                      } else {
-                        _setPeriod(per);
-                      }
-                    },
+                Expanded(
+                  child: ChipRow(
+                    children: [
+                      for (final per in Period.values)
+                        GlanceChip(
+                          label: per.label,
+                          selected: _period == per,
+                          onTap: () {
+                            if (per == Period.custom) {
+                              _pickCustom();
+                            } else {
+                              _setPeriod(per);
+                            }
+                          },
+                        ),
+                    ],
                   ),
+                ),
+                const SizedBox(width: 10),
+                _ViewToggle(
+                  mode: viewMode,
+                  onChanged: (v) =>
+                      ref.read(settingsProvider.notifier).setHomeView(v),
+                ),
               ],
             ),
           ),
@@ -188,14 +205,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             const SizedBox(height: 22),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                children: [
-                  for (final c in data.cards) ...[
-                    _SiteCardTile(card: c),
-                    const SizedBox(height: 12),
-                  ],
-                ],
-              ),
+              child: viewMode == HomeViewMode.grid
+                  ? _SiteGrid(cards: data.cards)
+                  : Column(
+                      children: [
+                        for (final c in data.cards) ...[
+                          _SiteCardTile(card: c),
+                          const SizedBox(height: 12),
+                        ],
+                      ],
+                    ),
             ),
           ],
         ],
@@ -320,10 +339,152 @@ class _SiteCardTile extends StatelessWidget {
     );
   }
 
-  List<double> _sparkValues(SiteCard c) {
-    final v = c.series.map((e) => e.visitors).toList();
-    if (v.length < 2) return const [0, 0];
-    return v;
+  List<double> _sparkValues(SiteCard c) => _sparkOf(c);
+}
+
+List<double> _sparkOf(SiteCard c) {
+  final v = c.series.map((e) => e.visitors).toList();
+  if (v.length < 2) return const [0, 0];
+  return v;
+}
+
+/// Bascule liste / grille (segmenté à deux icônes).
+class _ViewToggle extends StatelessWidget {
+  const _ViewToggle({required this.mode, required this.onChanged});
+  final HomeViewMode mode;
+  final ValueChanged<HomeViewMode> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.glance;
+    Widget seg(HomeViewMode m, IconData icon) {
+      final on = mode == m;
+      return GestureDetector(
+        onTap: () => onChanged(m),
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          width: 34,
+          height: 30,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: on ? p.accent : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, size: 17, color: on ? p.accentInk : p.fg2),
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        color: p.chip,
+        borderRadius: BorderRadius.circular(11),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          seg(HomeViewMode.list, Icons.view_agenda_outlined),
+          seg(HomeViewMode.grid, Icons.grid_view_rounded),
+        ],
+      ),
+    );
+  }
+}
+
+/// Grille 2 colonnes de cartes de sites.
+class _SiteGrid extends StatelessWidget {
+  const _SiteGrid({required this.cards});
+  final List<SiteCard> cards;
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: EdgeInsets.zero,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
+        childAspectRatio: 1, // cartes carrées
+      ),
+      itemCount: cards.length,
+      itemBuilder: (context, i) => _SiteGridCard(card: cards[i]),
+    );
+  }
+}
+
+class _SiteGridCard extends StatelessWidget {
+  const _SiteGridCard({required this.card});
+  final SiteCard card;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.glance;
+    final live = card.live;
+    return GlanceCard(
+      padding: const EdgeInsets.fromLTRB(15, 15, 15, 13),
+      onTap: () => openSite(context, card.site),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            card.site.name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GT.body(14, weight: 500, color: p.fg),
+          ),
+          const Spacer(),
+          // Nombre de visiteurs à gauche, « en direct » aligné à droite.
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Text(
+                  fmtInt(card.summary.visitors),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GT.stat(30, color: p.fg),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  PulseDot(
+                    size: 7,
+                    pulse: live > 0,
+                    color: live > 0 ? p.accent : p.fg3,
+                  ),
+                  const SizedBox(width: 5),
+                  Text(
+                    '$live',
+                    style: GT.mono(
+                      13,
+                      weight: 600,
+                      color: live > 0 ? p.accent : p.fg3,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 3),
+          DeltaText(card.deltaPct, fontSize: 11),
+          const Spacer(),
+          LayoutBuilder(
+            builder: (ctx, cons) => Sparkline(
+              values: _sparkOf(card),
+              color: p.accent,
+              width: cons.maxWidth,
+              height: 32,
+              fill: true,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

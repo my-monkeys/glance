@@ -272,9 +272,11 @@ class UmamiProvider extends AnalyticsProvider {
   List<DateTime> _buckets(DateWindow w) {
     final out = <DateTime>[];
     var c = _truncate(w.start, w.unit);
+    // Borne de fin exclusive : `w.end` est plafonné au début de l'unité
+    // suivante, donc on s'arrête avant (pas de bucket futur vide).
     final end = _truncate(w.end, w.unit);
     var guard = 0;
-    while (!c.isAfter(end) && guard < 2000) {
+    while (c.isBefore(end) && guard < 2000) {
       out.add(c);
       c = _advance(c, w.unit);
       guard++;

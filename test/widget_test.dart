@@ -6,17 +6,24 @@ void main() {
   group('Period.window', () {
     final now = DateTime(2026, 7, 10, 14, 30);
 
-    test('7 jours couvre la bonne fenêtre, granularité jour', () {
+    test('7 jours = 7 jours pleins alignés sur la grille', () {
       final w = Period.d7.window(now: now);
       expect(w.unit, TimeUnit.day);
       expect(w.start, DateTime(2026, 7, 4));
-      expect(w.end, now);
+      expect(w.end, DateTime(2026, 7, 11)); // plafonné au jour suivant
     });
 
-    test("aujourd'hui commence à minuit, granularité heure", () {
+    test("aujourd'hui : minuit → fin de l'heure courante, granularité heure", () {
       final w = Period.today.window(now: now);
       expect(w.unit, TimeUnit.hour);
       expect(w.start, DateTime(2026, 7, 10));
+      expect(w.end, DateTime(2026, 7, 10, 15)); // 14h30 → 15h
+    });
+
+    test('fenêtre stable dans la même heure (clé identique)', () {
+      final a = Period.today.window(now: DateTime(2026, 7, 10, 14, 5));
+      final b = Period.today.window(now: DateTime(2026, 7, 10, 14, 55));
+      expect(a, b); // même clé → pas de rechargement / flash
     });
 
     test('12 mois remonte 11 mois, granularité mois', () {

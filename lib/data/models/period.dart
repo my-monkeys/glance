@@ -49,30 +49,47 @@ enum Period {
 
   static DateTime _startOfDay(DateTime d) => DateTime(d.year, d.month, d.day);
 
+  /// Plafond de [d] au début de l'unité suivante. La fenêtre est ainsi alignée
+  /// sur la grille (heure/jour/mois) : sa clé reste stable pendant toute l'unité
+  /// courante, donc l'auto-refresh réutilise le même provider (pas de flash ni
+  /// d'accumulation d'instances). Le bucket courant grandit au fil des données.
+  static DateTime _ceil(DateTime d, TimeUnit u) => switch (u) {
+    TimeUnit.hour => DateTime(d.year, d.month, d.day, d.hour + 1),
+    TimeUnit.day => DateTime(d.year, d.month, d.day + 1),
+    TimeUnit.month => DateTime(d.year, d.month + 1, 1),
+  };
+
   /// Résout la fenêtre. Pour [custom], passer [customStart]/[customEnd].
   DateWindow window({DateTime? now, DateTime? customStart, DateTime? customEnd}) {
     final n = now ?? DateTime.now();
     switch (this) {
       case Period.today:
-        return DateWindow(_startOfDay(n), n, TimeUnit.hour);
+        return DateWindow(_startOfDay(n), _ceil(n, TimeUnit.hour), TimeUnit.hour);
       case Period.h24:
-        return DateWindow(n.subtract(const Duration(hours: 24)), n, TimeUnit.hour);
-      case Period.d7:
+        final end = _ceil(n, TimeUnit.hour);
         return DateWindow(
-          _startOfDay(n).subtract(const Duration(days: 6)),
-          n,
+          end.subtract(const Duration(hours: 24)),
+          end,
+          TimeUnit.hour,
+        );
+      case Period.d7:
+        final end = _ceil(n, TimeUnit.day);
+        return DateWindow(
+          end.subtract(const Duration(days: 7)),
+          end,
           TimeUnit.day,
         );
       case Period.d30:
+        final end = _ceil(n, TimeUnit.day);
         return DateWindow(
-          _startOfDay(n).subtract(const Duration(days: 29)),
-          n,
+          end.subtract(const Duration(days: 30)),
+          end,
           TimeUnit.day,
         );
       case Period.m12:
         return DateWindow(
           DateTime(n.year, n.month - 11, 1),
-          n,
+          _ceil(n, TimeUnit.month),
           TimeUnit.month,
         );
       case Period.custom:
