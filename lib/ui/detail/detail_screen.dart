@@ -218,15 +218,16 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
   }
 }
 
-class _DetailBody extends StatelessWidget {
+class _DetailBody extends ConsumerWidget {
   const _DetailBody({required this.detail, required this.window});
   final SiteDetail detail;
   final DateWindow window;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final p = context.glance;
     final s = detail.summary;
+    final hidden = ref.watch(settingsProvider.select((s) => s.hiddenSeries));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -257,6 +258,9 @@ class _DetailBody extends StatelessWidget {
                 showPageviews: true,
                 visitorsTotal: s.visitors,
                 pageviewsTotal: s.pageviews,
+                hidden: hidden,
+                onToggle: (k) =>
+                    ref.read(settingsProvider.notifier).toggleSeries(k),
               ),
             ],
           ),

@@ -21,7 +21,12 @@ class GlanceChart extends StatelessWidget {
     this.showPageviews = false,
     this.visitorsTotal,
     this.pageviewsTotal,
+    this.hidden = const {},
+    this.onToggle,
   });
+
+  static const kVisitors = 'visitors';
+  static const kPageviews = 'pageviews';
 
   final List<SeriesPoint> series;
   final String unit; // 'hour' | 'day' | 'month'
@@ -32,6 +37,10 @@ class GlanceChart extends StatelessWidget {
   final int? visitorsTotal;
   final int? pageviewsTotal;
 
+  /// Séries masquées (clés [kVisitors]/[kPageviews]) et bascule via la légende.
+  final Set<String> hidden;
+  final void Function(String key)? onToggle;
+
   @override
   Widget build(BuildContext context) {
     final p = context.glance;
@@ -40,12 +49,16 @@ class GlanceChart extends StatelessWidget {
     }
     final altColor = p.fg2;
 
+    final showVisitors = !hidden.contains(kVisitors);
+    final showViews = showPageviews && !hidden.contains(kPageviews);
+
     final visitors = series.map((e) => e.visitors).toList();
     final views = series.map((e) => e.pageviews).toList();
-    // Échelle partagée : le max doit couvrir la plus haute des deux courbes.
+    // Échelle : le max ne couvre que les courbes visibles → masquer les pages
+    // vues fait « remonter » la courbe visiteurs (rescale automatique).
     final rawMax = [
-      ...visitors,
-      if (showPageviews) ...views,
+      if (showVisitors) ...visitors,
+      if (showViews) ...views,
     ].fold<double>(0, math.max);
     final maxY = chartNiceMax(rawMax);
     final yInterval = maxY / 4;
@@ -139,28 +152,28 @@ class GlanceChart extends StatelessWidget {
                 vertical: 7,
               ),
               getTooltipItems: (touched) {
-                for (var k = 0; k < touched.length; k++) {
-                  final t = touched[k];
-                  final i = t.x.round().clamp(0, series.length - 1);
-                  final date = chartTooltipDate(series[i].t, unit);
-                  // Une seule courbe : gros chiffre + date.
-                  if (!showPageviews) {
-                    return [
-                      LineTooltipItem(
-                        '${fmtInt(t.y)}\n',
-                        GT.stat(15, color: p.bg),
-                        children: [
-                          TextSpan(text: date, style: GT.mono(10, color: p.fg3)),
-                        ],
-                      ),
-                    ];
-                  }
-                }
-                // Deux courbes : date en tête, puis « visiteurs · pages vues ».
+                // Ordre des courbes tracées = clés visibles (pages vues dessous,
+                // visiteurs dessus) pour mapper barIndex → libellé.
+                final visibleKeys = [
+                  if (showViews) 'pages vues',
+                  if (showVisitors) 'visiteurs',
+                ];
                 final i = touched.isEmpty
                     ? 0
                     : touched.first.x.round().clamp(0, series.length - 1);
                 final date = chartTooltipDate(series[i].t, unit);
+                // Une seule courbe visible : gros chiffre + date.
+                if (visibleKeys.length <= 1) {
+                  return [
+                    LineTooltipItem(
+                      '${fmtInt(touched.isEmpty ? 0 : touched.first.y)}\n',
+                      GT.stat(15, color: p.bg),
+                      children: [
+                        TextSpan(text: date, style: GT.mono(10, color: p.fg3)),
+                      ],
+                    ),
+                  ];
+                }
                 return [
                   for (var k = 0; k < touched.length; k++)
                     LineTooltipItem(
@@ -172,9 +185,9 @@ class GlanceChart extends StatelessWidget {
                           style: GT.stat(14, color: p.bg),
                         ),
                         TextSpan(
-                          text: touched[k].barIndex == (showPageviews ? 1 : 0)
-                              ? 'visiteurs'
-                              : 'pages vues',
+                          text: touched[k].barIndex < visibleKeys.length
+                              ? visibleKeys[touched[k].barIndex]
+                              : '',
                           style: GT.mono(9, color: p.fg3),
                         ),
                       ],
@@ -200,7 +213,7 @@ class GlanceChart extends StatelessWidget {
           ),
           lineBarsData: [
             // Pages vues (secondaire) — tracée dessous, sans remplissage.
-            if (showPageviews)
+            if (showViews)
               LineChartBarData(
                 spots: viewSpots,
                 isCurved: true,
@@ -213,37 +226,38 @@ class GlanceChart extends StatelessWidget {
                 dotData: const FlDotData(show: false),
               ),
             // Visiteurs (primaire) — accent + aire dégradée.
-            LineChartBarData(
-              spots: visitorSpots,
-              isCurved: true,
-              curveSmoothness: 0.32,
-              preventCurveOverShooting: true,
-              color: p.accent,
-              barWidth: 2.6,
-              isStrokeCapRound: true,
-              isStrokeJoinRound: true,
-              dotData: FlDotData(
-                show: true,
-                checkToShowDot: (spot, bar) => spot.x == lastX,
-                getDotPainter: (s, pr, b, idx) => FlDotCirclePainter(
-                  radius: 4,
-                  color: p.accent,
-                  strokeColor: p.surface,
-                  strokeWidth: 2,
+            if (showVisitors)
+              LineChartBarData(
+                spots: visitorSpots,
+                isCurved: true,
+                curveSmoothness: 0.32,
+                preventCurveOverShooting: true,
+                color: p.accent,
+                barWidth: 2.6,
+                isStrokeCapRound: true,
+                isStrokeJoinRound: true,
+                dotData: FlDotData(
+                  show: true,
+                  checkToShowDot: (spot, bar) => spot.x == lastX,
+                  getDotPainter: (s, pr, b, idx) => FlDotCirclePainter(
+                    radius: 4,
+                    color: p.accent,
+                    strokeColor: p.surface,
+                    strokeWidth: 2,
+                  ),
+                ),
+                belowBarData: BarAreaData(
+                  show: true,
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      p.accent.withValues(alpha: 0.22),
+                      p.accent.withValues(alpha: 0.0),
+                    ],
+                  ),
                 ),
               ),
-              belowBarData: BarAreaData(
-                show: true,
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    p.accent.withValues(alpha: 0.22),
-                    p.accent.withValues(alpha: 0.0),
-                  ],
-                ),
-              ),
-            ),
           ],
         ),
         duration: const Duration(milliseconds: 450),
@@ -264,12 +278,16 @@ class GlanceChart extends StatelessWidget {
                 color: p.accent,
                 label: 'Visiteurs',
                 value: visitorsTotal,
+                on: showVisitors,
+                onTap: onToggle == null ? null : () => onToggle!(kVisitors),
               ),
               const SizedBox(width: 16),
               _LegendItem(
                 color: altColor,
                 label: 'Pages vues',
                 value: pageviewsTotal,
+                on: showViews,
+                onTap: onToggle == null ? null : () => onToggle!(kPageviews),
               ),
             ],
           ),
@@ -281,29 +299,45 @@ class GlanceChart extends StatelessWidget {
 }
 
 class _LegendItem extends StatelessWidget {
-  const _LegendItem({required this.color, required this.label, this.value});
+  const _LegendItem({
+    required this.color,
+    required this.label,
+    this.value,
+    this.on = true,
+    this.onTap,
+  });
   final Color color;
   final String label;
+  final bool on;
+  final VoidCallback? onTap;
   final int? value;
 
   @override
   Widget build(BuildContext context) {
     final p = context.glance;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 9,
-          height: 9,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 150),
+        opacity: on ? 1 : 0.4,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 9,
+              height: 9,
+              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+            ),
+            const SizedBox(width: 6),
+            if (value != null) ...[
+              Text(fmtInt(value!), style: GT.mono(12, weight: 600, color: p.fg)),
+              const SizedBox(width: 4),
+            ],
+            Text(label, style: GT.body(12, color: p.fg2)),
+          ],
         ),
-        const SizedBox(width: 6),
-        if (value != null) ...[
-          Text(fmtInt(value!), style: GT.mono(12, weight: 600, color: p.fg)),
-          const SizedBox(width: 4),
-        ],
-        Text(label, style: GT.body(12, color: p.fg2)),
-      ],
+      ),
     );
   }
 }

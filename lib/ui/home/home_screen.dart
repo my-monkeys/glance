@@ -316,14 +316,15 @@ class _SiteStatSlot extends ConsumerWidget {
   }
 }
 
-class _TotalCard extends StatelessWidget {
+class _TotalCard extends ConsumerWidget {
   const _TotalCard({required this.data, required this.unit});
   final HomeData data;
   final String unit;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final p = context.glance;
+    final hidden = ref.watch(settingsProvider.select((s) => s.hiddenSeries));
     return GlanceCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -363,6 +364,8 @@ class _TotalCard extends StatelessWidget {
             showPageviews: true,
             visitorsTotal: data.totalVisitors,
             pageviewsTotal: data.totalPageviews,
+            hidden: hidden,
+            onToggle: (k) => ref.read(settingsProvider.notifier).toggleSeries(k),
           ),
         ],
       ),
