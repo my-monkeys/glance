@@ -104,6 +104,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     // Barre de chargement tant que des sites arrivent encore.
     final refreshing = totals.loading && sites.isNotEmpty;
 
+    // Tri par visiteurs uniques (desc) : sites chargés en tête, sites encore
+    // en chargement (squelettes) à la suite dans leur ordre d'origine.
+    final loaded = [...totals.data.cards]
+      ..sort((a, b) => b.summary.visitors.compareTo(a.summary.visitors));
+    final loadedSites = loaded.map((c) => c.site).toList();
+    final loadedSet = loadedSites.toSet();
+    final pendingSites = sites.where((s) => !loadedSet.contains(s)).toList();
+    final orderedSites = [...loadedSites, ...pendingSites];
+
     return Stack(
       children: [
         RefreshIndicator(
@@ -169,17 +178,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             crossAxisSpacing: 12,
                             childAspectRatio: 1.12,
                           ),
-                          itemCount: sites.length,
+                          itemCount: orderedSites.length,
                           itemBuilder: (context, i) => _SiteStatSlot(
-                            site: sites[i],
+                            key: ValueKey(orderedSites[i]),
+                            site: orderedSites[i],
                             window: _window,
                             grid: true,
                           ),
                         )
                       : Column(
                           children: [
-                            for (final s in sites) ...[
-                              _SiteStatSlot(site: s, window: _window),
+                            for (final s in orderedSites) ...[
+                              _SiteStatSlot(
+                                key: ValueKey(s),
+                                site: s,
+                                window: _window,
+                              ),
                               const SizedBox(height: 12),
                             ],
                           ],
@@ -284,6 +298,7 @@ class _Header extends StatelessWidget {
 /// un squelette tant que les stats ne sont pas arrivées.
 class _SiteStatSlot extends ConsumerWidget {
   const _SiteStatSlot({
+    super.key,
     required this.site,
     required this.window,
     this.grid = false,
