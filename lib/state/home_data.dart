@@ -1,0 +1,85 @@
+import '../data/models/models.dart';
+
+/// Données d'une carte de site sur la home.
+class SiteCard {
+  SiteCard({
+    required this.site,
+    required this.summary,
+    required this.series,
+    required this.live,
+  });
+
+  final Site site;
+  final StatsSummary summary;
+  final List<SeriesPoint> series;
+  final int live;
+
+  double? get deltaPct => summary.visitorsDeltaPct;
+  bool get up => (deltaPct ?? 0) >= 0;
+}
+
+/// Agrégat pour la home : total tous sites + série cumulée + cartes.
+class HomeData {
+  HomeData({
+    required this.cards,
+    required this.totalVisitors,
+    required this.prevTotalVisitors,
+    required this.totalLive,
+    required this.totalSeries,
+  });
+
+  final List<SiteCard> cards;
+  final int totalVisitors;
+  final int? prevTotalVisitors;
+  final int totalLive;
+  final List<SeriesPoint> totalSeries;
+
+  double? get totalDeltaPct {
+    final p = prevTotalVisitors;
+    if (p == null || p == 0) return null;
+    return (totalVisitors - p) / p * 100;
+  }
+
+  bool get up => (totalDeltaPct ?? 0) >= 0;
+
+  bool get isEmpty => cards.isEmpty;
+
+  /// Construit l'agrégat à partir des cartes déjà chargées.
+  static HomeData fromCards(List<SiteCard> cards) {
+    var totalVisitors = 0;
+    var prevTotal = 0;
+    var hasPrev = false;
+    var totalLive = 0;
+    for (final c in cards) {
+      totalVisitors += c.summary.visitors;
+      if (c.summary.prevVisitors != null) {
+        prevTotal += c.summary.prevVisitors!;
+        hasPrev = true;
+      }
+      totalLive += c.live;
+    }
+
+    // Série cumulée : somme des visiteurs par bucket (fenêtres alignées).
+    final buckets = cards.isEmpty ? <SeriesPoint>[] : cards.first.series;
+    final total = <SeriesPoint>[];
+    for (var i = 0; i < buckets.length; i++) {
+      var v = 0.0;
+      var pv = 0.0;
+      for (final c in cards) {
+        if (i < c.series.length) {
+          v += c.series[i].visitors;
+          pv += c.series[i].pageviews;
+        }
+      }
+      total.add(SeriesPoint(buckets[i].t, v, pv));
+    }
+
+    return HomeData(
+      cards: cards,
+      totalVisitors: totalVisitors,
+      prevTotalVisitors: hasPrev ? prevTotal : null,
+      totalLive: totalLive,
+      totalSeries: total,
+    );
+  }
+}
