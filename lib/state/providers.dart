@@ -1,15 +1,38 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/models/account.dart';
 import '../data/models/models.dart';
+import 'package:dio/dio.dart';
+
 import '../data/models/period.dart';
 import '../data/providers/analytics_provider.dart';
 import '../data/providers/provider_factory.dart';
 import '../data/repository/accounts_repository.dart';
+import '../data/favicon_cache.dart';
 import '../core/semaphore.dart';
 import 'home_data.dart';
+
+/// Garde le résultat d'un provider autoDispose en cache pendant [duration] après
+/// le départ du dernier auditeur : au retour sur un écran on réaffiche la donnée
+/// mise en cache instantanément (le refresh en fond met à jour ensuite), au lieu
+/// de tout refetcher/réafficher. Passé ce délai sans auditeur, le cache est
+/// libéré (pas de fuite mémoire).
+void cacheFor(Ref ref, Duration duration) {
+  final link = ref.keepAlive();
+  Timer? timer;
+  ref.onCancel(() {
+    timer?.cancel();
+    timer = Timer(duration, link.close);
+  });
+  ref.onResume(() => timer?.cancel());
+  ref.onDispose(() => timer?.cancel());
+}
+
+const _cacheTtl = Duration(minutes: 3);
 
 /// Injecté au démarrage (voir main.dart).
 final sharedPrefsProvider = Provider<SharedPreferences>(
@@ -21,6 +44,22 @@ final secureStorageProvider = Provider<FlutterSecureStorage>(
     iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
   ),
 );
+
+/// Cache de favicons (mémoire + disque). Une seule instance pour l'app.
+final faviconCacheProvider = Provider<FaviconCache>((ref) {
+  return FaviconCache(Dio(BaseOptions(
+    connectTimeout: const Duration(seconds: 8),
+    headers: const {'user-agent': 'GlanceApp/1.0'},
+  )));
+});
+
+/// Favicon d'un domaine (null si introuvable). Gardé longtemps en cache.
+final faviconProvider =
+    FutureProvider.autoDispose.family<Favicon?, String>((ref, domain) async {
+  cacheFor(ref, const Duration(minutes: 30));
+  if (domain.trim().isEmpty) return null;
+  return ref.watch(faviconCacheProvider).get(domain.trim());
+});
 
 final accountsRepoProvider = Provider<AccountsRepository>(
   (ref) => AccountsRepository(
@@ -115,6 +154,7 @@ final fetchGateProvider = Provider<Semaphore>((ref) => Semaphore(6));
 
 /// Visiteurs en direct d'un site (indépendant de la période sélectionnée).
 final siteLiveProvider = FutureProvider.autoDispose.family<int, Site>((ref, site) async {
+  cacheFor(ref, _cacheTtl);
   final gate = ref.watch(fetchGateProvider);
   final p = await _providerFor(ref, site);
   return gate.run(() => p.active(site)).catchError((_) => 0);
@@ -124,6 +164,7 @@ final siteLiveProvider = FutureProvider.autoDispose.family<int, Site>((ref, site
 /// autres sites → chaque carte apparaît dès que SA donnée arrive.
 final siteStatsProvider =
     FutureProvider.autoDispose.family<SiteStats, (Site, DateWindow)>((ref, key) async {
+  cacheFor(ref, _cacheTtl);
   final (site, w) = key;
   final gate = ref.watch(fetchGateProvider);
   final p = await _providerFor(ref, site);
@@ -173,7 +214,8 @@ final homeTotalsProvider =
 
 /// Détail complet d'un site (tout en parallèle).
 final detailProvider =
-    FutureProvider.family<SiteDetail, (Site, DateWindow)>((ref, key) async {
+    FutureProvider.autoDispose.family<SiteDetail, (Site, DateWindow)>((ref, key) async {
+  cacheFor(ref, _cacheTtl);
   final (site, w) = key;
   final p = await _providerFor(ref, site);
   final r = await Future.wait([
@@ -200,6 +242,7 @@ final detailProvider =
 /// Données d'événements d'un site pour une fenêtre (série + répartition).
 final eventsProvider =
     FutureProvider.autoDispose.family<EventsData, (Site, DateWindow)>((ref, key) async {
+  cacheFor(ref, _cacheTtl);
   final (site, w) = key;
   final gate = ref.watch(fetchGateProvider);
   final p = await _providerFor(ref, site);
@@ -214,6 +257,7 @@ final eventsProvider =
 /// période sélectionnée) → visibilité stable de l'onglet Événements.
 final siteHasEventsProvider =
     FutureProvider.autoDispose.family<bool, Site>((ref, site) async {
+  cacheFor(ref, const Duration(minutes: 10));
   final gate = ref.watch(fetchGateProvider);
   final p = await _providerFor(ref, site);
   final w = Period.d30.window();

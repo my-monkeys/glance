@@ -4,6 +4,7 @@ import '../../data/models/models.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
 import '../widgets/common.dart';
+import '../widgets/site_avatar.dart';
 import '../widgets/field.dart';
 
 /// Étape 2 de l'ajout : choix des sites à suivre.
@@ -155,7 +156,7 @@ class _SitePickerScreenState extends State<SitePickerScreen> {
                       onTap: () => _toggle(s.id),
                       child: Row(
                         children: [
-                          Mark(s.initial, size: 34),
+                          SiteAvatar(s, size: 34),
                           const SizedBox(width: 13),
                           Expanded(
                             child: Column(

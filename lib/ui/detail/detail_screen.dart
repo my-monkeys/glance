@@ -47,6 +47,16 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
       ref.invalidate(detailProvider((widget.site, w)));
       ref.invalidate(eventsProvider((widget.site, w)));
     });
+    // Rafraîchit en fond à l'ouverture si des données sont déjà en cache
+    // (réouverture d'un site récent) : on affiche le cache tout de suite et on
+    // met à jour derrière, sans repasser par le spinner.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final w = ref.read(periodProvider).window();
+      if (ref.read(detailProvider((widget.site, w))).hasValue) {
+        ref.invalidate(detailProvider((widget.site, w)));
+      }
+    });
   }
 
   @override

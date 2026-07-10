@@ -16,6 +16,7 @@ import '../../theme/type.dart';
 import '../root_scaffold.dart';
 import '../widgets/chip.dart';
 import '../widgets/common.dart';
+import '../widgets/site_avatar.dart';
 import '../widgets/field.dart';
 import '../widgets/glance_chart.dart';
 import '../widgets/pulse_dot.dart';
@@ -381,7 +382,7 @@ class _SiteCardTile extends StatelessWidget {
       onTap: () => openSite(context, card.site),
       child: Row(
         children: [
-          Mark(card.site.initial),
+          SiteAvatar(card.site),
           const SizedBox(width: 13),
           Expanded(
             child: Column(

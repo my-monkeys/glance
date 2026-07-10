@@ -41,6 +41,8 @@ dependencies:
   shared_preferences: ^2.5.5
   intl: ^0.20.3
   flutter_timezone: ^5.1.0
+  flutter_svg: ^2.3.0
+  path_provider: ^2.1.6
 
 dev_dependencies:
   flutter_test:

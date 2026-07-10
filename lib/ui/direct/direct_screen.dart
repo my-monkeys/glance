@@ -10,6 +10,7 @@ import '../../theme/palette.dart';
 import '../../theme/type.dart';
 import '../root_scaffold.dart';
 import '../widgets/common.dart';
+import '../widgets/site_avatar.dart';
 import '../widgets/pulse_dot.dart';
 
 class DirectScreen extends ConsumerStatefulWidget {
@@ -20,7 +21,6 @@ class DirectScreen extends ConsumerStatefulWidget {
 }
 
 class _DirectScreenState extends ConsumerState<DirectScreen> {
-  bool _onlyLive = false;
   Timer? _timer;
 
   @override
@@ -42,6 +42,7 @@ class _DirectScreenState extends ConsumerState<DirectScreen> {
   @override
   Widget build(BuildContext context) {
     final p = context.glance;
+    final onlyLive = ref.watch(settingsProvider.select((s) => s.directOnlyLive));
     final sitesAsync = ref.watch(sitesProvider);
     final sites = sitesAsync.value ?? const <Site>[];
 
@@ -58,7 +59,7 @@ class _DirectScreenState extends ConsumerState<DirectScreen> {
     }
     entries.sort((a, b) => b.live.compareTo(a.live));
     final shown =
-        _onlyLive ? entries.where((e) => e.live > 0).toList() : entries;
+        onlyLive ? entries.where((e) => e.live > 0).toList() : entries;
     final hiddenCount = entries.length - shown.length;
     final refreshing = loading && sites.isNotEmpty;
 
@@ -110,8 +111,10 @@ class _DirectScreenState extends ConsumerState<DirectScreen> {
                     Text('Actifs seulement', style: GT.body(12, color: p.fg2)),
                     const SizedBox(width: 8),
                     GlanceToggle(
-                      value: _onlyLive,
-                      onTap: () => setState(() => _onlyLive = !_onlyLive),
+                      value: onlyLive,
+                      onTap: () => ref
+                          .read(settingsProvider.notifier)
+                          .setDirectOnlyLive(!onlyLive),
                     ),
                   ],
                 ),
@@ -131,7 +134,7 @@ class _DirectScreenState extends ConsumerState<DirectScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 30),
                   child: Center(
                     child: Text(
-                      _onlyLive
+                      onlyLive
                           ? 'Aucun visiteur en direct pour l\'instant.'
                           : 'Aucun site.',
                       style: GT.body(14, color: p.fg3),
@@ -181,7 +184,7 @@ class _LiveRow extends StatelessWidget {
       onTap: () => openSite(context, site),
       child: Row(
         children: [
-          Mark(site.initial),
+          SiteAvatar(site),
           const SizedBox(width: 13),
           Expanded(
             child: Text(

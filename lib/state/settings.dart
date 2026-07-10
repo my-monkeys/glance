@@ -26,6 +26,7 @@ class Settings {
     this.daily = true,
     this.goals = false,
     this.homeView = HomeViewMode.list,
+    this.directOnlyLive = false,
   });
 
   final ThemeChoice theme;
@@ -34,6 +35,7 @@ class Settings {
   final bool daily;
   final bool goals;
   final HomeViewMode homeView;
+  final bool directOnlyLive; // Direct : « Actifs seulement »
 
   Settings copyWith({
     ThemeChoice? theme,
@@ -42,6 +44,7 @@ class Settings {
     bool? daily,
     bool? goals,
     HomeViewMode? homeView,
+    bool? directOnlyLive,
   }) => Settings(
     theme: theme ?? this.theme,
     refreshSeconds: refreshSeconds ?? this.refreshSeconds,
@@ -49,6 +52,7 @@ class Settings {
     daily: daily ?? this.daily,
     goals: goals ?? this.goals,
     homeView: homeView ?? this.homeView,
+    directOnlyLive: directOnlyLive ?? this.directOnlyLive,
   );
 }
 
@@ -59,6 +63,7 @@ class SettingsNotifier extends Notifier<Settings> {
   static const _kDaily = 'glance.notif.daily';
   static const _kGoals = 'glance.notif.goals';
   static const _kHomeView = 'glance.homeView';
+  static const _kDirectOnlyLive = 'glance.direct.onlyLive';
 
   SharedPreferences get _p => ref.read(sharedPrefsProvider);
 
@@ -77,12 +82,18 @@ class SettingsNotifier extends Notifier<Settings> {
         (v) => v.name == _p.getString(_kHomeView),
         orElse: () => HomeViewMode.list,
       ),
+      directOnlyLive: _p.getBool(_kDirectOnlyLive) ?? false,
     );
   }
 
   void setHomeView(HomeViewMode v) {
     _p.setString(_kHomeView, v.name);
     state = state.copyWith(homeView: v);
+  }
+
+  void setDirectOnlyLive(bool v) {
+    _p.setBool(_kDirectOnlyLive, v);
+    state = state.copyWith(directOnlyLive: v);
   }
 
   void setTheme(ThemeChoice t) {
