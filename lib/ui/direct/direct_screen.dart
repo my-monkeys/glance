@@ -51,8 +51,11 @@ class _DirectScreenState extends ConsumerState<DirectScreen> {
     final cards =
         _onlyLive ? allCards.where((c) => c.live > 0).toList() : allCards;
     final hiddenCount = allCards.length - cards.length;
+    final refreshing = async.isLoading && data != null;
 
-    return RefreshIndicator(
+    return Stack(
+      children: [
+        RefreshIndicator(
       color: p.accent,
       backgroundColor: p.surface,
       onRefresh: () async {
@@ -146,6 +149,14 @@ class _DirectScreenState extends ConsumerState<DirectScreen> {
           ],
         ],
       ),
+        ),
+        Positioned(
+          top: MediaQuery.of(context).padding.top,
+          left: 0,
+          right: 0,
+          child: RefreshBar(visible: refreshing),
+        ),
+      ],
     );
   }
 }

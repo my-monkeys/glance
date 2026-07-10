@@ -65,6 +65,30 @@ class Mark extends StatelessWidget {
   }
 }
 
+/// Fine barre de progression indéterminée, à poser en haut d'un écran pendant
+/// un rechargement en fond (la donnée précédente reste affichée).
+class RefreshBar extends StatelessWidget {
+  const RefreshBar({super.key, this.visible = true});
+  final bool visible;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.glance;
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 200),
+      opacity: visible ? 1 : 0,
+      child: SizedBox(
+        height: 2.5,
+        child: LinearProgressIndicator(
+          minHeight: 2.5,
+          backgroundColor: p.accent.withValues(alpha: 0.12),
+          color: p.accent,
+        ),
+      ),
+    );
+  }
+}
+
 /// Bouton icône rond (chip bg + bordure).
 class GlanceIconButton extends StatelessWidget {
   const GlanceIconButton({super.key, required this.icon, required this.onTap});

@@ -99,9 +99,12 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
     // Changement de période → on montre bien le chargement (données différentes).
     final detail =
         async.value ?? (_lastDetailWindow == window ? _lastDetail : null);
+    final refreshing = async.isLoading && detail != null;
 
     return Scaffold(
-      body: RefreshIndicator(
+      body: Stack(
+        children: [
+          RefreshIndicator(
         color: p.accent,
         backgroundColor: p.surface,
         onRefresh: () async {
@@ -187,6 +190,14 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
               _DetailBody(detail: detail, window: window),
           ],
         ),
+          ),
+          Positioned(
+            top: MediaQuery.of(context).padding.top,
+            left: 0,
+            right: 0,
+            child: RefreshBar(visible: refreshing),
+          ),
+        ],
       ),
     );
   }

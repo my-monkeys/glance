@@ -102,8 +102,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final data = async.value ?? _lastData;
     final now = DateTime.now();
     final viewMode = ref.watch(settingsProvider.select((s) => s.homeView));
+    // Rechargement en fond (donnée déjà affichée) → fine barre en haut.
+    final refreshing = async.isLoading && data != null;
 
-    return RefreshIndicator(
+    return Stack(
+      children: [
+        RefreshIndicator(
       color: p.accent,
       backgroundColor: p.surface,
       onRefresh: () async {
@@ -219,6 +223,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ],
         ],
       ),
+        ),
+        Positioned(
+          top: MediaQuery.of(context).padding.top,
+          left: 0,
+          right: 0,
+          child: RefreshBar(visible: refreshing),
+        ),
+      ],
     );
   }
 }
@@ -407,7 +419,7 @@ class _SiteGrid extends StatelessWidget {
         crossAxisCount: 2,
         mainAxisSpacing: 12,
         crossAxisSpacing: 12,
-        childAspectRatio: 1, // cartes carrées
+        childAspectRatio: 1.12, // un peu moins haut que carré
       ),
       itemCount: cards.length,
       itemBuilder: (context, i) => _SiteGridCard(card: cards[i]),
@@ -435,7 +447,7 @@ class _SiteGridCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: GT.body(14, weight: 500, color: p.fg),
           ),
-          const Spacer(),
+          const SizedBox(height: 6),
           // Nombre de visiteurs à gauche, « en direct » aligné à droite.
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
