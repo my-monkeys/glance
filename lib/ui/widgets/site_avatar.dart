@@ -23,7 +23,8 @@ class SiteAvatar extends ConsumerWidget {
 
     Widget child;
     if (fav != null && fav.bytes.isNotEmpty) {
-      final inset = size * 0.18;
+      // Marge fine : juste assez pour ne pas toucher les coins arrondis.
+      final inset = size * 0.06;
       final iconSize = size - inset * 2;
       child = Padding(
         padding: EdgeInsets.all(inset),
