@@ -91,15 +91,14 @@ Mot de passe : <voir scratchpad / à coller dans App Store Connect>
 | Deployment target | iOS 15.0 |
 | Devices | iPhone (portrait) |
 
-## Distribution (Codemagic, réutilise l'infra piloo)
+## Distribution (build local → TestFlight)
 
-Pas de nouvelle clé API à générer : l'intégration App Store Connect « Personnal »
-et le certif de distribution vivent déjà dans le compte Codemagic (utilisés par piloo).
-Détails + runbook : **`docs/deploy-mobile-ios.md`**. Actions de Maxim (one-time) :
+Build signé depuis le Mac (team `5C67TFSJ2B`, certif de distribution déjà dans le
+trousseau). Runbook : **`docs/deploy-mobile-ios.md`**. Étapes :
 
-1. **Codemagic** → *Add application* → connecter le repo `my-monkeys/glance`.
-2. **App Store Connect** → *Apps → +* → créer l'app (nom, bundle `fr.mymonkey.glance`, SKU `glance-mymonkey`).
-3. Puis : `git tag v1.0.0 && git push origin v1.0.0` → build + upload TestFlight auto.
+1. **App Store Connect** → *Apps → +* → créer l'app (nom, bundle `fr.mymonkey.glance`, SKU `glance-mymonkey`). *(seule action manuelle)*
+2. `flutter build ipa --release` → `build/ios/ipa/glance.ipa`.
+3. Upload via **Transporter** (glisser l'IPA) ou Xcode Organizer.
 
 ## Reste à produire
 
