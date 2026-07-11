@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Politique de confidentialité — Glance</title>
+<meta name="description" content="Politique de confidentialité de l'application Glance. Glance ne collecte aucune donnée : vos identifiants restent sur votre appareil et l'app ne parle qu'à vos serveurs analytics.">
+<meta name="robots" content="index, follow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Geist:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#f7f5f1;--surface:#fff;--fg:#211e19;--fg2:#8c857a;--fg3:#b4ada1;
+        --accent:#3b7a5a;--accent-dk:#2f6349;--line:rgba(30,25,15,.09);--radius:22px}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--fg);font-family:'Geist',system-ui,sans-serif;
+       line-height:1.7;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:720px;margin:0 auto;padding:0 24px}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{color:var(--accent-dk)}
+  header{padding:28px 0}
+  .brand{display:flex;align-items:center;gap:12px}
+  .mark{width:40px;height:40px;border-radius:11px;background:var(--accent);flex:none;
+        display:flex;align-items:center;justify-content:center}
+  .brand b{font-family:'Fredoka';font-weight:600;font-size:22px;letter-spacing:-.3px}
+
+  .doc{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+       padding:48px 44px;margin:20px 0 60px;
+       box-shadow:0 1px 2px rgba(40,35,25,.03),0 10px 30px rgba(40,35,25,.04)}
+  h1{font-family:'Fredoka';font-weight:600;font-size:36px;letter-spacing:-.8px;margin:0 0 6px}
+  .updated{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.5px;
+           color:var(--fg3);text-transform:uppercase;margin-bottom:30px}
+  h2{font-family:'Fredoka';font-weight:600;font-size:20px;letter-spacing:-.3px;margin:34px 0 8px}
+  p{color:#3a352d;margin:0 0 12px}
+  .tldr{background:#e7efe9;border-radius:14px;padding:20px 22px;margin:0 0 8px;color:#274a39}
+  .tldr b{color:var(--accent-dk)}
+  ul{margin:6px 0 12px;padding-left:22px;color:#3a352d}
+  li{margin:5px 0}
+  .back{display:inline-block;margin:28px 0 60px;font-family:'JetBrains Mono',monospace;font-size:13px}
+  footer{border-top:1px solid var(--line);padding:30px 0 60px;color:var(--fg3);font-size:13px;
+         font-family:'JetBrains Mono',monospace}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <a href="/" class="brand">
+        <span class="mark"><svg width="24" height="24" viewBox="0 0 72 72" fill="none"><path d="M10 50C20 50 24 30 34 30C44 30 44 42 52 42C60 42 62 22 70 22" stroke="#f7f5f1" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="70" cy="22" r="6" fill="#f7f5f1"/></svg></span>
+        <b>Glance</b>
+      </a>
+    </header>
+
+    <article class="doc">
+      <h1>Politique de confidentialité</h1>
+      <div class="updated">Dernière mise à jour&nbsp;: 11 juillet 2026</div>
+
+      <div class="tldr">
+        <b>En bref&nbsp;:</b> Glance ne collecte aucune donnée personnelle. Vos identifiants
+        restent stockés localement sur votre appareil, et l'application ne communique
+        qu'avec les serveurs analytics que <b>vous</b> configurez. Aucune donnée n'est
+        envoyée à My-Monkey ni à un quelconque tiers.
+      </div>
+
+      <h2>Données que nous collectons</h2>
+      <p>Aucune. Glance ne dispose d'aucun serveur qui recevrait vos données, ne contient
+      aucun SDK d'analyse ou de publicité tiers, et n'effectue aucun suivi (tracking).</p>
+
+      <h2>Données stockées sur votre appareil</h2>
+      <p>Pour fonctionner, l'application conserve localement&nbsp;:</p>
+      <ul>
+        <li>les <b>identifiants</b> de vos comptes analytics (URL, jeton ou identifiant/mot de passe),
+        stockés de façon chiffrée dans le <b>trousseau (Keychain)</b> de votre appareil&nbsp;;</li>
+        <li>vos <b>préférences</b> (sites suivis, période, thème, affichage), stockées localement.</li>
+      </ul>
+      <p>Ces informations ne quittent jamais votre appareil, si ce n'est pour interroger
+      vos propres serveurs analytics (voir ci-dessous).</p>
+
+      <h2>Communications réseau</h2>
+      <p>Glance communique uniquement avec les instances analytics que vous renseignez
+      (par exemple votre serveur <b>Umami</b> ou <b>Plausible</b>), afin d'afficher vos
+      statistiques. Ces échanges se font directement entre votre appareil et vos serveurs,
+      en lecture seule. Glance ne modifie pas vos données analytics.</p>
+
+      <h2>Services tiers</h2>
+      <p>Glance n'intègre aucun service tiers de collecte, d'analyse ou de publicité.
+      Les seuls serveurs contactés sont ceux que vous avez vous-même configurés.</p>
+
+      <h2>Suppression de vos données</h2>
+      <p>Vous pouvez à tout moment supprimer un compte depuis les réglages de l'application,
+      ou désinstaller Glance&nbsp;: l'ensemble des identifiants et préférences stockés
+      localement est alors effacé de votre appareil.</p>
+
+      <h2>Enfants</h2>
+      <p>Glance n'est pas destiné aux enfants et ne collecte sciemment aucune donnée les concernant.</p>
+
+      <h2>Modifications</h2>
+      <p>Cette politique pourra être mise à jour. La date de dernière mise à jour figure en tête de page.</p>
+
+      <h2>Contact</h2>
+      <p>Glance est un projet du collectif My-Monkey. Pour toute question relative à cette
+      politique, rendez-vous sur <a href="https://my-monkey.fr">my-monkey.fr</a>.</p>
+
+      <a class="back" href="/">← Retour</a>
+    </article>
+
+    <footer>Un projet du collectif My-Monkey</footer>
+  </div>
+</body>
+</html>
