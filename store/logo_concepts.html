@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Geist:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f7f5f1; --surface:#fff; --fg:#211e19; --fg2:#8c857a; --line:rgba(30,25,15,.09);
+    --accent:#3b7a5a; --cream:#f7f5f1; --dark:#16140f;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);font-family:'Geist',sans-serif;color:var(--fg);padding:56px 48px 72px;width:1040px}
+  .head{margin-bottom:8px}
+  .kicker{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--fg2)}
+  h1{font-family:'Fredoka',sans-serif;font-weight:600;font-size:40px;letter-spacing:-.3px;margin-top:6px}
+  .sub{color:var(--fg2);font-size:15px;margin-top:6px}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:28px;margin-top:40px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:26px;padding:26px 24px 22px;box-shadow:0 1px 2px rgba(40,35,25,.04),0 8px 24px rgba(40,35,25,.05)}
+  .num{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1.5px;color:var(--fg2)}
+  .name{font-family:'Fredoka';font-weight:600;font-size:19px;margin:2px 0 20px}
+  .row{display:flex;align-items:center;gap:18px}
+  .mark{width:88px;height:88px;flex:none;display:flex;align-items:center;justify-content:center}
+  .tile{width:88px;height:88px;border-radius:20px;flex:none;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px rgba(40,35,25,.12)}
+  .tile.accent{background:var(--accent)}
+  .tile.cream{background:var(--cream);border:1px solid var(--line)}
+  .tile.dark{background:var(--dark)}
+  .tlabel{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--fg2);text-align:center;margin-top:8px;text-transform:uppercase}
+  .tcol{display:flex;flex-direction:column;align-items:center}
+  .wordmark{display:flex;align-items:center;gap:12px;margin-top:44px;padding:26px 30px;background:var(--surface);border:1px solid var(--line);border-radius:22px;width:fit-content}
+  .wm-name{font-family:'Fredoka';font-weight:600;font-size:40px;letter-spacing:-.5px}
+</style>
+</head>
+<body>
+  <div class="head">
+    <div class="kicker">Glance · concepts de logo</div>
+    <h1>Six directions pour la marque</h1>
+    <div class="sub">Chaque concept : la marque, puis en icône iOS (accent / crème / sombre). Dis-moi le numéro préféré.</div>
+  </div>
+
+  <div class="grid">
+
+    <!-- 1 Aperture / donut -->
+    <div class="card">
+      <div class="num">01</div><div class="name">Ouverture</div>
+      <div class="row">
+        <div class="mark">
+          <svg width="72" height="72" viewBox="0 0 72 72"><circle cx="36" cy="36" r="34" fill="#3b7a5a"/><circle cx="36" cy="36" r="11" fill="#f7f5f1"/></svg>
+        </div>
+        <div class="tcol"><div class="tile accent"><svg width="52" height="52" viewBox="0 0 72 72"><circle cx="36" cy="36" r="30" fill="#f7f5f1"/><circle cx="36" cy="36" r="10" fill="#3b7a5a"/></svg></div><div class="tlabel">accent</div></div>
+        <div class="tcol"><div class="tile cream"><svg width="52" height="52" viewBox="0 0 72 72"><circle cx="36" cy="36" r="30" fill="#3b7a5a"/><circle cx="36" cy="36" r="10" fill="#f7f5f1"/></svg></div><div class="tlabel">crème</div></div>
+        <div class="tcol"><div class="tile dark"><svg width="52" height="52" viewBox="0 0 72 72"><circle cx="36" cy="36" r="30" fill="#5aa57e"/><circle cx="36" cy="36" r="10" fill="#16140f"/></svg></div><div class="tlabel">sombre</div></div>
+      </div>
+    </div>
+
+    <!-- 2 Pulse / live -->
+    <div class="card">
+      <div class="num">02</div><div class="name">Pulse (live)</div>
+      <div class="row">
+        <div class="mark">
+          <svg width="72" height="72" viewBox="0 0 72 72" fill="none"><circle cx="36" cy="36" r="33" stroke="#3b7a5a" stroke-width="2" opacity=".28"/><circle cx="36" cy="36" r="22" stroke="#3b7a5a" stroke-width="2.5" opacity=".55"/><circle cx="36" cy="36" r="9" fill="#3b7a5a"/></svg>
+        </div>
+        <div class="tcol"><div class="tile accent"><svg width="54" height="54" viewBox="0 0 72 72" fill="none"><circle cx="36" cy="36" r="29" stroke="#f7f5f1" stroke-width="2.5" opacity=".35"/><circle cx="36" cy="36" r="19" stroke="#f7f5f1" stroke-width="3" opacity=".6"/><circle cx="36" cy="36" r="9" fill="#f7f5f1"/></svg></div><div class="tlabel">accent</div></div>
+        <div class="tcol"><div class="tile cream"><svg width="54" height="54" viewBox="0 0 72 72" fill="none"><circle cx="36" cy="36" r="29" stroke="#3b7a5a" stroke-width="2.5" opacity=".3"/><circle cx="36" cy="36" r="19" stroke="#3b7a5a" stroke-width="3" opacity=".55"/><circle cx="36" cy="36" r="9" fill="#3b7a5a"/></svg></div><div class="tlabel">crème</div></div>
+        <div class="tcol"><div class="tile dark"><svg width="54" height="54" viewBox="0 0 72 72" fill="none"><circle cx="36" cy="36" r="29" stroke="#5aa57e" stroke-width="2.5" opacity=".35"/><circle cx="36" cy="36" r="19" stroke="#5aa57e" stroke-width="3" opacity=".6"/><circle cx="36" cy="36" r="9" fill="#5aa57e"/></svg></div><div class="tlabel">sombre</div></div>
+      </div>
+    </div>
+
+    <!-- 3 Eye / glance -->
+    <div class="card">
+      <div class="num">03</div><div class="name">Coup d'œil</div>
+      <div class="row">
+        <div class="mark">
+          <svg width="80" height="72" viewBox="0 0 80 72" fill="none"><path d="M6 36C18 16 62 16 74 36C62 56 18 56 6 36Z" stroke="#3b7a5a" stroke-width="4" stroke-linejoin="round"/><circle cx="40" cy="36" r="10" fill="#3b7a5a"/></svg>
+        </div>
+        <div class="tcol"><div class="tile accent"><svg width="56" height="50" viewBox="0 0 80 72" fill="none"><path d="M8 36C20 18 60 18 72 36C60 54 20 54 8 36Z" stroke="#f7f5f1" stroke-width="4.5" stroke-linejoin="round"/><circle cx="40" cy="36" r="9" fill="#f7f5f1"/></svg></div><div class="tlabel">accent</div></div>
+        <div class="tcol"><div class="tile cream"><svg width="56" height="50" viewBox="0 0 80 72" fill="none"><path d="M8 36C20 18 60 18 72 36C60 54 20 54 8 36Z" stroke="#3b7a5a" stroke-width="4.5" stroke-linejoin="round"/><circle cx="40" cy="36" r="9" fill="#3b7a5a"/></svg></div><div class="tlabel">crème</div></div>
+        <div class="tcol"><div class="tile dark"><svg width="56" height="50" viewBox="0 0 80 72" fill="none"><path d="M8 36C20 18 60 18 72 36C60 54 20 54 8 36Z" stroke="#5aa57e" stroke-width="4.5" stroke-linejoin="round"/><circle cx="40" cy="36" r="9" fill="#5aa57e"/></svg></div><div class="tlabel">sombre</div></div>
+      </div>
+    </div>
+
+    <!-- 4 Sparkline -->
+    <div class="card">
+      <div class="num">04</div><div class="name">Courbe</div>
+      <div class="row">
+        <div class="mark">
+          <svg width="80" height="72" viewBox="0 0 80 72" fill="none"><path d="M8 48C18 48 22 26 32 26C42 26 42 40 50 40C58 40 60 18 72 18" stroke="#3b7a5a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="72" cy="18" r="6" fill="#3b7a5a"/></svg>
+        </div>
+        <div class="tcol"><div class="tile accent"><svg width="56" height="50" viewBox="0 0 80 72" fill="none"><path d="M10 50C20 50 24 30 34 30C44 30 44 42 52 42C60 42 62 22 70 22" stroke="#f7f5f1" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="70" cy="22" r="6" fill="#f7f5f1"/></svg></div><div class="tlabel">accent</div></div>
+        <div class="tcol"><div class="tile cream"><svg width="56" height="50" viewBox="0 0 80 72" fill="none"><path d="M10 50C20 50 24 30 34 30C44 30 44 42 52 42C60 42 62 22 70 22" stroke="#3b7a5a" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="70" cy="22" r="6" fill="#3b7a5a"/></svg></div><div class="tlabel">crème</div></div>
+        <div class="tcol"><div class="tile dark"><svg width="56" height="50" viewBox="0 0 80 72" fill="none"><path d="M10 50C20 50 24 30 34 30C44 30 44 42 52 42C60 42 62 22 70 22" stroke="#5aa57e" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="70" cy="22" r="6" fill="#5aa57e"/></svg></div><div class="tlabel">sombre</div></div>
+      </div>
+    </div>
+
+    <!-- 5 Monogram -->
+    <div class="card">
+      <div class="num">05</div><div class="name">Monogramme G</div>
+      <div class="row">
+        <div class="mark"><span style="font-family:'Fredoka';font-weight:700;font-size:74px;color:#3b7a5a;line-height:1">G</span></div>
+        <div class="tcol"><div class="tile accent"><span style="font-family:'Fredoka';font-weight:700;font-size:52px;color:#f7f5f1">G</span></div><div class="tlabel">accent</div></div>
+        <div class="tcol"><div class="tile cream"><span style="font-family:'Fredoka';font-weight:700;font-size:52px;color:#3b7a5a">G</span></div><div class="tlabel">crème</div></div>
+        <div class="tcol"><div class="tile dark"><span style="font-family:'Fredoka';font-weight:700;font-size:52px;color:#5aa57e">G</span></div><div class="tlabel">sombre</div></div>
+      </div>
+    </div>
+
+    <!-- 6 Iris segments -->
+    <div class="card">
+      <div class="num">06</div><div class="name">Iris</div>
+      <div class="row">
+        <div class="mark">
+          <svg width="76" height="76" viewBox="0 0 76 76" fill="none" stroke="#3b7a5a" stroke-width="6" stroke-linecap="round"><circle cx="38" cy="38" r="30" stroke-dasharray="24 15.5" opacity=".9"/><circle cx="38" cy="38" r="7" fill="#3b7a5a" stroke="none"/></svg>
+        </div>
+        <div class="tcol"><div class="tile accent"><svg width="54" height="54" viewBox="0 0 76 76" fill="none" stroke="#f7f5f1" stroke-width="6.5" stroke-linecap="round"><circle cx="38" cy="38" r="28" stroke-dasharray="22 14.5"/><circle cx="38" cy="38" r="7" fill="#f7f5f1" stroke="none"/></svg></div><div class="tlabel">accent</div></div>
+        <div class="tcol"><div class="tile cream"><svg width="54" height="54" viewBox="0 0 76 76" fill="none" stroke="#3b7a5a" stroke-width="6.5" stroke-linecap="round"><circle cx="38" cy="38" r="28" stroke-dasharray="22 14.5"/><circle cx="38" cy="38" r="7" fill="#3b7a5a" stroke="none"/></svg></div><div class="tlabel">crème</div></div>
+        <div class="tcol"><div class="tile dark"><svg width="54" height="54" viewBox="0 0 76 76" fill="none" stroke="#5aa57e" stroke-width="6.5" stroke-linecap="round"><circle cx="38" cy="38" r="28" stroke-dasharray="22 14.5"/><circle cx="38" cy="38" r="7" fill="#5aa57e" stroke="none"/></svg></div><div class="tlabel">sombre</div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="wordmark">
+    <svg width="44" height="44" viewBox="0 0 72 72"><circle cx="36" cy="36" r="34" fill="#3b7a5a"/><circle cx="36" cy="36" r="11" fill="#f7f5f1"/></svg>
+    <span class="wm-name">Glance</span>
+  </div>
+</body>
+</html>
