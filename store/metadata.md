@@ -103,6 +103,14 @@ Détails + runbook : **`docs/deploy-mobile-ios.md`**. Actions de Maxim (one-time
 
 ## Reste à produire
 
-- [ ] Icône iOS (dépend du choix de logo)
-- [ ] Captures d'écran stylisées 6.9" (1290×2796) — 5-6 visuels
+- [x] Icône iOS — concept « Courbe » (sparkline), `store/icon_master.svg` → appiconset
+- [x] Captures d'écran stylisées 6.9" (1290×2796) — 5 visuels dans `store/screenshots/`
 - [ ] Page confidentialité + support hébergée (`glance.my-monkey.fr/privacy`)
+- [ ] Créer l'app dans App Store Connect + connecter le repo à Codemagic (cf. `docs/deploy-mobile-ios.md`)
+
+### Captures (ordre suggéré dans ASC)
+1. `01-apercu.png` — Tous vos sites, d'un coup d'œil
+2. `02-events.png` — Vos événements, une couleur chacun
+3. `03-detail.png` — Chaque site, dans le détail
+4. `04-grille.png` — Liste ou grille, comme vous voulez
+5. `05-direct.png` — Le trafic, en temps réel
