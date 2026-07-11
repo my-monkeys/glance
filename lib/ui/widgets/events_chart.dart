@@ -55,7 +55,7 @@ class EventsChart extends StatelessWidget {
 
     final len = series.first.points.length;
     final rawMax = series
-        .expand((s) => s.points.map((e) => e.visitors))
+        .expand((s) => s.points.map((e) => e.visits))
         .fold<double>(0, math.max);
     final maxY = chartNiceMax(rawMax);
     final yInterval = maxY / 4;
@@ -161,7 +161,7 @@ class EventsChart extends StatelessWidget {
               LineChartBarData(
                 spots: [
                   for (var i = 0; i < len; i++)
-                    FlSpot(i.toDouble(), series[s].points[i].visitors),
+                    FlSpot(i.toDouble(), series[s].points[i].visits),
                 ],
                 isCurved: true,
                 curveSmoothness: 0.32,

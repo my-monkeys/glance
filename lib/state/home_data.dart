@@ -92,7 +92,7 @@ class HomeData {
       totalLive += c.live;
     }
 
-    // Série cumulée : somme des visiteurs par bucket (fenêtres alignées).
+    // Série cumulée : somme des visites (sessions) par bucket (fenêtres alignées).
     final buckets = cards.isEmpty ? <SeriesPoint>[] : cards.first.series;
     final total = <SeriesPoint>[];
     for (var i = 0; i < buckets.length; i++) {
@@ -100,7 +100,7 @@ class HomeData {
       var pv = 0.0;
       for (final c in cards) {
         if (i < c.series.length) {
-          v += c.series[i].visitors;
+          v += c.series[i].visits;
           pv += c.series[i].pageviews;
         }
       }

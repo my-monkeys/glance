@@ -85,27 +85,33 @@ class _PulseDotState extends State<PulseDot>
   );
 }
 
-/// Pastille « N live » avec point pulsant.
+/// Pastille « N live ». Verte + pulse quand il y a des visiteurs en direct,
+/// grisée et immobile quand il n'y a personne (count == 0).
 class LivePill extends StatelessWidget {
-  const LivePill({super.key, required this.label, this.big = false});
-  final String label;
-  final bool big;
+  const LivePill({super.key, required this.count, this.text});
+  final int count;
+
+  /// Texte affiché ; défaut « N live ». Passer un libellé fixe (ex. « en ce
+  /// moment ») quand le nombre est déjà montré ailleurs.
+  final String? text;
 
   @override
   Widget build(BuildContext context) {
     final p = context.glance;
+    final live = count > 0;
+    final fg = live ? p.accent : p.fg3;
     return Container(
       padding: const EdgeInsets.fromLTRB(8, 4, 10, 4),
       decoration: BoxDecoration(
-        color: p.accentSoft,
+        color: live ? p.accentSoft : p.chip,
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const PulseDot(),
+          PulseDot(pulse: live, color: fg),
           const SizedBox(width: 6),
-          Text(label, style: GT.mono(12, weight: 600, color: p.accent)),
+          Text(text ?? '$count live', style: GT.mono(12, weight: 600, color: fg)),
         ],
       ),
     );

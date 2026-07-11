@@ -90,9 +90,12 @@ class _DirectScreenState extends ConsumerState<DirectScreen> {
               GlanceCard(
                 child: Column(
                   children: [
-                    LivePill(label: 'en ce moment'),
+                    LivePill(count: totalLive, text: 'en ce moment'),
                     const SizedBox(height: 14),
-                    Text('$totalLive', style: GT.stat(64, color: p.accent)),
+                    Text(
+                      '$totalLive',
+                      style: GT.stat(64, color: totalLive > 0 ? p.accent : p.fg3),
+                    ),
                     const SizedBox(height: 4),
                     Text(
                       "visiteurs sur l'ensemble de vos sites",

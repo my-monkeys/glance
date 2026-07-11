@@ -139,7 +139,7 @@ class PlausibleProvider extends AnalyticsProvider {
     };
     final res = await _query({
       'site_id': _siteId,
-      'metrics': ['visitors', 'pageviews'],
+      'metrics': ['visits', 'pageviews'],
       'date_range': [_dtFmt.format(w.start), _dtFmt.format(w.end)],
       'dimensions': [dim],
       'timezone': await _timezone(),

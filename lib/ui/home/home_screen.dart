@@ -353,7 +353,7 @@ class _TotalCard extends ConsumerWidget {
                   ],
                 ),
               ),
-              LivePill(label: '${data.totalLive} live'),
+              LivePill(count: data.totalLive),
             ],
           ),
           const SizedBox(height: 12),
@@ -371,6 +371,7 @@ class _TotalCard extends ConsumerWidget {
             height: 156,
             showPageviews: true,
             visitorsTotal: data.totalVisitors,
+            visitsTotal: data.totalVisits,
             pageviewsTotal: data.totalPageviews,
             hidden: hidden,
             onToggle: (k) => ref.read(settingsProvider.notifier).toggleSeries(k),
@@ -408,11 +409,15 @@ class _SiteCardTile extends StatelessWidget {
                 const SizedBox(height: 5),
                 Row(
                   children: [
-                    const PulseDot(size: 8),
+                    PulseDot(
+                      size: 8,
+                      pulse: card.live > 0,
+                      color: card.live > 0 ? p.accent : p.fg3,
+                    ),
                     const SizedBox(width: 6),
                     Text(
                       '${card.live} live',
-                      style: GT.mono(11, color: p.accent),
+                      style: GT.mono(11, color: card.live > 0 ? p.accent : p.fg3),
                     ),
                   ],
                 ),
@@ -447,7 +452,7 @@ class _SiteCardTile extends StatelessWidget {
 }
 
 List<double> _sparkOf(SiteCard c) {
-  final v = c.series.map((e) => e.visitors).toList();
+  final v = c.series.map((e) => e.visits).toList();
   if (v.length < 2) return const [0, 0];
   return v;
 }

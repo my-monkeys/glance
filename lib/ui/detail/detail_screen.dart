@@ -143,7 +143,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                     ),
                   ),
                   const SizedBox(width: 10),
-                  LivePill(label: '${detail?.live ?? 0}'),
+                  LivePill(count: detail?.live ?? 0, text: '${detail?.live ?? 0}'),
                 ],
               ),
             ),
@@ -265,6 +265,7 @@ class _DetailBody extends ConsumerWidget {
                 height: 172,
                 showPageviews: true,
                 visitorsTotal: s.visitors,
+                visitsTotal: s.visits,
                 pageviewsTotal: s.pageviews,
                 hidden: hidden,
                 onToggle: (k) =>
@@ -303,7 +304,7 @@ class _DetailBody extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     SectionLabel('En direct maintenant'),
-                    LivePill(label: '${detail.live}'),
+                    LivePill(count: detail.live, text: '${detail.live}'),
                   ],
                 ),
                 const SizedBox(height: 6),

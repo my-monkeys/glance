@@ -76,9 +76,13 @@ class StatsSummary {
 /// Un point de la série temporelle.
 @immutable
 class SeriesPoint {
-  const SeriesPoint(this.t, this.visitors, this.pageviews);
+  const SeriesPoint(this.t, this.visits, this.pageviews);
   final DateTime t;
-  final double visitors;
+
+  /// Visites (sessions) par bucket. Umami/Plausible n'exposent pas les
+  /// visiteurs *uniques* en série temporelle (seulement en total), d'où la
+  /// courbe « Visites » plutôt que « Visiteurs ».
+  final double visits;
   final double pageviews;
 }
 

@@ -19,13 +19,14 @@ class GlanceChart extends StatelessWidget {
     required this.unit,
     this.height = 168,
     this.showPageviews = false,
-    this.visitorsTotal,
+    this.visitsTotal,
     this.pageviewsTotal,
+    this.visitorsTotal,
     this.hidden = const {},
     this.onToggle,
   });
 
-  static const kVisitors = 'visitors';
+  static const kVisits = 'visits';
   static const kPageviews = 'pageviews';
 
   final List<SeriesPoint> series;
@@ -34,10 +35,14 @@ class GlanceChart extends StatelessWidget {
 
   /// Superpose une seconde courbe « pages vues » + une légende.
   final bool showPageviews;
-  final int? visitorsTotal;
+  final int? visitsTotal;
   final int? pageviewsTotal;
 
-  /// Séries masquées (clés [kVisitors]/[kPageviews]) et bascule via la légende.
+  /// Visiteurs *uniques* (total) : affiché en référence dans la légende, sans
+  /// courbe (Umami/Plausible ne l'exposent pas en série temporelle).
+  final int? visitorsTotal;
+
+  /// Séries masquées (clés [kVisits]/[kPageviews]) et bascule via la légende.
   final Set<String> hidden;
   final void Function(String key)? onToggle;
 
@@ -49,22 +54,22 @@ class GlanceChart extends StatelessWidget {
     }
     final altColor = p.fg2;
 
-    final showVisitors = !hidden.contains(kVisitors);
+    final showVisits = !hidden.contains(kVisits);
     final showViews = showPageviews && !hidden.contains(kPageviews);
 
-    final visitors = series.map((e) => e.visitors).toList();
+    final visits = series.map((e) => e.visits).toList();
     final views = series.map((e) => e.pageviews).toList();
     // Échelle : le max ne couvre que les courbes visibles → masquer les pages
-    // vues fait « remonter » la courbe visiteurs (rescale automatique).
+    // vues fait « remonter » la courbe visites (rescale automatique).
     final rawMax = [
-      if (showVisitors) ...visitors,
+      if (showVisits) ...visits,
       if (showViews) ...views,
     ].fold<double>(0, math.max);
     final maxY = chartNiceMax(rawMax);
     final yInterval = maxY / 4;
 
-    final visitorSpots = [
-      for (var i = 0; i < series.length; i++) FlSpot(i.toDouble(), visitors[i]),
+    final visitSpots = [
+      for (var i = 0; i < series.length; i++) FlSpot(i.toDouble(), visits[i]),
     ];
     final viewSpots = [
       for (var i = 0; i < series.length; i++) FlSpot(i.toDouble(), views[i]),
@@ -156,7 +161,7 @@ class GlanceChart extends StatelessWidget {
                 // visiteurs dessus) pour mapper barIndex → libellé.
                 final visibleKeys = [
                   if (showViews) 'pages vues',
-                  if (showVisitors) 'visiteurs',
+                  if (showVisits) 'visites',
                 ];
                 final i = touched.isEmpty
                     ? 0
@@ -226,9 +231,9 @@ class GlanceChart extends StatelessWidget {
                 dotData: const FlDotData(show: false),
               ),
             // Visiteurs (primaire) — accent + aire dégradée.
-            if (showVisitors)
+            if (showVisits)
               LineChartBarData(
-                spots: visitorSpots,
+                spots: visitSpots,
                 isCurved: true,
                 curveSmoothness: 0.32,
                 preventCurveOverShooting: true,
@@ -272,16 +277,25 @@ class GlanceChart extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.only(bottom: 10, left: 2),
-          child: Row(
+          child: Wrap(
+            spacing: 16,
+            runSpacing: 6,
             children: [
+              // Visiteurs uniques : référence (total), pas de courbe.
+              if (visitorsTotal != null)
+                _LegendItem(
+                  color: p.fg3,
+                  hollow: true,
+                  label: 'Visiteurs',
+                  value: visitorsTotal,
+                ),
               _LegendItem(
                 color: p.accent,
-                label: 'Visiteurs',
-                value: visitorsTotal,
-                on: showVisitors,
-                onTap: onToggle == null ? null : () => onToggle!(kVisitors),
+                label: 'Visites',
+                value: visitsTotal,
+                on: showVisits,
+                onTap: onToggle == null ? null : () => onToggle!(kVisits),
               ),
-              const SizedBox(width: 16),
               _LegendItem(
                 color: altColor,
                 label: 'Pages vues',
@@ -305,12 +319,16 @@ class _LegendItem extends StatelessWidget {
     this.value,
     this.on = true,
     this.onTap,
+    this.hollow = false,
   });
   final Color color;
   final String label;
   final bool on;
   final VoidCallback? onTap;
   final int? value;
+
+  /// Dot en anneau (non plein) : marque un total de référence sans courbe.
+  final bool hollow;
 
   @override
   Widget build(BuildContext context) {
@@ -327,7 +345,11 @@ class _LegendItem extends StatelessWidget {
             Container(
               width: 9,
               height: 9,
-              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+              decoration: BoxDecoration(
+                color: hollow ? Colors.transparent : color,
+                shape: BoxShape.circle,
+                border: hollow ? Border.all(color: color, width: 1.5) : null,
+              ),
             ),
             const SizedBox(width: 6),
             if (value != null) ...[
