@@ -54,6 +54,16 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  flutter_native_splash: ^2.4.6
+
+# Écran de lancement de marque (fond vert d'accent + sparkline).
+# Régénérer après modif : dart run flutter_native_splash:create
+flutter_native_splash:
+  color: "#3b7a5a"
+  color_dark: "#16140f"
+  image: assets/splash/glance_splash.png
+  android: true
+  ios: true
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
