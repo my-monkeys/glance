@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#f7f5f1;--fg:#211e19;--fg2:#8c857a;--accent:#3b7a5a;--cream:#f7f5f1;--dark:#16140f;--line:rgba(30,25,15,.09)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);font-family:'Fredoka',sans-serif;color:var(--fg);padding:56px 52px 72px;width:1000px}
+  .kicker{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--fg2)}
+  h1{font-weight:600;font-size:34px;letter-spacing:-.3px;margin-top:6px}
+  .sub{color:var(--fg2);font-size:15px;margin-top:6px;font-family:'JetBrains Mono',monospace}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:36px 40px;margin-top:44px}
+  .cell{display:flex;flex-direction:column;align-items:center}
+  .icon{width:200px;height:200px;border-radius:45px;background:var(--accent);
+        display:flex;align-items:center;justify-content:center;
+        box-shadow:0 10px 30px rgba(40,35,25,.16),inset 0 1px 0 rgba(255,255,255,.12)}
+  .lab{margin-top:16px;font-weight:600;font-size:17px}
+  .num{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:1px;color:var(--fg2);margin-top:2px}
+</style>
+</head>
+<body>
+  <div class="kicker">Glance · icônes iOS</div>
+  <h1>Les 6 pistes, en icône réelle</h1>
+  <div class="sub">Fond vert d'accent · rendu app icon · dis-moi le numéro</div>
+
+  <div class="grid">
+
+    <div class="cell">
+      <div class="icon"><svg width="118" height="118" viewBox="0 0 72 72"><circle cx="36" cy="36" r="30" fill="#f7f5f1"/><circle cx="36" cy="36" r="10" fill="#3b7a5a"/></svg></div>
+      <div class="lab">Ouverture</div><div class="num">01</div>
+    </div>
+
+    <div class="cell">
+      <div class="icon"><svg width="124" height="124" viewBox="0 0 72 72" fill="none"><circle cx="36" cy="36" r="29" stroke="#f7f5f1" stroke-width="2.5" opacity=".35"/><circle cx="36" cy="36" r="19" stroke="#f7f5f1" stroke-width="3" opacity=".62"/><circle cx="36" cy="36" r="9" fill="#f7f5f1"/></svg></div>
+      <div class="lab">Pulse (live)</div><div class="num">02</div>
+    </div>
+
+    <div class="cell">
+      <div class="icon"><svg width="128" height="115" viewBox="0 0 80 72" fill="none"><path d="M8 36C20 18 60 18 72 36C60 54 20 54 8 36Z" stroke="#f7f5f1" stroke-width="4.5" stroke-linejoin="round"/><circle cx="40" cy="36" r="9.5" fill="#f7f5f1"/></svg></div>
+      <div class="lab">Coup d'œil</div><div class="num">03</div>
+    </div>
+
+    <div class="cell">
+      <div class="icon"><svg width="128" height="115" viewBox="0 0 80 72" fill="none"><path d="M10 50C20 50 24 30 34 30C44 30 44 42 52 42C60 42 62 22 70 22" stroke="#f7f5f1" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="70" cy="22" r="6.5" fill="#f7f5f1"/></svg></div>
+      <div class="lab">Courbe</div><div class="num">04</div>
+    </div>
+
+    <div class="cell">
+      <div class="icon"><span style="font-family:'Fredoka';font-weight:700;font-size:120px;color:#f7f5f1;line-height:1">G</span></div>
+      <div class="lab">Monogramme G</div><div class="num">05</div>
+    </div>
+
+    <div class="cell">
+      <div class="icon"><svg width="122" height="122" viewBox="0 0 76 76" fill="none" stroke="#f7f5f1" stroke-width="6.5" stroke-linecap="round"><circle cx="38" cy="38" r="28" stroke-dasharray="22 14.5"/><circle cx="38" cy="38" r="7" fill="#f7f5f1" stroke="none"/></svg></div>
+      <div class="lab">Iris</div><div class="num">06</div>
+    </div>
+
+  </div>
+</body>
+</html>
