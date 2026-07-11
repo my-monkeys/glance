@@ -1,7 +1,8 @@
 # Glance — App Store / TestFlight
 
 Métadonnées prêtes pour App Store Connect (langue principale : **Français (FR)**).
-Format aligné sur `fastlane deliver` (voir `fastlane/` une fois la clé API fournie).
+À saisir dans ASC → App Information / Version. Distribution via **Codemagic** (réutilise
+l'infra iOS de piloo) — cf. `docs/deploy-mobile-ios.md`.
 
 ## Identité
 
@@ -90,18 +91,18 @@ Mot de passe : <voir scratchpad / à coller dans App Store Connect>
 | Deployment target | iOS 15.0 |
 | Devices | iPhone (portrait) |
 
-## Prérequis côté Maxim (compte Apple)
+## Distribution (Codemagic, réutilise l'infra piloo)
 
-1. **Apple Developer Program payant** actif (99 $/an) — requis pour TestFlight.
-2. **Clé API App Store Connect** : App Store Connect → *Users and Access* → *Integrations* → *App Store Connect API* → *Generate API Key* (rôle **App Manager** ou **Admin**). Récupérer :
-   - **Issuer ID** (en haut de la page)
-   - **Key ID**
-   - le fichier **`AuthKey_<KeyID>.p8`** (téléchargeable **une seule fois**)
-3. Me transmettre ces 3 éléments (le .p8 : chemin local, ne pas committer). Je configure `fastlane` (build → `deliver` métadonnées → `pilot`/TestFlight upload).
+Pas de nouvelle clé API à générer : l'intégration App Store Connect « Personnal »
+et le certif de distribution vivent déjà dans le compte Codemagic (utilisés par piloo).
+Détails + runbook : **`docs/deploy-mobile-ios.md`**. Actions de Maxim (one-time) :
+
+1. **Codemagic** → *Add application* → connecter le repo `my-monkeys/glance`.
+2. **App Store Connect** → *Apps → +* → créer l'app (nom, bundle `fr.mymonkey.glance`, SKU `glance-mymonkey`).
+3. Puis : `git tag v1.0.0 && git push origin v1.0.0` → build + upload TestFlight auto.
 
 ## Reste à produire
 
 - [ ] Icône iOS (dépend du choix de logo)
 - [ ] Captures d'écran stylisées 6.9" (1290×2796) — 5-6 visuels
-- [ ] Page confidentialité + support hébergée
-- [ ] Setup `fastlane` (à la réception de la clé API)
+- [ ] Page confidentialité + support hébergée (`glance.my-monkey.fr/privacy`)
