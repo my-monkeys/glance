@@ -226,10 +226,21 @@ final detailProvider =
     p.metric(site, w, MetricType.countries, limit: 6),
     p.active(site).catchError((_) => 0),
     p.livePages(site).catchError((_) => <LivePage>[]),
+    p.visitorsPerBucket(site, w).catchError((_) => <int, double>{}),
   ]);
+  // Fusion des visiteurs uniques par bucket → courbe verte (détail seulement).
+  final baseSeries = r[1] as List<SeriesPoint>;
+  final vpb = r[7] as Map<int, double>;
+  final series = vpb.isEmpty
+      ? baseSeries
+      : [
+          for (final sp in baseSeries)
+            SeriesPoint(sp.t, sp.visits, sp.pageviews,
+                visitors: vpb[sp.t.millisecondsSinceEpoch]),
+        ];
   return SiteDetail(
     summary: r[0] as StatsSummary,
-    series: r[1] as List<SeriesPoint>,
+    series: series,
     unit: w.unit.api,
     topPages: r[2] as List<MetricRow>,
     sources: r[3] as List<MetricRow>,

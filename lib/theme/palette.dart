@@ -14,6 +14,7 @@ class GlancePalette extends ThemeExtension<GlancePalette> {
     required this.accent,
     required this.accentInk,
     required this.accentSoft,
+    required this.amber,
     required this.neg,
     required this.chip,
     required this.shadow,
@@ -28,6 +29,9 @@ class GlancePalette extends ThemeExtension<GlancePalette> {
   final Color accent;
   final Color accentInk;
   final Color accentSoft;
+
+  /// Ambre/orange — couleur de la métrique « visites ».
+  final Color amber;
   final Color neg;
   final Color chip;
   final List<BoxShadow> shadow;
@@ -43,6 +47,7 @@ class GlancePalette extends ThemeExtension<GlancePalette> {
     accent: Color(0xFF3B7A5A),
     accentInk: Color(0xFFFFFFFF),
     accentSoft: Color(0x1F3B7A5A), // rgba(59,122,90,.12)
+    amber: Color(0xFFC77A33),
     neg: Color(0xFFB15A42),
     chip: Color(0xFFF0EDE7),
     shadow: [
@@ -62,6 +67,7 @@ class GlancePalette extends ThemeExtension<GlancePalette> {
     accent: Color(0xFF5AA57E),
     accentInk: Color(0xFF0E1A12),
     accentSoft: Color(0x1F5AA57E),
+    amber: Color(0xFFDDA05C),
     neg: Color(0xFFCF7A5F),
     chip: Color(0xFF2A271E),
     shadow: [
@@ -80,6 +86,7 @@ class GlancePalette extends ThemeExtension<GlancePalette> {
     Color? accent,
     Color? accentInk,
     Color? accentSoft,
+    Color? amber,
     Color? neg,
     Color? chip,
     List<BoxShadow>? shadow,
@@ -94,6 +101,7 @@ class GlancePalette extends ThemeExtension<GlancePalette> {
       accent: accent ?? this.accent,
       accentInk: accentInk ?? this.accentInk,
       accentSoft: accentSoft ?? this.accentSoft,
+      amber: amber ?? this.amber,
       neg: neg ?? this.neg,
       chip: chip ?? this.chip,
       shadow: shadow ?? this.shadow,
@@ -113,6 +121,7 @@ class GlancePalette extends ThemeExtension<GlancePalette> {
       accent: Color.lerp(accent, other.accent, t)!,
       accentInk: Color.lerp(accentInk, other.accentInk, t)!,
       accentSoft: Color.lerp(accentSoft, other.accentSoft, t)!,
+      amber: Color.lerp(amber, other.amber, t)!,
       neg: Color.lerp(neg, other.neg, t)!,
       chip: Color.lerp(chip, other.chip, t)!,
       shadow: t < 0.5 ? shadow : other.shadow,

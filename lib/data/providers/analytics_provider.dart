@@ -36,6 +36,13 @@ abstract class AnalyticsProvider {
 
   /// Une série temporelle par nom d'événement (triées par total décroissant).
   Future<List<EventSeries>> eventSeries(Site site, DateWindow w);
+
+  /// Visiteurs *uniques* par bucket (millisecondsSinceEpoch → nombre), pour la
+  /// courbe verte. Vide par défaut : la plupart des endpoints ne fournissent
+  /// que visites + pages vues en série ; produire les uniques par bucket coûte
+  /// un appel par point, donc réservé au détail d'un site (surchargé par Umami).
+  Future<Map<int, double>> visitorsPerBucket(Site site, DateWindow w) async =>
+      const {};
 }
 
 /// Champs d'identifiants demandés à l'écran d'ajout, par fournisseur.
