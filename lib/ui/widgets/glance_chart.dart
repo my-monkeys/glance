@@ -88,11 +88,14 @@ class GlanceChart extends StatelessWidget {
     final lastX = (series.length - 1).toDouble();
 
     // Une barre lissée avec point terminal. `area` = aire dégradée sous la courbe.
+    // `dash` = trait pointillé (Visites) : reste lisible même superposée aux
+    // Visiteurs (à l'heure, visites == visiteurs → courbes confondues).
     LineChartBarData lineBar(
       List<FlSpot> spots,
       Color color,
       double width, {
       bool area = false,
+      List<int>? dash,
     }) =>
         LineChartBarData(
           spots: spots,
@@ -101,6 +104,7 @@ class GlanceChart extends StatelessWidget {
           preventCurveOverShooting: true,
           color: color,
           barWidth: width,
+          dashArray: dash,
           isStrokeCapRound: true,
           isStrokeJoinRound: true,
           dotData: FlDotData(
@@ -135,7 +139,7 @@ class GlanceChart extends StatelessWidget {
       if (showVisitors)
         (label: 'visiteurs', bar: lineBar(visitorSpots, p.accent, 2.6, area: true)),
       if (showVisits)
-        (label: 'visites', bar: lineBar(visitSpots, p.amber, 2.4)),
+        (label: 'visites', bar: lineBar(visitSpots, p.amber, 2.4, dash: const [6, 5])),
     ];
 
     // Nombre de labels X visés selon la largeur.
