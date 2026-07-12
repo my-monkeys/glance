@@ -61,9 +61,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       if (!mounted) return;
       ref.invalidate(siteStatsProvider);
       ref.invalidate(siteLiveProvider);
-      // Pas siteVisitsProvider : lourd (un /stats par bucket × sites) et gardé
-      // en cache — le rafraîchir à chaque tick empêcherait l'agrégat orange de
-      // se compléter. Il se met à jour au pull-to-refresh et au cache TTL.
     });
   }
 
@@ -108,7 +105,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           onRefresh: () async {
             ref.invalidate(siteStatsProvider);
             ref.invalidate(siteLiveProvider);
-            ref.invalidate(siteVisitsProvider);
             await ref.read(sitesProvider.future);
           },
           child: ListView(
@@ -375,7 +371,6 @@ class _TotalCard extends ConsumerWidget {
             height: 156,
             showPageviews: true,
             visitorsTotal: data.totalVisitors,
-            visitsTotal: data.totalVisits,
             pageviewsTotal: data.totalPageviews,
             hidden: hidden,
             onToggle: (k) => ref.read(settingsProvider.notifier).toggleSeries(k),

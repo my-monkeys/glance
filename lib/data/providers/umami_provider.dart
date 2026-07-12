@@ -148,8 +148,7 @@ class UmamiProvider extends AnalyticsProvider {
 
     final views = _bin(d['pageviews'], w.unit);
     // La série `sessions` d'Umami compte les visiteurs *uniques* par bucket (et
-    // non les visites/`visit_id`, qui ne sont pas exposées en série — cf.
-    // visitsPerBucket). C'est donc la courbe verte « Visiteurs ».
+    // non les visites/`visit_id`) → c'est la courbe verte « Visiteurs ».
     final visitors = _bin(d['sessions'], w.unit);
 
     // Buckets continus (Umami renvoie une série creuse) → chart propre.
@@ -162,36 +161,6 @@ class UmamiProvider extends AnalyticsProvider {
           ),
         )
         .toList(growable: false);
-  }
-
-  /// Visites (`visit_id`) par bucket : un appel `/stats` par point (Umami
-  /// n'expose pas de série de visites), lancés par lots de 6 pour ne pas saturer.
-  @override
-  Future<Map<int, double>> visitsPerBucket(Site site, DateWindow w) async {
-    final buckets = _buckets(w);
-    if (buckets.isEmpty) return const {};
-    final out = <int, double>{};
-    const batch = 6;
-    for (var i = 0; i < buckets.length; i += batch) {
-      final slice = buckets.skip(i).take(batch).toList();
-      final results = await Future.wait(
-        slice.asMap().entries.map((e) async {
-          final gi = i + e.key;
-          final start = e.value;
-          final end = gi + 1 < buckets.length ? buckets[gi + 1] : w.end;
-          final d = await _get('/api/websites/${site.id}/stats', {
-            'startAt': start.millisecondsSinceEpoch,
-            'endAt': end.millisecondsSinceEpoch,
-          }) as Map;
-          return MapEntry(
-            start.millisecondsSinceEpoch,
-            ((d['visits'] ?? 0) as num).toDouble(),
-          );
-        }),
-      );
-      out.addEntries(results);
-    }
-    return out;
   }
 
   @override

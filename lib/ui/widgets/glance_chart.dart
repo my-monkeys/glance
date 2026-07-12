@@ -19,7 +19,6 @@ class GlanceChart extends StatelessWidget {
     required this.unit,
     this.height = 168,
     this.showPageviews = false,
-    this.visitsTotal,
     this.pageviewsTotal,
     this.visitorsTotal,
     this.hidden = const {},
@@ -27,7 +26,6 @@ class GlanceChart extends StatelessWidget {
   });
 
   static const kVisitors = 'visitors';
-  static const kVisits = 'visits';
   static const kPageviews = 'pageviews';
 
   final List<SeriesPoint> series;
@@ -36,13 +34,12 @@ class GlanceChart extends StatelessWidget {
 
   /// Superpose une seconde courbe « pages vues » + une légende.
   final bool showPageviews;
-  final int? visitsTotal;
   final int? pageviewsTotal;
 
-  /// Total visiteurs uniques (courbe verte, toujours tracée depuis la série).
+  /// Total visiteurs uniques (courbe verte).
   final int? visitorsTotal;
 
-  /// Séries masquées (clés [kVisits]/[kPageviews]) et bascule via la légende.
+  /// Séries masquées (clés [kVisitors]/[kPageviews]) et bascule via la légende.
   final Set<String> hidden;
   final void Function(String key)? onToggle;
 
@@ -54,22 +51,15 @@ class GlanceChart extends StatelessWidget {
     }
     final altColor = p.fg2;
 
-    // Visiteurs (vert) + pages vues (gris) sont toujours traçables. La courbe
-    // orange des *visites* (visit_id) n'est dispo que si la série les porte :
-    // Umami ne les fournit qu'au détail d'un site (un appel /stats par point) ;
-    // sinon les visites restent une référence chiffrée dans la légende.
-    final hasVisitsSeries = series.any((e) => e.visits != null);
+    // Deux courbes : visiteurs uniques (vert, aire) + pages vues (gris).
     final showVisitors = !hidden.contains(kVisitors);
-    final showVisits = hasVisitsSeries && !hidden.contains(kVisits);
     final showViews = showPageviews && !hidden.contains(kPageviews);
 
     final visitors = series.map((e) => e.visitors).toList();
-    final visits = series.map((e) => e.visits ?? 0).toList();
     final views = series.map((e) => e.pageviews).toList();
     // Échelle : le max ne couvre que les courbes visibles (rescale au masquage).
     final rawMax = [
       if (showVisitors) ...visitors,
-      if (showVisits) ...visits,
       if (showViews) ...views,
     ].fold<double>(0, math.max);
     final maxY = chartNiceMax(rawMax);
@@ -79,23 +69,17 @@ class GlanceChart extends StatelessWidget {
       for (var i = 0; i < series.length; i++)
         FlSpot(i.toDouble(), visitors[i]),
     ];
-    final visitSpots = [
-      for (var i = 0; i < series.length; i++) FlSpot(i.toDouble(), visits[i]),
-    ];
     final viewSpots = [
       for (var i = 0; i < series.length; i++) FlSpot(i.toDouble(), views[i]),
     ];
     final lastX = (series.length - 1).toDouble();
 
     // Une barre lissée avec point terminal. `area` = aire dégradée sous la courbe.
-    // `dash` = trait pointillé (Visites) : reste lisible même superposée aux
-    // Visiteurs (à l'heure, visites == visiteurs → courbes confondues).
     LineChartBarData lineBar(
       List<FlSpot> spots,
       Color color,
       double width, {
       bool area = false,
-      List<int>? dash,
     }) =>
         LineChartBarData(
           spots: spots,
@@ -104,7 +88,6 @@ class GlanceChart extends StatelessWidget {
           preventCurveOverShooting: true,
           color: color,
           barWidth: width,
-          dashArray: dash,
           isStrokeCapRound: true,
           isStrokeJoinRound: true,
           dotData: FlDotData(
@@ -131,15 +114,13 @@ class GlanceChart extends StatelessWidget {
         );
 
     // Courbes visibles dans l'ordre de tracé (pages vues dessous → visiteurs
-    // avec aire → visites dessus). Clé/libellé et barre construits ensemble :
-    // le tooltip mappe barIndex → libellé sans risque de désync.
+    // avec aire dessus). Clé/libellé et barre construits ensemble : le tooltip
+    // mappe barIndex → libellé sans risque de désync.
     final drawn = <({String label, LineChartBarData bar})>[
       if (showViews)
         (label: 'pages vues', bar: lineBar(viewSpots, altColor, 1.8)),
       if (showVisitors)
         (label: 'visiteurs', bar: lineBar(visitorSpots, p.accent, 2.6, area: true)),
-      if (showVisits)
-        (label: 'visites', bar: lineBar(visitSpots, p.amber, 2.4, dash: const [6, 5])),
     ];
 
     // Nombre de labels X visés selon la largeur.
@@ -296,7 +277,7 @@ class GlanceChart extends StatelessWidget {
             spacing: 16,
             runSpacing: 6,
             children: [
-              // Visiteurs uniques (vert) — toujours une courbe, basculable.
+              // Visiteurs uniques (vert) + pages vues (gris), basculables.
               if (visitorsTotal != null)
                 _LegendItem(
                   color: p.accent,
@@ -305,19 +286,6 @@ class GlanceChart extends StatelessWidget {
                   on: showVisitors,
                   onTap: onToggle == null ? null : () => onToggle!(kVisitors),
                 ),
-              // Visites (orange). Courbe basculable en détail (série dispo) ;
-              // sinon simple référence chiffrée (point creux) — Umami ne fournit
-              // pas les visites en série sur l'accueil.
-              _LegendItem(
-                color: p.amber,
-                hollow: !hasVisitsSeries,
-                label: 'Visites',
-                value: visitsTotal,
-                on: hasVisitsSeries ? showVisits : true,
-                onTap: (hasVisitsSeries && onToggle != null)
-                    ? () => onToggle!(kVisits)
-                    : null,
-              ),
               _LegendItem(
                 color: altColor,
                 label: 'Pages vues',
@@ -341,16 +309,12 @@ class _LegendItem extends StatelessWidget {
     this.value,
     this.on = true,
     this.onTap,
-    this.hollow = false,
   });
   final Color color;
   final String label;
   final bool on;
   final VoidCallback? onTap;
   final int? value;
-
-  /// Dot en anneau (non plein) : marque un total de référence sans courbe.
-  final bool hollow;
 
   @override
   Widget build(BuildContext context) {
@@ -368,9 +332,8 @@ class _LegendItem extends StatelessWidget {
               width: 9,
               height: 9,
               decoration: BoxDecoration(
-                color: hollow ? Colors.transparent : color,
+                color: color,
                 shape: BoxShape.circle,
-                border: hollow ? Border.all(color: color, width: 1.5) : null,
               ),
             ),
             const SizedBox(width: 6),

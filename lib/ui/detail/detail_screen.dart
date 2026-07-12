@@ -265,7 +265,6 @@ class _DetailBody extends ConsumerWidget {
                 height: 172,
                 showPageviews: true,
                 visitorsTotal: s.visitors,
-                visitsTotal: s.visits,
                 pageviewsTotal: s.pageviews,
                 hidden: hidden,
                 onToggle: (k) =>

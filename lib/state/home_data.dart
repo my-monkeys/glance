@@ -92,29 +92,19 @@ class HomeData {
       totalLive += c.live;
     }
 
-    // Série cumulée par bucket (fenêtres alignées) : visiteurs + pages vues
-    // toujours ; visites seulement si *tous* les sites chargés les portent
-    // (Umami ne fournit pas les visites en série → agrégat honnête).
+    // Série cumulée par bucket (fenêtres alignées) : visiteurs + pages vues.
     final buckets = cards.isEmpty ? <SeriesPoint>[] : cards.first.series;
     final total = <SeriesPoint>[];
     for (var i = 0; i < buckets.length; i++) {
       var vu = 0.0;
       var pv = 0.0;
-      var vs = 0.0;
-      var allVisits = cards.isNotEmpty;
       for (final c in cards) {
         if (i < c.series.length) {
           vu += c.series[i].visitors;
           pv += c.series[i].pageviews;
-          final sv = c.series[i].visits;
-          if (sv == null) {
-            allVisits = false;
-          } else {
-            vs += sv;
-          }
         }
       }
-      total.add(SeriesPoint(buckets[i].t, vu, pv, visits: allVisits ? vs : null));
+      total.add(SeriesPoint(buckets[i].t, vu, pv));
     }
 
     return HomeData(

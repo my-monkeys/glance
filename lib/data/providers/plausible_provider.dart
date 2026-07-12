@@ -139,9 +139,8 @@ class PlausibleProvider extends AnalyticsProvider {
     };
     final res = await _query({
       'site_id': _siteId,
-      // Plausible fournit les trois séries en un seul appel : visiteurs uniques
-      // (courbe verte), visites (orange) et pages vues (gris).
-      'metrics': ['visitors', 'visits', 'pageviews'],
+      // Deux séries pour le graphe : visiteurs uniques (vert) + pages vues (gris).
+      'metrics': ['visitors', 'pageviews'],
       'date_range': [_dtFmt.format(w.start), _dtFmt.format(w.end)],
       'dimensions': [dim],
       'timezone': await _timezone(),
@@ -156,8 +155,7 @@ class PlausibleProvider extends AnalyticsProvider {
           return SeriesPoint(
             t,
             (mm[0] as num).toDouble(), // visiteurs
-            (mm[2] as num).toDouble(), // pages vues
-            visits: (mm[1] as num).toDouble(),
+            (mm[1] as num).toDouble(), // pages vues
           );
         })
         .whereType<SeriesPoint>()
