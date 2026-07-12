@@ -45,8 +45,10 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
   Future<void> _continue() async {
     final fields = credentialFieldsFor(_kind);
     final creds = {for (final f in fields) f.key: _c(f.key).text.trim()};
-    if (creds.values.any((v) => v.isEmpty)) {
-      setState(() => _error = 'Renseigne tous les champs.');
+    final missingRequired =
+        fields.any((f) => !f.optional && (creds[f.key] ?? '').isEmpty);
+    if (missingRequired) {
+      setState(() => _error = 'Renseigne les champs obligatoires.');
       return;
     }
     setState(() {
@@ -171,6 +173,11 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
                       url: f.keyboardUrl,
                       mono: f.secret,
                     ),
+                    if (f.hint != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 6, left: 3, right: 3),
+                        child: Text(f.hint!, style: GT.body(12, color: p.fg3)),
+                      ),
                     const SizedBox(height: 14),
                   ],
                   if (_error != null) ...[

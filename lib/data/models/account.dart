@@ -28,12 +28,20 @@ class CredentialField {
     this.secret = false,
     this.placeholder,
     this.keyboardUrl = false,
+    this.optional = false,
+    this.hint,
   });
   final String key;
   final String label;
   final bool secret;
   final String? placeholder;
   final bool keyboardUrl;
+
+  /// Champ facultatif : le formulaire n'exige pas qu'il soit rempli.
+  final bool optional;
+
+  /// Aide affichée sous le champ (contrainte non évidente).
+  final String? hint;
 }
 
 /// Un compte configuré : le fournisseur + son URL d'instance + un libellé.

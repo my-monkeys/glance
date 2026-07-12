@@ -60,12 +60,16 @@ List<CredentialField> credentialFieldsFor(ProviderKind kind) {
           placeholder: 'plausible.io',
           keyboardUrl: true,
         ),
+        CredentialField(key: 'apiKey', label: 'Clé API', secret: true),
         CredentialField(
           key: 'siteId',
-          label: 'Domaine à suivre',
+          label: 'Domaine (facultatif)',
           placeholder: 'mondomaine.fr',
+          optional: true,
+          hint: 'Laisser vide pour lister vos sites automatiquement '
+              '(nécessite une clé avec accès « Sites » — self-hosted ou plan '
+              'Enterprise). Sinon, saisissez le domaine à suivre.',
         ),
-        CredentialField(key: 'apiKey', label: 'Clé API', secret: true),
       ];
     case ProviderKind.fathom:
       return const [

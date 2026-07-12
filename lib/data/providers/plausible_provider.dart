@@ -7,9 +7,10 @@ import '../models/models.dart';
 import '../models/period.dart';
 import 'analytics_provider.dart';
 
-/// Client Plausible (Stats API v2 — `POST /api/v2/query`). Un compte Plausible
-/// = un domaine (`site_id`), Plausible n'exposant pas de liste de sites via la
-/// Stats API. Implémenté d'après la doc officielle ; à valider sur instance.
+/// Client Plausible (Stats API v2 — `POST /api/v2/query`). La Stats API ne liste
+/// pas les sites → on tente la **Sites API** (`GET /api/v1/sites`) pour lister
+/// automatiquement (self-hosted ou plan Enterprise) ; sinon on retombe sur le
+/// domaine saisi manuellement. Chaque requête cible `site.id` (le domaine).
 class PlausibleProvider extends AnalyticsProvider {
   PlausibleProvider(super.account, super.creds) {
     _dio = Dio(
@@ -29,7 +30,8 @@ class PlausibleProvider extends AnalyticsProvider {
   late final Dio _dio;
   String? _tz;
 
-  String get _siteId => creds['siteId'] ?? account.baseUrl;
+  /// Domaine saisi manuellement (facultatif). Vide → on tente la Sites API.
+  String get _configuredSite => (creds['siteId'] ?? '').trim();
 
   static String _normalizeBase(String raw) {
     var s = raw.trim().isEmpty ? 'plausible.io' : raw.trim();
@@ -61,24 +63,62 @@ class PlausibleProvider extends AnalyticsProvider {
 
   @override
   Future<int> verify() async {
-    await _query({
-      'site_id': _siteId,
-      'metrics': ['visitors'],
-      'date_range': '7d',
-    });
+    final api = await _listViaApi();
+    if (api.isNotEmpty) return api.length;
+    // Pas de Sites API (clé Stats simple) → on valide le domaine saisi.
+    final id = _configuredSite;
+    if (id.isEmpty) {
+      throw StateError(
+        'Renseignez un domaine, ou utilisez une clé avec accès « Sites » '
+        'pour lister automatiquement.',
+      );
+    }
+    await _query({'site_id': id, 'metrics': ['visitors'], 'date_range': '7d'});
     return 1;
   }
 
   @override
   Future<List<Site>> listSites() async {
-    return [
-      Site(id: _siteId, accountId: account.id, name: _siteId, domain: _siteId),
-    ];
+    final api = await _listViaApi();
+    if (api.isNotEmpty) return api;
+    final id = _configuredSite;
+    if (id.isEmpty) return const [];
+    return [Site(id: id, accountId: account.id, name: id, domain: id)];
   }
 
-  Future<int> _visitorsFor(List<String> range) async {
+  /// Liste les sites via la **Sites API** de Plausible (`GET /api/v1/sites`,
+  /// paginée). Nécessite une clé avec accès « Sites » (self-hosted ou plan
+  /// Enterprise) : renvoie une liste vide si l'endpoint n'est pas disponible.
+  Future<List<Site>> _listViaApi() async {
+    final out = <Site>[];
+    String? after;
+    for (var guard = 0; guard < 20; guard++) {
+      try {
+        final r = await _dio.get('/api/v1/sites', queryParameters: {
+          'limit': 100,
+          if (after != null && after.isNotEmpty) 'after': after,
+        });
+        final data = (r.data as Map).cast<String, dynamic>();
+        final sites = (data['sites'] as List?) ?? const [];
+        for (final s in sites) {
+          final d = (s['domain'] ?? '').toString();
+          if (d.isNotEmpty) {
+            out.add(Site(id: d, accountId: account.id, name: d, domain: d));
+          }
+        }
+        after = (data['meta'] as Map?)?['after']?.toString();
+        if (sites.isEmpty || after == null || after.isEmpty) break;
+      } on DioException {
+        // 401/402/403/404 : Sites API indisponible pour cette clé/ce plan.
+        return const [];
+      }
+    }
+    return out;
+  }
+
+  Future<int> _visitorsFor(String siteId, List<String> range) async {
     final res = await _query({
-      'site_id': _siteId,
+      'site_id': siteId,
       'metrics': ['visitors'],
       'date_range': range,
     });
@@ -97,7 +137,7 @@ class PlausibleProvider extends AnalyticsProvider {
       'visit_duration',
     ];
     final res = await _query({
-      'site_id': _siteId,
+      'site_id': site.id,
       'metrics': metrics,
       'date_range': [_dateFmt.format(w.start), _dateFmt.format(w.end)],
       'timezone': await _timezone(),
@@ -112,7 +152,7 @@ class PlausibleProvider extends AnalyticsProvider {
     final span = w.end.difference(w.start);
     int? prevVisitors;
     try {
-      prevVisitors = await _visitorsFor([
+      prevVisitors = await _visitorsFor(site.id, [
         _dateFmt.format(w.start.subtract(span)),
         _dateFmt.format(w.start),
       ]);
@@ -138,7 +178,7 @@ class PlausibleProvider extends AnalyticsProvider {
       TimeUnit.month => 'time:month',
     };
     final res = await _query({
-      'site_id': _siteId,
+      'site_id': site.id,
       // Deux séries pour le graphe : visiteurs uniques (vert) + pages vues (gris).
       'metrics': ['visitors', 'pageviews'],
       'date_range': [_dtFmt.format(w.start), _dtFmt.format(w.end)],
@@ -166,7 +206,7 @@ class PlausibleProvider extends AnalyticsProvider {
   Future<int> active(Site site) async {
     final r = await _dio.get(
       '/api/v1/stats/realtime/visitors',
-      queryParameters: {'site_id': _siteId},
+      queryParameters: {'site_id': site.id},
     );
     return (r.data as num?)?.round() ?? 0;
   }
@@ -186,7 +226,7 @@ class PlausibleProvider extends AnalyticsProvider {
     };
     final metric = type == MetricType.events ? 'events' : 'visitors';
     final res = await _query({
-      'site_id': _siteId,
+      'site_id': site.id,
       'metrics': [metric],
       'date_range': [_dateFmt.format(w.start), _dateFmt.format(w.end)],
       'dimensions': [dim],
@@ -215,7 +255,7 @@ class PlausibleProvider extends AnalyticsProvider {
       TimeUnit.month => 'time:month',
     };
     final res = await _query({
-      'site_id': _siteId,
+      'site_id': site.id,
       'metrics': ['events'],
       'date_range': [_dtFmt.format(w.start), _dtFmt.format(w.end)],
       'dimensions': [timeDim, 'event:name'],
@@ -257,7 +297,7 @@ class PlausibleProvider extends AnalyticsProvider {
   @override
   Future<List<LivePage>> livePages(Site site) async {
     final res = await _query({
-      'site_id': _siteId,
+      'site_id': site.id,
       'metrics': ['visitors'],
       'date_range': 'realtime',
       'dimensions': ['event:page'],
