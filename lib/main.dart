@@ -6,10 +6,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'app.dart';
 import 'dev/seed.dart';
 import 'state/providers.dart';
+import 'state/widget_publisher.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('fr_FR');
+  await WidgetPublisher.init();
   final prefs = await SharedPreferences.getInstance();
 
   final container = ProviderContainer(
