@@ -288,6 +288,28 @@ struct SiteRow: View {
     }
 }
 
+/// Item de site sur 2 lignes (nom + valeur/delta, puis courbe en dessous), pour
+/// laisser toute la largeur au nom dans une colonne étroite (widget moyen).
+struct SiteRowStacked: View {
+    let s: SiteStat
+    var body: some View {
+        VStack(alignment: .leading, spacing: 3) {
+            HStack(spacing: 6) {
+                Text(s.name)
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(GT.fg).lineLimit(1).truncationMode(.tail)
+                Spacer(minLength: 4)
+                Text(fmtInt(s.value))
+                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    .foregroundStyle(GT.fg).fixedSize()
+                DeltaLabel(pct: s.delta, size: 9).fixedSize()
+            }
+            SparkView(points: s.spark, color: GT.accent.opacity(0.75), line: 1.4)
+                .frame(maxWidth: .infinity).frame(height: 14)
+        }
+    }
+}
+
 struct MediumView: View {
     let d: GlanceData
     var rows: Int = 3
@@ -304,12 +326,9 @@ struct MediumView: View {
                 SparkView(points: d.totalSpark).frame(height: 26)
             }
             .frame(width: 118)
-            VStack(alignment: .leading, spacing: 0) {
+            VStack(alignment: .leading, spacing: 8) {
                 ForEach(Array(d.sites.prefix(rows))) { s in
-                    SiteRow(s: s)
-                    if s.id != d.sites.prefix(rows).last?.id {
-                        Divider().overlay(GT.line)
-                    }
+                    SiteRowStacked(s: s)
                 }
                 Spacer(minLength: 0)
             }
