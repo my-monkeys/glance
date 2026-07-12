@@ -37,11 +37,12 @@ abstract class AnalyticsProvider {
   /// Une série temporelle par nom d'événement (triées par total décroissant).
   Future<List<EventSeries>> eventSeries(Site site, DateWindow w);
 
-  /// Visiteurs *uniques* par bucket (millisecondsSinceEpoch → nombre), pour la
-  /// courbe verte. Vide par défaut : la plupart des endpoints ne fournissent
-  /// que visites + pages vues en série ; produire les uniques par bucket coûte
-  /// un appel par point, donc réservé au détail d'un site (surchargé par Umami).
-  Future<Map<int, double>> visitorsPerBucket(Site site, DateWindow w) async =>
+  /// Visites (`visit_id`) *par bucket* (millisecondsSinceEpoch → nombre), pour la
+  /// courbe orange. Vide par défaut : Umami ne fournit pas les visites en série
+  /// (la série `sessions` compte les visiteurs) → un appel `/stats` par point,
+  /// réservé au détail d'un site. Plausible les a déjà dans [series], donc n'a
+  /// pas besoin de surcharger ceci.
+  Future<Map<int, double>> visitsPerBucket(Site site, DateWindow w) async =>
       const {};
 }
 

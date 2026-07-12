@@ -61,6 +61,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       if (!mounted) return;
       ref.invalidate(siteStatsProvider);
       ref.invalidate(siteLiveProvider);
+      // Pas siteVisitsProvider : lourd (un /stats par bucket × sites) et gardé
+      // en cache — le rafraîchir à chaque tick empêcherait l'agrégat orange de
+      // se compléter. Il se met à jour au pull-to-refresh et au cache TTL.
     });
   }
 
@@ -105,6 +108,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           onRefresh: () async {
             ref.invalidate(siteStatsProvider);
             ref.invalidate(siteLiveProvider);
+            ref.invalidate(siteVisitsProvider);
             await ref.read(sitesProvider.future);
           },
           child: ListView(
@@ -452,7 +456,7 @@ class _SiteCardTile extends StatelessWidget {
 }
 
 List<double> _sparkOf(SiteCard c) {
-  final v = c.series.map((e) => e.visits).toList();
+  final v = c.series.map((e) => e.visitors).toList();
   if (v.length < 2) return const [0, 0];
   return v;
 }

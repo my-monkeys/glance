@@ -76,17 +76,20 @@ class StatsSummary {
 /// Un point de la série temporelle.
 @immutable
 class SeriesPoint {
-  const SeriesPoint(this.t, this.visits, this.pageviews, {this.visitors});
+  const SeriesPoint(this.t, this.visitors, this.pageviews, {this.visits});
   final DateTime t;
 
-  /// Visites (sessions) par bucket.
-  final double visits;
+  /// Visiteurs *uniques* par bucket. Toujours présent — c'est la courbe verte
+  /// de référence (série `sessions` d'Umami = uniques ; `visitors` de Plausible).
+  final double visitors;
   final double pageviews;
 
-  /// Visiteurs *uniques* par bucket. `null` quand indisponible : les endpoints
-  /// de série ne fournissent que visites + pages vues ; les uniques par bucket
-  /// coûtent un appel `/stats` par point, donc calculés uniquement en détail.
-  final double? visitors;
+  /// Visites (`visit_id`) par bucket : navigations distinctes (≥ visiteurs, car
+  /// une même personne peut ouvrir plusieurs sessions). `null` quand non calculé :
+  /// Umami ne fournit **pas** les visites en série (la série `sessions` compte les
+  /// visiteurs, pas les visites) → un appel `/stats` par point, réservé au détail
+  /// d'un site. Plausible les renvoie directement dans [series].
+  final double? visits;
 }
 
 /// Une ligne de métrique (page, source, pays…), avec barre relative.

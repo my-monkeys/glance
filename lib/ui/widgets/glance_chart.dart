@@ -39,8 +39,7 @@ class GlanceChart extends StatelessWidget {
   final int? visitsTotal;
   final int? pageviewsTotal;
 
-  /// Visiteurs *uniques* (total) affiché dans la légende. Devient une courbe
-  /// verte si la série porte des `visitors` par point (détail d'un site).
+  /// Total visiteurs uniques (courbe verte, toujours tracée depuis la série).
   final int? visitorsTotal;
 
   /// Séries masquées (clés [kVisits]/[kPageviews]) et bascule via la légende.
@@ -55,15 +54,17 @@ class GlanceChart extends StatelessWidget {
     }
     final altColor = p.fg2;
 
-    // Courbe verte des visiteurs uniques dispo seulement si la série la porte
-    // (détail d'un site) ; sinon les visiteurs restent une référence chiffrée.
-    final hasVisitorSeries = series.any((e) => e.visitors != null);
-    final showVisitors = hasVisitorSeries && !hidden.contains(kVisitors);
-    final showVisits = !hidden.contains(kVisits);
+    // Visiteurs (vert) + pages vues (gris) sont toujours traçables. La courbe
+    // orange des *visites* (visit_id) n'est dispo que si la série les porte :
+    // Umami ne les fournit qu'au détail d'un site (un appel /stats par point) ;
+    // sinon les visites restent une référence chiffrée dans la légende.
+    final hasVisitsSeries = series.any((e) => e.visits != null);
+    final showVisitors = !hidden.contains(kVisitors);
+    final showVisits = hasVisitsSeries && !hidden.contains(kVisits);
     final showViews = showPageviews && !hidden.contains(kPageviews);
 
-    final visitors = series.map((e) => e.visitors ?? 0).toList();
-    final visits = series.map((e) => e.visits).toList();
+    final visitors = series.map((e) => e.visitors).toList();
+    final visits = series.map((e) => e.visits ?? 0).toList();
     final views = series.map((e) => e.pageviews).toList();
     // Échelle : le max ne couvre que les courbes visibles (rescale au masquage).
     final rawMax = [
@@ -85,6 +86,57 @@ class GlanceChart extends StatelessWidget {
       for (var i = 0; i < series.length; i++) FlSpot(i.toDouble(), views[i]),
     ];
     final lastX = (series.length - 1).toDouble();
+
+    // Une barre lissée avec point terminal. `area` = aire dégradée sous la courbe.
+    LineChartBarData lineBar(
+      List<FlSpot> spots,
+      Color color,
+      double width, {
+      bool area = false,
+    }) =>
+        LineChartBarData(
+          spots: spots,
+          isCurved: true,
+          curveSmoothness: 0.32,
+          preventCurveOverShooting: true,
+          color: color,
+          barWidth: width,
+          isStrokeCapRound: true,
+          isStrokeJoinRound: true,
+          dotData: FlDotData(
+            show: true,
+            checkToShowDot: (spot, bar) => spot.x == lastX,
+            getDotPainter: (s, pr, b, idx) => FlDotCirclePainter(
+              radius: 4,
+              color: color,
+              strokeColor: p.surface,
+              strokeWidth: 2,
+            ),
+          ),
+          belowBarData: BarAreaData(
+            show: area,
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                color.withValues(alpha: 0.20),
+                color.withValues(alpha: 0.0),
+              ],
+            ),
+          ),
+        );
+
+    // Courbes visibles dans l'ordre de tracé (pages vues dessous → visiteurs
+    // avec aire → visites dessus). Clé/libellé et barre construits ensemble :
+    // le tooltip mappe barIndex → libellé sans risque de désync.
+    final drawn = <({String label, LineChartBarData bar})>[
+      if (showViews)
+        (label: 'pages vues', bar: lineBar(viewSpots, altColor, 1.8)),
+      if (showVisitors)
+        (label: 'visiteurs', bar: lineBar(visitorSpots, p.accent, 2.6, area: true)),
+      if (showVisits)
+        (label: 'visites', bar: lineBar(visitSpots, p.amber, 2.4)),
+    ];
 
     // Nombre de labels X visés selon la largeur.
     final labelStep = math.max(1, (series.length / 6).ceil());
@@ -167,14 +219,8 @@ class GlanceChart extends StatelessWidget {
                 vertical: 7,
               ),
               getTooltipItems: (touched) {
-                // Ordre des courbes tracées = clés visibles (pages vues dessous,
-                // visiteurs dessus) pour mapper barIndex → libellé.
-                // Doit suivre l'ordre de tracé (pages vues, visiteurs, visites).
-                final visibleKeys = [
-                  if (showViews) 'pages vues',
-                  if (showVisitors) 'visiteurs',
-                  if (showVisits) 'visites',
-                ];
+                // Libellés dans l'ordre de tracé → mappe barIndex → libellé.
+                final visibleKeys = [for (final d in drawn) d.label];
                 final i = touched.isEmpty
                     ? 0
                     : touched.first.x.round().clamp(0, series.length - 1);
@@ -228,88 +274,7 @@ class GlanceChart extends StatelessWidget {
                 )
                 .toList(),
           ),
-          lineBarsData: [
-            // Pages vues (secondaire) — tracée dessous, sans remplissage.
-            if (showViews)
-              LineChartBarData(
-                spots: viewSpots,
-                isCurved: true,
-                curveSmoothness: 0.32,
-                preventCurveOverShooting: true,
-                color: altColor,
-                barWidth: 1.8,
-                isStrokeCapRound: true,
-                isStrokeJoinRound: true,
-                dotData: const FlDotData(show: false),
-              ),
-            // Visiteurs uniques (détail) — vert + aire dégradée, tracé dessous.
-            if (showVisitors)
-              LineChartBarData(
-                spots: visitorSpots,
-                isCurved: true,
-                curveSmoothness: 0.32,
-                preventCurveOverShooting: true,
-                color: p.accent,
-                barWidth: 2.6,
-                isStrokeCapRound: true,
-                isStrokeJoinRound: true,
-                dotData: FlDotData(
-                  show: true,
-                  checkToShowDot: (spot, bar) => spot.x == lastX,
-                  getDotPainter: (s, pr, b, idx) => FlDotCirclePainter(
-                    radius: 4,
-                    color: p.accent,
-                    strokeColor: p.surface,
-                    strokeWidth: 2,
-                  ),
-                ),
-                belowBarData: BarAreaData(
-                  show: true,
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      p.accent.withValues(alpha: 0.20),
-                      p.accent.withValues(alpha: 0.0),
-                    ],
-                  ),
-                ),
-              ),
-            // Visites — ambre, tracée par-dessus (reste visible même quand elle
-            // est proche des visiteurs). Aire seulement si pas de courbe verte.
-            if (showVisits)
-              LineChartBarData(
-                spots: visitSpots,
-                isCurved: true,
-                curveSmoothness: 0.32,
-                preventCurveOverShooting: true,
-                color: p.amber,
-                barWidth: 2.4,
-                isStrokeCapRound: true,
-                isStrokeJoinRound: true,
-                dotData: FlDotData(
-                  show: true,
-                  checkToShowDot: (spot, bar) => spot.x == lastX,
-                  getDotPainter: (s, pr, b, idx) => FlDotCirclePainter(
-                    radius: 4,
-                    color: p.amber,
-                    strokeColor: p.surface,
-                    strokeWidth: 2,
-                  ),
-                ),
-                belowBarData: BarAreaData(
-                  show: !hasVisitorSeries,
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      p.amber.withValues(alpha: 0.20),
-                      p.amber.withValues(alpha: 0.0),
-                    ],
-                  ),
-                ),
-              ),
-          ],
+          lineBarsData: [for (final d in drawn) d.bar],
         ),
         duration: const Duration(milliseconds: 450),
         curve: Curves.easeOutCubic,
@@ -327,25 +292,27 @@ class GlanceChart extends StatelessWidget {
             spacing: 16,
             runSpacing: 6,
             children: [
-              // Visiteurs uniques (vert). Courbe basculable en détail (série
-              // dispo) ; sinon simple référence chiffrée (point creux).
+              // Visiteurs uniques (vert) — toujours une courbe, basculable.
               if (visitorsTotal != null)
                 _LegendItem(
                   color: p.accent,
-                  hollow: !hasVisitorSeries,
                   label: 'Visiteurs',
                   value: visitorsTotal,
-                  on: hasVisitorSeries ? showVisitors : true,
-                  onTap: (hasVisitorSeries && onToggle != null)
-                      ? () => onToggle!(kVisitors)
-                      : null,
+                  on: showVisitors,
+                  onTap: onToggle == null ? null : () => onToggle!(kVisitors),
                 ),
+              // Visites (orange). Courbe basculable en détail (série dispo) ;
+              // sinon simple référence chiffrée (point creux) — Umami ne fournit
+              // pas les visites en série sur l'accueil.
               _LegendItem(
                 color: p.amber,
+                hollow: !hasVisitsSeries,
                 label: 'Visites',
                 value: visitsTotal,
-                on: showVisits,
-                onTap: onToggle == null ? null : () => onToggle!(kVisits),
+                on: hasVisitsSeries ? showVisits : true,
+                onTap: (hasVisitsSeries && onToggle != null)
+                    ? () => onToggle!(kVisits)
+                    : null,
               ),
               _LegendItem(
                 color: altColor,

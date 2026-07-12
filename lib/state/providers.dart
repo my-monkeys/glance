@@ -152,6 +152,11 @@ Future<AnalyticsProvider> _providerFor(Ref ref, Site site) =>
 /// Plafonne la concurrence des requêtes analytics (chargement incrémental).
 final fetchGateProvider = Provider<Semaphore>((ref) => Semaphore(6));
 
+/// Sémaphore *séparé* pour la reconstitution des visites par bucket (un appel
+/// `/stats` par point). Pool distinct → ces requêtes lourdes ne privent jamais
+/// les cartes (résumé + série) de jetons : elles se remplissent en arrière-plan.
+final visitsGateProvider = Provider<Semaphore>((ref) => Semaphore(3));
+
 /// Visiteurs en direct d'un site (indépendant de la période sélectionnée).
 final siteLiveProvider = FutureProvider.autoDispose.family<int, Site>((ref, site) async {
   cacheFor(ref, _cacheTtl);
@@ -177,6 +182,23 @@ final siteStatsProvider =
   });
 });
 
+/// Visites (`visit_id`) *par bucket* d'un site (millisecondsSinceEpoch → nombre).
+/// Chargé à part des stats de carte : lourd (un appel `/stats` par point), gated
+/// par [visitsGateProvider], mis en cache. Sert la courbe orange « Visites » de
+/// l'accueil (agrégée) — Umami ne fournit pas les visites en série. Vide pour un
+/// fournisseur qui livre déjà les visites dans sa série (Plausible).
+final siteVisitsProvider =
+    FutureProvider.autoDispose.family<Map<int, double>, (Site, DateWindow)>(
+        (ref, key) async {
+  cacheFor(ref, _cacheTtl);
+  final (site, w) = key;
+  final gate = ref.watch(visitsGateProvider);
+  final p = await _providerFor(ref, site);
+  return gate
+      .run(() => p.visitsPerBucket(site, w))
+      .catchError((_) => <int, double>{});
+});
+
 /// Agrégat vivant de la home : recalculé à chaque site qui se charge (watch de
 /// tous les providers par site). Fournit les totaux sur les sites déjà chargés.
 final homeTotalsProvider =
@@ -190,13 +212,31 @@ final homeTotalsProvider =
   for (final s in sites) {
     final stats = ref.watch(siteStatsProvider((s, w)));
     final live = ref.watch(siteLiveProvider(s));
+    final visits = ref.watch(siteVisitsProvider((s, w)));
     if (stats.isLoading || live.isLoading) loading = true;
     final sv = stats.value;
     if (sv != null) {
+      // Visites par bucket (courbe orange) : déjà dans la série pour un
+      // fournisseur qui les livre (Plausible → on garde `sp.visits`), sinon
+      // reconstituées (Umami, via siteVisitsProvider). Tant que la reconstitution
+      // n'a pas *abouti*, visits reste null → l'agrégat n'affiche pas encore
+      // l'orange (cf. HomeData.fromCards, tout-ou-rien). Une fois résolue — même
+      // vide (site sans donnée / en erreur) — on retombe à 0 pour ne pas bloquer.
+      final vmap = visits.hasValue ? (visits.value ?? const {}) : null;
+      final series = [
+        for (final sp in sv.series)
+          SeriesPoint(
+            sp.t,
+            sp.visitors,
+            sp.pageviews,
+            visits: sp.visits ??
+                (vmap == null ? null : (vmap[sp.t.millisecondsSinceEpoch] ?? 0.0)),
+          ),
+      ];
       cards.add(SiteCard(
         site: s,
         summary: sv.summary,
-        series: sv.series,
+        series: series,
         live: live.value ?? 0,
       ));
     } else {
@@ -226,17 +266,18 @@ final detailProvider =
     p.metric(site, w, MetricType.countries, limit: 6),
     p.active(site).catchError((_) => 0),
     p.livePages(site).catchError((_) => <LivePage>[]),
-    p.visitorsPerBucket(site, w).catchError((_) => <int, double>{}),
+    p.visitsPerBucket(site, w).catchError((_) => <int, double>{}),
   ]);
-  // Fusion des visiteurs uniques par bucket → courbe verte (détail seulement).
+  // Fusion des visites (visit_id) par bucket → courbe orange (détail seulement ;
+  // la série de base porte déjà visiteurs + pages vues).
   final baseSeries = r[1] as List<SeriesPoint>;
   final vpb = r[7] as Map<int, double>;
   final series = vpb.isEmpty
       ? baseSeries
       : [
           for (final sp in baseSeries)
-            SeriesPoint(sp.t, sp.visits, sp.pageviews,
-                visitors: vpb[sp.t.millisecondsSinceEpoch]),
+            SeriesPoint(sp.t, sp.visitors, sp.pageviews,
+                visits: vpb[sp.t.millisecondsSinceEpoch]),
         ];
   return SiteDetail(
     summary: r[0] as StatsSummary,
