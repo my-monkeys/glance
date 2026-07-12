@@ -20,8 +20,12 @@ import '../widgets/glance_chart.dart';
 import '../widgets/pulse_dot.dart';
 
 class DetailScreen extends ConsumerStatefulWidget {
-  const DetailScreen({super.key, required this.site});
+  const DetailScreen({super.key, required this.site, this.embedded = false});
   final Site site;
+
+  /// Intégré dans le panneau central du desktop (master-détail) : pas de bouton
+  /// retour (la sélection se fait dans la liste de gauche).
+  final bool embedded;
 
   @override
   ConsumerState<DetailScreen> createState() => _DetailScreenState();
@@ -129,11 +133,13 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
                 children: [
-                  GlanceIconButton(
-                    icon: Icons.arrow_back_ios_new_rounded,
-                    onTap: () => Navigator.of(context).pop(),
-                  ),
-                  const SizedBox(width: 12),
+                  if (!widget.embedded) ...[
+                    GlanceIconButton(
+                      icon: Icons.arrow_back_ios_new_rounded,
+                      onTap: () => Navigator.of(context).pop(),
+                    ),
+                    const SizedBox(width: 12),
+                  ],
                   Expanded(
                     child: Text(
                       widget.site.name,

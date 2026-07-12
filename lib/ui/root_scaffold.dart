@@ -4,14 +4,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/models/models.dart';
 import 'add/add_source_screen.dart';
+import 'desktop/desktop_shell.dart';
 import 'detail/detail_screen.dart';
 import 'direct/direct_screen.dart';
 import 'home/home_screen.dart';
 import 'settings/settings_screen.dart';
 import 'widgets/tab_bar.dart';
 
-/// Pousse l'écran de détail d'un site.
+/// Ouvre un site. Sur desktop (master-détail), sélectionne le site dans le
+/// panneau central via [DesktopShellScope] ; sur mobile, pousse une page détail.
 void openSite(BuildContext context, Site site) {
+  final scope = DesktopShellScope.maybeOf(context);
+  if (scope != null) {
+    scope.onOpenSite(site);
+    return;
+  }
   Navigator.of(context).push(
     MaterialPageRoute(builder: (_) => DetailScreen(site: site)),
   );
@@ -38,6 +45,11 @@ class _RootScaffoldState extends ConsumerState<RootScaffold> {
 
   @override
   Widget build(BuildContext context) {
+    // Grand écran (desktop / fenêtre large) → shell master-détail.
+    if (MediaQuery.of(context).size.width >= kDesktopBreakpoint) {
+      return const DesktopShell();
+    }
+
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bottomInset = MediaQuery.of(context).padding.bottom;
 
