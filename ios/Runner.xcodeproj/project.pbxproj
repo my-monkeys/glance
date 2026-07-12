@@ -21,6 +21,7 @@
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
 		B7D2DF849F501B867C404F5B /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 229C32455CCC4C39AD1A88E1 /* WidgetKit.framework */; };
+		DBFF0AEADDE2CC6FE660D87B /* GlanceSiteWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52CAB80272EC4EA32730A40 /* GlanceSiteWidget.swift */; };
 		E7D7D3DAD7A55DA7305087F8 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2D9B4559ED3C72D9A13161B6 /* Foundation.framework */; };
 		E7DA6DC9A1D6BF6CEB7BE985 /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 138EE1A630D80519F7F027D2 /* Pods_RunnerTests.framework */; };
 		FBF474EF69937669CFBF9411 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E7384E3E750DD58C526F4C54 /* Pods_Runner.framework */; };
@@ -97,6 +98,7 @@
 		97C147001CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9EA56D25308C3EA03103A454 /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
+		A52CAB80272EC4EA32730A40 /* GlanceSiteWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GlanceSiteWidget.swift; sourceTree = "<group>"; };
 		C06313F2BD286754580ABD38 /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
 		E573CD53C60BEF9559E37010 /* Pods-Runner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"; sourceTree = "<group>"; };
 		E7384E3E750DD58C526F4C54 /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -150,6 +152,7 @@
 				602401F7D794A91176684580 /* GlanceWidget.swift */,
 				92EA10963AD9D6B80895FED7 /* Info.plist */,
 				EF66F257A7CDA6BA441AD603 /* GlanceWidget.entitlements */,
+				A52CAB80272EC4EA32730A40 /* GlanceSiteWidget.swift */,
 			);
 			name = GlanceWidget;
 			path = GlanceWidget;
@@ -488,6 +491,7 @@
 			files = (
 				3A7EC86BC8A9C1F45721B49B /* GlanceWidgetBundle.swift in Sources */,
 				6CD9D08666C8C69B8C36978E /* GlanceWidget.swift in Sources */,
+				DBFF0AEADDE2CC6FE660D87B /* GlanceSiteWidget.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

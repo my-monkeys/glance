@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io' show Platform;
 import 'dart:math' as math;
 
@@ -54,6 +55,8 @@ class WidgetPublisher {
 
     final top = [...data.cards]
       ..sort((a, b) => b.summary.visitors.compareTo(a.summary.visitors));
+
+    // Top sites (widget « Aperçu » moyen/grand).
     final n = math.min(_maxSites, top.length);
     await set('site_count', n);
     for (var i = 0; i < n; i++) {
@@ -66,9 +69,25 @@ class WidgetPublisher {
           _spark(c.series.map((e) => e.visitors).toList()));
     }
 
+    // Tous les sites (widget « par site » configurable : sélecteur + rendu).
+    final all = [
+      for (final c in top)
+        {
+          'i': c.site.id,
+          'n': c.site.name,
+          'v': c.summary.visitors,
+          'p': c.summary.pageviews,
+          if (c.summary.visitorsDeltaPct != null)
+            'd': c.summary.visitorsDeltaPct,
+          's': _spark(c.series.map((e) => e.visitors).toList()),
+        }
+    ];
+    await set('all_sites', jsonEncode(all));
+
     // Recharge les timelines des widgets. iOSName = `kind` du widget.
+    await HomeWidget.updateWidget(iOSName: 'GlanceOverviewWidget');
     await HomeWidget.updateWidget(
-      iOSName: 'GlanceOverviewWidget',
+      iOSName: 'GlanceSiteWidget',
       androidName: 'GlanceOverviewWidgetProvider',
     );
   }
