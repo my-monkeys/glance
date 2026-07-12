@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/models/period.dart';
+import 'settings.dart';
 
 /// Période sélectionnée, partagée par tous les écrans (accueil, détail…) pour
 /// qu'ils restent synchronisés.
@@ -36,7 +37,11 @@ class PeriodState {
 
 class PeriodNotifier extends Notifier<PeriodState> {
   @override
-  PeriodState build() => const PeriodState();
+  PeriodState build() {
+    // Période affichée au lancement = réglage « période par défaut ».
+    final def = ref.read(settingsProvider).defaultPeriod;
+    return PeriodState(period: def);
+  }
 
   void set(Period p) => state = PeriodState(period: p);
 

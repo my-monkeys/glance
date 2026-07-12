@@ -15,7 +15,6 @@ import '../../state/settings.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
 import '../detail/detail_screen.dart';
-import '../direct/direct_screen.dart';
 import '../root_scaffold.dart';
 import '../settings/settings_screen.dart';
 import '../widgets/chip.dart';
@@ -148,27 +147,17 @@ class _Sidebar extends ConsumerWidget {
               ],
             ),
           ),
-          // Pied : Direct + Réglages.
+          // Pied : Réglages. (« Direct » fusionné dans la vue d'ensemble.)
           Container(
             decoration: BoxDecoration(
               border: Border(top: BorderSide(color: p.line)),
             ),
             padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
-            child: Column(
-              children: [
-                _NavTile(
-                  icon: Icons.show_chart_rounded,
-                  label: 'Direct',
-                  selected: nav.view == DesktopView.direct,
-                  onTap: () => ref.read(desktopNavProvider.notifier).direct(),
-                ),
-                _NavTile(
-                  icon: Icons.tune_rounded,
-                  label: 'Réglages',
-                  selected: nav.view == DesktopView.settings,
-                  onTap: () => ref.read(desktopNavProvider.notifier).settings(),
-                ),
-              ],
+            child: _NavTile(
+              icon: Icons.tune_rounded,
+              label: 'Réglages',
+              selected: nav.view == DesktopView.settings,
+              onTap: () => ref.read(desktopNavProvider.notifier).settings(),
             ),
           ),
         ],
@@ -431,7 +420,7 @@ class _TileFrame extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Panneau central : vue d'ensemble | détail d'un site | direct | réglages.
+// Panneau central : vue d'ensemble | détail d'un site | réglages.
 // ---------------------------------------------------------------------------
 
 class _Center extends ConsumerWidget {
@@ -458,7 +447,6 @@ class _Center extends ConsumerWidget {
       DesktopView.site when nav.site != null =>
         DetailScreen(key: ValueKey(nav.site), site: nav.site!, embedded: true),
       DesktopView.site => const _Overview(),
-      DesktopView.direct => const DirectScreen(),
       DesktopView.settings => const SettingsScreen(),
     };
 
@@ -610,6 +598,11 @@ class _OverviewState extends ConsumerState<_Overview> {
                     label: 'Sites', value: '${totals.siteCount}'),
               ],
             ),
+            const SizedBox(height: 24),
+            _LiveNow(
+              cards: data.cards,
+              onOpen: (s) => ref.read(desktopNavProvider.notifier).openSite(s),
+            ),
           ],
         ),
         Positioned(top: 0, left: 0, right: 0, child: RefreshBar(visible: refreshing)),
@@ -639,6 +632,79 @@ class _OverviewKpi extends StatelessWidget {
               child: Text(value, style: GT.stat(24, color: p.fg)),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// « En direct maintenant » : sites ayant des visiteurs live (fusion de l'ancien
+/// onglet Direct dans la vue d'ensemble). Chaque ligne ouvre le détail du site.
+class _LiveNow extends StatelessWidget {
+  const _LiveNow({required this.cards, required this.onOpen});
+  final List<SiteCard> cards;
+  final void Function(Site site) onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.glance;
+    final live = [...cards.where((c) => c.live > 0)]
+      ..sort((a, b) => b.live.compareTo(a.live));
+
+    return GlanceCard(
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SectionLabel('En direct maintenant'),
+          if (live.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              child: Text('Personne en ce moment.',
+                  style: GT.body(14, color: p.fg3)),
+            )
+          else
+            for (final c in live)
+              _LiveRow(card: c, onTap: () => onOpen(c.site)),
+        ],
+      ),
+    );
+  }
+}
+
+class _LiveRow extends StatelessWidget {
+  const _LiveRow({required this.card, required this.onTap});
+  final SiteCard card;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.glance;
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        hoverColor: p.chip.withValues(alpha: 0.5),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 11),
+          child: Row(
+            children: [
+              SiteAvatar(card.site, size: 32),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(card.site.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GT.body(14, weight: 600, color: p.fg)),
+              ),
+              PulseDot(size: 7, color: p.accent),
+              const SizedBox(width: 8),
+              Text(fmtInt(card.live),
+                  style: GT.stat(18, color: p.accent)),
+            ],
+          ),
         ),
       ),
     );

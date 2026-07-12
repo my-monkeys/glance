@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../data/models/period.dart';
+import 'period_state.dart';
 import 'providers.dart';
 
 enum ThemeChoice {
@@ -28,6 +30,7 @@ class Settings {
     this.homeView = HomeViewMode.list,
     this.directOnlyLive = false,
     this.hiddenSeries = const {},
+    this.defaultPeriod = Period.d7,
   });
 
   final ThemeChoice theme;
@@ -38,6 +41,7 @@ class Settings {
   final HomeViewMode homeView;
   final bool directOnlyLive; // Direct : « Actifs seulement »
   final Set<String> hiddenSeries; // séries masquées sur les gros graphes
+  final Period defaultPeriod; // période affichée au lancement
 
   Settings copyWith({
     ThemeChoice? theme,
@@ -48,6 +52,7 @@ class Settings {
     HomeViewMode? homeView,
     bool? directOnlyLive,
     Set<String>? hiddenSeries,
+    Period? defaultPeriod,
   }) => Settings(
     theme: theme ?? this.theme,
     refreshSeconds: refreshSeconds ?? this.refreshSeconds,
@@ -57,6 +62,7 @@ class Settings {
     homeView: homeView ?? this.homeView,
     directOnlyLive: directOnlyLive ?? this.directOnlyLive,
     hiddenSeries: hiddenSeries ?? this.hiddenSeries,
+    defaultPeriod: defaultPeriod ?? this.defaultPeriod,
   );
 }
 
@@ -69,6 +75,7 @@ class SettingsNotifier extends Notifier<Settings> {
   static const _kHomeView = 'glance.homeView';
   static const _kDirectOnlyLive = 'glance.direct.onlyLive';
   static const _kHiddenSeries = 'glance.chart.hidden';
+  static const _kDefaultPeriod = 'glance.period.default';
 
   SharedPreferences get _p => ref.read(sharedPrefsProvider);
 
@@ -90,12 +97,21 @@ class SettingsNotifier extends Notifier<Settings> {
       directOnlyLive: _p.getBool(_kDirectOnlyLive) ?? false,
       hiddenSeries:
           (_p.getStringList(_kHiddenSeries) ?? const <String>[]).toSet(),
+      defaultPeriod:
+          Period.fromKey(_p.getString(_kDefaultPeriod) ?? Period.d7.key),
     );
   }
 
   void setHomeView(HomeViewMode v) {
     _p.setString(_kHomeView, v.name);
     state = state.copyWith(homeView: v);
+  }
+
+  /// Change la période par défaut (persistée) et l'applique tout de suite.
+  void setDefaultPeriod(Period period) {
+    _p.setString(_kDefaultPeriod, period.key);
+    state = state.copyWith(defaultPeriod: period);
+    ref.read(periodProvider.notifier).set(period);
   }
 
   void setDirectOnlyLive(bool v) {

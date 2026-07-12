@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/models/account.dart';
+import '../../data/models/period.dart';
 import '../../state/providers.dart';
 import '../../state/settings.dart';
 import '../../theme/palette.dart';
@@ -86,6 +87,30 @@ class SettingsScreen extends ConsumerWidget {
                           selected: settings.theme == t,
                           onTap: () => notifier.setTheme(t),
                         ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 13, 16, 14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text('Période par défaut', style: GT.body(15, color: p.fg)),
+                  const SizedBox(height: 4),
+                  Text('À l\'ouverture de l\'application',
+                      style: GT.body(12.5, color: p.fg3)),
+                  const SizedBox(height: 12),
+                  ChipRow(
+                    children: [
+                      for (final per in Period.values)
+                        if (per != Period.custom)
+                          GlanceChip(
+                            label: per.label,
+                            selected: settings.defaultPeriod == per,
+                            onTap: () => notifier.setDefaultPeriod(per),
+                          ),
                     ],
                   ),
                 ],
@@ -240,13 +265,12 @@ class SettingsScreen extends ConsumerWidget {
   Future<void> _editSites(BuildContext context, WidgetRef ref, Account a) async {
     final sites = await ref.read(accountSitesProvider(a.id).future);
     if (!context.mounted) return;
-    final selection = await Navigator.of(context).push<List<String>?>(
-      MaterialPageRoute(
-        builder: (_) => SitePickerScreen(
-          providerName: a.kind.displayName,
-          sites: sites,
-          initialSelection: a.sites,
-        ),
+    final selection = await showGlanceModal<List<String>?>(
+      context,
+      SitePickerScreen(
+        providerName: a.kind.displayName,
+        sites: sites,
+        initialSelection: a.sites,
       ),
     );
     if (selection == null) return; // annulé

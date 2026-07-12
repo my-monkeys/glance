@@ -4,7 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/models/models.dart';
 
 /// Ce que montre le panneau central du shell desktop (master-détail).
-enum DesktopView { overview, site, direct, settings }
+/// (Le temps réel est fusionné dans [overview], pas un onglet séparé.)
+enum DesktopView { overview, site, settings }
 
 @immutable
 class DesktopNav {
@@ -24,7 +25,6 @@ class DesktopNavNotifier extends Notifier<DesktopNav> {
 
   void overview() => state = const DesktopNav();
   void openSite(Site s) => state = DesktopNav(view: DesktopView.site, site: s);
-  void direct() => state = const DesktopNav(view: DesktopView.direct);
   void settings() => state = const DesktopNav(view: DesktopView.settings);
 }
 

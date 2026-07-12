@@ -9,6 +9,7 @@ import '../../data/repository/accounts_repository.dart';
 import '../../state/providers.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
+import '../root_scaffold.dart';
 import '../widgets/common.dart';
 import '../widgets/field.dart';
 import 'site_picker.dart';
@@ -67,13 +68,25 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
       final provider = buildProvider(account, creds);
       final sites = await provider.listSites();
       if (!mounted) return;
-      // Étape 2 : sélection des sites.
-      final selection = await Navigator.of(context).push<List<String>?>(
-        MaterialPageRoute(
-          builder: (_) => SitePickerScreen(
-            providerName: _kind.displayName,
-            sites: sites,
-          ),
+      if (sites.isEmpty) {
+        // Aucun site listé : le fournisseur ne sait pas énumérer (ex. Plausible
+        // sans accès Sites API) et aucun domaine n'a été saisi. On bloque avant
+        // de créer un compte vide, avec un message actionnable.
+        setState(() {
+          _busy = false;
+          _error = _kind == ProviderKind.plausible
+              ? 'Aucun site listé automatiquement. Renseignez le domaine à '
+                  'suivre (le listing auto nécessite une clé avec accès « Sites »).'
+              : 'Aucun site trouvé pour ce compte.';
+        });
+        return;
+      }
+      // Étape 2 : sélection des sites (modale sur desktop, page sur mobile).
+      final selection = await showGlanceModal<List<String>?>(
+        context,
+        SitePickerScreen(
+          providerName: _kind.displayName,
+          sites: sites,
         ),
       );
       if (selection == null) {

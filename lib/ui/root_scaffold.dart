@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/models/models.dart';
+import '../theme/palette.dart';
 import 'add/add_source_screen.dart';
 import 'desktop/desktop_shell.dart';
 import 'detail/detail_screen.dart';
@@ -24,11 +25,39 @@ void openSite(BuildContext context, Site site) {
   );
 }
 
-/// Pousse l'écran d'ajout de source.
-void openAddSource(BuildContext context) {
-  Navigator.of(context).push(
-    MaterialPageRoute(builder: (_) => const AddSourceScreen()),
+/// Présente un écran de flux (ajout de source, choix des sites…) : sur desktop,
+/// en **modale centrée** (taille type téléphone) avec un backdrop assombri ;
+/// sur mobile, en page plein écran poussée sur la pile. Renvoie la valeur que
+/// l'écran passe à `Navigator.pop`.
+Future<T?> showGlanceModal<T>(BuildContext context, Widget child) {
+  final desktop = MediaQuery.of(context).size.width >= kDesktopBreakpoint;
+  if (!desktop) {
+    return Navigator.of(context)
+        .push<T>(MaterialPageRoute(builder: (_) => child));
+  }
+  final p = context.glance;
+  return showDialog<T>(
+    context: context,
+    barrierColor: Colors.black.withValues(alpha: 0.62),
+    barrierDismissible: true,
+    builder: (_) => Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 420, maxHeight: 680),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(22),
+          child: Material(
+            color: p.bg,
+            child: SizedBox(width: 420, height: 680, child: child),
+          ),
+        ),
+      ),
+    ),
   );
+}
+
+/// Ouvre l'écran d'ajout de source (modale sur desktop, page sur mobile).
+void openAddSource(BuildContext context) {
+  showGlanceModal<void>(context, const AddSourceScreen());
 }
 
 class RootScaffold extends ConsumerStatefulWidget {
