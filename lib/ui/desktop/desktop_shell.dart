@@ -221,15 +221,43 @@ class _OverviewTile extends StatelessWidget {
               ],
             ),
           ),
-          if (live > 0) ...[
-            PulseDot(size: 7, color: p.accent),
-            const SizedBox(width: 8),
-          ],
           if (!loading)
-            Text(fmtInt(visitors),
-                style: GT.stat(17, color: selected ? p.fg : p.fg)),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Total de la période (pas le direct).
+                Text(fmtInt(visitors), style: GT.stat(17, color: p.fg)),
+                // Direct : sous la valeur + label explicite pour ne pas
+                // confondre avec le total de la période.
+                if (live > 0) ...[
+                  const SizedBox(height: 3),
+                  _LiveTag(count: live),
+                ],
+              ],
+            ),
         ],
       ),
+    );
+  }
+}
+
+/// Petit indicateur « N live » (point qui pulse + compte + label), utilisé sous
+/// une valeur totale pour bien la distinguer des visiteurs en direct.
+class _LiveTag extends StatelessWidget {
+  const _LiveTag({required this.count});
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.glance;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        PulseDot(size: 6, color: p.accent),
+        const SizedBox(width: 4),
+        Text('$count live', style: GT.mono(10, color: p.accent)),
+      ],
     );
   }
 }
