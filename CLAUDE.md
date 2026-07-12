@@ -51,7 +51,7 @@ La sélection de sites est éditable après coup : Réglages → tap sur le comp
 
 ## Graphiques (point clé de la demande)
 
-- `ui/widgets/glance_chart.dart` (fl_chart) : courbe **lissée** (`isCurved`, `curveSmoothness`, cap/join round), **aire dégradée**, **échelle Y arrondie**, labels X selon la granularité, tooltip tactile. Deux courbes (visiteurs + pages vues) avec légende sur home/détail. Remplace la barre de la maquette. Sparkline compacte des cartes = `ui/widgets/sparkline.dart`.
+- `ui/widgets/glance_chart.dart` (fl_chart) : courbe **lissée** (`isCurved`, `curveSmoothness`, cap/join round), **aire dégradée**, **échelle Y arrondie**, labels X selon la granularité, tooltip tactile. Trois courbes — **Visiteurs** (vert, aire), **Visites** (orange), **Pages vues** (gris) — avec légende cliquable (masquer/afficher) sur home/détail. La courbe orange n'apparaît que si la série porte `visits` (cf. gotcha `sessions ≠ visites`). Remplace la barre de la maquette. Sparkline compacte des cartes = `ui/widgets/sparkline.dart`.
 - `ui/widgets/events_chart.dart` : **multi-lignes, une couleur par événement** (palette `kEventPalette`), échelle Y partagée, tooltip listant chaque événement. Onglet Événements du détail : légende = puces cliquables (cocher/décocher les courbes ; au-delà de 6 events les moins fréquents sont masqués par défaut), barres de répartition colorées assorties.
 - Helpers partagés dans `ui/widgets/chart_util.dart` (`chartNiceMax`, `chartTooltipDate`).
 
@@ -61,7 +61,7 @@ La sélection de sites est éditable après coup : Réglages → tap sur le comp
 - Auth : `POST /api/auth/login` {username,password} → `{token, user:{isAdmin,role}}`. Bearer réutilisé, re-login auto sur 401.
 - **Liste des sites** : `/api/websites` ne renvoie **que** les sites possédés/partagés → un compte **admin** doit passer par **`/api/admin/websites`** (routage selon `isAdmin`).
 - `/api/websites/:id/stats` → nombres **plats** `{pageviews,visitors,visits,bounces,totaltime}` (le champ `comparison` n'est pas peuplé sans params dédiés → on fait un **2e appel** sur la période précédente pour le delta).
-- `/api/websites/:id/pageviews?unit=&timezone=` → `{pageviews:[{x,y}], sessions:[{x,y}]}`, `x` = `"YYYY-MM-DD HH:MM:SS"`. On remplit des buckets continus.
+- `/api/websites/:id/pageviews?unit=&timezone=` → `{pageviews:[{x,y}], sessions:[{x,y}]}`, `x` = `"YYYY-MM-DD HH:MM:SS"`. On remplit des buckets continus. **`sessions` = visiteurs uniques par bucket, pas les visites** (cf. gotchas).
 - `/api/websites/:id/active` → `{visitors:N}`.
 - `/api/websites/:id/metrics?type=` : **`path`** (pages, ⚠️ pas `url` en v3), `referrer` (sources), `country` (pays).
 
@@ -96,6 +96,8 @@ Umami `uuu.my-monkey.fr` (cookie-server). Un utilisateur **service** dédié `gl
 - **`Cannot remove from an unmodifiable list`** : `Account.decodeList` renvoie `growable:false` ; `loadAccounts()` doit renvoyer une copie modifiable.
 - **Delta « explosif »** : quand la période précédente ≈ 0 (Umami récemment ajouté), le % explose. Au-delà de +400 %, `DeltaText` bascule en multiplicateur « ×N ».
 - Umami v3 : `type=path` (pas `url`) ; sites admin via `/api/admin/websites` ; deltas via 2e appel stats.
+- **⚠️ `sessions` de `/pageviews` = visiteurs *uniques*, PAS les visites.** Vérifié sur toutes les instances/granularités : la série `sessions` de `/api/websites/:id/pageviews` est *strictement égale* aux `visitors` de `/stats` par bucket (une personne = 1 session/bucket). Les **visites** (`visit_id`, navigations distinctes) sont un autre nombre (≥ visiteurs) que **Umami n'expose pas en série** → reconstituées par un appel `/stats` par point (`visitsPerBucket`). Donc `SeriesPoint.visitors` (vert) vient de `sessions`, `SeriesPoint.pageviews` (gris) de `pageviews`, `SeriesPoint.visits` (orange, nullable) de `visitsPerBucket`. Ne PAS retomber dans le piège « sessions = visites » (ça donnait vert = orange superposées). Plausible, lui, renvoie visitors/visits/pageviews en un appel.
+- **Courbe orange « Visites » de l'accueil = coûteuse** : agrégée sur tous les sites via `siteVisitsProvider` (1 `/stats` par bucket × site), sémaphore dédié `visitsGateProvider`, non rafraîchie au tick d'auto-refresh (sinon l'agrégat tout-ou-rien ne se complète jamais). Avec beaucoup de sites (compte admin qui voit tout) le premier calcul prend du temps puis reste en cache — sélectionner ses sites garde l'accueil rapide.
 
 ## Pas encore fait
 
