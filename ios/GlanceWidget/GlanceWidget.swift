@@ -187,13 +187,21 @@ struct Provider: TimelineProvider {
 
 // MARK: - Vues
 
-struct Header: View {
+/// Titre sur 2 lignes : nom + période (sans troncature).
+struct TitleLines: View {
+    var title: String = "Tous les sites"
     let periodLabel: String
     var body: some View {
-        Text("TOUS LES SITES\(periodLabel.isEmpty ? "" : " · \(periodLabel.uppercased())")")
-            .font(.system(size: 10, weight: .semibold, design: .monospaced))
-            .foregroundStyle(GT.fg2)
-            .lineLimit(1)
+        VStack(alignment: .leading, spacing: 1) {
+            Text(title)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(GT.fg).lineLimit(1).minimumScaleFactor(0.8)
+            if !periodLabel.isEmpty {
+                Text(periodLabel)
+                    .font(.system(size: 10.5, weight: .medium, design: .monospaced))
+                    .foregroundStyle(GT.fg3).lineLimit(1)
+            }
+        }
     }
 }
 
@@ -208,22 +216,53 @@ struct EmptyStateView: View {
     }
 }
 
+/// En-tête sur 2 lignes (titre + période à gauche) avec les stats à droite.
+struct TitleStatsRow: View {
+    let title: String
+    let periodLabel: String
+    let value: Int
+    let delta: Double?
+    var valueSize: CGFloat = 27
+    var titleLines: Int = 1
+    var showPeriod: Bool = true
+    var body: some View {
+        HStack(alignment: .top) {
+            VStack(alignment: .leading, spacing: 1) {
+                Text(title)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(GT.fg).lineLimit(titleLines).minimumScaleFactor(0.8)
+                if showPeriod && !periodLabel.isEmpty {
+                    Text(periodLabel)
+                        .font(.system(size: 11, weight: .medium, design: .monospaced))
+                        .foregroundStyle(GT.fg3).lineLimit(1)
+                }
+            }
+            Spacer(minLength: 6)
+            VStack(alignment: .trailing, spacing: 1) {
+                Text(fmtInt(value))
+                    .font(.system(size: valueSize, weight: .bold, design: .rounded))
+                    .foregroundStyle(GT.fg).lineLimit(1).minimumScaleFactor(0.5)
+                DeltaLabel(pct: delta, size: 11)
+            }
+        }
+    }
+}
+
 struct SmallView: View {
     let d: GlanceData
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Header(periodLabel: d.periodLabel)
-            Spacer(minLength: 4)
-            Text(fmtInt(d.totalVisitors))
-                .font(.system(size: 34, weight: .bold, design: .rounded))
-                .foregroundStyle(GT.fg).minimumScaleFactor(0.6).lineLimit(1)
-            HStack(spacing: 6) {
-                DeltaLabel(pct: d.totalDelta)
-                Text("visiteurs").font(.system(size: 11)).foregroundStyle(GT.fg2)
-            }
-            Spacer(minLength: 6)
+            // Titre sur 2 lignes à gauche, stats à droite (période masquée ici,
+            // gardée sur les grandes tailles).
+            TitleStatsRow(
+                title: "Tous les sites", periodLabel: d.periodLabel,
+                value: d.totalVisitors, delta: d.totalDelta,
+                valueSize: 24, titleLines: 2, showPeriod: false
+            )
+            Spacer(minLength: 8)
             SparkView(points: d.totalSpark)
-                .frame(height: 30)
+                .frame(maxWidth: .infinity)
+                .frame(height: 42)
         }
     }
 }
@@ -255,8 +294,8 @@ struct MediumView: View {
     var body: some View {
         HStack(alignment: .top, spacing: 16) {
             VStack(alignment: .leading, spacing: 0) {
-                Header(periodLabel: d.periodLabel)
-                Spacer(minLength: 2)
+                TitleLines(periodLabel: d.periodLabel)
+                Spacer(minLength: 4)
                 Text(fmtInt(d.totalVisitors))
                     .font(.system(size: 30, weight: .bold, design: .rounded))
                     .foregroundStyle(GT.fg).minimumScaleFactor(0.6).lineLimit(1)
@@ -282,20 +321,13 @@ struct LargeView: View {
     let d: GlanceData
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Header(periodLabel: d.periodLabel)
-                    HStack(alignment: .firstTextBaseline, spacing: 8) {
-                        Text(fmtInt(d.totalVisitors))
-                            .font(.system(size: 32, weight: .bold, design: .rounded))
-                            .foregroundStyle(GT.fg)
-                        DeltaLabel(pct: d.totalDelta, size: 13)
-                    }
-                }
-                Spacer()
-                SparkView(points: d.totalSpark)
-                    .frame(width: 110, height: 40)
-            }
+            // Titre + stats en haut, courbe pleine largeur en dessous.
+            TitleStatsRow(
+                title: "Tous les sites", periodLabel: d.periodLabel,
+                value: d.totalVisitors, delta: d.totalDelta, valueSize: 32
+            )
+            SparkView(points: d.totalSpark)
+                .frame(maxWidth: .infinity).frame(height: 46)
             Divider().overlay(GT.line)
             VStack(spacing: 0) {
                 ForEach(Array(d.sites.prefix(6))) { s in
