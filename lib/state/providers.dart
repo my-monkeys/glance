@@ -42,6 +42,13 @@ final sharedPrefsProvider = Provider<SharedPreferences>(
 final secureStorageProvider = Provider<FlutterSecureStorage>(
   (ref) => const FlutterSecureStorage(
     iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
+    // macOS : trousseau fichier legacy (pas le « data protection keychain »),
+    // qui n'exige PAS l'entitlement keychain-access-groups → signature ad-hoc OK
+    // pour une app distribuée hors Mac App Store (cf. entitlements macOS).
+    mOptions: MacOsOptions(
+      accessibility: KeychainAccessibility.first_unlock,
+      usesDataProtectionKeychain: false,
+    ),
   ),
 );
 
