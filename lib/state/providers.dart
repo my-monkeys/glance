@@ -145,6 +145,16 @@ final sitesProvider = FutureProvider<List<Site>>((ref) async {
   return all;
 });
 
+/// Santé d'un compte (auth valide ?) pour signaler un souci dans les réglages.
+/// Diagnostic léger, mis en cache : recalculé au retour sur l'écran passé le TTL.
+final accountHealthProvider =
+    FutureProvider.autoDispose.family<AccountHealth, String>((ref, accountId) async {
+  cacheFor(ref, _cacheTtl);
+  final reg = ref.watch(providerRegistryProvider);
+  final p = await reg.forAccount(accountId);
+  return p.health();
+});
+
 /// Tous les sites d'un compte (pour l'écran de sélection), sans filtre.
 final accountSitesProvider =
     FutureProvider.family<List<Site>, String>((ref, accountId) async {

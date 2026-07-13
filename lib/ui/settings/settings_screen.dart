@@ -3,10 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/models/account.dart';
 import '../../data/models/period.dart';
+import '../../data/providers/analytics_provider.dart';
 import '../../state/providers.dart';
 import '../../state/settings.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
+import '../add/add_source_screen.dart';
 import '../add/site_picker.dart';
 import '../root_scaffold.dart';
 import '../widgets/chip.dart';
@@ -42,22 +44,38 @@ class SettingsScreen extends ConsumerWidget {
         _Group(
           children: [
             for (final a in accounts)
-              _Row(
-                leading: Mark(
-                  a.kind.initial,
-                  size: 30,
-                  circle: false,
-                ),
-                title: a.title,
-                subtitle:
-                    '${a.kind.displayName} · ${siteCount(a)} site${siteCount(a) > 1 ? 's' : ''}',
-                trailing: Icon(
-                  Icons.chevron_right_rounded,
-                  color: p.fg3,
-                  size: 22,
-                ),
-                onTap: () => _openAccount(context, ref, a),
-              ),
+              Builder(builder: (context) {
+                final health = ref.watch(accountHealthProvider(a.id)).value;
+                final problem = health == AccountHealth.badAuth ||
+                    health == AccountHealth.unreachable;
+                return _Row(
+                  leading: Mark(
+                    a.kind.initial,
+                    size: 30,
+                    circle: false,
+                  ),
+                  title: a.title,
+                  subtitle: problem
+                      ? (health == AccountHealth.badAuth
+                          ? 'Identifiants ou clé API refusés'
+                          : 'Instance injoignable')
+                      : '${a.kind.displayName} · ${siteCount(a)} site${siteCount(a) > 1 ? 's' : ''}',
+                  subtitleColor: problem ? p.neg : null,
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (problem)
+                        Padding(
+                          padding: const EdgeInsets.only(right: 6),
+                          child: Icon(Icons.error_outline_rounded,
+                              color: p.neg, size: 19),
+                        ),
+                      Icon(Icons.chevron_right_rounded, color: p.fg3, size: 22),
+                    ],
+                  ),
+                  onTap: () => _openAccount(context, ref, a),
+                );
+              }),
             _Row(
               leading: Icon(Icons.add, color: p.accent, size: 22),
               title: 'Ajouter une source',
@@ -234,6 +252,21 @@ class SettingsScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             ListTile(
+              leading: Icon(Icons.tune_rounded, color: ctx.glance.fg),
+              title: Text(
+                'Modifier la source',
+                style: GT.body(16, color: ctx.glance.fg),
+              ),
+              subtitle: Text(
+                'URL, identifiants, clé API…',
+                style: GT.body(12.5, color: ctx.glance.fg3),
+              ),
+              onTap: () {
+                Navigator.of(ctx).pop();
+                _editSource(context, ref, a);
+              },
+            ),
+            ListTile(
               leading: Icon(Icons.checklist_rounded, color: ctx.glance.fg),
               title: Text(
                 'Choisir les sites',
@@ -259,6 +292,15 @@ class SettingsScreen extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Future<void> _editSource(BuildContext context, WidgetRef ref, Account a) async {
+    final creds = await ref.read(accountsRepoProvider).credentials(a.id);
+    if (!context.mounted) return;
+    await showGlanceModal<void>(
+      context,
+      AddSourceScreen(editing: a, initialCreds: creds),
     );
   }
 
@@ -357,6 +399,7 @@ class _Row extends StatelessWidget {
     this.trailing,
     this.onTap,
     this.titleColor,
+    this.subtitleColor,
   });
 
   final String title;
@@ -365,6 +408,7 @@ class _Row extends StatelessWidget {
   final Widget? trailing;
   final VoidCallback? onTap;
   final Color? titleColor;
+  final Color? subtitleColor;
 
   @override
   Widget build(BuildContext context) {
@@ -390,7 +434,8 @@ class _Row extends StatelessWidget {
                   ),
                   if (subtitle != null) ...[
                     const SizedBox(height: 2),
-                    Text(subtitle!, style: GT.body(12, color: p.fg2)),
+                    Text(subtitle!,
+                        style: GT.body(12, color: subtitleColor ?? p.fg2)),
                   ],
                 ],
               ),

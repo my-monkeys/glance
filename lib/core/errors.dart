@@ -5,6 +5,7 @@ String friendlyError(Object e) {
   if (e is UnimplementedError) {
     return e.message ?? 'Fonctionnalité indisponible.';
   }
+  if (e is StateError) return e.message; // messages métier (ex. verify)
   if (e is DioException) {
     final code = e.response?.statusCode;
     if (code == 401 || code == 403) return 'Identifiants refusés.';
