@@ -58,7 +58,15 @@ class _SitePickerScreenState extends State<SitePickerScreen> {
 
   void _toggle(String id) {
     setState(() {
-      _all = false;
+      if (_all) {
+        // On quitte « tous » : matérialiser la sélection complète d'abord, pour
+        // que taper une carte cochée retire bien CE site (et pas l'inverse —
+        // sinon on se retrouverait à ne suivre que le site tapé).
+        _all = false;
+        _selected
+          ..clear()
+          ..addAll(widget.sites.map((s) => s.id));
+      }
       if (_selected.contains(id)) {
         _selected.remove(id);
       } else {
@@ -157,7 +165,9 @@ class _SitePickerScreenState extends State<SitePickerScreen> {
                         horizontal: 15,
                         vertical: 12,
                       ),
-                      selected: !_all && _selected.contains(s.id),
+                      // En mode « tous », les cartes sont affichées comme
+                      // sélectionnées (cohérent avec la coche) → taper = retirer.
+                      selected: _all || _selected.contains(s.id),
                       onTap: () => _toggle(s.id),
                       child: Row(
                         children: [

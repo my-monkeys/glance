@@ -147,7 +147,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               else if (sites.isEmpty && sitesAsync.isLoading)
                 const _HomeSkeleton()
               else if (sites.isEmpty)
-                _EmptyBox(onAdd: () => openAddSource(context))
+                _EmptyBox(
+                  onChoose: widget.onGoSettings,
+                  onAdd: () => openAddSource(context),
+                )
               else ...[
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -603,8 +606,12 @@ class _ErrorBox extends StatelessWidget {
   }
 }
 
+/// Vide quand une source existe mais ne suit aucun site (tout masqué, ou
+/// fournisseur sans site) : le bon remède est d'aller choisir les sites, pas
+/// d'ajouter une 2ᵉ source — cette dernière reste offerte en action secondaire.
 class _EmptyBox extends StatelessWidget {
-  const _EmptyBox({required this.onAdd});
+  const _EmptyBox({required this.onChoose, required this.onAdd});
+  final VoidCallback onChoose;
   final VoidCallback onAdd;
 
   @override
@@ -614,18 +621,27 @@ class _EmptyBox extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 60),
       child: Column(
         children: [
-          Text('Aucun site', style: GT.display(22, color: p.fg)),
+          Text('Aucun site affiché', style: GT.display(22, color: p.fg)),
           const SizedBox(height: 8),
           Text(
-            'Ajoute une source pour voir tes stats.',
+            'Aucun site suivi pour le moment. Choisis ceux à afficher.',
+            textAlign: TextAlign.center,
             style: GT.body(14, color: p.fg2),
           ),
           const SizedBox(height: 18),
           GestureDetector(
+            onTap: onChoose,
+            child: Text(
+              'Choisir les sites',
+              style: GT.body(15, weight: 600, color: p.accent),
+            ),
+          ),
+          const SizedBox(height: 14),
+          GestureDetector(
             onTap: onAdd,
             child: Text(
               '+ Ajouter une source',
-              style: GT.body(15, weight: 600, color: p.accent),
+              style: GT.body(13.5, color: p.fg3),
             ),
           ),
         ],

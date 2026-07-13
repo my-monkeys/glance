@@ -103,7 +103,9 @@ class _Sidebar extends ConsumerWidget {
     // Filtre « masquer les sites à 0 » (n'affecte que les sites chargés).
     final loaded =
         hideZero ? sorted.where((c) => c.summary.visitors > 0).toList() : sorted;
-    final shownCount = loaded.length + pending.length;
+    // Masqués = sites chargés à 0 visiteur écartés par le filtre (les pending,
+    // pas encore chargés, restent affichés).
+    final hiddenCount = sorted.length - loaded.length;
 
     return Container(
       color: p.bg,
@@ -142,7 +144,15 @@ class _Sidebar extends ConsumerWidget {
                   padding: const EdgeInsets.fromLTRB(10, 12, 10, 6),
                   child: Row(
                     children: [
-                      Expanded(child: SectionLabel('Sites ($shownCount)')),
+                      SectionLabel('Sites (${sites.length})'),
+                      if (hiddenCount > 0) ...[
+                        const SizedBox(width: 8),
+                        Text(
+                          '$hiddenCount masqué${hiddenCount > 1 ? 's' : ''}',
+                          style: GT.body(11, color: p.fg3),
+                        ),
+                      ],
+                      const Spacer(),
                       _HideZeroToggle(
                         on: hideZero,
                         onTap: () => ref
@@ -574,6 +584,16 @@ class _OverviewState extends ConsumerState<_Overview> {
     final refreshing = totals.loading && data.cards.isNotEmpty;
     final dateLabel = DateFormat('EEE d MMM', 'fr_FR').format(DateTime.now());
 
+    // Compte(s) présent(s) mais aucun site suivi → dashboard vide trompeur :
+    // on montre un état dédié plutôt qu'un graphe vide et des KPI à zéro.
+    final noSites =
+        ref.watch(sitesProvider.select((a) => a.hasValue && a.value!.isEmpty));
+    if (noSites) {
+      return _OverviewNoSites(
+        onChoose: () => ref.read(desktopNavProvider.notifier).settings(),
+      );
+    }
+
     return Stack(
       children: [
         ListView(
@@ -812,6 +832,59 @@ class _DesktopEmpty extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Aperçu quand des comptes existent mais ne suivent aucun site (tout masqué).
+/// Évite un tableau de bord tout-à-zéro qui a l'air cassé ; oriente vers le
+/// choix des sites dans les réglages.
+class _OverviewNoSites extends StatelessWidget {
+  const _OverviewNoSites({required this.onChoose});
+  final VoidCallback onChoose;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.glance;
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 380),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: p.accentSoft,
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child:
+                  Icon(Icons.visibility_off_rounded, color: p.accent, size: 28),
+            ),
+            const SizedBox(height: 20),
+            Text('Aucun site affiché', style: GT.display(26, color: p.fg)),
+            const SizedBox(height: 8),
+            Text(
+              'Vos comptes ne suivent aucun site pour le moment. '
+              'Choisissez les sites à afficher depuis les réglages.',
+              textAlign: TextAlign.center,
+              style: GT.body(14.5, color: p.fg2),
+            ),
+            const SizedBox(height: 24),
+            FilledButton.icon(
+              onPressed: onChoose,
+              icon: const Icon(Icons.tune_rounded, size: 18),
+              label: const Text('Choisir les sites'),
+              style: FilledButton.styleFrom(
+                backgroundColor: p.accent,
+                foregroundColor: p.accentInk,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               ),
             ),
           ],
