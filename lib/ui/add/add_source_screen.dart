@@ -75,8 +75,9 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
         setState(() {
           _busy = false;
           _error = _kind == ProviderKind.plausible
-              ? 'Aucun site listé automatiquement. Renseignez le domaine à '
-                  'suivre (le listing auto nécessite une clé avec accès « Sites »).'
+              ? 'Aucun site listé automatiquement : votre instance n\'expose pas '
+                  'l\'API de listing (Plausible Community Edition). Renseignez le '
+                  'domaine à suivre ci-dessus.'
               : 'Aucun site trouvé pour ce compte.';
         });
         return;
