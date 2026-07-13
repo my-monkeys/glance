@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Widget « Site » : configurable (choix du site à l'ajout), cible 2×2. -->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="140dp"
+    android:minHeight="110dp"
+    android:targetCellWidth="2"
+    android:targetCellHeight="2"
+    android:minResizeWidth="140dp"
+    android:minResizeHeight="80dp"
+    android:maxResizeWidth="360dp"
+    android:maxResizeHeight="200dp"
+    android:resizeMode="horizontal|vertical"
+    android:widgetCategory="home_screen"
+    android:configure="fr.mymonkey.glance.GlanceSiteConfigActivity"
+    android:initialLayout="@layout/glance_widget_loading"
+    android:description="@string/glance_site_widget_description"
+    android:previewLayout="@layout/glance_site_widget"
+    android:updatePeriodMillis="1800000" />

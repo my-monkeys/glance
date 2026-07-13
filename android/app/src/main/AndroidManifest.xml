@@ -37,6 +37,26 @@
                 android:resource="@xml/glance_overview_widget_info" />
         </receiver>
 
+        <!-- Widget « Site » configurable (choix du site à l'ajout). -->
+        <receiver
+            android:name=".GlanceSiteWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/glance_site_widget_info" />
+        </receiver>
+        <activity
+            android:name=".GlanceSiteConfigActivity"
+            android:exported="true"
+            android:theme="@android:style/Theme.DeviceDefault.Light.Dialog.NoActionBar">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

@@ -84,11 +84,15 @@ class WidgetPublisher {
     ];
     await set('all_sites', jsonEncode(all));
 
-    // Recharge les timelines des widgets. iOSName = `kind` du widget.
-    await HomeWidget.updateWidget(iOSName: 'GlanceOverviewWidget');
+    // Recharge les timelines/vues des widgets (iOSName = `kind`, androidName =
+    // classe du provider).
+    await HomeWidget.updateWidget(
+      iOSName: 'GlanceOverviewWidget',
+      androidName: 'GlanceOverviewWidgetProvider',
+    );
     await HomeWidget.updateWidget(
       iOSName: 'GlanceSiteWidget',
-      androidName: 'GlanceOverviewWidgetProvider',
+      androidName: 'GlanceSiteWidgetProvider',
     );
   }
 }
