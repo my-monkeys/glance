@@ -55,11 +55,11 @@ Glance est un projet du collectif My-Monkey. Vos retours sont les bienvenus.
 
 | Champ | Valeur | Statut |
 |---|---|---|
-| URL de support | `https://glance.my-monkey.fr` (ou page support dédiée) | ⚠️ à créer/héberger |
-| URL marketing (option) | `https://glance.my-monkey.fr` | ⚠️ à créer |
-| Politique de confidentialité | `https://glance.my-monkey.fr/privacy` | ⚠️ **obligatoire** — à héberger (texte prêt ci-dessous) |
+| URL de support | `https://glance-analytics.com` (ou page support dédiée) | ⚠️ à créer/héberger |
+| URL marketing (option) | `https://glance-analytics.com` | ⚠️ à créer |
+| Politique de confidentialité | `https://glance-analytics.com/privacy` | ⚠️ **obligatoire** — à héberger (texte prêt ci-dessous) |
 
-> Option rapide : une petite page statique déployée via `.monkey` sur `glance.my-monkey.fr` (landing + /privacy). Je peux la faire.
+> Option rapide : une petite page statique déployée via `.monkey` sur `glance-analytics.com` (landing + /privacy). Je peux la faire.
 
 ## Confidentialité App Store (App Privacy)
 
@@ -104,7 +104,7 @@ trousseau). Runbook : **`docs/deploy-mobile-ios.md`**. Étapes :
 
 - [x] Icône iOS — concept « Courbe » (sparkline), `store/icon_master.svg` → appiconset
 - [x] Captures d'écran stylisées 6.9" (1290×2796) — 5 visuels dans `store/screenshots/`
-- [ ] Page confidentialité + support hébergée (`glance.my-monkey.fr/privacy`)
+- [ ] Page confidentialité + support hébergée (`glance-analytics.com/privacy`)
 - [ ] Créer l'app dans App Store Connect + connecter le repo à Codemagic (cf. `docs/deploy-mobile-ios.md`)
 
 ### Captures (ordre suggéré dans ASC)

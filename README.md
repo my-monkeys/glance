@@ -8,7 +8,7 @@ A clean, fast mobile & desktop client for your privacy-friendly web analytics â€
 [Umami](https://umami.is) and [Plausible](https://plausible.io) â€” with all your
 sites in one place.
 
-[![Website](https://img.shields.io/badge/Website-glance.my--monkey.fr-3B7A5A?style=for-the-badge)](https://glance.my-monkey.fr)
+[![Website](https://img.shields.io/badge/Website-glance--analytics.com-3B7A5A?style=for-the-badge)](https://glance-analytics.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-969696?style=for-the-badge)](LICENSE)
 [![Flutter](https://img.shields.io/badge/Built%20with-Flutter-0468D7?style=for-the-badge)](https://flutter.dev)
 

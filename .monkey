@@ -1,4 +1,4 @@
 {
-  "target": "glance.my-monkey.fr",
+  "target": "glance-analytics.com",
   "source": "./store/site/"
 }
