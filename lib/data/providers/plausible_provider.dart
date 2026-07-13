@@ -7,10 +7,11 @@ import '../models/period.dart';
 import 'analytics_provider.dart';
 
 /// Client Plausible (Stats API v2 — `POST /api/v2/query`, via clé API). La Stats
-/// API ne liste pas les sites ; pour lister, on se connecte à l'interface web
-/// (email + mot de passe) et on lit l'endpoint interne `/api/sites` (cf.
-/// [_listViaWeb]). Sinon, fallback sur le domaine saisi. Chaque requête de stats
-/// cible `site.id` (le domaine).
+/// API ne liste pas les sites, et en Community Edition la Sites API Bearer
+/// `/api/v1/sites` n'existe pas (route Enterprise-only) : pour lister, on se
+/// connecte à l'interface web (email + mot de passe) et on parse la page `/sites`
+/// paginée (cf. [_listViaWeb]). Sinon, fallback sur le domaine saisi. Chaque
+/// requête de stats cible `site.id` (le domaine).
 class PlausibleProvider extends AnalyticsProvider {
   PlausibleProvider(super.account, super.creds) {
     _dio = Dio(
@@ -40,6 +41,12 @@ class PlausibleProvider extends AnalyticsProvider {
   }
 
   static final _dateFmt = DateFormat('yyyy-MM-dd');
+
+  // Listing web `/sites` : chaque carte de site porte data-domain="<domaine>"
+  // (une occurrence par site ; les cartes « tous les sites »/CTA n'en ont pas).
+  // Le bloc de pagination affiche « Page N of M » (absent s'il n'y a qu'une page).
+  static final _siteDomain = RegExp(r'data-domain="([^"]+)"');
+  static final _pageOf = RegExp(r'Page\s+(\d+)\s+of\s+(\d+)');
 
   Future<Map<String, dynamic>> _query(Map<String, dynamic> body) async {
     final r = await _dio.post('/api/v2/query', data: body);
@@ -74,10 +81,10 @@ class PlausibleProvider extends AnalyticsProvider {
   }
 
   /// Liste les sites en se connectant à l'interface web (email + mot de passe),
-  /// puis en lisant l'endpoint interne `/api/sites` (celui qu'utilise le
-  /// dashboard). La Stats API de Plausible Community Edition n'expose pas de
-  /// listing des sites ; on passe donc par la session web. Renvoie une liste
-  /// vide si email/mdp absents ou si le flux échoue (→ fallback domaine manuel).
+  /// puis en parsant la page paginée `/sites` (le HTML rendu côté serveur). Ni la
+  /// Stats API ni (en Community Edition) la Sites API Bearer n'exposent le listing
+  /// des sites ; on passe donc par la session web. Renvoie une liste vide si
+  /// email/mdp absents ou si le flux échoue (→ fallback domaine manuel).
   /// N.B. : endpoints internes non documentés — cette voie sert uniquement à
   /// lister/rafraîchir ; les stats passent toujours par la clé API (stable).
   Future<List<Site>> _listViaWeb() async {
@@ -143,30 +150,36 @@ class PlausibleProvider extends AnalyticsProvider {
       // Échec d'auth : Plausible renvoie 200 (re-affiche le login) au lieu de 302.
       if (login.statusCode != 302 && login.statusCode != 303) return const [];
 
-      // 3. GET /api/sites avec la session, paginé. L'endpoint interne pagine
-      //    (souvent ~12/page en ignorant `limit`) → on itère jusqu'à ce qu'une
-      //    page n'apporte plus aucun site (on ne se fie pas au flag has_next_page
-      //    dont le format varie selon la version).
+      // 3. Liste complète des sites. ⚠️ `/api/sites` est l'autocomplete du
+      //    sélecteur (limite 9 EN DUR, sans pagination) et la Sites API Bearer
+      //    `/api/v1/sites` n'existe pas en Community Edition → la seule source
+      //    complète est la page web `/sites`, paginée (page_size plafonné à 100),
+      //    dont on parse le HTML rendu côté serveur. Le listing est scopé à
+      //    l'équipe Plausible courante.
+      const pageSize = 100;
       final out = <Site>[];
       final seen = <String>{};
-      for (var page = 1; page <= 100; page++) {
-        final r = await web.get('/api/sites',
-            queryParameters: {'page': page, 'limit': 100},
-            options: Options(headers: cookieHeader()));
-        if (r.statusCode != 200 || r.data is! Map) break;
-        final data = (r.data as Map).cast<String, dynamic>();
-        final list = (data['data'] ?? data['sites']) as List? ?? const [];
-        if (list.isEmpty) break;
-        var added = 0;
-        for (final s in list) {
-          final d = (s is Map ? (s['domain'] ?? s['id']) : s)?.toString() ?? '';
+      for (var page = 1; page <= 200; page++) {
+        final r = await web.get('/sites',
+            queryParameters: {'page': page, 'page_size': pageSize},
+            options: Options(
+              responseType: ResponseType.plain,
+              headers: cookieHeader(),
+            ));
+        if (r.statusCode != 200 || r.data is! String) break;
+        final html = r.data as String;
+        for (final m in _siteDomain.allMatches(html)) {
+          final d = m.group(1)!.trim();
           if (d.isNotEmpty && seen.add(d)) {
             out.add(Site(id: d, accountId: account.id, name: d, domain: d));
-            added++;
           }
         }
-        // Aucun site nouveau (dernière page, ou pagination ignorée) → on arrête.
-        if (added == 0) break;
+        // Arrêt sur l'info de pagination du serveur : « Page N of M » (absent =
+        // page unique) — plus fiable que compter les cartes.
+        final pm = _pageOf.firstMatch(html);
+        if (pm == null || int.parse(pm.group(1)!) >= int.parse(pm.group(2)!)) {
+          break;
+        }
       }
       return out;
     } on DioException {
