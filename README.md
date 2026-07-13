@@ -49,16 +49,14 @@ juggling.
 
 ## Home screen widgets
 
-Keep an eye on your traffic without opening the app. Glance ships iOS widgets in
-every size, plus a configurable **per-site** widget where you pick which site to
-watch.
+Keep an eye on your traffic without opening the app. Glance ships home-screen
+widgets on **iOS and Android** — an overview of all your sites, plus a
+configurable **per-site** widget where you pick which site to watch.
 
 <div align="center">
-<img src="docs/screenshots/widget-medium.png" width="360" alt="Overview widget — all-sites total, trend and the top sites" />
+<img src="docs/screenshots/widget-android.png" width="330" alt="Overview widget — all-sites total, trend and the top sites" />
 &nbsp;&nbsp;
-<img src="docs/screenshots/widget-small.png" width="190" alt="Overview widget, small size — total visitors and sparkline" />
-&nbsp;&nbsp;
-<img src="docs/screenshots/widget-site.png" width="190" alt="Per-site widget — the site you choose, with its visitors and trend" />
+<img src="docs/screenshots/widget-android-site.png" width="205" alt="Per-site widget — the site you choose, with its visitors, trend and page views" />
 </div>
 
 ## Private by design
