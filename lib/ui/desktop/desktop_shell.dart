@@ -92,11 +92,18 @@ class _Sidebar extends ConsumerWidget {
     final sitesAsync = ref.watch(sitesProvider);
     final sites = sitesAsync.value ?? const <Site>[];
 
+    final hideZero = ref.watch(settingsProvider.select((s) => s.hideZeroSites));
+
     // Sites chargés triés par visiteurs, puis ceux encore en chargement.
-    final loaded = [...totals.data.cards]
+    final sorted = [...totals.data.cards]
       ..sort((a, b) => b.summary.visitors.compareTo(a.summary.visitors));
-    final loadedSites = loaded.map((c) => c.site).toSet();
+    // Ensemble des sites déjà chargés (avant filtre) → pending = vraiment non chargés.
+    final loadedSites = sorted.map((c) => c.site).toSet();
     final pending = sites.where((s) => !loadedSites.contains(s)).toList();
+    // Filtre « masquer les sites à 0 » (n'affecte que les sites chargés).
+    final loaded =
+        hideZero ? sorted.where((c) => c.summary.visitors > 0).toList() : sorted;
+    final shownCount = loaded.length + pending.length;
 
     return Container(
       color: p.bg,
@@ -133,7 +140,17 @@ class _Sidebar extends ConsumerWidget {
                 const SizedBox(height: 4),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(10, 12, 10, 6),
-                  child: SectionLabel('Sites (${sites.length})'),
+                  child: Row(
+                    children: [
+                      Expanded(child: SectionLabel('Sites ($shownCount)')),
+                      _HideZeroToggle(
+                        on: hideZero,
+                        onTap: () => ref
+                            .read(settingsProvider.notifier)
+                            .setHideZeroSites(!hideZero),
+                      ),
+                    ],
+                  ),
                 ),
                 for (final c in loaded)
                   _SiteTile(
@@ -381,6 +398,49 @@ class _NavTile extends StatelessWidget {
                   weight: selected ? 600 : 400,
                   color: selected ? p.fg : p.fg2)),
         ],
+      ),
+    );
+  }
+}
+
+/// Petit interrupteur « masquer les sites à 0 visiteur » (en-tête de la liste).
+class _HideZeroToggle extends StatelessWidget {
+  const _HideZeroToggle({required this.on, required this.onTap});
+  final bool on;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.glance;
+    return Tooltip(
+      message: on
+          ? 'Afficher tous les sites'
+          : 'Masquer les sites sans visiteur',
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(999),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(999),
+          hoverColor: p.chip.withValues(alpha: 0.6),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  on ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                  size: 14,
+                  color: on ? p.accent : p.fg3,
+                ),
+                const SizedBox(width: 5),
+                Text('≠ 0',
+                    style: GT.mono(10.5,
+                        weight: 600, color: on ? p.accent : p.fg3)),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

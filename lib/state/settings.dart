@@ -31,6 +31,7 @@ class Settings {
     this.directOnlyLive = false,
     this.hiddenSeries = const {},
     this.defaultPeriod = Period.d7,
+    this.hideZeroSites = false,
   });
 
   final ThemeChoice theme;
@@ -42,6 +43,7 @@ class Settings {
   final bool directOnlyLive; // Direct : « Actifs seulement »
   final Set<String> hiddenSeries; // séries masquées sur les gros graphes
   final Period defaultPeriod; // période affichée au lancement
+  final bool hideZeroSites; // masque les sites à 0 visiteur (liste desktop)
 
   Settings copyWith({
     ThemeChoice? theme,
@@ -53,6 +55,7 @@ class Settings {
     bool? directOnlyLive,
     Set<String>? hiddenSeries,
     Period? defaultPeriod,
+    bool? hideZeroSites,
   }) => Settings(
     theme: theme ?? this.theme,
     refreshSeconds: refreshSeconds ?? this.refreshSeconds,
@@ -63,6 +66,7 @@ class Settings {
     directOnlyLive: directOnlyLive ?? this.directOnlyLive,
     hiddenSeries: hiddenSeries ?? this.hiddenSeries,
     defaultPeriod: defaultPeriod ?? this.defaultPeriod,
+    hideZeroSites: hideZeroSites ?? this.hideZeroSites,
   );
 }
 
@@ -76,6 +80,7 @@ class SettingsNotifier extends Notifier<Settings> {
   static const _kDirectOnlyLive = 'glance.direct.onlyLive';
   static const _kHiddenSeries = 'glance.chart.hidden';
   static const _kDefaultPeriod = 'glance.period.default';
+  static const _kHideZeroSites = 'glance.sites.hideZero';
 
   SharedPreferences get _p => ref.read(sharedPrefsProvider);
 
@@ -99,6 +104,7 @@ class SettingsNotifier extends Notifier<Settings> {
           (_p.getStringList(_kHiddenSeries) ?? const <String>[]).toSet(),
       defaultPeriod:
           Period.fromKey(_p.getString(_kDefaultPeriod) ?? Period.d7.key),
+      hideZeroSites: _p.getBool(_kHideZeroSites) ?? false,
     );
   }
 
@@ -117,6 +123,11 @@ class SettingsNotifier extends Notifier<Settings> {
   void setDirectOnlyLive(bool v) {
     _p.setBool(_kDirectOnlyLive, v);
     state = state.copyWith(directOnlyLive: v);
+  }
+
+  void setHideZeroSites(bool v) {
+    _p.setBool(_kHideZeroSites, v);
+    state = state.copyWith(hideZeroSites: v);
   }
 
   void toggleSeries(String key) {
