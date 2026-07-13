@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Palette Glance — thème sombre (mêmes clés, teintes « dark » du widget iOS). -->
+<resources>
+    <color name="gt_accent">#FF5AA57E</color>
+    <color name="gt_bg">#FF1A1712</color>
+    <color name="gt_surface">#FF211D16</color>
+    <color name="gt_fg">#FFF3F0E9</color>
+    <color name="gt_fg2">#FFA69F91</color>
+    <color name="gt_fg3">#FF6E685C</color>
+    <color name="gt_neg">#FFCF7A5F</color>
+    <color name="gt_line">#1AFAF5EB</color>
+</resources>

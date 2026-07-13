@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Widget « Aperçu » Glance (Android). Miroir de la vue Large iOS :
+     en-tête (titre + période / total + delta), courbe pleine largeur, puis
+     top des sites. Les lignes sans donnée sont masquées à l'exécution.
+     RemoteViews exige des IDs uniques → les 5 lignes sont explicites. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/glance_widget_bg"
+    android:padding="16dp">
+
+    <!-- En-tête -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/w_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tous les sites"
+                android:textColor="@color/gt_fg"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-medium" />
+
+            <TextView
+                android:id="@+id/w_period"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="1dp"
+                android:textColor="@color/gt_fg3"
+                android:textSize="11sp"
+                android:fontFamily="monospace" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:gravity="end"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/w_total"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="—"
+                android:textColor="@color/gt_fg"
+                android:textSize="30sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-medium" />
+
+            <TextView
+                android:id="@+id/w_total_delta"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-medium"
+                android:visibility="gone" />
+        </LinearLayout>
+    </RelativeLayout>
+
+    <!-- Courbe totale -->
+    <ImageView
+        android:id="@+id/w_spark"
+        android:layout_width="match_parent"
+        android:layout_height="46dp"
+        android:layout_marginTop="8dp"
+        android:scaleType="fitXY"
+        android:contentDescription="Courbe des visiteurs" />
+
+    <!-- Divider : ImageView (RemoteViews ne supporte pas le type View brut). -->
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="2dp"
+        android:background="@color/gt_line"
+        android:contentDescription="@null" />
+
+    <!-- Top sites : 5 lignes explicites, masquées si pas de donnée -->
+    <LinearLayout
+        android:id="@+id/w_rows"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <!-- Ligne 0 -->
+        <LinearLayout
+            android:id="@+id/w_row_0"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
+            android:visibility="gone">
+            <TextView android:id="@+id/w_name_0" android:layout_width="0dp"
+                android:layout_height="wrap_content" android:layout_weight="1"
+                android:maxLines="1" android:ellipsize="end"
+                android:textColor="@color/gt_fg" android:textSize="13sp"
+                android:fontFamily="sans-serif-medium" />
+            <ImageView android:id="@+id/w_rowspark_0" android:layout_width="32dp"
+                android:layout_height="14dp" android:layout_marginStart="7dp"
+                android:layout_marginEnd="7dp" android:scaleType="fitXY" />
+            <TextView android:id="@+id/w_value_0" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:textColor="@color/gt_fg"
+                android:textSize="14sp" android:textStyle="bold"
+                android:fontFamily="sans-serif-medium" />
+            <TextView android:id="@+id/w_delta_0" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:layout_marginStart="6dp"
+                android:textSize="10sp" android:textStyle="bold"
+                android:fontFamily="sans-serif-medium" android:visibility="gone" />
+        </LinearLayout>
+
+        <!-- Ligne 1 -->
+        <LinearLayout
+            android:id="@+id/w_row_1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
+            android:visibility="gone">
+            <TextView android:id="@+id/w_name_1" android:layout_width="0dp"
+                android:layout_height="wrap_content" android:layout_weight="1"
+                android:maxLines="1" android:ellipsize="end"
+                android:textColor="@color/gt_fg" android:textSize="13sp"
+                android:fontFamily="sans-serif-medium" />
+            <ImageView android:id="@+id/w_rowspark_1" android:layout_width="32dp"
+                android:layout_height="14dp" android:layout_marginStart="7dp"
+                android:layout_marginEnd="7dp" android:scaleType="fitXY" />
+            <TextView android:id="@+id/w_value_1" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:textColor="@color/gt_fg"
+                android:textSize="14sp" android:textStyle="bold"
+                android:fontFamily="sans-serif-medium" />
+            <TextView android:id="@+id/w_delta_1" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:layout_marginStart="6dp"
+                android:textSize="10sp" android:textStyle="bold"
+                android:fontFamily="sans-serif-medium" android:visibility="gone" />
+        </LinearLayout>
+
+        <!-- Ligne 2 -->
+        <LinearLayout
+            android:id="@+id/w_row_2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
+            android:visibility="gone">
+            <TextView android:id="@+id/w_name_2" android:layout_width="0dp"
+                android:layout_height="wrap_content" android:layout_weight="1"
+                android:maxLines="1" android:ellipsize="end"
+                android:textColor="@color/gt_fg" android:textSize="13sp"
+                android:fontFamily="sans-serif-medium" />
+            <ImageView android:id="@+id/w_rowspark_2" android:layout_width="32dp"
+                android:layout_height="14dp" android:layout_marginStart="7dp"
+                android:layout_marginEnd="7dp" android:scaleType="fitXY" />
+            <TextView android:id="@+id/w_value_2" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:textColor="@color/gt_fg"
+                android:textSize="14sp" android:textStyle="bold"
+                android:fontFamily="sans-serif-medium" />
+            <TextView android:id="@+id/w_delta_2" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:layout_marginStart="6dp"
+                android:textSize="10sp" android:textStyle="bold"
+                android:fontFamily="sans-serif-medium" android:visibility="gone" />
+        </LinearLayout>
+
+        <!-- Ligne 3 -->
+        <LinearLayout
+            android:id="@+id/w_row_3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
+            android:visibility="gone">
+            <TextView android:id="@+id/w_name_3" android:layout_width="0dp"
+                android:layout_height="wrap_content" android:layout_weight="1"
+                android:maxLines="1" android:ellipsize="end"
+                android:textColor="@color/gt_fg" android:textSize="13sp"
+                android:fontFamily="sans-serif-medium" />
+            <ImageView android:id="@+id/w_rowspark_3" android:layout_width="32dp"
+                android:layout_height="14dp" android:layout_marginStart="7dp"
+                android:layout_marginEnd="7dp" android:scaleType="fitXY" />
+            <TextView android:id="@+id/w_value_3" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:textColor="@color/gt_fg"
+                android:textSize="14sp" android:textStyle="bold"
+                android:fontFamily="sans-serif-medium" />
+            <TextView android:id="@+id/w_delta_3" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:layout_marginStart="6dp"
+                android:textSize="10sp" android:textStyle="bold"
+                android:fontFamily="sans-serif-medium" android:visibility="gone" />
+        </LinearLayout>
+
+        <!-- Ligne 4 -->
+        <LinearLayout
+            android:id="@+id/w_row_4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
+            android:visibility="gone">
+            <TextView android:id="@+id/w_name_4" android:layout_width="0dp"
+                android:layout_height="wrap_content" android:layout_weight="1"
+                android:maxLines="1" android:ellipsize="end"
+                android:textColor="@color/gt_fg" android:textSize="13sp"
+                android:fontFamily="sans-serif-medium" />
+            <ImageView android:id="@+id/w_rowspark_4" android:layout_width="32dp"
+                android:layout_height="14dp" android:layout_marginStart="7dp"
+                android:layout_marginEnd="7dp" android:scaleType="fitXY" />
+            <TextView android:id="@+id/w_value_4" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:textColor="@color/gt_fg"
+                android:textSize="14sp" android:textStyle="bold"
+                android:fontFamily="sans-serif-medium" />
+            <TextView android:id="@+id/w_delta_4" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:layout_marginStart="6dp"
+                android:textSize="10sp" android:textStyle="bold"
+                android:fontFamily="sans-serif-medium" android:visibility="gone" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- État vide -->
+    <TextView
+        android:id="@+id/w_empty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:text="Ouvrez Glance"
+        android:textColor="@color/gt_fg2"
+        android:textSize="12sp"
+        android:visibility="gone" />
+</LinearLayout>

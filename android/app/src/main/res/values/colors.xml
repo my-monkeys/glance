@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Palette Glance (Direction A : crème + vert forêt) — thème clair.
+     Reprend exactement les teintes du widget iOS (GlanceWidget.swift). -->
+<resources>
+    <color name="gt_accent">#FF3B7A5A</color>
+    <color name="gt_bg">#FFF7F5F1</color>
+    <color name="gt_surface">#FFFFFFFF</color>
+    <color name="gt_fg">#FF211E19</color>
+    <color name="gt_fg2">#FF8C857A</color>
+    <color name="gt_fg3">#FFB4ADA1</color>
+    <color name="gt_neg">#FFB15A42</color>
+    <color name="gt_line">#1A1E190F</color>
+</resources>
