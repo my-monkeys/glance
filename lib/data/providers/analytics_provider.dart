@@ -62,13 +62,24 @@ List<CredentialField> credentialFieldsFor(ProviderKind kind) {
         ),
         CredentialField(key: 'apiKey', label: 'Clé API', secret: true),
         CredentialField(
+          key: 'email',
+          label: 'Email du compte (facultatif)',
+          placeholder: 'vous@exemple.fr',
+          optional: true,
+          hint: 'Email + mot de passe : Glance liste vos sites automatiquement. '
+              'Sinon, laissez vide et renseignez un domaine ci-dessous.',
+        ),
+        CredentialField(
+          key: 'password',
+          label: 'Mot de passe (facultatif)',
+          secret: true,
+          optional: true,
+        ),
+        CredentialField(
           key: 'siteId',
-          label: 'Domaine (facultatif)',
+          label: 'Domaine (si pas d\'email/mot de passe)',
           placeholder: 'mondomaine.fr',
           optional: true,
-          hint: 'Laisser vide pour lister vos sites automatiquement '
-              '(nécessite une clé avec accès « Sites » — self-hosted ou plan '
-              'Enterprise). Sinon, saisissez le domaine à suivre.',
         ),
       ];
     case ProviderKind.fathom:

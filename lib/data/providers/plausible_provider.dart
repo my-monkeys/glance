@@ -7,10 +7,11 @@ import '../models/models.dart';
 import '../models/period.dart';
 import 'analytics_provider.dart';
 
-/// Client Plausible (Stats API v2 — `POST /api/v2/query`). La Stats API ne liste
-/// pas les sites → on tente la **Sites API** (`GET /api/v1/sites`) pour lister
-/// automatiquement (self-hosted ou plan Enterprise) ; sinon on retombe sur le
-/// domaine saisi manuellement. Chaque requête cible `site.id` (le domaine).
+/// Client Plausible (Stats API v2 — `POST /api/v2/query`, via clé API). La Stats
+/// API ne liste pas les sites ; pour lister, on se connecte à l'interface web
+/// (email + mot de passe) et on lit l'endpoint interne `/api/sites` (cf.
+/// [_listViaWeb]). Sinon, fallback sur le domaine saisi. Chaque requête de stats
+/// cible `site.id` (le domaine).
 class PlausibleProvider extends AnalyticsProvider {
   PlausibleProvider(super.account, super.creds) {
     _dio = Dio(
@@ -30,7 +31,7 @@ class PlausibleProvider extends AnalyticsProvider {
   late final Dio _dio;
   String? _tz;
 
-  /// Domaine saisi manuellement (facultatif). Vide → on tente la Sites API.
+  /// Domaine saisi manuellement (facultatif, fallback sans email/mot de passe).
   String get _configuredSite => (creds['siteId'] ?? '').trim();
 
   static String _normalizeBase(String raw) {
@@ -63,15 +64,13 @@ class PlausibleProvider extends AnalyticsProvider {
 
   @override
   Future<int> verify() async {
-    final api = await _listViaApi();
-    if (api.isNotEmpty) return api.length;
-    // Pas de Sites API (clé Stats simple) → on valide le domaine saisi.
+    final listed = await _listViaWeb();
+    if (listed.isNotEmpty) return listed.length;
+    // Pas de listing (ni email/mdp, ni endpoint dispo) → on valide le domaine.
     final id = _configuredSite;
     if (id.isEmpty) {
-      throw StateError(
-        'Renseignez un domaine, ou utilisez une clé avec accès « Sites » '
-        'pour lister automatiquement.',
-      );
+      throw StateError('Renseignez un domaine, ou email + mot de passe pour '
+          'lister vos sites automatiquement.');
     }
     await _query({'site_id': id, 'metrics': ['visitors'], 'date_range': '7d'});
     return 1;
@@ -79,41 +78,110 @@ class PlausibleProvider extends AnalyticsProvider {
 
   @override
   Future<List<Site>> listSites() async {
-    final api = await _listViaApi();
-    if (api.isNotEmpty) return api;
+    final listed = await _listViaWeb();
+    if (listed.isNotEmpty) return listed;
     final id = _configuredSite;
     if (id.isEmpty) return const [];
     return [Site(id: id, accountId: account.id, name: id, domain: id)];
   }
 
-  /// Liste les sites via la **Sites API** de Plausible (`GET /api/v1/sites`,
-  /// paginée). Nécessite une clé avec accès « Sites » (self-hosted ou plan
-  /// Enterprise) : renvoie une liste vide si l'endpoint n'est pas disponible.
-  Future<List<Site>> _listViaApi() async {
-    final out = <Site>[];
-    String? after;
-    for (var guard = 0; guard < 20; guard++) {
-      try {
-        final r = await _dio.get('/api/v1/sites', queryParameters: {
-          'limit': 100,
-          if (after != null && after.isNotEmpty) 'after': after,
-        });
+  /// Liste les sites en se connectant à l'interface web (email + mot de passe),
+  /// puis en lisant l'endpoint interne `/api/sites` (celui qu'utilise le
+  /// dashboard). La Stats API de Plausible Community Edition n'expose pas de
+  /// listing des sites ; on passe donc par la session web. Renvoie une liste
+  /// vide si email/mdp absents ou si le flux échoue (→ fallback domaine manuel).
+  /// N.B. : endpoints internes non documentés — cette voie sert uniquement à
+  /// lister/rafraîchir ; les stats passent toujours par la clé API (stable).
+  Future<List<Site>> _listViaWeb() async {
+    final email = (creds['email'] ?? '').trim();
+    final password = creds['password'] ?? '';
+    if (email.isEmpty || password.isEmpty) return const [];
+
+    // Dio dédié à la session web (cookies gérés à la main, sans le Bearer).
+    final web = Dio(BaseOptions(
+      baseUrl: _dio.options.baseUrl,
+      connectTimeout: const Duration(seconds: 15),
+      receiveTimeout: const Duration(seconds: 20),
+      followRedirects: false,
+      validateStatus: (s) => s != null && s < 500,
+    ));
+
+    String? cookie;
+    void absorb(Headers h) {
+      final set = h.map['set-cookie'];
+      if (set == null) return;
+      final jar = <String, String>{};
+      if (cookie != null) {
+        for (final kv in cookie!.split('; ')) {
+          final i = kv.indexOf('=');
+          if (i > 0) jar[kv.substring(0, i)] = kv.substring(i + 1);
+        }
+      }
+      for (final c in set) {
+        final first = c.split(';').first.trim();
+        final i = first.indexOf('=');
+        if (i > 0) jar[first.substring(0, i)] = first.substring(i + 1);
+      }
+      cookie = jar.entries.map((e) => '${e.key}=${e.value}').join('; ');
+    }
+
+    try {
+      // 1. GET /login → cookie initial + jeton CSRF (champ caché du formulaire).
+      final loginPage = await web.get<String>('/login',
+          options: Options(responseType: ResponseType.plain));
+      absorb(loginPage.headers);
+      final html = loginPage.data ?? '';
+      final csrf = RegExp(r'name="_csrf_token"[^>]*value="([^"]+)"')
+              .firstMatch(html)
+              ?.group(1) ??
+          RegExp(r'value="([^"]+)"[^>]*name="_csrf_token"')
+              .firstMatch(html)
+              ?.group(1);
+      if (csrf == null) return const [];
+
+      // 2. POST /login (form) → session authentifiée.
+      Map<String, String>? cookieHeader() {
+        final ck = cookie;
+        return ck == null ? null : {'cookie': ck};
+      }
+
+      final login = await web.post('/login',
+          data: {'_csrf_token': csrf, 'email': email, 'password': password},
+          options: Options(
+            contentType: Headers.formUrlEncodedContentType,
+            headers: cookieHeader(),
+          ));
+      absorb(login.headers);
+      // Échec d'auth : Plausible renvoie 200 (re-affiche le login) au lieu de 302.
+      if (login.statusCode != 302 && login.statusCode != 303) return const [];
+
+      // 3. GET /api/sites (paginé) avec la session.
+      final out = <Site>[];
+      final seen = <String>{};
+      for (var page = 1; page <= 20; page++) {
+        final r = await web.get('/api/sites',
+            queryParameters: {'page': page, 'limit': 100},
+            options: Options(headers: cookieHeader()));
+        if (r.statusCode != 200 || r.data is! Map) break;
         final data = (r.data as Map).cast<String, dynamic>();
-        final sites = (data['sites'] as List?) ?? const [];
-        for (final s in sites) {
-          final d = (s['domain'] ?? '').toString();
-          if (d.isNotEmpty) {
+        final list = (data['data'] ?? data['sites']) as List? ?? const [];
+        if (list.isEmpty) break;
+        for (final s in list) {
+          final d = (s is Map ? (s['domain'] ?? s['id']) : s)?.toString() ?? '';
+          if (d.isNotEmpty && seen.add(d)) {
             out.add(Site(id: d, accountId: account.id, name: d, domain: d));
           }
         }
-        after = (data['meta'] as Map?)?['after']?.toString();
-        if (sites.isEmpty || after == null || after.isEmpty) break;
-      } on DioException {
-        // 401/402/403/404 : Sites API indisponible pour cette clé/ce plan.
-        return const [];
+        final meta = (data['meta'] as Map?)?.cast<String, dynamic>();
+        final hasNext = meta?['pagination']?['has_next_page'] == true;
+        if (!hasNext) break;
       }
+      return out;
+    } on DioException {
+      return const [];
+    } finally {
+      web.close();
     }
-    return out;
   }
 
   Future<int> _visitorsFor(String siteId, List<String> range) async {
