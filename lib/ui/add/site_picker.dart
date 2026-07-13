@@ -7,13 +7,19 @@ import '../widgets/common.dart';
 import '../widgets/site_avatar.dart';
 import '../widgets/field.dart';
 
-/// Étape 2 de l'ajout : choix des sites à suivre.
-///
-/// Renvoie via Navigator.pop :
-/// - `null` si annulé (retour arrière) ;
-/// - une liste **vide** = « tous les sites » (le compte suivra automatiquement
-///   les nouveaux sites aussi) ;
-/// - une liste d'ids = sélection explicite.
+/// Résultat du choix des sites (pop du picker). Un pop **sans valeur** (`null`)
+/// = annulé. Un [SiteChoice] = confirmé, où [sites] encode les trois cas gérés
+/// par [Account] : `null` = tous les sites (suit aussi les futurs), `[]` =
+/// **aucun** (rien n'est affiché), `[ids]` = sélection explicite.
+@immutable
+class SiteChoice {
+  const SiteChoice(this.sites);
+  const SiteChoice.all() : sites = null;
+  final List<String>? sites;
+}
+
+/// Étape 2 de l'ajout : choix des sites à suivre. Renvoie un [SiteChoice] via
+/// Navigator.pop (ou `null` si annulé).
 class SitePickerScreen extends StatefulWidget {
   const SitePickerScreen({
     super.key,
@@ -61,10 +67,9 @@ class _SitePickerScreenState extends State<SitePickerScreen> {
     });
   }
 
-  bool get _canConfirm => _all || _selected.isNotEmpty;
-
   void _confirm() {
-    Navigator.of(context).pop<List<String>>(_all ? const [] : _selected.toList());
+    Navigator.of(context)
+        .pop<SiteChoice>(SiteChoice(_all ? null : _selected.toList()));
   }
 
   @override
@@ -198,10 +203,14 @@ class _SitePickerScreenState extends State<SitePickerScreen> {
                 MediaQuery.of(context).padding.bottom + 12,
               ),
               child: GlanceButton(
-                label: count == 0
-                    ? 'Sélectionne au moins un site'
-                    : 'Suivre $count site${count > 1 ? 's' : ''}',
-                onTap: _canConfirm ? _confirm : null,
+                // Zéro site est un choix valide (masquer ce compte) : toujours
+                // confirmable, seul le libellé change.
+                label: _all
+                    ? 'Suivre tous les sites'
+                    : count == 0
+                        ? 'N\'afficher aucun site'
+                        : 'Suivre $count site${count > 1 ? 's' : ''}',
+                onTap: _confirm,
               ),
             ),
           ],

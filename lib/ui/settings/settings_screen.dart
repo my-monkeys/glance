@@ -247,7 +247,7 @@ class SettingsScreen extends ConsumerWidget {
             const SizedBox(height: 16),
             Text(a.title, style: GT.body(16, weight: 600, color: ctx.glance.fg)),
             Text(
-              '${a.kind.displayName} · ${a.sites == null ? 'tous les sites' : '${a.sites!.length} site${a.sites!.length > 1 ? 's' : ''}'}',
+              '${a.kind.displayName} · ${a.sites == null ? 'tous les sites' : a.sites!.isEmpty ? 'aucun site' : '${a.sites!.length} site${a.sites!.length > 1 ? 's' : ''}'}',
               style: GT.body(13, color: ctx.glance.fg2),
             ),
             const SizedBox(height: 8),
@@ -307,7 +307,7 @@ class SettingsScreen extends ConsumerWidget {
   Future<void> _editSites(BuildContext context, WidgetRef ref, Account a) async {
     final sites = await ref.read(accountSitesProvider(a.id).future);
     if (!context.mounted) return;
-    final selection = await showGlanceModal<List<String>?>(
+    final choice = await showGlanceModal<SiteChoice?>(
       context,
       SitePickerScreen(
         providerName: a.kind.displayName,
@@ -315,10 +315,9 @@ class SettingsScreen extends ConsumerWidget {
         initialSelection: a.sites,
       ),
     );
-    if (selection == null) return; // annulé
-    await ref
-        .read(accountsProvider.notifier)
-        .updateSites(a.id, selection.isEmpty ? null : selection);
+    if (choice == null) return; // annulé
+    // null = tous ; [] = aucun (masqué) ; [ids] = sélection explicite.
+    await ref.read(accountsProvider.notifier).updateSites(a.id, choice.sites);
   }
 
   void _confirmLogout(BuildContext context, WidgetRef ref) {

@@ -169,7 +169,7 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
       }
       if (!mounted) return;
       // Étape 2 : sélection des sites (modale sur desktop, page sur mobile).
-      final selection = await showGlanceModal<List<String>?>(
+      final choice = await showGlanceModal<SiteChoice?>(
         context,
         SitePickerScreen(
           providerName: _kind.displayName,
@@ -177,13 +177,13 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
           initialSelection: widget.editing?.sites,
         ),
       );
-      if (selection == null) {
+      if (choice == null) {
         // annulé
         setState(() => _busy = false);
         return;
       }
-      // selection vide via "tous" est encodé par une liste spéciale : voir picker.
-      final chosen = selection.isEmpty ? null : selection;
+      // null = tous les sites ; [] = aucun (masqué) ; [ids] = sélection explicite.
+      final chosen = choice.sites;
       // add() remplace par id → sert aussi à la mise à jour d'un compte existant.
       await ref
           .read(accountsProvider.notifier)

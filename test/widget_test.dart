@@ -58,6 +58,31 @@ void main() {
       expect(a.includesSite('nimporte'), isTrue);
     });
 
+    test('sites [] = aucun → includesSite toujours faux (et round-trip)', () {
+      const a = Account(
+        id: 'a',
+        kind: ProviderKind.umami,
+        baseUrl: 'x',
+        sites: [],
+      );
+      expect(a.includesSite('nimporte'), isFalse);
+      // La liste vide (aucun) ne doit pas se confondre avec null (tous).
+      final back = Account.fromJson(a.toJson());
+      expect(back.sites, isNotNull);
+      expect(back.sites, isEmpty);
+      expect(back.includesSite('nimporte'), isFalse);
+    });
+
+    test('copyWith(sites: []) = aucun (distinct de allSites)', () {
+      const a = Account(
+        id: 'a',
+        kind: ProviderKind.umami,
+        baseUrl: 'x',
+        sites: ['s1'],
+      );
+      expect(a.copyWith(sites: const []).sites, isEmpty);
+    });
+
     test('copyWith allSites remet la sélection à tous', () {
       const a = Account(
         id: 'a',
