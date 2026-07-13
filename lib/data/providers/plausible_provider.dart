@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/countries.dart';
@@ -29,7 +28,6 @@ class PlausibleProvider extends AnalyticsProvider {
   }
 
   late final Dio _dio;
-  String? _tz;
 
   /// Domaine saisi manuellement (facultatif, fallback sans email/mot de passe).
   String get _configuredSite => (creds['siteId'] ?? '').trim();
@@ -41,18 +39,7 @@ class PlausibleProvider extends AnalyticsProvider {
     return '${u.scheme}://${u.host}${u.hasPort ? ':${u.port}' : ''}';
   }
 
-  Future<String> _timezone() async {
-    if (_tz != null) return _tz!;
-    try {
-      _tz = (await FlutterTimezone.getLocalTimezone()).identifier;
-    } catch (_) {
-      _tz = 'UTC';
-    }
-    return _tz!;
-  }
-
   static final _dateFmt = DateFormat('yyyy-MM-dd');
-  static final _dtFmt = DateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
   Future<Map<String, dynamic>> _query(Map<String, dynamic> body) async {
     final r = await _dio.post('/api/v2/query', data: body);
@@ -65,15 +52,16 @@ class PlausibleProvider extends AnalyticsProvider {
   @override
   Future<int> verify() async {
     final listed = await _listViaWeb();
-    if (listed.isNotEmpty) return listed.length;
-    // Pas de listing (ni email/mdp, ni endpoint dispo) → on valide le domaine.
-    final id = _configuredSite;
-    if (id.isEmpty) {
+    // Site témoin pour valider la CLÉ API (les stats en dépendent) : 1er site
+    // listé, sinon le domaine saisi.
+    final probe = listed.isNotEmpty ? listed.first.id : _configuredSite;
+    if (probe.isEmpty) {
       throw StateError('Renseignez un domaine, ou email + mot de passe pour '
           'lister vos sites automatiquement.');
     }
-    await _query({'site_id': id, 'metrics': ['visitors'], 'date_range': '7d'});
-    return 1;
+    // Valide la clé API : un 401 ici = clé refusée (même si le listing a marché).
+    await _query({'site_id': probe, 'metrics': ['visitors'], 'date_range': '7d'});
+    return listed.isNotEmpty ? listed.length : 1;
   }
 
   @override
@@ -155,10 +143,13 @@ class PlausibleProvider extends AnalyticsProvider {
       // Échec d'auth : Plausible renvoie 200 (re-affiche le login) au lieu de 302.
       if (login.statusCode != 302 && login.statusCode != 303) return const [];
 
-      // 3. GET /api/sites (paginé) avec la session.
+      // 3. GET /api/sites avec la session, paginé. L'endpoint interne pagine
+      //    (souvent ~12/page en ignorant `limit`) → on itère jusqu'à ce qu'une
+      //    page n'apporte plus aucun site (on ne se fie pas au flag has_next_page
+      //    dont le format varie selon la version).
       final out = <Site>[];
       final seen = <String>{};
-      for (var page = 1; page <= 20; page++) {
+      for (var page = 1; page <= 100; page++) {
         final r = await web.get('/api/sites',
             queryParameters: {'page': page, 'limit': 100},
             options: Options(headers: cookieHeader()));
@@ -166,15 +157,16 @@ class PlausibleProvider extends AnalyticsProvider {
         final data = (r.data as Map).cast<String, dynamic>();
         final list = (data['data'] ?? data['sites']) as List? ?? const [];
         if (list.isEmpty) break;
+        var added = 0;
         for (final s in list) {
           final d = (s is Map ? (s['domain'] ?? s['id']) : s)?.toString() ?? '';
           if (d.isNotEmpty && seen.add(d)) {
             out.add(Site(id: d, accountId: account.id, name: d, domain: d));
+            added++;
           }
         }
-        final meta = (data['meta'] as Map?)?.cast<String, dynamic>();
-        final hasNext = meta?['pagination']?['has_next_page'] == true;
-        if (!hasNext) break;
+        // Aucun site nouveau (dernière page, ou pagination ignorée) → on arrête.
+        if (added == 0) break;
       }
       return out;
     } on DioException {
@@ -208,7 +200,6 @@ class PlausibleProvider extends AnalyticsProvider {
       'site_id': site.id,
       'metrics': metrics,
       'date_range': [_dateFmt.format(w.start), _dateFmt.format(w.end)],
-      'timezone': await _timezone(),
     });
     final rows = _rows(res);
     final m = rows.isEmpty
@@ -249,9 +240,9 @@ class PlausibleProvider extends AnalyticsProvider {
       'site_id': site.id,
       // Deux séries pour le graphe : visiteurs uniques (vert) + pages vues (gris).
       'metrics': ['visitors', 'pageviews'],
-      'date_range': [_dtFmt.format(w.start), _dtFmt.format(w.end)],
+      // Dates (yyyy-MM-dd) : la Stats API v2 refuse le datetime ISO en date_range.
+      'date_range': [_dateFmt.format(w.start), _dateFmt.format(w.end)],
       'dimensions': [dim],
-      'timezone': await _timezone(),
     });
     return _rows(res)
         .map((r) {
@@ -298,7 +289,8 @@ class PlausibleProvider extends AnalyticsProvider {
       'metrics': [metric],
       'date_range': [_dateFmt.format(w.start), _dateFmt.format(w.end)],
       'dimensions': [dim],
-      'limit': limit + (type == MetricType.events ? 1 : 0),
+      // La limite passe par `pagination` (un `limit` à la racine → 400).
+      'pagination': {'limit': limit + (type == MetricType.events ? 1 : 0)},
     });
     final rows = _rows(res).map((r) {
       final label = (r['dimensions'] as List).first.toString();
@@ -325,9 +317,8 @@ class PlausibleProvider extends AnalyticsProvider {
     final res = await _query({
       'site_id': site.id,
       'metrics': ['events'],
-      'date_range': [_dtFmt.format(w.start), _dtFmt.format(w.end)],
+      'date_range': [_dateFmt.format(w.start), _dateFmt.format(w.end)],
       'dimensions': [timeDim, 'event:name'],
-      'timezone': await _timezone(),
     });
     // Regroupe par nom d'événement (exclut « pageview »).
     final byName = <String, Map<int, double>>{};
@@ -364,12 +355,14 @@ class PlausibleProvider extends AnalyticsProvider {
 
   @override
   Future<List<LivePage>> livePages(Site site) async {
+    // La Stats API v2 n'accepte pas date_range "realtime" (temps réel = un
+    // endpoint séparé, cf. active()). On approxime avec les pages du jour.
     final res = await _query({
       'site_id': site.id,
       'metrics': ['visitors'],
-      'date_range': 'realtime',
+      'date_range': 'day',
       'dimensions': ['event:page'],
-      'limit': 5,
+      'pagination': {'limit': 5},
     });
     return _rows(res).map((r) {
       final path = (r['dimensions'] as List).first.toString();
