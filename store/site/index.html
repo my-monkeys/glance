@@ -7,12 +7,21 @@
 <title>Glance — Vos stats, réunies. · Client analytics Umami & Plausible</title>
 <meta name="description" content="Glance : un client mobile et desktop clair pour vos analytics Umami et Plausible. Tous vos sites sur iOS, Android, macOS et Windows — open source, sans serveur tiers.">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="canonical" href="https://glance-analytics.com/">
 <meta property="og:type" content="website">
+<meta property="og:site_name" content="Glance">
+<meta property="og:locale" content="fr_FR">
 <meta property="og:title" content="Glance — Vos stats, réunies.">
 <meta property="og:description" content="Un client clair et lisible par-dessus Umami et Plausible. Tous vos sites, sur iOS, Android, macOS et Windows.">
 <meta property="og:url" content="https://glance-analytics.com">
 <meta property="og:image" content="https://glance-analytics.com/img/desktop.png">
+<meta property="og:image:width" content="1440">
+<meta property="og:image:height" content="1020">
+<meta property="og:image:alt" content="Glance sur macOS — liste des sites et vue d'ensemble">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://glance-analytics.com/img/desktop.png">
+<link rel="preload" as="image" href="img/mobile-home.webp" fetchpriority="high">
+<script defer src="https://uuu.my-monkey.fr/u.js" data-website-id="0d62b5ee-a8e2-4b05-959c-9e8b5a41c0dc"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -128,6 +137,68 @@ a{color:#3B7A5A;text-decoration:none}a:hover{color:#2F6349}
 .arw{width:42px;height:42px}
 }
 </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "@id": "https://my-monkey.fr/#organization",
+  "name": "My-Monkey",
+  "url": "https://my-monkey.fr",
+  "sameAs": [
+    "https://github.com/my-monkeys",
+    "https://www.linkedin.com/company/my-monkey"
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "@id": "https://glance-analytics.com/#website",
+  "name": "Glance",
+  "url": "https://glance-analytics.com",
+  "inLanguage": "fr-FR",
+  "publisher": { "@id": "https://my-monkey.fr/#organization" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "@id": "https://glance-analytics.com/#app",
+  "name": "Glance",
+  "description": "Un client mobile et desktop clair pour vos analytics Umami et Plausible. Tous vos sites sur iOS, Android, macOS et Windows — open source, sans serveur tiers.",
+  "url": "https://glance-analytics.com",
+  "image": "https://glance-analytics.com/img/desktop.png",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "iOS, Android, macOS, Windows",
+  "inLanguage": "fr-FR",
+  "isAccessibleForFree": true,
+  "license": "https://github.com/my-monkeys/glance/blob/main/LICENSE",
+  "downloadUrl": "https://github.com/my-monkeys/glance/releases/latest",
+  "softwareHelp": "https://github.com/my-monkeys/glance",
+  "screenshot": [
+    "https://glance-analytics.com/img/desktop.png",
+    "https://glance-analytics.com/img/mobile-home.png",
+    "https://glance-analytics.com/img/mobile-detail.png",
+    "https://glance-analytics.com/img/mobile-live.png",
+    "https://glance-analytics.com/img/mobile-widgets.png"
+  ],
+  "featureList": [
+    "Client unifié Umami et Plausible",
+    "Courbes lissées visiteurs et pages vues sur 6 périodes",
+    "Temps réel multi-sites",
+    "Widgets iOS pour l'écran d'accueil",
+    "Identifiants chiffrés dans le Keychain, accès en lecture seule"
+  ],
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "EUR"
+  },
+  "publisher": { "@id": "https://my-monkey.fr/#organization" }
+}
+</script>
 </head>
 <body>
 <div class="board"><div class="page">
@@ -137,7 +208,7 @@ a{color:#3B7A5A;text-decoration:none}a:hover{color:#2F6349}
 <div><div class="kick">Analytics · Open source</div><h1 class="h1" style="margin-top:20px">Vos stats,<br><span class="ta">réunies.</span></h1><p class="lead" style="margin-top:22px;max-width:460px">Un client clair et lisible par-dessus Umami et Plausible. Tous vos sites, sur iOS, Android, macOS et Windows — sans jamais quitter votre instance.</p>
 <div class="fx ac gap12" style="margin-top:32px"><a class="btn btn-p" href="#install">Installer Glance</a><a class="btn btn-g" href="https://github.com/my-monkeys/glance"><svg width="17" height="17" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>GitHub</a></div>
 <div class="fx ac gap12" style="margin-top:30px;flex-wrap:wrap"><span class="mono t3" style="font-size:11px;letter-spacing:1.4px">FONCTIONNE AVEC</span><span class="chip"><span class="cd"></span>Umami</span><span class="chip"><span class="cd"></span>Plausible</span><span class="chip"><span class="cd" style="background:#B4ADA1"></span>Fathom</span></div></div>
-<div style="position:relative;display:flex;justify-content:center;align-items:center;min-height:660px"><div class="halo" style="width:460px;height:460px;left:50%;top:50%;transform:translate(-50%,-50%)"></div><div class="shot" style="position:relative;z-index:2;width:300px;height:636px;border-radius:30px"><img src="img/mobile-home.png" alt="Glance sur iPhone — l'écran Mes sites avec le total de visiteurs et la liste des sites" width="600" height="1304"></div></div>
+<div style="position:relative;display:flex;justify-content:center;align-items:center;min-height:660px"><div class="halo" style="width:460px;height:460px;left:50%;top:50%;transform:translate(-50%,-50%)"></div><div class="shot" style="position:relative;z-index:2;width:300px;height:636px;border-radius:30px"><img src="img/mobile-home.webp" fetchpriority="high" alt="Glance sur iPhone — l'écran Mes sites avec le total de visiteurs et la liste des sites" width="600" height="1304"></div></div>
 </div></div>
 
 <div id="feat" class="sec" style="padding-top:24px;padding-bottom:64px">
@@ -152,13 +223,13 @@ a{color:#3B7A5A;text-decoration:none}a:hover{color:#2F6349}
 </div>
 </div>
 
-<div id="desk" class="sec" style="padding-top:24px;padding-bottom:40px;background:#F1EFE9"><div class="feat"><div class="featx" style="flex:0 0 300px"><div class="kick">macOS & Windows</div><h2 class="h2" style="margin-top:16px">Sur votre<br>bureau aussi</h2><p class="body" style="margin-top:16px">Vue master-détail native : la liste de vos sites à gauche, tout le détail à droite. La même app, en grand.</p></div><div class="featx"><div class="shot" style="width:100%;aspect-ratio:16/10;border-radius:14px"><img src="img/desktop.png" alt="Glance sur macOS — la liste des sites à gauche, la vue d'ensemble avec graphique à droite" width="1440" height="1020"></div></div></div></div>
+<div id="desk" class="sec" style="padding-top:24px;padding-bottom:40px;background:#F1EFE9"><div class="feat"><div class="featx" style="flex:0 0 300px"><div class="kick">macOS & Windows</div><h2 class="h2" style="margin-top:16px">Sur votre<br>bureau aussi</h2><p class="body" style="margin-top:16px">Vue master-détail native : la liste de vos sites à gauche, tout le détail à droite. La même app, en grand.</p></div><div class="featx"><div class="shot" style="width:100%;aspect-ratio:16/10;border-radius:14px"><img src="img/desktop.png" alt="Glance sur macOS — la liste des sites à gauche, la vue d'ensemble avec graphique à droite" width="1440" height="1020" loading="lazy"></div></div></div></div>
 
 <div class="sec" style="padding-top:56px;padding-bottom:76px"><div style="text-align:center"><div class="kick">Mobile & widgets</div><h2 class="h2" style="margin-top:14px">Dans votre poche,<br>sur votre écran d'accueil</h2></div>
 <div class="mslider" style="margin-top:34px"><div class="mvp"><div class="mtrack" data-i="0">
-<div class="mslide"><div class="fx jc"><div class="shot" style="width:300px;height:636px;border-radius:30px"><img src="img/mobile-detail.png" alt="Glance — le détail d'un site : visiteurs uniques, graphique, visites, durée et rebond" width="600" height="1304" loading="lazy"></div></div><div><div class="kick">Détail par site</div><h3 class="h2" style="font-size:38px;margin-top:14px">Chaque site,<br>dans le détail</h3><p class="body" style="margin-top:18px;max-width:420px">Des courbes lissées pour vos visiteurs et pages vues, sur six périodes. Top pages, sources, pays, et vos événements personnalisés — une couleur chacun.</p><div class="fx ac gap12" style="margin-top:24px;flex-wrap:wrap"><span class="chip">Courbes lissées</span><span class="chip">6 périodes</span><span class="chip">Événements</span></div></div></div>
-<div class="mslide"><div class="fx jc"><div class="shot" style="width:300px;height:636px;border-radius:30px"><img src="img/mobile-live.png" alt="Glance — le temps réel : les visiteurs en direct sur l'ensemble de vos sites" width="600" height="1304" loading="lazy"></div></div><div><div class="kick">Temps réel</div><h3 class="h2" style="font-size:38px;margin-top:14px">Le trafic,<br>en direct</h3><p class="body" style="margin-top:18px;max-width:420px">Voyez qui est là, maintenant, sur chacun de vos sites. Un compteur global, le détail par site, et un filtre « actifs seulement » — le tout sans jamais rafraîchir.</p><div class="fx ac gap12" style="margin-top:24px;flex-wrap:wrap"><span class="chip">Compteur global</span><span class="chip">Détail par site</span></div></div></div>
-<div class="mslide"><div class="fx jc"><div class="shot" style="width:300px;height:636px;border-radius:30px"><img src="img/mobile-widgets.png" alt="Glance — un widget iOS sur l'écran d'accueil affichant les visiteurs d'un site" width="600" height="1304" loading="lazy"></div></div><div><div class="kick">Widgets iOS</div><h3 class="h2" style="font-size:38px;margin-top:14px">Sur votre<br>écran d'accueil</h3><p class="body" style="margin-top:18px;max-width:420px">Un widget « aperçu » pour l'ensemble de vos sites, et un widget « par site » configurable. Vos chiffres d'un coup d'œil, sans même ouvrir l'application.</p><div class="fx ac gap12" style="margin-top:24px;flex-wrap:wrap"><span class="chip">Aperçu tous sites</span><span class="chip">Par site configurable</span></div></div></div>
+<div class="mslide"><div class="fx jc"><div class="shot" style="width:300px;height:636px;border-radius:30px"><img src="img/mobile-detail.webp" alt="Glance — le détail d'un site : visiteurs uniques, graphique, visites, durée et rebond" width="600" height="1304" loading="lazy"></div></div><div><div class="kick">Détail par site</div><h3 class="h2" style="font-size:38px;margin-top:14px">Chaque site,<br>dans le détail</h3><p class="body" style="margin-top:18px;max-width:420px">Des courbes lissées pour vos visiteurs et pages vues, sur six périodes. Top pages, sources, pays, et vos événements personnalisés — une couleur chacun.</p><div class="fx ac gap12" style="margin-top:24px;flex-wrap:wrap"><span class="chip">Courbes lissées</span><span class="chip">6 périodes</span><span class="chip">Événements</span></div></div></div>
+<div class="mslide"><div class="fx jc"><div class="shot" style="width:300px;height:636px;border-radius:30px"><img src="img/mobile-live.webp" alt="Glance — le temps réel : les visiteurs en direct sur l'ensemble de vos sites" width="600" height="1304" loading="lazy"></div></div><div><div class="kick">Temps réel</div><h3 class="h2" style="font-size:38px;margin-top:14px">Le trafic,<br>en direct</h3><p class="body" style="margin-top:18px;max-width:420px">Voyez qui est là, maintenant, sur chacun de vos sites. Un compteur global, le détail par site, et un filtre « actifs seulement » — le tout sans jamais rafraîchir.</p><div class="fx ac gap12" style="margin-top:24px;flex-wrap:wrap"><span class="chip">Compteur global</span><span class="chip">Détail par site</span></div></div></div>
+<div class="mslide"><div class="fx jc"><div class="shot" style="width:300px;height:636px;border-radius:30px"><img src="img/mobile-widgets.webp" alt="Glance — un widget iOS sur l'écran d'accueil affichant les visiteurs d'un site" width="600" height="1304" loading="lazy"></div></div><div><div class="kick">Widgets iOS</div><h3 class="h2" style="font-size:38px;margin-top:14px">Sur votre<br>écran d'accueil</h3><p class="body" style="margin-top:18px;max-width:420px">Un widget « aperçu » pour l'ensemble de vos sites, et un widget « par site » configurable. Vos chiffres d'un coup d'œil, sans même ouvrir l'application.</p><div class="fx ac gap12" style="margin-top:24px;flex-wrap:wrap"><span class="chip">Aperçu tous sites</span><span class="chip">Par site configurable</span></div></div></div>
 </div></div>
 <div class="mctrl"><button class="arw" data-prev aria-label="Précédent"><svg width="10" height="16" viewBox="0 0 10 16" fill="none"><path d="M8 1L2 8l6 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="dots"><button class="dot on" aria-label="Diapositive 1"></button><button class="dot" aria-label="Diapositive 2"></button><button class="dot" aria-label="Diapositive 3"></button></div><button class="arw" data-next aria-label="Suivant"><svg width="10" height="16" viewBox="0 0 10 16" fill="none"><path d="M2 1l6 7-6 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
 </div>

@@ -1,3 +1,18 @@
 # Sert index.html en priorité (devance l'index.php WordPress qu'O2switch
 # peut créer par défaut sur un nouveau sous-domaine).
 DirectoryIndex index.html index.htm
+
+# En-têtes de sécurité (HSTS géré côté Cloudflare).
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+  Header set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+</IfModule>
+
+# Cache long pour les assets versionnables (images, polices).
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType image/webp "access plus 30 days"
+  ExpiresByType image/png "access plus 30 days"
+  ExpiresByType image/svg+xml "access plus 30 days"
+</IfModule>

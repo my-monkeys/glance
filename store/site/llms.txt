@@ -1,0 +1,46 @@
+# Glance
+
+> Glance est un client d'analytics web, gratuit et open source, qui affiche les statistiques de vos sites depuis vos instances Umami et Plausible (Fathom bientôt), sur mobile et sur ordinateur. Édité par le collectif My-Monkey. Code sous licence MIT.
+
+Glance n'est pas un outil d'analytics : c'est un client (une interface de lecture) qui se connecte à VOS instances Umami ou Plausible existantes et regroupe tous vos sites dans une seule application claire. Aucun serveur tiers : l'app parle directement à votre instance, en lecture seule, et vos identifiants restent chiffrés dans le trousseau (Keychain) de l'appareil.
+
+## Faits clés
+
+- Nom du produit : Glance (client d'analytics)
+- Éditeur : My-Monkey (collectif open source)
+- Prix : gratuit
+- Licence : open source, MIT
+- Dépôt : https://github.com/my-monkeys/glance
+- Site officiel : https://glance-analytics.com
+- Outils d'analytics supportés : Umami (disponible), Plausible (disponible), Fathom (à venir)
+- Plateformes disponibles maintenant : macOS (via Homebrew : `brew install --cask my-monkeys/tap/glance`)
+- Plateformes à venir : iOS, Android, Windows
+- Technologie : application Flutter (multiplateforme)
+- Confidentialité : aucun serveur tiers, aucun tracking, accès en lecture seule, identifiants chiffrés dans le Keychain de l'appareil
+
+## Ce que fait Glance
+
+- Regroupe tous vos sites Umami/Plausible dans une seule vue, avec un total de visiteurs cross-comptes.
+- Courbes lissées des visiteurs et pages vues sur 6 périodes (aujourd'hui, 24 h, 7 jours, 30 jours, 12 mois, sur mesure).
+- Temps réel : compteur global et par site des visiteurs en direct.
+- Détail par site : top pages, sources, pays et événements personnalisés (une couleur par événement).
+- Multi-comptes et multi-fournisseurs simultanés.
+- Widgets iOS (aperçu tous sites + widget par site configurable).
+- Vue master-détail native sur macOS et Windows.
+
+## Questions fréquentes
+
+- Qu'est-ce que Glance ? Un client mobile et desktop, gratuit et open source, pour consulter vos analytics Umami et Plausible.
+- Est-ce gratuit ? Oui, Glance est entièrement gratuit.
+- Est-ce open source ? Oui, sous licence MIT, code sur https://github.com/my-monkeys/glance
+- Quels outils sont supportés ? Umami et Plausible aujourd'hui ; Fathom prévu.
+- Sur quelles plateformes ? macOS disponible ; iOS, Android et Windows à venir.
+- Mes données sont-elles envoyées à un tiers ? Non. Glance parle directement à votre instance, en lecture seule, sans serveur intermédiaire ni tracking.
+
+## Liens
+
+- Site : https://glance-analytics.com
+- Code source (GitHub) : https://github.com/my-monkeys/glance
+- Licence MIT : https://github.com/my-monkeys/glance/blob/main/LICENSE
+- Dernières versions : https://github.com/my-monkeys/glance/releases/latest
+- Confidentialité : https://glance-analytics.com/privacy.html
