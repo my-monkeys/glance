@@ -22,6 +22,7 @@
 
 /* Begin PBXBuildFile section */
 		03EC6FBC2F6C291BCE348B04 /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 05B248277D105DE5B0310A22 /* Pods_RunnerTests.framework */; };
+		1EE2CEC458B0F189CB4EFA86 /* GlanceWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9160FF29F2286E3771E80162 /* GlanceWidget.swift */; };
 		331C80D8294CF71000263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C80D7294CF71000263BE5 /* RunnerTests.swift */; };
 		335BBD1B22A9A15E00E9071D /* GeneratedPluginRegistrant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 335BBD1A22A9A15E00E9071D /* GeneratedPluginRegistrant.swift */; };
 		33CC10F12044A3C60003C045 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33CC10F02044A3C60003C045 /* AppDelegate.swift */; };
@@ -29,6 +30,10 @@
 		33CC10F62044A3C60003C045 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 33CC10F42044A3C60003C045 /* MainMenu.xib */; };
 		33CC11132044BFA00003C045 /* MainFlutterWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33CC11122044BFA00003C045 /* MainFlutterWindow.swift */; };
 		5E6518D36FE4E57738E63CE0 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B27A0486F28C8D5D760549C /* Pods_Runner.framework */; };
+		6686507A0EE326A2DEEED3FF /* GlanceWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 55C5338C689082DE55A10EB1 /* GlanceWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		767EB06E368B19ADE1BF61EF /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7DB7693C69C7D51F2346A2FE /* Cocoa.framework */; };
+		CEF6DCAC9D38667C3675E7A7 /* GlanceMacWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CA9757D4A55B71F32CBBF80 /* GlanceMacWidgetBundle.swift */; };
+		E9A4513718815871D3C7292C /* GlanceSiteWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CEDDF5FFC1959969AE9BD1B /* GlanceSiteWidget.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,6 +51,13 @@
 			remoteGlobalIDString = 33CC111A2044C6BA0003C045;
 			remoteInfo = FLX;
 		};
+		39AA738D7FBAF8A2831D197D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 33CC10E52044A3C60003C045 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8090E7D6A6B4FC4FEAD6704C;
+			remoteInfo = GlanceWidgetExtension;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -57,6 +69,17 @@
 			files = (
 			);
 			name = "Bundle Framework";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FBE795CC690D6BB313AE17B8 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				6686507A0EE326A2DEEED3FF /* GlanceWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -82,11 +105,18 @@
 		33E51914231749380026EE4D /* Release.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = Release.entitlements; sourceTree = "<group>"; };
 		33E5194F232828860026EE4D /* AppInfo.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = AppInfo.xcconfig; sourceTree = "<group>"; };
 		39AD87FD0311A62C8458C6CE /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
+		55C5338C689082DE55A10EB1 /* GlanceWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = GlanceWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		5CEDDF5FFC1959969AE9BD1B /* GlanceSiteWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GlanceSiteWidget.swift; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
+		7DB7693C69C7D51F2346A2FE /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.0.sdk/System/Library/Frameworks/Cocoa.framework; sourceTree = DEVELOPER_DIR; };
+		9160FF29F2286E3771E80162 /* GlanceWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GlanceWidget.swift; sourceTree = "<group>"; };
 		9740EEB21CF90195004384FC /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
+		9CA9757D4A55B71F32CBBF80 /* GlanceMacWidgetBundle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GlanceMacWidgetBundle.swift; sourceTree = "<group>"; };
 		AEF34AE73118F92C68E93A7F /* Pods-RunnerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.debug.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.debug.xcconfig"; sourceTree = "<group>"; };
 		BEE337A14AED68310B89DDDC /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
 		D075506087ADA9AD41E2C3A1 /* Pods-RunnerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.release.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.release.xcconfig"; sourceTree = "<group>"; };
+		E358CA40F9D15D76F77704D2 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		E3DC9170B00AAB0DB9B80F43 /* GlanceWidget.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = GlanceWidget.entitlements; sourceTree = "<group>"; };
 		F0DD6AA46AF522168A9B51AF /* Pods-RunnerTests.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.profile.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.profile.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -107,9 +137,38 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		458CA673AFF9A18BAE4E2AD0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				767EB06E368B19ADE1BF61EF /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		06063B2E85FB1FC47124933B /* GlanceWidget */ = {
+			isa = PBXGroup;
+			children = (
+				9CA9757D4A55B71F32CBBF80 /* GlanceMacWidgetBundle.swift */,
+				E358CA40F9D15D76F77704D2 /* Info.plist */,
+				E3DC9170B00AAB0DB9B80F43 /* GlanceWidget.entitlements */,
+			);
+			name = GlanceWidget;
+			path = GlanceWidget;
+			sourceTree = "<group>";
+		};
+		0AB737F2226B07D4B8FC85B0 /* GlanceWidgetShared */ = {
+			isa = PBXGroup;
+			children = (
+				9160FF29F2286E3771E80162 /* GlanceWidget.swift */,
+				5CEDDF5FFC1959969AE9BD1B /* GlanceSiteWidget.swift */,
+			);
+			name = GlanceWidgetShared;
+			path = ../ios/GlanceWidget;
+			sourceTree = "<group>";
+		};
 		331C80D6294CF71000263BE5 /* RunnerTests */ = {
 			isa = PBXGroup;
 			children = (
@@ -138,6 +197,8 @@
 				33CC10EE2044A3C60003C045 /* Products */,
 				D73912EC22F37F3D000D13A0 /* Frameworks */,
 				74943895F7522A723FA74149 /* Pods */,
+				06063B2E85FB1FC47124933B /* GlanceWidget */,
+				0AB737F2226B07D4B8FC85B0 /* GlanceWidgetShared */,
 			);
 			sourceTree = "<group>";
 		};
@@ -146,6 +207,7 @@
 			children = (
 				33CC10ED2044A3C60003C045 /* glance.app */,
 				331C80D5294CF71000263BE5 /* RunnerTests.xctest */,
+				55C5338C689082DE55A10EB1 /* GlanceWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -199,11 +261,20 @@
 			path = Pods;
 			sourceTree = "<group>";
 		};
+		D01D53EF1E5CA3FE91C0B36A /* OS X */ = {
+			isa = PBXGroup;
+			children = (
+				7DB7693C69C7D51F2346A2FE /* Cocoa.framework */,
+			);
+			name = "OS X";
+			sourceTree = "<group>";
+		};
 		D73912EC22F37F3D000D13A0 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
 				2B27A0486F28C8D5D760549C /* Pods_Runner.framework */,
 				05B248277D105DE5B0310A22 /* Pods_RunnerTests.framework */,
+				D01D53EF1E5CA3FE91C0B36A /* OS X */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -240,17 +311,36 @@
 				33CC10EB2044A3C60003C045 /* Resources */,
 				33CC110E2044A8840003C045 /* Bundle Framework */,
 				3399D490228B24CF009A79C7 /* ShellScript */,
+				FBE795CC690D6BB313AE17B8 /* Embed Foundation Extensions */,
 				401E6EB61CFA10EDE3E17571 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				33CC11202044C79F0003C045 /* PBXTargetDependency */,
+				48FA3F6C892364C48B0524F2 /* PBXTargetDependency */,
 			);
 			name = Runner;
 			productName = Runner;
 			productReference = 33CC10ED2044A3C60003C045 /* glance.app */;
 			productType = "com.apple.product-type.application";
+		};
+		8090E7D6A6B4FC4FEAD6704C /* GlanceWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 987C6FE98842D5993D3D1D72 /* Build configuration list for PBXNativeTarget "GlanceWidgetExtension" */;
+			buildPhases = (
+				E494B1CB4862810E70C4DE45 /* Sources */,
+				458CA673AFF9A18BAE4E2AD0 /* Frameworks */,
+				286D331BC4B98173963DE368 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = GlanceWidgetExtension;
+			productName = GlanceWidgetExtension;
+			productReference = 55C5338C689082DE55A10EB1 /* GlanceWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -299,11 +389,19 @@
 				33CC10EC2044A3C60003C045 /* Runner */,
 				331C80D4294CF70F00263BE5 /* RunnerTests */,
 				33CC111A2044C6BA0003C045 /* Flutter Assemble */,
+				8090E7D6A6B4FC4FEAD6704C /* GlanceWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		286D331BC4B98173963DE368 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		331C80D3294CF70F00263BE5 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -443,6 +541,16 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E494B1CB4862810E70C4DE45 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CEF6DCAC9D38667C3675E7A7 /* GlanceMacWidgetBundle.swift in Sources */,
+				1EE2CEC458B0F189CB4EFA86 /* GlanceWidget.swift in Sources */,
+				E9A4513718815871D3C7292C /* GlanceSiteWidget.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -455,6 +563,12 @@
 			isa = PBXTargetDependency;
 			target = 33CC111A2044C6BA0003C045 /* Flutter Assemble */;
 			targetProxy = 33CC111F2044C79F0003C045 /* PBXContainerItemProxy */;
+		};
+		48FA3F6C892364C48B0524F2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = GlanceWidgetExtension;
+			target = 8090E7D6A6B4FC4FEAD6704C /* GlanceWidgetExtension */;
+			targetProxy = 39AA738D7FBAF8A2831D197D /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -471,6 +585,60 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		20B6FB9A4FFEB893610EF445 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = GlanceWidget/GlanceWidget.entitlements;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 6;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = GlanceWidget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../../../../Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.2.0;
+				PRODUCT_BUNDLE_IDENTIFIER = fr.mymonkey.glance.GlanceWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		25C53205A4E9C79575B5B1FE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = GlanceWidget/GlanceWidget.entitlements;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 6;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = GlanceWidget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../../../../Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.2.0;
+				PRODUCT_BUNDLE_IDENTIFIER = fr.mymonkey.glance.GlanceWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
 		331C80DB294CF71000263BE5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = AEF34AE73118F92C68E93A7F /* Pods-RunnerTests.debug.xcconfig */;
@@ -752,6 +920,33 @@
 			};
 			name = Release;
 		};
+		EC26212D7B3378FBCCB59691 /* Profile */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = GlanceWidget/GlanceWidget.entitlements;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 6;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = GlanceWidget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../../../../Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.2.0;
+				PRODUCT_BUNDLE_IDENTIFIER = fr.mymonkey.glance.GlanceWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Profile;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -791,6 +986,16 @@
 				33CC111C2044C6BA0003C045 /* Debug */,
 				33CC111D2044C6BA0003C045 /* Release */,
 				338D0CEB231458BD00FA5F75 /* Profile */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		987C6FE98842D5993D3D1D72 /* Build configuration list for PBXNativeTarget "GlanceWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				25C53205A4E9C79575B5B1FE /* Release */,
+				20B6FB9A4FFEB893610EF445 /* Debug */,
+				EC26212D7B3378FBCCB59691 /* Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

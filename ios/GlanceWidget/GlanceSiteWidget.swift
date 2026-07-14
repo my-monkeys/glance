@@ -32,7 +32,7 @@ func loadAllSites() -> [SiteRecord] {
 
 // MARK: - App Intent de configuration (choix du site)
 
-@available(iOS 17.0, *)
+@available(iOS 17.0, macOS 14.0, *)
 struct SiteEntity: AppEntity {
     let id: String
     let name: String
@@ -42,7 +42,7 @@ struct SiteEntity: AppEntity {
     static var defaultQuery = SiteQuery()
 }
 
-@available(iOS 17.0, *)
+@available(iOS 17.0, macOS 14.0, *)
 struct SiteQuery: EntityQuery {
     func entities(for identifiers: [String]) async throws -> [SiteEntity] {
         loadAllSites().filter { identifiers.contains($0.i) }
@@ -56,7 +56,7 @@ struct SiteQuery: EntityQuery {
     }
 }
 
-@available(iOS 17.0, *)
+@available(iOS 17.0, macOS 14.0, *)
 struct SelectSiteIntent: WidgetConfigurationIntent {
     static var title: LocalizedStringResource = "Site"
     static var description = IntentDescription("Choisir le site à afficher.")
@@ -66,14 +66,14 @@ struct SelectSiteIntent: WidgetConfigurationIntent {
 
 // MARK: - Timeline
 
-@available(iOS 17.0, *)
+@available(iOS 17.0, macOS 14.0, *)
 struct SiteEntry: TimelineEntry {
     let date: Date
     let record: SiteRecord?
     let periodLabel: String
 }
 
-@available(iOS 17.0, *)
+@available(iOS 17.0, macOS 14.0, *)
 struct SiteProvider: AppIntentTimelineProvider {
     func placeholder(in context: Context) -> SiteEntry {
         SiteEntry(date: Date(), record: .placeholder, periodLabel: "7 jours")
@@ -100,7 +100,7 @@ struct SiteProvider: AppIntentTimelineProvider {
 
 // MARK: - Vues
 
-@available(iOS 17.0, *)
+@available(iOS 17.0, macOS 14.0, *)
 struct SiteSmallView: View {
     let r: SiteRecord
     let period: String
@@ -116,7 +116,7 @@ struct SiteSmallView: View {
     }
 }
 
-@available(iOS 17.0, *)
+@available(iOS 17.0, macOS 14.0, *)
 struct SiteMediumView: View {
     let r: SiteRecord
     let period: String
@@ -137,7 +137,7 @@ struct SiteMediumView: View {
     }
 }
 
-@available(iOS 17.0, *)
+@available(iOS 17.0, macOS 14.0, *)
 struct SiteWidgetEntryView: View {
     @Environment(\.widgetFamily) var family
     let entry: SiteEntry
@@ -156,7 +156,7 @@ struct SiteWidgetEntryView: View {
     }
 }
 
-@available(iOS 17.0, *)
+@available(iOS 17.0, macOS 14.0, *)
 struct GlanceSiteWidget: Widget {
     let kind = "GlanceSiteWidget"
     var body: some WidgetConfiguration {

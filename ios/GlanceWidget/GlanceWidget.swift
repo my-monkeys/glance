@@ -1,10 +1,16 @@
 import WidgetKit
 import SwiftUI
+#if canImport(UIKit)
 import UIKit
+private typealias PlatformColor = UIColor
+#elseif canImport(AppKit)
+import AppKit
+private typealias PlatformColor = NSColor
+#endif
 
 // MARK: - Palette Glance (Direction A : crème + vert forêt), adaptée clair/sombre
 
-extension UIColor {
+extension PlatformColor {
     fileprivate convenience init(rgb: UInt32) {
         self.init(
             red: CGFloat((rgb >> 16) & 0xFF) / 255,
@@ -16,10 +22,18 @@ extension UIColor {
 }
 
 extension Color {
+    // Couleur dynamique clair/sombre, portée sur UIKit (iOS) et AppKit (macOS).
     fileprivate init(light: UInt32, dark: UInt32) {
+        #if canImport(UIKit)
         self = Color(uiColor: UIColor { trait in
             trait.userInterfaceStyle == .dark ? UIColor(rgb: dark) : UIColor(rgb: light)
         })
+        #elseif canImport(AppKit)
+        self = Color(nsColor: NSColor(name: nil) { appearance in
+            let isDark = appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
+            return isDark ? NSColor(rgb: dark) : NSColor(rgb: light)
+        })
+        #endif
     }
 }
 
@@ -54,7 +68,14 @@ struct GlanceData {
     var siteCount: Int
     var sites: [SiteStat]
 
+    // Sur macOS, l'identifiant d'App Group DOIT être préfixé par le Team ID ;
+    // sur iOS c'est l'identifiant nu. Doit correspondre au suite name côté écriture
+    // (home_widget sur iOS, MainFlutterWindow.swift sur macOS).
+    #if os(macOS)
+    static let appGroup = "5C67TFSJ2B.group.fr.mymonkey.glance"
+    #else
     static let appGroup = "group.fr.mymonkey.glance"
+    #endif
 
     static func load() -> GlanceData {
         let d = UserDefaults(suiteName: appGroup)
@@ -364,7 +385,7 @@ struct LargeView: View {
 /// Fond du widget : `containerBackground` sur iOS 17+, sinon fond + marges.
 struct GlanceBackground: ViewModifier {
     func body(content: Content) -> some View {
-        if #available(iOS 17.0, *) {
+        if #available(iOS 17.0, macOS 14.0, *) {
             content.containerBackground(for: .widget) { GT.bg }
         } else {
             content.padding(16).background(GT.bg)
