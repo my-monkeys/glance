@@ -1,0 +1,45 @@
+name: Build Android
+
+# Manuel (bouton « Run workflow ») ou automatique sur un tag de version.
+# Aucun build ne se déclenche sur un simple push de branche.
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "android-v*"
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.44.6
+          cache: true
+
+      - run: flutter pub get
+
+      # ⚠️ Signé avec la clé de DEBUG (cf. android/app/build.gradle : le buildType
+      # release utilise signingConfigs.debug). L'APK est installable pour tester,
+      # mais PAS publiable sur le Play Store en l'état — pour ça il faudra une
+      # vraie keystore (via des secrets GitHub + signingConfig dédié).
+      - run: flutter build apk --release
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: glance-android-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Attacher à la release (si tag)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/app/outputs/flutter-apk/app-release.apk

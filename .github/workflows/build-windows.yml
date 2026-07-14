@@ -1,0 +1,43 @@
+name: Build Windows
+
+# Manuel (bouton « Run workflow ») ou automatique sur un tag de version.
+# Aucun build ne se déclenche sur un simple push de branche.
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "windows-v*"
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.44.6
+          cache: true
+
+      - run: flutter config --enable-windows-desktop
+      - run: flutter pub get
+
+      # Le runner windows-latest embarque Visual Studio 2022 avec la charge C++
+      # desktop (ATL inclus) → flutter_secure_storage_windows compile sans étape
+      # supplémentaire (contrairement à une install minimale VCTools).
+      - run: flutter build windows --release
+
+      - name: Zip du build release
+        run: Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath glance-windows-x64.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: glance-windows-x64
+          path: glance-windows-x64.zip
+
+      - name: Attacher à la release (si tag)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: glance-windows-x64.zip
