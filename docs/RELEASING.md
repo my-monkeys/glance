@@ -35,6 +35,11 @@ ENT="macos/Runner/Release-hardened.entitlements"
 # 2. Sign inside-out (hardened runtime + timestamp)
 find "$APP/Contents/Frameworks" -maxdepth 1 -name "*.framework" \
   -exec codesign --force --options runtime --timestamp --sign "$ID" {} \;
+# L'extension widget doit être signée avec SES entitlements (sandbox + app-group),
+# pas ceux de l'app — sinon le widget ne partage pas l'App Group une fois distribué.
+codesign --force --options runtime --timestamp \
+  --entitlements macos/GlanceWidget/GlanceWidget.entitlements --sign "$ID" \
+  "$APP/Contents/PlugIns/GlanceWidgetExtension.appex"
 codesign --force --options runtime --timestamp --entitlements "$ENT" --sign "$ID" "$APP"
 codesign --verify --deep --strict "$APP"
 
