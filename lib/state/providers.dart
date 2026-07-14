@@ -32,6 +32,13 @@ void cacheFor(Ref ref, Duration duration) {
   ref.onDispose(() => timer?.cancel());
 }
 
+/// Garde le résultat en cache pour TOUTE la session : une fois une période
+/// chargée pour un site, y revenir (ou rebasculer sur cette période) l'affiche
+/// instantanément — plus de squelette ni de blanc. La fraîcheur est assurée par
+/// les refresh, ciblés sur la seule fenêtre courante, qui mettent à jour les
+/// valeurs en place. Les autres périodes restent servies depuis le cache.
+void cacheSession(Ref ref) => ref.keepAlive();
+
 const _cacheTtl = Duration(minutes: 3);
 
 /// Injecté au démarrage (voir main.dart).
@@ -181,7 +188,7 @@ final siteLiveProvider = FutureProvider.autoDispose.family<int, Site>((ref, site
 /// autres sites → chaque carte apparaît dès que SA donnée arrive.
 final siteStatsProvider =
     FutureProvider.autoDispose.family<SiteStats, (Site, DateWindow)>((ref, key) async {
-  cacheFor(ref, _cacheTtl);
+  cacheSession(ref);
   final (site, w) = key;
   final gate = ref.watch(fetchGateProvider);
   final p = await _providerFor(ref, site);
@@ -232,7 +239,7 @@ final homeTotalsProvider =
 /// Détail complet d'un site (tout en parallèle).
 final detailProvider =
     FutureProvider.autoDispose.family<SiteDetail, (Site, DateWindow)>((ref, key) async {
-  cacheFor(ref, _cacheTtl);
+  cacheSession(ref);
   final (site, w) = key;
   final p = await _providerFor(ref, site);
   final r = await Future.wait([
@@ -259,7 +266,7 @@ final detailProvider =
 /// Données d'événements d'un site pour une fenêtre (série + répartition).
 final eventsProvider =
     FutureProvider.autoDispose.family<EventsData, (Site, DateWindow)>((ref, key) async {
-  cacheFor(ref, _cacheTtl);
+  cacheSession(ref);
   final (site, w) = key;
   final gate = ref.watch(fetchGateProvider);
   final p = await _providerFor(ref, site);

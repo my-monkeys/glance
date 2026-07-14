@@ -547,7 +547,11 @@ class _OverviewState extends ConsumerState<_Overview> {
     final secs = ref.read(settingsProvider).refreshSeconds;
     _timer = Timer.periodic(Duration(seconds: secs), (_) {
       if (!mounted) return;
-      ref.invalidate(siteStatsProvider);
+      // Rafraîchit en place la seule fenêtre courante (autres périodes en cache).
+      final w = ref.read(periodProvider).window();
+      for (final s in ref.read(sitesProvider).value ?? const <Site>[]) {
+        ref.invalidate(siteStatsProvider((s, w)));
+      }
       ref.invalidate(siteLiveProvider);
     });
   }

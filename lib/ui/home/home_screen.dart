@@ -59,7 +59,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final secs = ref.read(settingsProvider).refreshSeconds;
     _timer = Timer.periodic(Duration(seconds: secs), (_) {
       if (!mounted) return;
-      ref.invalidate(siteStatsProvider);
+      // Rafraîchit en place la SEULE fenêtre courante (les autres périodes
+      // restent en cache) → valeurs mises à jour sans squelette.
+      final w = ref.read(periodProvider).window();
+      for (final s in ref.read(sitesProvider).value ?? const <Site>[]) {
+        ref.invalidate(siteStatsProvider((s, w)));
+      }
       ref.invalidate(siteLiveProvider);
     });
   }
@@ -103,7 +108,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           color: p.accent,
           backgroundColor: p.surface,
           onRefresh: () async {
-            ref.invalidate(siteStatsProvider);
+            // Ne réactualise que la fenêtre courante (cache des autres périodes
+            // préservé) ; les valeurs se mettent à jour en place.
+            for (final s in sites) {
+              ref.invalidate(siteStatsProvider((s, window)));
+            }
             ref.invalidate(siteLiveProvider);
             await ref.read(sitesProvider.future);
           },
