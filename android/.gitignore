@@ -12,3 +12,6 @@ GeneratedPluginRegistrant.java
 key.properties
 **/*.keystore
 **/*.jks
+
+# Sauvegarde locale de la keystore (ne JAMAIS committer)
+keystore-backup/
