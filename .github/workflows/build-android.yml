@@ -31,22 +31,42 @@ jobs:
 
       - run: flutter pub get
 
-      # ⚠️ Signé avec la clé de DEBUG (cf. android/app/build.gradle : le buildType
-      # release utilise signingConfigs.debug). L'APK est installable pour tester,
-      # mais PAS publiable sur le Play Store en l'état — pour ça il faudra une
-      # vraie keystore (via des secrets GitHub + signingConfig dédié).
-      - run: flutter build apk --release
+      # Signature de release depuis les secrets GitHub (keystore + mots de passe).
+      # Sans ces secrets, le build retomberait sur la clé de debug (cf. build.gradle.kts).
+      - name: Configurer la signature release
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          echo "$KEYSTORE_B64" | base64 --decode > android/app/glance-release.jks
+          cat > android/key.properties <<EOF
+          storePassword=$STORE_PASSWORD
+          keyPassword=$KEY_PASSWORD
+          keyAlias=$KEY_ALIAS
+          storeFile=glance-release.jks
+          EOF
 
-      - name: Renommer l'APK (nom de téléchargement propre)
-        run: cp build/app/outputs/flutter-apk/app-release.apk glance-android.apk
+      - run: flutter build apk --release
+      - run: flutter build appbundle --release
+
+      - name: Renommer les binaires (noms propres)
+        run: |
+          cp build/app/outputs/flutter-apk/app-release.apk glance-android.apk
+          cp build/app/outputs/bundle/release/app-release.aab glance-android.aab
 
       - uses: actions/upload-artifact@v4
         with:
-          name: glance-android-apk
-          path: glance-android.apk
+          name: glance-android
+          path: |
+            glance-android.apk
+            glance-android.aab
 
       - name: Attacher à la release (si tag)
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: glance-android.apk
+          files: |
+            glance-android.apk
+            glance-android.aab
