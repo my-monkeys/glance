@@ -15,6 +15,7 @@ import '../data/repository/accounts_repository.dart';
 import '../data/favicon_cache.dart';
 import '../core/semaphore.dart';
 import 'home_data.dart';
+import 'workspaces.dart';
 
 /// Garde le résultat d'un provider autoDispose en cache pendant [duration] après
 /// le départ du dernier auditeur : au retour sur un écran on réaffiche la donnée
@@ -139,7 +140,9 @@ final providerRegistryProvider = Provider<ProviderRegistry>((ref) {
   );
 });
 
-/// Sites affichés = sites de chaque compte filtrés par sa sélection.
+/// Périmètre suivi = sites de chaque compte filtrés par sa sélection. C'est ce
+/// que Glance va chercher ; ce qui est *affiché* passe encore par le groupe
+/// actif (cf. `visibleSitesProvider`).
 final sitesProvider = FutureProvider<List<Site>>((ref) async {
   final accounts = ref.watch(accountsProvider);
   final reg = ref.watch(providerRegistryProvider);
@@ -203,9 +206,12 @@ final siteStatsProvider =
 
 /// Agrégat vivant de la home : recalculé à chaque site qui se charge (watch de
 /// tous les providers par site). Fournit les totaux sur les sites déjà chargés.
+///
+/// Porté par le **groupe actif** : les totaux, la courbe et les cartes ne
+/// comptent que ses sites. « Tous » = le périmètre entier.
 final homeTotalsProvider =
     Provider.autoDispose.family<HomeTotals, DateWindow>((ref, w) {
-  final sitesAsync = ref.watch(sitesProvider);
+  final sitesAsync = ref.watch(visibleSitesProvider);
   final sites = sitesAsync.value ?? const <Site>[];
   final cards = <SiteCard>[];
   var pending = 0;

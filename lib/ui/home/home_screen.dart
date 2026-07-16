@@ -7,13 +7,16 @@ import 'package:intl/intl.dart';
 import '../../core/format.dart';
 import '../../data/models/models.dart';
 import '../../data/models/period.dart';
+import '../../data/models/workspace.dart';
 import '../../state/home_data.dart';
 import '../../state/period_state.dart';
 import '../../state/providers.dart';
 import '../../state/settings.dart';
+import '../../state/workspaces.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
 import '../root_scaffold.dart';
+import '../settings/workspaces_screen.dart';
 import '../widgets/chip.dart';
 import '../widgets/common.dart';
 import '../widgets/day_nav.dart';
@@ -60,9 +63,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     _timer = Timer.periodic(Duration(seconds: secs), (_) {
       if (!mounted) return;
       // Rafraîchit en place la SEULE fenêtre courante (les autres périodes
-      // restent en cache) → valeurs mises à jour sans squelette.
+      // restent en cache) → valeurs mises à jour sans squelette. Limité au
+      // groupe affiché : inutile de solliciter les sites qu'on ne regarde pas.
       final w = ref.read(periodProvider).window();
-      for (final s in ref.read(sitesProvider).value ?? const <Site>[]) {
+      for (final s in ref.read(visibleSitesProvider).value ?? const <Site>[]) {
         ref.invalidate(siteStatsProvider((s, w)));
       }
       ref.invalidate(siteLiveProvider);
@@ -85,8 +89,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     final periodState = ref.watch(periodProvider);
     final window = periodState.window();
-    final sitesAsync = ref.watch(sitesProvider);
+    // Périmètre = le groupe actif (tous les sites si aucun n'est sélectionné).
+    final sitesAsync = ref.watch(visibleSitesProvider);
     final sites = sitesAsync.value ?? const <Site>[];
+    final group = ref.watch(activeWorkspaceProvider);
     final totals = ref.watch(homeTotalsProvider(window));
     final now = DateTime.now();
     final viewMode = ref.watch(settingsProvider.select((s) => s.homeView));
@@ -156,10 +162,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               else if (sites.isEmpty && sitesAsync.isLoading)
                 const _HomeSkeleton()
               else if (sites.isEmpty)
-                _EmptyBox(
-                  onChoose: widget.onGoSettings,
-                  onAdd: () => openAddSource(context),
-                )
+                group != null
+                    ? _EmptyGroupBox(group: group)
+                    : _EmptyBox(
+                        onChoose: widget.onGoSettings,
+                        onAdd: () => openAddSource(context),
+                      )
               else ...[
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -218,8 +226,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 }
 
-/// En-tête : date + titre, boutons, périodes, bascule liste/grille.
-class _Header extends StatelessWidget {
+/// En-tête : date + titre, boutons, groupes, périodes, bascule liste/grille.
+/// Le titre porte le nom du groupe actif : c'est lui qui annonce le périmètre
+/// sur lequel portent le total et la courbe juste en dessous.
+class _Header extends ConsumerWidget {
   const _Header({
     required this.period,
     required this.now,
@@ -239,8 +249,10 @@ class _Header extends StatelessWidget {
   final VoidCallback onSettings;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final p = context.glance;
+    final groups = ref.watch(workspacesProvider);
+    final active = ref.watch(activeWorkspaceProvider);
     return Column(
       children: [
         Padding(
@@ -258,7 +270,12 @@ class _Header extends StatelessWidget {
                       style: GT.label(color: p.fg2),
                     ),
                     const SizedBox(height: 9),
-                    Text('Mes sites', style: GT.display(34, color: p.fg)),
+                    Text(
+                      active?.name ?? 'Mes sites',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GT.display(34, color: p.fg),
+                    ),
                   ],
                 ),
               ),
@@ -271,6 +288,33 @@ class _Header extends StatelessWidget {
             ],
           ),
         ),
+        if (groups.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 14, 16, 0),
+            // Pleine largeur : la Column centre ses enfants, or les chips
+            // doivent s'aligner à gauche comme le titre et les périodes.
+            child: SizedBox(
+              width: double.infinity,
+              child: ChipRow(
+                children: [
+                  GlanceChip(
+                    label: 'Tous',
+                    selected: active == null,
+                    onTap: () =>
+                        ref.read(activeWorkspaceIdProvider.notifier).set(null),
+                  ),
+                  for (final g in groups)
+                    GlanceChip(
+                      label: g.name,
+                      selected: active?.id == g.id,
+                      onTap: () => ref
+                          .read(activeWorkspaceIdProvider.notifier)
+                          .set(g.id),
+                    ),
+                ],
+              ),
+            ),
+          ),
         const SizedBox(height: 16),
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 0, 16, 0),
@@ -356,7 +400,9 @@ class _TotalCard extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SectionLabel('Visiteurs · tous les sites'),
+                    SectionLabel(
+                      'Visiteurs · ${ref.watch(activeWorkspaceProvider)?.name ?? 'tous les sites'}',
+                    ),
                     const SizedBox(height: 8),
                     Text(
                       fmtInt(data.totalVisitors),
@@ -650,6 +696,49 @@ class _EmptyBox extends StatelessWidget {
             onTap: onAdd,
             child: Text(
               '+ Ajouter une source',
+              style: GT.body(13.5, color: p.fg3),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Vide propre à un groupe : des sites sont suivis, mais aucun n'est dans ce
+/// groupe. Le remède est de le remplir — pas de toucher aux comptes — d'où un
+/// état distinct de [_EmptyBox].
+class _EmptyGroupBox extends ConsumerWidget {
+  const _EmptyGroupBox({required this.group});
+  final Workspace group;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final p = context.glance;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 60),
+      child: Column(
+        children: [
+          Text('Groupe vide', style: GT.display(22, color: p.fg)),
+          const SizedBox(height: 8),
+          Text(
+            '« ${group.name} » ne contient aucun site.',
+            textAlign: TextAlign.center,
+            style: GT.body(14, color: p.fg2),
+          ),
+          const SizedBox(height: 18),
+          GestureDetector(
+            onTap: () => openWorkspaceEditor(context, group),
+            child: Text(
+              'Choisir ses sites',
+              style: GT.body(15, weight: 600, color: p.accent),
+            ),
+          ),
+          const SizedBox(height: 14),
+          GestureDetector(
+            onTap: () => ref.read(activeWorkspaceIdProvider.notifier).set(null),
+            child: Text(
+              'Voir tous les sites',
               style: GT.body(13.5, color: p.fg3),
             ),
           ),

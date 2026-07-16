@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:glance/data/models/account.dart';
+import 'package:glance/data/models/models.dart';
 import 'package:glance/data/models/period.dart';
+import 'package:glance/data/models/workspace.dart';
 
 void main() {
   group('Period.window', () {
@@ -91,6 +93,64 @@ void main() {
         sites: ['s1'],
       );
       expect(a.copyWith(allSites: true).sites, isNull);
+    });
+  });
+
+  group('Workspace', () {
+    Site site(String id, String accountId) =>
+        Site(id: id, accountId: accountId, name: id, domain: '$id.fr');
+
+    test('contains identifie le site par (compte, id)', () {
+      final w = Workspace(
+        id: 'w',
+        name: 'Jeux',
+        sites: [SiteRef.of(site('s1', 'a1'))],
+      );
+      expect(w.contains(site('s1', 'a1')), isTrue);
+      // Même id de site mais autre compte → site différent (cf. Site.==).
+      expect(w.contains(site('s1', 'a2')), isFalse);
+      expect(w.contains(site('s2', 'a1')), isFalse);
+    });
+
+    test('une référence orpheline est simplement ignorée au filtrage', () {
+      final w = Workspace(
+        id: 'w',
+        name: 'Jeux',
+        sites: [
+          SiteRef.of(site('s1', 'a1')),
+          const SiteRef('compte-supprimé', 's9'),
+        ],
+      );
+      final connus = [site('s1', 'a1'), site('s2', 'a1')];
+      // Pas de nettoyage nécessaire : le filtre intersecte avec les sites connus.
+      expect(connus.where(w.contains).map((s) => s.id), ['s1']);
+    });
+
+    test('round-trip conserve nom et références', () {
+      final w = Workspace(
+        id: 'w1',
+        name: 'Clients',
+        sites: [SiteRef.of(site('s1', 'a1')), SiteRef.of(site('s2', 'a2'))],
+      );
+      final back = Workspace.decodeList(Workspace.encodeList([w])).single;
+      expect(back.id, 'w1');
+      expect(back.name, 'Clients');
+      expect(back.sites, w.sites);
+    });
+
+    test('groupe sans site = groupe vide (pas « tous »)', () {
+      const w = Workspace(id: 'w', name: 'Vide');
+      final back = Workspace.decodeList(Workspace.encodeList([w])).single;
+      expect(back.sites, isEmpty);
+      expect(back.contains(site('s1', 'a1')), isFalse);
+    });
+
+    test('la liste décodée est modifiable', () {
+      final list = Workspace.decodeList(
+        Workspace.encodeList([const Workspace(id: 'w', name: 'A')]),
+      );
+      // Cf. le piège d'Account.decodeList (growable:false → suppression KO).
+      expect(() => list.removeWhere((e) => e.id == 'w'), returnsNormally);
     });
   });
 }

@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/models.dart';
 import '../../state/providers.dart';
 import '../../state/settings.dart';
+import '../../state/workspaces.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
 import '../root_scaffold.dart';
@@ -43,8 +44,10 @@ class _DirectScreenState extends ConsumerState<DirectScreen> {
   Widget build(BuildContext context) {
     final p = context.glance;
     final onlyLive = ref.watch(settingsProvider.select((s) => s.directOnlyLive));
-    final sitesAsync = ref.watch(sitesProvider);
+    // Même périmètre que l'accueil : le direct porte sur le groupe actif.
+    final sitesAsync = ref.watch(visibleSitesProvider);
     final sites = sitesAsync.value ?? const <Site>[];
+    final group = ref.watch(activeWorkspaceProvider);
 
     // Live par site, chargé indépendamment (incrémental).
     final entries = <({Site site, int live, bool loading})>[];
@@ -98,7 +101,9 @@ class _DirectScreenState extends ConsumerState<DirectScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      "visiteurs sur l'ensemble de vos sites",
+                      group == null
+                          ? "visiteurs sur l'ensemble de vos sites"
+                          : 'visiteurs sur le groupe « ${group.name} »',
                       textAlign: TextAlign.center,
                       style: GT.body(13, color: p.fg2),
                     ),

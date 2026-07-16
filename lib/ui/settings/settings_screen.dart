@@ -6,6 +6,7 @@ import '../../data/models/period.dart';
 import '../../data/providers/analytics_provider.dart';
 import '../../state/providers.dart';
 import '../../state/settings.dart';
+import '../../state/workspaces.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
 import '../add/add_source_screen.dart';
@@ -13,6 +14,7 @@ import '../add/site_picker.dart';
 import '../root_scaffold.dart';
 import '../widgets/chip.dart';
 import '../widgets/common.dart';
+import 'workspaces_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -24,6 +26,7 @@ class SettingsScreen extends ConsumerWidget {
     final settings = ref.watch(settingsProvider);
     final notifier = ref.read(settingsProvider.notifier);
     final sites = ref.watch(sitesProvider).value ?? const [];
+    final groups = ref.watch(workspacesProvider);
 
     int siteCount(Account a) => sites.where((s) => s.accountId == a.id).length;
 
@@ -81,6 +84,25 @@ class SettingsScreen extends ConsumerWidget {
               title: 'Ajouter une source',
               titleColor: p.accent,
               onTap: () => openAddSource(context),
+            ),
+          ],
+        ),
+        const SizedBox(height: 22),
+
+        // Sites.
+        _GroupLabel('Sites'),
+        _Group(
+          children: [
+            _Row(
+              leading: Icon(Icons.folder_rounded, color: p.fg2, size: 20),
+              title: 'Groupes',
+              subtitle: groups.isEmpty
+                  ? 'Lire une partie de vos sites à part'
+                  : groups.map((g) => g.name).join(' · '),
+              trailing:
+                  Icon(Icons.chevron_right_rounded, color: p.fg3, size: 22),
+              onTap: () =>
+                  showGlanceModal<void>(context, const WorkspacesScreen()),
             ),
           ],
         ),

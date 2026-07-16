@@ -7,16 +7,19 @@ import 'package:intl/intl.dart';
 import '../../core/format.dart';
 import '../../data/models/models.dart';
 import '../../data/models/period.dart';
+import '../../data/models/workspace.dart';
 import '../../state/desktop_nav.dart';
 import '../../state/home_data.dart';
 import '../../state/period_state.dart';
 import '../../state/providers.dart';
 import '../../state/settings.dart';
+import '../../state/workspaces.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
 import '../detail/detail_screen.dart';
 import '../root_scaffold.dart';
 import '../settings/settings_screen.dart';
+import '../settings/workspaces_screen.dart';
 import '../widgets/chip.dart';
 import '../widgets/common.dart';
 import '../widgets/glance_chart.dart';
@@ -89,8 +92,11 @@ class _Sidebar extends ConsumerWidget {
     final nav = ref.watch(desktopNavProvider);
     final window = ref.watch(periodProvider).window();
     final totals = ref.watch(homeTotalsProvider(window));
-    final sitesAsync = ref.watch(sitesProvider);
+    // Périmètre = le groupe actif (tous les sites si aucun n'est sélectionné).
+    final sitesAsync = ref.watch(visibleSitesProvider);
     final sites = sitesAsync.value ?? const <Site>[];
+    final groups = ref.watch(workspacesProvider);
+    final active = ref.watch(activeWorkspaceProvider);
 
     final hideZero = ref.watch(settingsProvider.select((s) => s.hideZeroSites));
 
@@ -112,13 +118,19 @@ class _Sidebar extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // En-tête.
+          // En-tête : le titre porte le groupe actif — c'est le périmètre des
+          // totaux affichés juste en dessous.
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 22, 16, 14),
             child: Row(
               children: [
                 Expanded(
-                  child: Text('Mes sites', style: GT.display(24, color: p.fg)),
+                  child: Text(
+                    active?.name ?? 'Mes sites',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GT.display(24, color: p.fg),
+                  ),
                 ),
                 GlanceIconButton(
                   icon: Icons.add,
@@ -127,6 +139,27 @@ class _Sidebar extends ConsumerWidget {
               ],
             ),
           ),
+          if (groups.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 16, 14),
+              child: ChipRow(
+                children: [
+                  GlanceChip(
+                    label: 'Tous',
+                    selected: active == null,
+                    onTap: () =>
+                        ref.read(activeWorkspaceIdProvider.notifier).set(null),
+                  ),
+                  for (final g in groups)
+                    GlanceChip(
+                      label: g.name,
+                      selected: active?.id == g.id,
+                      onTap: () =>
+                          ref.read(activeWorkspaceIdProvider.notifier).set(g.id),
+                    ),
+                ],
+              ),
+            ),
           // Liste défilante : « Vue d'ensemble » + sites.
           Expanded(
             child: ListView(
@@ -134,6 +167,7 @@ class _Sidebar extends ConsumerWidget {
               children: [
                 _OverviewTile(
                   selected: nav.view == DesktopView.overview,
+                  scopeLabel: active?.name ?? 'Tous les sites',
                   visitors: totals.data.totalVisitors,
                   live: totals.data.totalLive,
                   loading: totals.loading && totals.data.cards.isEmpty,
@@ -193,16 +227,19 @@ class _Sidebar extends ConsumerWidget {
   }
 }
 
-/// Ligne « Vue d'ensemble » (tous les sites) en tête de la liste.
+/// Ligne « Vue d'ensemble » en tête de la liste. [scopeLabel] rappelle sur quoi
+/// portent les totaux : tous les sites, ou le groupe actif.
 class _OverviewTile extends StatelessWidget {
   const _OverviewTile({
     required this.selected,
+    required this.scopeLabel,
     required this.visitors,
     required this.live,
     required this.loading,
     required this.onTap,
   });
   final bool selected;
+  final String scopeLabel;
   final int visitors;
   final int live;
   final bool loading;
@@ -233,7 +270,10 @@ class _OverviewTile extends StatelessWidget {
               children: [
                 Text('Vue d\'ensemble',
                     style: GT.body(14, weight: 600, color: p.fg)),
-                Text('Tous les sites', style: GT.body(11.5, color: p.fg3)),
+                Text(scopeLabel,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GT.body(11.5, color: p.fg3)),
               ],
             ),
           ),
@@ -500,12 +540,12 @@ class _Center extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final p = context.glance;
     final nav = ref.watch(desktopNavProvider);
-    // Site sélectionné retiré (compte supprimé) → retour à l'aperçu. On attend
-    // que la liste soit chargée et non vide pour ne pas reset pendant un refresh.
-    final sitesAsync = ref.watch(sitesProvider);
+    // Site sélectionné hors du périmètre courant (compte supprimé, ou bascule
+    // vers un groupe qui ne le contient pas) → retour à l'aperçu. On attend que
+    // la liste soit chargée pour ne pas reset pendant un refresh.
+    final sitesAsync = ref.watch(visibleSitesProvider);
     if (nav.view == DesktopView.site &&
         sitesAsync.hasValue &&
-        sitesAsync.value!.isNotEmpty &&
         (nav.site == null || !sitesAsync.value!.contains(nav.site))) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ref.read(desktopNavProvider.notifier).overview();
@@ -547,9 +587,10 @@ class _OverviewState extends ConsumerState<_Overview> {
     final secs = ref.read(settingsProvider).refreshSeconds;
     _timer = Timer.periodic(Duration(seconds: secs), (_) {
       if (!mounted) return;
-      // Rafraîchit en place la seule fenêtre courante (autres périodes en cache).
+      // Rafraîchit en place la seule fenêtre courante (autres périodes en
+      // cache), limité au groupe affiché.
       final w = ref.read(periodProvider).window();
-      for (final s in ref.read(sitesProvider).value ?? const <Site>[]) {
+      for (final s in ref.read(visibleSitesProvider).value ?? const <Site>[]) {
         ref.invalidate(siteStatsProvider((s, w)));
       }
       ref.invalidate(siteLiveProvider);
@@ -587,14 +628,18 @@ class _OverviewState extends ConsumerState<_Overview> {
     final hidden = ref.watch(settingsProvider.select((s) => s.hiddenSeries));
     final refreshing = totals.loading && data.cards.isNotEmpty;
     final dateLabel = DateFormat('EEE d MMM', 'fr_FR').format(DateTime.now());
+    final group = ref.watch(activeWorkspaceProvider);
+    final scope = group?.name ?? 'Tous les sites';
 
-    // Compte(s) présent(s) mais aucun site suivi → dashboard vide trompeur :
-    // on montre un état dédié plutôt qu'un graphe vide et des KPI à zéro.
-    final noSites =
-        ref.watch(sitesProvider.select((a) => a.hasValue && a.value!.isEmpty));
-    if (noSites) {
+    // Aucun site dans le périmètre → dashboard vide trompeur : on montre un état
+    // dédié plutôt qu'un graphe vide et des KPI à zéro.
+    final sitesAsync = ref.watch(visibleSitesProvider);
+    if (sitesAsync.hasValue && sitesAsync.value!.isEmpty) {
       return _OverviewNoSites(
-        onChoose: () => ref.read(desktopNavProvider.notifier).settings(),
+        group: group,
+        onChoose: () => group == null
+            ? ref.read(desktopNavProvider.notifier).settings()
+            : openWorkspaceEditor(context, group),
       );
     }
 
@@ -610,7 +655,10 @@ class _OverviewState extends ConsumerState<_Overview> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Expanded(
-                  child: Text('Tous les sites', style: GT.display(30, color: p.fg)),
+                  child: Text(scope,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GT.display(30, color: p.fg)),
                 ),
                 LivePill(count: data.totalLive, text: '${data.totalLive} live'),
               ],
@@ -634,7 +682,7 @@ class _OverviewState extends ConsumerState<_Overview> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SectionLabel('Visiteurs · tous les sites'),
+                  SectionLabel('Visiteurs · $scope'),
                   const SizedBox(height: 8),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
@@ -845,16 +893,18 @@ class _DesktopEmpty extends StatelessWidget {
   }
 }
 
-/// Aperçu quand des comptes existent mais ne suivent aucun site (tout masqué).
-/// Évite un tableau de bord tout-à-zéro qui a l'air cassé ; oriente vers le
-/// choix des sites dans les réglages.
+/// Aperçu quand le périmètre est vide : soit les comptes ne suivent aucun site,
+/// soit le groupe actif ne contient rien. Évite un tableau de bord tout-à-zéro
+/// qui a l'air cassé, et oriente vers le bon remède selon le cas.
 class _OverviewNoSites extends StatelessWidget {
-  const _OverviewNoSites({required this.onChoose});
+  const _OverviewNoSites({required this.group, required this.onChoose});
+  final Workspace? group;
   final VoidCallback onChoose;
 
   @override
   Widget build(BuildContext context) {
     final p = context.glance;
+    final inGroup = group != null;
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 380),
@@ -868,23 +918,35 @@ class _OverviewNoSites extends StatelessWidget {
                 color: p.accentSoft,
                 borderRadius: BorderRadius.circular(18),
               ),
-              child:
-                  Icon(Icons.visibility_off_rounded, color: p.accent, size: 28),
+              child: Icon(
+                inGroup
+                    ? Icons.folder_open_rounded
+                    : Icons.visibility_off_rounded,
+                color: p.accent,
+                size: 28,
+              ),
             ),
             const SizedBox(height: 20),
-            Text('Aucun site affiché', style: GT.display(26, color: p.fg)),
+            Text(inGroup ? 'Groupe vide' : 'Aucun site affiché',
+                style: GT.display(26, color: p.fg)),
             const SizedBox(height: 8),
             Text(
-              'Vos comptes ne suivent aucun site pour le moment. '
-              'Choisissez les sites à afficher depuis les réglages.',
+              inGroup
+                  ? '« ${group!.name} » ne contient aucun site. Choisissez ceux '
+                      'qui en font partie.'
+                  : 'Vos comptes ne suivent aucun site pour le moment. '
+                      'Choisissez les sites à afficher depuis les réglages.',
               textAlign: TextAlign.center,
               style: GT.body(14.5, color: p.fg2),
             ),
             const SizedBox(height: 24),
             FilledButton.icon(
               onPressed: onChoose,
-              icon: const Icon(Icons.tune_rounded, size: 18),
-              label: const Text('Choisir les sites'),
+              icon: Icon(
+                inGroup ? Icons.folder_rounded : Icons.tune_rounded,
+                size: 18,
+              ),
+              label: Text(inGroup ? 'Choisir ses sites' : 'Choisir les sites'),
               style: FilledButton.styleFrom(
                 backgroundColor: p.accent,
                 foregroundColor: p.accentInk,

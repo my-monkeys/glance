@@ -29,6 +29,11 @@ class GlanceApp extends ConsumerWidget {
 
 /// Publie l'agrégat de l'accueil vers les widgets d'écran d'accueil dès qu'il
 /// est chargé (et à chaque refresh). Monté en haut de l'app → toujours actif.
+///
+/// L'agrégat suit le **groupe actif** : le widget montre donc le périmètre
+/// qu'on regarde dans l'app. Le choix étant persisté, il reste stable entre
+/// deux lancements. (Un widget configurable par groupe demanderait des App
+/// Intents iOS/macOS et une activité de config Android — pas fait.)
 class _WidgetSync extends ConsumerWidget {
   const _WidgetSync({required this.child});
   final Widget child;
