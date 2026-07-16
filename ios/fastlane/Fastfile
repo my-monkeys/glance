@@ -1,8 +1,14 @@
 default_platform(:ios)
 
-# Build iOS + upload TestFlight, signature AUTOMATIQUE via la clé App Store
-# Connect (xcodebuild -allowProvisioningUpdates gère les profils du Runner ET de
-# l'extension widget). Utilisé par le workflow GitHub Actions build-ios.yml.
+# Build iOS + upload TestFlight. Les profils App Store (app + extension widget)
+# sont créés/téléchargés via la clé API (get_provisioning_profile) puis l'export
+# se fait en signature MANUELLE → évite l'erreur « Cloud signing permission »
+# rencontrée avec la signature automatique à l'export.
+APP_ID = "fr.mymonkey.glance"
+WIDGET_ID = "fr.mymonkey.glance.GlanceWidget"
+APP_PROFILE = "Glance App Store CI"
+WIDGET_PROFILE = "Glance Widget App Store CI"
+
 platform :ios do
   desc "Build the app and upload it to TestFlight"
   lane :beta do
@@ -14,18 +20,38 @@ platform :ios do
       in_house: false
     )
 
+    # Profils App Store (créés si absents), installés localement.
+    get_provisioning_profile(
+      api_key: api_key,
+      app_identifier: APP_ID,
+      provisioning_name: APP_PROFILE,
+      force: true
+    )
+    get_provisioning_profile(
+      api_key: api_key,
+      app_identifier: WIDGET_ID,
+      provisioning_name: WIDGET_PROFILE,
+      force: true
+    )
+
     build_app(
       workspace: "Runner.xcworkspace",
       scheme: "Runner",
       configuration: "Release",
       export_method: "app-store",
-      export_options: { signingStyle: "automatic" },
       xcargs: [
         "-allowProvisioningUpdates",
         "-authenticationKeyPath", ENV["ASC_KEY_PATH"],
         "-authenticationKeyID", ENV["ASC_KEY_ID"],
         "-authenticationKeyIssuerID", ENV["ASC_ISSUER_ID"]
       ].join(" "),
+      export_options: {
+        signingStyle: "manual",
+        provisioningProfiles: {
+          APP_ID => APP_PROFILE,
+          WIDGET_ID => WIDGET_PROFILE
+        }
+      },
       output_directory: "build",
       output_name: "Glance.ipa",
       clean: true
