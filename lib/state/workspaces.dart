@@ -20,8 +20,19 @@ class WorkspacesNotifier extends Notifier<List<Workspace>> {
     state = next;
   }
 
-  Future<Workspace> create(String name, List<SiteRef> sites) async {
-    final w = Workspace(id: _newId(), name: name.trim(), sites: sites);
+  Future<Workspace> create(
+    String name,
+    List<SiteRef> sites, {
+    WorkspaceIcon icon = WorkspaceIcon.dossier,
+    WorkspaceColor color = WorkspaceColor.forest,
+  }) async {
+    final w = Workspace(
+      id: _newId(),
+      name: name.trim(),
+      sites: sites,
+      icon: icon,
+      color: color,
+    );
     await _save([...state, w]);
     return w;
   }

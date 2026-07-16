@@ -25,6 +25,7 @@ import '../widgets/field.dart';
 import '../widgets/glance_chart.dart';
 import '../widgets/pulse_dot.dart';
 import '../widgets/sparkline.dart';
+import '../widgets/workspace_switcher.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key, required this.onGoSettings});
@@ -142,8 +143,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     : ref.read(periodProvider.notifier).set(per),
                 onViewMode: (v) =>
                     ref.read(settingsProvider.notifier).setHomeView(v),
-                onAdd: () => openAddSource(context),
-                onSettings: widget.onGoSettings,
+                onNewGroup: () => openWorkspaceEditor(context, null),
               ),
               if (periodState.canNavigateDays) ...[
                 const SizedBox(height: 14),
@@ -226,9 +226,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 }
 
-/// En-tête : date + titre, boutons, groupes, périodes, bascule liste/grille.
+/// En-tête : date + titre, boutons, périodes, bascule liste/grille.
 /// Le titre porte le nom du groupe actif : c'est lui qui annonce le périmètre
-/// sur lequel portent le total et la courbe juste en dessous.
+/// sur lequel portent le total et la courbe juste en dessous. La pastille de
+/// droite le montre et sert de sélecteur — pas de rangée de chips en plus.
 class _Header extends ConsumerWidget {
   const _Header({
     required this.period,
@@ -236,8 +237,7 @@ class _Header extends ConsumerWidget {
     required this.viewMode,
     required this.onPeriod,
     required this.onViewMode,
-    required this.onAdd,
-    required this.onSettings,
+    required this.onNewGroup,
   });
 
   final Period period;
@@ -245,13 +245,11 @@ class _Header extends ConsumerWidget {
   final HomeViewMode viewMode;
   final ValueChanged<Period> onPeriod;
   final ValueChanged<HomeViewMode> onViewMode;
-  final VoidCallback onAdd;
-  final VoidCallback onSettings;
+  final VoidCallback onNewGroup;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final p = context.glance;
-    final groups = ref.watch(workspacesProvider);
     final active = ref.watch(activeWorkspaceProvider);
     return Column(
       children: [
@@ -279,42 +277,12 @@ class _Header extends ConsumerWidget {
                   ],
                 ),
               ),
-              GlanceIconButton(icon: Icons.add, onTap: onAdd),
+              GlanceIconButton(icon: Icons.add, onTap: onNewGroup),
               const SizedBox(width: 8),
-              GestureDetector(
-                onTap: onSettings,
-                child: const Mark('M', circle: true),
-              ),
+              const WorkspaceSwitcher(),
             ],
           ),
         ),
-        if (groups.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 14, 16, 0),
-            // Pleine largeur : la Column centre ses enfants, or les chips
-            // doivent s'aligner à gauche comme le titre et les périodes.
-            child: SizedBox(
-              width: double.infinity,
-              child: ChipRow(
-                children: [
-                  GlanceChip(
-                    label: 'Tous',
-                    selected: active == null,
-                    onTap: () =>
-                        ref.read(activeWorkspaceIdProvider.notifier).set(null),
-                  ),
-                  for (final g in groups)
-                    GlanceChip(
-                      label: g.name,
-                      selected: active?.id == g.id,
-                      onTap: () => ref
-                          .read(activeWorkspaceIdProvider.notifier)
-                          .set(g.id),
-                    ),
-                ],
-              ),
-            ),
-          ),
         const SizedBox(height: 16),
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 0, 16, 0),

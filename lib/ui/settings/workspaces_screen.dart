@@ -7,15 +7,22 @@ import '../../state/providers.dart';
 import '../../state/workspaces.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
+import '../add/add_source_screen.dart';
 import '../root_scaffold.dart';
+import '../widgets/chip.dart';
 import '../widgets/common.dart';
 import '../widgets/field.dart';
 import '../widgets/site_avatar.dart';
+import '../widgets/workspace_switcher.dart';
 
 /// Ouvre l'éditeur d'un groupe (modale sur desktop, page sur mobile).
 /// [group] à `null` = création.
 Future<void> openWorkspaceEditor(BuildContext context, Workspace? group) =>
     showGlanceModal<void>(context, WorkspaceEditScreen(group: group));
+
+/// Ouvre la liste des groupes.
+Future<void> openWorkspaces(BuildContext context) =>
+    showGlanceModal<void>(context, const WorkspacesScreen());
 
 /// Liste des groupes : créer, renommer, remplir, supprimer.
 class WorkspacesScreen extends ConsumerWidget {
@@ -118,15 +125,7 @@ class _GroupCard extends StatelessWidget {
       onTap: onTap,
       child: Row(
         children: [
-          Container(
-            width: 34,
-            height: 34,
-            decoration: BoxDecoration(
-              color: p.chip,
-              borderRadius: BorderRadius.circular(9),
-            ),
-            child: Icon(Icons.folder_rounded, size: 18, color: p.fg2),
-          ),
+          WorkspaceBadge(group: group, size: 34),
           const SizedBox(width: 13),
           Expanded(
             child: Column(
@@ -204,6 +203,8 @@ class WorkspaceEditScreen extends ConsumerStatefulWidget {
 class _WorkspaceEditScreenState extends ConsumerState<WorkspaceEditScreen> {
   late final TextEditingController _name;
   late final Set<SiteRef> _selected;
+  late WorkspaceIcon _icon;
+  late WorkspaceColor _color;
 
   bool get _isNew => widget.group == null;
 
@@ -214,6 +215,12 @@ class _WorkspaceEditScreenState extends ConsumerState<WorkspaceEditScreen> {
       // Le bouton d'enregistrement s'active dès qu'un nom est saisi.
       ..addListener(() => setState(() {}));
     _selected = {...?widget.group?.sites};
+    _icon = widget.group?.icon ?? WorkspaceIcon.dossier;
+    // Nouveau groupe : couleur suivante du nuancier → deux groupes ne se
+    // ressemblent pas sans que l'utilisateur ait à choisir.
+    _color = widget.group?.color ??
+        WorkspaceColor.values[ref.read(workspacesProvider).length %
+            WorkspaceColor.values.length];
   }
 
   @override
@@ -229,17 +236,46 @@ class _WorkspaceEditScreenState extends ConsumerState<WorkspaceEditScreen> {
     });
   }
 
+  /// Ajouter une source sans quitter le groupe : les sites qu'elle apporte
+  /// entrent directement dedans — c'est le sens de « créer une source depuis
+  /// le groupe ».
+  Future<void> _addSource() async {
+    final before = (ref.read(sitesProvider).value ?? const <Site>[])
+        .map(SiteRef.of)
+        .toSet();
+    await showGlanceModal<void>(context, const AddSourceScreen());
+    if (!mounted) return;
+    final after = await ref.read(sitesProvider.future);
+    if (!mounted) return;
+    setState(() {
+      for (final s in after) {
+        final r = SiteRef.of(s);
+        if (!before.contains(r)) _selected.add(r);
+      }
+    });
+  }
+
   Future<void> _save() async {
     final name = _name.text.trim();
     if (name.isEmpty) return;
     final notifier = ref.read(workspacesProvider.notifier);
     if (_isNew) {
-      final created = await notifier.create(name, _selected.toList());
+      final created = await notifier.create(
+        name,
+        _selected.toList(),
+        icon: _icon,
+        color: _color,
+      );
       // Créer un groupe, c'est vouloir le regarder → on l'active.
       ref.read(activeWorkspaceIdProvider.notifier).set(created.id);
     } else {
       await notifier.update(
-        widget.group!.copyWith(name: name, sites: _selected.toList()),
+        widget.group!.copyWith(
+          name: name,
+          sites: _selected.toList(),
+          icon: _icon,
+          color: _color,
+        ),
       );
     }
     if (mounted) Navigator.of(context).pop();
@@ -313,17 +349,62 @@ class _WorkspaceEditScreenState extends ConsumerState<WorkspaceEditScreen> {
                 physics: const BouncingScrollPhysics(),
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
                 children: [
-                  GlanceField(
-                    label: 'Nom',
-                    controller: _name,
-                    hint: 'Jeux, Clients, Perso…',
-                    autofocus: _isNew,
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: WorkspaceBadge(
+                          group: Workspace(
+                            id: '',
+                            name: '',
+                            icon: _icon,
+                            color: _color,
+                          ),
+                          size: 48,
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: GlanceField(
+                          label: 'Nom',
+                          controller: _name,
+                          hint: 'Jeux, Clients, Perso…',
+                          autofocus: _isNew,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 18),
+                  ChipRow(
+                    children: [
+                      for (final c in WorkspaceColor.values)
+                        _Swatch(
+                          color: c,
+                          on: _color == c,
+                          onTap: () => setState(() => _color = c),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  ChipRow(
+                    children: [
+                      for (final i in WorkspaceIcon.values)
+                        _IconChoice(
+                          icon: i,
+                          color: _color,
+                          on: _icon == i,
+                          onTap: () => setState(() => _icon = i),
+                        ),
+                    ],
                   ),
                   const SizedBox(height: 22),
                   Padding(
                     padding: const EdgeInsets.only(left: 3, bottom: 8),
                     child: SectionLabel('Sites du groupe'),
                   ),
+                  _AddSourceRow(onTap: _addSource),
+                  const SizedBox(height: 10),
                   if (sites.isEmpty && sitesAsync.isLoading)
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 30),
@@ -338,8 +419,8 @@ class _WorkspaceEditScreenState extends ConsumerState<WorkspaceEditScreen> {
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 24),
                       child: Text(
-                        'Aucun site suivi. Choisissez d\'abord les sites de vos '
-                        'comptes dans les réglages.',
+                        'Aucun site suivi pour l\'instant — ajoutez une source '
+                        'ci-dessus pour remplir ce groupe.',
                         textAlign: TextAlign.center,
                         style: GT.body(14, color: p.fg3),
                       ),
@@ -379,6 +460,102 @@ class _WorkspaceEditScreenState extends ConsumerState<WorkspaceEditScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Pastille de couleur du nuancier.
+class _Swatch extends StatelessWidget {
+  const _Swatch({required this.color, required this.on, required this.onTap});
+  final WorkspaceColor color;
+  final bool on;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.glance;
+    final c = color.of(Theme.of(context).brightness);
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        width: 32,
+        height: 32,
+        decoration: BoxDecoration(
+          color: c,
+          shape: BoxShape.circle,
+          // Anneau de sélection détaché : lisible sur toutes les teintes.
+          border: Border.all(
+            color: on ? p.fg : Colors.transparent,
+            width: 2,
+          ),
+        ),
+        child: on
+            ? Icon(Icons.check_rounded, size: 16, color: p.surface)
+            : null,
+      ),
+    );
+  }
+}
+
+/// Choix d'icône, teinté de la couleur courante du groupe.
+class _IconChoice extends StatelessWidget {
+  const _IconChoice({
+    required this.icon,
+    required this.color,
+    required this.on,
+    required this.onTap,
+  });
+  final WorkspaceIcon icon;
+  final WorkspaceColor color;
+  final bool on;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.glance;
+    final c = color.of(Theme.of(context).brightness);
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        width: 38,
+        height: 38,
+        decoration: BoxDecoration(
+          color: on ? c.withValues(alpha: 0.16) : p.chip,
+          borderRadius: BorderRadius.circular(11),
+          border: Border.all(color: on ? c : Colors.transparent, width: 1.5),
+        ),
+        child: Icon(icon.data, size: 18, color: on ? c : p.fg2),
+      ),
+    );
+  }
+}
+
+/// Ajouter une source sans quitter le groupe en cours de composition.
+class _AddSourceRow extends StatelessWidget {
+  const _AddSourceRow({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.glance;
+    return GlanceCard(
+      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
+      onTap: onTap,
+      child: Row(
+        children: [
+          Icon(Icons.add, size: 22, color: p.accent),
+          const SizedBox(width: 13),
+          Expanded(
+            child: Text(
+              'Ajouter une source',
+              style: GT.body(15, weight: 500, color: p.accent),
+            ),
+          ),
+          Text('ses sites entrent ici', style: GT.body(11.5, color: p.fg3)),
+        ],
       ),
     );
   }

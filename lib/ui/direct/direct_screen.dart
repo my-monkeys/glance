@@ -13,6 +13,7 @@ import '../root_scaffold.dart';
 import '../widgets/common.dart';
 import '../widgets/site_avatar.dart';
 import '../widgets/pulse_dot.dart';
+import '../widgets/workspace_switcher.dart';
 
 class DirectScreen extends ConsumerStatefulWidget {
   const DirectScreen({super.key});
@@ -86,9 +87,24 @@ class _DirectScreenState extends ConsumerState<DirectScreen> {
               120,
             ),
             children: [
-              SectionLabel('Temps réel'),
-              const SizedBox(height: 9),
-              Text('En direct', style: GT.display(34, color: p.fg)),
+              // Même pastille de périmètre que l'accueil : le direct est scopé
+              // pareil, on doit pouvoir en changer sans y retourner.
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SectionLabel('Temps réel'),
+                        const SizedBox(height: 9),
+                        Text('En direct', style: GT.display(34, color: p.fg)),
+                      ],
+                    ),
+                  ),
+                  const WorkspaceSwitcher(),
+                ],
+              ),
               const SizedBox(height: 18),
               GlanceCard(
                 child: Column(

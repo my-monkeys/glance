@@ -126,16 +126,35 @@ void main() {
       expect(connus.where(w.contains).map((s) => s.id), ['s1']);
     });
 
-    test('round-trip conserve nom et références', () {
+    test('round-trip conserve nom, références, icône et couleur', () {
       final w = Workspace(
         id: 'w1',
         name: 'Clients',
         sites: [SiteRef.of(site('s1', 'a1')), SiteRef.of(site('s2', 'a2'))],
+        icon: WorkspaceIcon.travail,
+        color: WorkspaceColor.ardoise,
       );
       final back = Workspace.decodeList(Workspace.encodeList([w])).single;
       expect(back.id, 'w1');
       expect(back.name, 'Clients');
       expect(back.sites, w.sites);
+      expect(back.icon, WorkspaceIcon.travail);
+      expect(back.color, WorkspaceColor.ardoise);
+    });
+
+    test('groupe sans icône/couleur (créé avant) = valeurs par défaut', () {
+      // JSON d'un groupe d'avant l'ajout de l'apparence : pas de migration,
+      // les champs manquants retombent sur les valeurs par défaut.
+      final back = Workspace.fromJson({
+        'id': 'w',
+        'name': 'Ancien',
+        'sites': [
+          {'a': 'a1', 's': 's1'},
+        ],
+      });
+      expect(back.icon, WorkspaceIcon.dossier);
+      expect(back.color, WorkspaceColor.forest);
+      expect(back.contains(site('s1', 'a1')), isTrue);
     });
 
     test('groupe sans site = groupe vide (pas « tous »)', () {

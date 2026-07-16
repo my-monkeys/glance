@@ -26,6 +26,7 @@ import '../widgets/glance_chart.dart';
 import '../widgets/pulse_dot.dart';
 import '../widgets/site_avatar.dart';
 import '../widgets/sparkline.dart';
+import '../widgets/workspace_switcher.dart';
 
 /// Largeur minimale pour basculer en shell desktop master-détail.
 const double kDesktopBreakpoint = 860;
@@ -95,7 +96,6 @@ class _Sidebar extends ConsumerWidget {
     // Périmètre = le groupe actif (tous les sites si aucun n'est sélectionné).
     final sitesAsync = ref.watch(visibleSitesProvider);
     final sites = sitesAsync.value ?? const <Site>[];
-    final groups = ref.watch(workspacesProvider);
     final active = ref.watch(activeWorkspaceProvider);
 
     final hideZero = ref.watch(settingsProvider.select((s) => s.hideZeroSites));
@@ -134,32 +134,13 @@ class _Sidebar extends ConsumerWidget {
                 ),
                 GlanceIconButton(
                   icon: Icons.add,
-                  onTap: () => openAddSource(context),
+                  onTap: () => openWorkspaceEditor(context, null),
                 ),
+                const SizedBox(width: 8),
+                const WorkspaceSwitcher(),
               ],
             ),
           ),
-          if (groups.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 16, 14),
-              child: ChipRow(
-                children: [
-                  GlanceChip(
-                    label: 'Tous',
-                    selected: active == null,
-                    onTap: () =>
-                        ref.read(activeWorkspaceIdProvider.notifier).set(null),
-                  ),
-                  for (final g in groups)
-                    GlanceChip(
-                      label: g.name,
-                      selected: active?.id == g.id,
-                      onTap: () =>
-                          ref.read(activeWorkspaceIdProvider.notifier).set(g.id),
-                    ),
-                ],
-              ),
-            ),
           // Liste défilante : « Vue d'ensemble » + sites.
           Expanded(
             child: ListView(
