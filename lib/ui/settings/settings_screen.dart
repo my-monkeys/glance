@@ -187,36 +187,6 @@ class SettingsScreen extends ConsumerWidget {
         ),
         const SizedBox(height: 22),
 
-        // Notifications.
-        _GroupLabel('Notifications'),
-        _Group(
-          children: [
-            _Row(
-              title: 'Pic de trafic',
-              trailing: GlanceToggle(
-                value: settings.spike,
-                onTap: notifier.toggleSpike,
-              ),
-            ),
-            _Row(
-              title: 'Rapport quotidien',
-              subtitle: 'Chaque jour à 9 h 00',
-              trailing: GlanceToggle(
-                value: settings.daily,
-                onTap: notifier.toggleDaily,
-              ),
-            ),
-            _Row(
-              title: 'Objectifs atteints',
-              trailing: GlanceToggle(
-                value: settings.goals,
-                onTap: notifier.toggleGoals,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 22),
-
         // Données.
         _GroupLabel('Données'),
         _Group(
@@ -235,11 +205,6 @@ class SettingsScreen extends ConsumerWidget {
                 ],
               ),
               onTap: () => _pickRefresh(context, ref, settings.refreshSeconds),
-            ),
-            _Row(
-              title: 'Se déconnecter',
-              titleColor: p.neg,
-              onTap: () => _confirmLogout(context, ref),
             ),
           ],
         ),
@@ -369,35 +334,6 @@ class SettingsScreen extends ConsumerWidget {
     await ref.read(accountsProvider.notifier).updateSites(a.id, choice.sites);
   }
 
-  void _confirmLogout(BuildContext context, WidgetRef ref) {
-    showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: ctx.glance.surface,
-        title: Text('Se déconnecter ?', style: GT.display(20, color: ctx.glance.fg)),
-        content: Text(
-          'Toutes les sources configurées seront supprimées de cet appareil.',
-          style: GT.body(14, color: ctx.glance.fg2),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: Text('Annuler', style: GT.body(15, color: ctx.glance.fg2)),
-          ),
-          TextButton(
-            onPressed: () {
-              ref.read(accountsProvider.notifier).clear();
-              Navigator.of(ctx).pop();
-            },
-            child: Text(
-              'Déconnexion',
-              style: GT.body(15, weight: 600, color: ctx.glance.neg),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class _GroupLabel extends StatelessWidget {

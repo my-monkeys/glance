@@ -117,11 +117,6 @@ class AccountsNotifier extends Notifier<List<Account>> {
     await _repo.removeAccount(id);
     state = _repo.loadAccounts();
   }
-
-  Future<void> clear() async {
-    await _repo.clear();
-    state = const [];
-  }
 }
 
 final accountsProvider =

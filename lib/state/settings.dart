@@ -24,9 +24,6 @@ class Settings {
   const Settings({
     this.theme = ThemeChoice.auto,
     this.refreshSeconds = 30,
-    this.spike = true,
-    this.daily = true,
-    this.goals = false,
     this.homeView = HomeViewMode.list,
     this.directOnlyLive = false,
     this.hiddenSeries = const {},
@@ -36,9 +33,6 @@ class Settings {
 
   final ThemeChoice theme;
   final int refreshSeconds;
-  final bool spike;
-  final bool daily;
-  final bool goals;
   final HomeViewMode homeView;
   final bool directOnlyLive; // Direct : « Actifs seulement »
   final Set<String> hiddenSeries; // séries masquées sur les gros graphes
@@ -48,9 +42,6 @@ class Settings {
   Settings copyWith({
     ThemeChoice? theme,
     int? refreshSeconds,
-    bool? spike,
-    bool? daily,
-    bool? goals,
     HomeViewMode? homeView,
     bool? directOnlyLive,
     Set<String>? hiddenSeries,
@@ -59,9 +50,6 @@ class Settings {
   }) => Settings(
     theme: theme ?? this.theme,
     refreshSeconds: refreshSeconds ?? this.refreshSeconds,
-    spike: spike ?? this.spike,
-    daily: daily ?? this.daily,
-    goals: goals ?? this.goals,
     homeView: homeView ?? this.homeView,
     directOnlyLive: directOnlyLive ?? this.directOnlyLive,
     hiddenSeries: hiddenSeries ?? this.hiddenSeries,
@@ -73,9 +61,6 @@ class Settings {
 class SettingsNotifier extends Notifier<Settings> {
   static const _kTheme = 'glance.theme';
   static const _kRefresh = 'glance.refresh';
-  static const _kSpike = 'glance.notif.spike';
-  static const _kDaily = 'glance.notif.daily';
-  static const _kGoals = 'glance.notif.goals';
   static const _kHomeView = 'glance.homeView';
   static const _kDirectOnlyLive = 'glance.direct.onlyLive';
   static const _kHiddenSeries = 'glance.chart.hidden';
@@ -92,9 +77,6 @@ class SettingsNotifier extends Notifier<Settings> {
         orElse: () => ThemeChoice.auto,
       ),
       refreshSeconds: _p.getInt(_kRefresh) ?? 30,
-      spike: _p.getBool(_kSpike) ?? true,
-      daily: _p.getBool(_kDaily) ?? true,
-      goals: _p.getBool(_kGoals) ?? false,
       homeView: HomeViewMode.values.firstWhere(
         (v) => v.name == _p.getString(_kHomeView),
         orElse: () => HomeViewMode.list,
@@ -145,21 +127,6 @@ class SettingsNotifier extends Notifier<Settings> {
   void setRefresh(int seconds) {
     _p.setInt(_kRefresh, seconds);
     state = state.copyWith(refreshSeconds: seconds);
-  }
-
-  void toggleSpike() {
-    _p.setBool(_kSpike, !state.spike);
-    state = state.copyWith(spike: !state.spike);
-  }
-
-  void toggleDaily() {
-    _p.setBool(_kDaily, !state.daily);
-    state = state.copyWith(daily: !state.daily);
-  }
-
-  void toggleGoals() {
-    _p.setBool(_kGoals, !state.goals);
-    state = state.copyWith(goals: !state.goals);
   }
 }
 

@@ -50,13 +50,6 @@ class AccountsRepository {
     await _secure.delete(key: _credPrefix + accountId);
   }
 
-  Future<void> clear() async {
-    for (final a in loadAccounts()) {
-      await _secure.delete(key: _credPrefix + a.id);
-    }
-    await _prefs.remove(_kAccounts);
-  }
-
   /// Génère un identifiant de compte simple et unique.
   static String newId() =>
       DateTime.now().microsecondsSinceEpoch.toRadixString(36);
