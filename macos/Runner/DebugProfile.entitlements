@@ -13,5 +13,8 @@
 	<array>
 		<string>5C67TFSJ2B.group.fr.mymonkey.glance</string>
 	</array>
+	<!-- Caméra : scan du QR de transfert (import). Requis sous hardened runtime. -->
+	<key>com.apple.security.device.camera</key>
+	<true/>
 </dict>
 </plist>
