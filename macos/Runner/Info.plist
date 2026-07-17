@@ -30,5 +30,11 @@
 	<string>NSApplication</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Pour scanner le QR code de transfert affiché sur votre autre appareil et y reprendre votre configuration.</string>
+	<key>SUFeedURL</key>
+	<string>https://raw.githubusercontent.com/my-monkeys/glance/main/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>2mMhHtQHkG1dXcUc+8Yte8Nk+Tvlr/5Myxv4w5ODjPQ=</string>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
 </dict>
 </plist>

@@ -46,3 +46,4 @@ app.*.map.json
 
 # Added by ggshield
 .cache_ggshield
+Glance-*.dmg

@@ -6,6 +6,7 @@ import '../../data/models/period.dart';
 import '../../data/providers/analytics_provider.dart';
 import '../../state/providers.dart';
 import '../../state/settings.dart';
+import '../../state/updater.dart';
 import '../../state/workspaces.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
@@ -208,6 +209,24 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ],
         ),
+
+        // Application (desktop uniquement : les stores gèrent les MàJ mobiles).
+        if (Updater.isSupported) ...[
+          const SizedBox(height: 22),
+          _GroupLabel('Application'),
+          _Group(
+            children: [
+              _Row(
+                leading:
+                    Icon(Icons.system_update_rounded, color: p.fg2, size: 20),
+                title: 'Rechercher des mises à jour',
+                trailing:
+                    Icon(Icons.chevron_right_rounded, color: p.fg3, size: 22),
+                onTap: () => Updater.checkNow(),
+              ),
+            ],
+          ),
+        ],
       ],
     );
   }
