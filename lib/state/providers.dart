@@ -95,6 +95,18 @@ class AccountsNotifier extends Notifier<List<Account>> {
     state = _repo.loadAccounts();
   }
 
+  /// Fusionne des comptes venus d'un autre appareil. Les ids sont conservés →
+  /// réimporter le même transfert remplace au lieu de dupliquer.
+  Future<void> import(
+    List<Account> accounts,
+    Map<String, Map<String, String>> credentials,
+  ) async {
+    for (final a in accounts) {
+      await _repo.addAccount(a, credentials[a.id] ?? const {});
+    }
+    state = _repo.loadAccounts();
+  }
+
   Future<void> updateSites(String accountId, List<String>? sites) async {
     final account = state.firstWhere((a) => a.id == accountId);
     await _repo.updateAccount(account.copyWith(sites: sites, allSites: sites == null));

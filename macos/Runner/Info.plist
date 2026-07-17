@@ -28,5 +28,7 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Pour scanner le QR code de transfert affiché sur votre autre appareil et y reprendre votre configuration.</string>
 </dict>
 </plist>

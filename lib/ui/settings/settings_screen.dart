@@ -14,6 +14,7 @@ import '../add/site_picker.dart';
 import '../root_scaffold.dart';
 import '../widgets/chip.dart';
 import '../widgets/common.dart';
+import 'transfer_screen.dart';
 import 'workspaces_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -101,8 +102,34 @@ class SettingsScreen extends ConsumerWidget {
                   : groups.map((g) => g.name).join(' · '),
               trailing:
                   Icon(Icons.chevron_right_rounded, color: p.fg3, size: 22),
-              onTap: () =>
-                  showGlanceModal<void>(context, const WorkspacesScreen()),
+              onTap: () => openWorkspaces(context),
+            ),
+          ],
+        ),
+        const SizedBox(height: 22),
+
+        // Transfert d'un appareil à l'autre.
+        _GroupLabel('Transfert'),
+        _Group(
+          children: [
+            _Row(
+              leading: Icon(Icons.qr_code_2_rounded, color: p.fg2, size: 20),
+              title: 'Afficher un QR de transfert',
+              subtitle: accounts.isEmpty
+                  ? 'Aucun compte à transférer'
+                  : 'Comptes, identifiants et groupes',
+              trailing:
+                  Icon(Icons.chevron_right_rounded, color: p.fg3, size: 22),
+              onTap: accounts.isEmpty ? null : () => openTransferExport(context),
+            ),
+            _Row(
+              leading: Icon(Icons.qr_code_scanner_rounded,
+                  color: p.fg2, size: 20),
+              title: 'Importer depuis un autre appareil',
+              subtitle: 'Scanner un QR de transfert',
+              trailing:
+                  Icon(Icons.chevron_right_rounded, color: p.fg3, size: 22),
+              onTap: () => openTransferImport(context),
             ),
           ],
         ),

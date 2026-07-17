@@ -40,6 +40,16 @@ class WorkspacesNotifier extends Notifier<List<Workspace>> {
   Future<void> update(Workspace w) =>
       _save([for (final e in state) if (e.id == w.id) w else e]);
 
+  /// Fusionne des groupes venus d'un autre appareil : à id égal, l'entrant
+  /// gagne → réimporter le même transfert ne duplique pas.
+  Future<void> upsertAll(List<Workspace> incoming) {
+    final byId = {for (final w in state) w.id: w};
+    for (final w in incoming) {
+      byId[w.id] = w;
+    }
+    return _save(byId.values.toList());
+  }
+
   /// Supprime le groupe. Si c'était le groupe actif, [activeWorkspaceProvider]
   /// retombe seul sur « Tous » (il ne résout plus l'id) — rien à faire ici.
   Future<void> remove(String id) =>
