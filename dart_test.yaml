@@ -1,0 +1,4 @@
+tags:
+  # Test d'intégration : nécessite le backend glance-sync local ; se skippe seul
+  # s'il n'est pas joignable.
+  integration:

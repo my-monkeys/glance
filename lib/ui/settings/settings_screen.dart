@@ -6,6 +6,7 @@ import '../../data/models/period.dart';
 import '../../data/providers/analytics_provider.dart';
 import '../../state/providers.dart';
 import '../../state/settings.dart';
+import '../../state/sync.dart';
 import '../../state/updater.dart';
 import '../../state/workspaces.dart';
 import '../../theme/palette.dart';
@@ -15,6 +16,7 @@ import '../add/site_picker.dart';
 import '../root_scaffold.dart';
 import '../widgets/chip.dart';
 import '../widgets/common.dart';
+import 'sync_screen.dart';
 import 'transfer_screen.dart';
 import 'workspaces_screen.dart';
 
@@ -105,6 +107,42 @@ class SettingsScreen extends ConsumerWidget {
                   Icon(Icons.chevron_right_rounded, color: p.fg3, size: 22),
               onTap: () => openWorkspaces(context),
             ),
+          ],
+        ),
+        const SizedBox(height: 22),
+
+        // Synchronisation cloud (compte Glance Sync).
+        _GroupLabel('Synchronisation'),
+        _Group(
+          children: [
+            Builder(builder: (context) {
+              final sync = ref.watch(syncControllerProvider);
+              final signedIn = sync.status == SyncStatus.signedIn;
+              return _Row(
+                leading: Icon(
+                  signedIn ? Icons.cloud_done_rounded : Icons.cloud_outlined,
+                  color: signedIn ? p.accent : p.fg2,
+                  size: 20,
+                ),
+                title: 'Glance Sync',
+                subtitle: signedIn
+                    ? (sync.email ?? 'Connecté')
+                    : 'Sauvegarder et synchroniser (chiffré)',
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (signedIn && sync.isPro)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 6),
+                        child: Text('PRO',
+                            style: GT.mono(10.5, weight: 700, color: p.accent)),
+                      ),
+                    Icon(Icons.chevron_right_rounded, color: p.fg3, size: 22),
+                  ],
+                ),
+                onTap: () => openSync(context),
+              );
+            }),
           ],
         ),
         const SizedBox(height: 22),
