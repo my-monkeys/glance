@@ -250,11 +250,15 @@ class _Account extends ConsumerWidget {
   }
 }
 
-/// Compte non-Pro : incitation à débloquer (achat via RevenueCat — à venir).
-class _UnlockCard extends StatelessWidget {
+/// Compte non-Pro : incitation à débloquer (achat unique via RevenueCat).
+class _UnlockCard extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final p = context.glance;
+    final sync = ref.watch(syncControllerProvider);
+    final ctrl = ref.read(syncControllerProvider.notifier);
+    final canBuy = ref.watch(purchasesSupportedProvider);
+
     return GlanceCard(
       padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
       child: Column(
@@ -263,15 +267,35 @@ class _UnlockCard extends StatelessWidget {
           Text('Débloquez Glance Sync', style: GT.body(16, weight: 600, color: p.fg)),
           const SizedBox(height: 6),
           Text(
-            'Sauvegardez et synchronisez vos comptes et groupes sur tous vos '
-            'appareils. Achat unique.',
+            canBuy
+                ? 'Sauvegardez et synchronisez vos comptes et groupes sur tous '
+                    'vos appareils. Achat unique.'
+                : 'Achat unique depuis l\'app mobile (iOS/Android). Une fois '
+                    'débloqué, connectez-vous ici avec le même compte : la sync '
+                    'suit automatiquement.',
             style: GT.body(13, color: p.fg2),
           ),
           const SizedBox(height: 14),
-          GlanceButton(
-            label: 'Bientôt disponible',
-            onTap: null,
-          ),
+          if (canBuy) ...[
+            GlanceButton(
+              label: 'Débloquer',
+              busy: sync.busy,
+              onTap: ctrl.buyPro,
+            ),
+            const SizedBox(height: 4),
+            Center(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: ctrl.restorePurchase,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  child: Text('Restaurer un achat',
+                      style: GT.body(13, weight: 500, color: p.accent)),
+                ),
+              ),
+            ),
+          ] else
+            const GlanceButton(label: 'Bientôt disponible', onTap: null),
         ],
       ),
     );

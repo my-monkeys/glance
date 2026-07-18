@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../data/sync/purchases_service.dart';
 import '../data/sync/sync_api.dart';
 import '../data/sync/sync_crypto.dart';
 import '../data/transfer/config_transfer.dart' show TransferPayload;
@@ -50,6 +51,14 @@ final syncApiProvider = Provider<SyncApi>(
   (ref) => SyncApi(SecureTokenStore(ref.watch(secureStorageProvider))),
 );
 
+final purchasesProvider = Provider<PurchasesService>((_) => PurchasesService());
+
+/// Vrai si l'achat in-app « Glance Sync » est disponible sur cet appareil
+/// (store mobile + clé RevenueCat fournie). Faux sur desktop et tant que
+/// RevenueCat n'est pas configuré → l'UI reste en « Bientôt disponible ».
+final purchasesSupportedProvider =
+    Provider<bool>((ref) => ref.read(purchasesProvider).supported);
+
 /// Pilote la synchronisation cloud : auth (Better Auth), chiffrement E2E de la
 /// config avec le mot de passe du compte, pull/push du blob.
 ///
@@ -59,6 +68,7 @@ class SyncController extends Notifier<SyncState> {
   static const _kPassword = 'glance.sync.pw';
 
   SyncApi get _api => ref.read(syncApiProvider);
+  PurchasesService get _purchases => ref.read(purchasesProvider);
 
   /// Vrai pendant l'application d'un pull → évite qu'un push automatique se
   /// déclenche sur les changements qu'on vient d'importer (boucle).
@@ -66,7 +76,10 @@ class SyncController extends Notifier<SyncState> {
 
   @override
   SyncState build() {
-    Future.microtask(_restore);
+    Future.microtask(() async {
+      await _purchases.configure();
+      await _restore();
+    });
     return const SyncState();
   }
 
@@ -85,6 +98,7 @@ class SyncController extends Notifier<SyncState> {
         email: user.email,
         isPro: user.isPro,
       );
+      await _purchases.identify(user.id);
       await pull();
     } catch (_) {
       state = state.copyWith(status: SyncStatus.signedOut);
@@ -120,6 +134,7 @@ class SyncController extends Notifier<SyncState> {
         isPro: user.isPro,
         busy: false,
       );
+      await _purchases.identify(user.id);
       await pull(); // récupère une éventuelle config existante
       return true;
     } on SyncAuthError catch (e) {
@@ -133,8 +148,63 @@ class SyncController extends Notifier<SyncState> {
 
   Future<void> signOut() async {
     await _api.signOut();
+    await _purchases.reset();
     await ref.read(secureStorageProvider).delete(key: _kPassword);
     state = const SyncState(status: SyncStatus.signedOut);
+  }
+
+  /// Achète « Glance Sync » (achat unique). L'achat déclenche le webhook
+  /// RevenueCat qui pose `isPro` côté serveur ; on attend cette bascule avant
+  /// de confirmer, puis on lance une première synchro.
+  Future<void> buyPro() async {
+    if (state.status != SyncStatus.signedIn) return;
+    state = state.copyWith(busy: true, clearError: true);
+    final outcome = await _purchases.buy();
+    switch (outcome) {
+      case PurchaseOutcome.cancelled:
+        state = state.copyWith(busy: false);
+      case PurchaseOutcome.error:
+        state = state.copyWith(busy: false, error: 'Achat impossible. Réessayez.');
+      case PurchaseOutcome.purchased:
+        final activated = await _awaitProActivation();
+        if (activated) {
+          state = state.copyWith(busy: false, isPro: true, clearError: true);
+          await push();
+        } else {
+          state = state.copyWith(
+            busy: false,
+            error: 'Achat validé — activation en cours, réessayez la sync dans un instant.',
+          );
+        }
+    }
+  }
+
+  /// Restaure un achat existant (changement d'appareil, réinstallation).
+  Future<void> restorePurchase() async {
+    if (state.status != SyncStatus.signedIn) return;
+    state = state.copyWith(busy: true, clearError: true);
+    final entitled = await _purchases.restore();
+    if (!entitled) {
+      state = state.copyWith(busy: false, error: 'Aucun achat à restaurer.');
+      return;
+    }
+    final activated = await _awaitProActivation();
+    if (activated) {
+      state = state.copyWith(busy: false, isPro: true, clearError: true);
+      await push();
+    } else {
+      state = state.copyWith(busy: false, error: 'Achat restauré — activation en cours…');
+    }
+  }
+
+  /// Attend que le webhook ait basculé le compte en Pro côté serveur.
+  Future<bool> _awaitProActivation() async {
+    for (var i = 0; i < 6; i++) {
+      await Future<void>.delayed(const Duration(milliseconds: 1500));
+      final user = await _api.session();
+      if (user?.isPro == true) return true;
+    }
+    return false;
   }
 
   /// Télécharge le blob distant et l'applique à la config locale.

@@ -48,6 +48,7 @@ dependencies:
   cryptography: ^2.9.0
   mobile_scanner: ^7.3.0
   auto_updater: ^1.0.0
+  purchases_flutter: ^10.4.2
 
 dev_dependencies:
   flutter_test:

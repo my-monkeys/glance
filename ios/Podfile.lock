@@ -10,6 +10,12 @@ PODS:
   - mobile_scanner (7.0.0):
     - Flutter
     - FlutterMacOS
+  - purchases_flutter (10.4.2):
+    - Flutter
+    - PurchasesHybridCommon (= 18.22.1)
+  - PurchasesHybridCommon (18.22.1):
+    - RevenueCat (= 5.81.0)
+  - RevenueCat (5.81.0)
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -20,7 +26,13 @@ DEPENDENCIES:
   - flutter_timezone (from `.symlinks/plugins/flutter_timezone/ios`)
   - home_widget (from `.symlinks/plugins/home_widget/ios`)
   - mobile_scanner (from `.symlinks/plugins/mobile_scanner/darwin`)
+  - purchases_flutter (from `.symlinks/plugins/purchases_flutter/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
+
+SPEC REPOS:
+  trunk:
+    - PurchasesHybridCommon
+    - RevenueCat
 
 EXTERNAL SOURCES:
   Flutter:
@@ -33,6 +45,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/home_widget/ios"
   mobile_scanner:
     :path: ".symlinks/plugins/mobile_scanner/darwin"
+  purchases_flutter:
+    :path: ".symlinks/plugins/purchases_flutter/ios"
   shared_preferences_foundation:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
 
@@ -42,6 +56,9 @@ SPEC CHECKSUMS:
   flutter_timezone: 7c838e17ffd4645d261e87037e5bebf6d38fe544
   home_widget: 54b4f6b36ed8d64cfee594a476225c35c3e45091
   mobile_scanner: 9157936403f5a0644ca3779a38ff8404c5434a93
+  purchases_flutter: 64c9e64676b8b681ced103755d6989bec7fbad0c
+  PurchasesHybridCommon: 5759975e7b63c093772fd92d8a9e5edbc6a809a8
+  RevenueCat: c692d9b9d123ce98acea28796abcd81f63e9f34a
   shared_preferences_foundation: 7036424c3d8ec98dfe75ff1667cb0cd531ec82bb
 
 PODFILE CHECKSUM: ae6b58a11e1126c724549bfa4938b558d5d98b81
