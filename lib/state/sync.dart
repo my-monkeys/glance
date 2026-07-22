@@ -197,12 +197,16 @@ class SyncController extends Notifier<SyncState> {
     }
   }
 
-  /// Attend que le webhook ait basculé le compte en Pro côté serveur.
+  /// Demande au serveur de vérifier l'achat auprès de RevenueCat (avec retries
+  /// le temps que la transaction se propage côté RevenueCat).
   Future<bool> _awaitProActivation() async {
     for (var i = 0; i < 6; i++) {
+      try {
+        if (await _api.refreshPro()) return true;
+      } catch (_) {
+        // Réseau/serveur : on retente.
+      }
       await Future<void>.delayed(const Duration(milliseconds: 1500));
-      final user = await _api.session();
-      if (user?.isPro == true) return true;
     }
     return false;
   }

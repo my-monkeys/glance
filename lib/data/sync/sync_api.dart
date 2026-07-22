@@ -145,6 +145,20 @@ class SyncApi {
     await _store.clear();
   }
 
+  /// Demande au serveur de vérifier l'achat auprès de RevenueCat et de mettre
+  /// à jour le statut Pro. Renvoie le statut vérifié.
+  Future<bool> refreshPro() async {
+    final Response r;
+    try {
+      r = await _dio.post('/api/pro/refresh', options: await _auth());
+    } on DioException {
+      throw SyncNetworkError();
+    }
+    if (r.statusCode == 401) throw SyncAuthError('Session expirée');
+    if (r.statusCode != 200) throw SyncNetworkError();
+    return (r.data as Map)['isPro'] == true;
+  }
+
   /// Récupère le blob chiffré (pull).
   Future<RemoteConfig> pull() async {
     final Response r;
