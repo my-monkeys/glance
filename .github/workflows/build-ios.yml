@@ -58,7 +58,7 @@ jobs:
           echo "$KEY_B64" | base64 --decode > "$HOME/.appstoreconnect/private_keys/AuthKey_${KEY_ID}.p8"
 
       - run: flutter pub get
-      - run: flutter build ios --release --no-codesign
+      - run: flutter build ios --release --no-codesign --dart-define=REVENUECAT_APPLE_KEY=appl_zwDZqOJFtTkSuIiIXMmoTRqSJlB
 
       - name: Build signé + upload TestFlight (fastlane)
         working-directory: ios
