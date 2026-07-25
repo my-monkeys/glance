@@ -13,6 +13,7 @@ import '../data/providers/analytics_provider.dart';
 import '../data/providers/provider_factory.dart';
 import '../data/repository/accounts_repository.dart';
 import '../data/favicon_cache.dart';
+import '../data/stats_cache.dart';
 import '../core/semaphore.dart';
 import 'home_data.dart';
 import 'workspaces.dart';
@@ -59,6 +60,27 @@ final secureStorageProvider = Provider<FlutterSecureStorage>(
     ),
   ),
 );
+
+/// Cache disque des stats (résumé/série/métriques) pour un affichage instantané
+/// au démarrage à froid. Une seule instance pour l'app.
+final statsCacheProvider =
+    Provider<StatsCache>((ref) => StatsCache(ref.watch(sharedPrefsProvider)));
+
+/// Dernières stats connues (persistées) d'un site pour une fenêtre, lues de
+/// façon synchrone → seed des cartes de l'accueil avant la réponse réseau. Null
+/// si rien en cache ou trop ancien.
+final cachedStatsProvider =
+    Provider.autoDispose.family<SiteStats?, (Site, DateWindow)>((ref, key) {
+  final (site, w) = key;
+  return ref.watch(statsCacheProvider).readStats(site, w);
+});
+
+/// Idem pour le détail complet d'un site (live exclu du cache).
+final cachedDetailProvider =
+    Provider.autoDispose.family<SiteDetail?, (Site, DateWindow)>((ref, key) {
+  final (site, w) = key;
+  return ref.watch(statsCacheProvider).readDetail(site, w);
+});
 
 /// Cache de favicons (mémoire + disque). Une seule instance pour l'app.
 final faviconCacheProvider = Provider<FaviconCache>((ref) {
@@ -204,10 +226,12 @@ final siteStatsProvider =
   final p = await _providerFor(ref, site);
   return gate.run(() async {
     final r = await Future.wait([p.summary(site, w), p.series(site, w)]);
-    return SiteStats(
+    final stats = SiteStats(
       summary: r[0] as StatsSummary,
       series: r[1] as List<SeriesPoint>,
     );
+    ref.read(statsCacheProvider).writeStats(site, w, stats);
+    return stats;
   });
 });
 
@@ -228,7 +252,9 @@ final homeTotalsProvider =
     final stats = ref.watch(siteStatsProvider((s, w)));
     final live = ref.watch(siteLiveProvider(s));
     if (stats.isLoading || live.isLoading) loading = true;
-    final sv = stats.value;
+    // Seed depuis le cache disque au démarrage à froid : la carte s'affiche
+    // avec la dernière valeur connue au lieu d'un squelette, le refresh corrige.
+    final sv = stats.value ?? ref.watch(cachedStatsProvider((s, w)));
     if (sv != null) {
       cards.add(SiteCard(
         site: s,
@@ -264,7 +290,7 @@ final detailProvider =
     p.active(site).catchError((_) => 0),
     p.livePages(site).catchError((_) => <LivePage>[]),
   ]);
-  return SiteDetail(
+  final detail = SiteDetail(
     summary: r[0] as StatsSummary,
     series: r[1] as List<SeriesPoint>,
     unit: w.unit.api,
@@ -274,6 +300,8 @@ final detailProvider =
     live: r[5] as int,
     livePages: r[6] as List<LivePage>,
   );
+  ref.read(statsCacheProvider).writeDetail(site, w, detail);
+  return detail;
 });
 
 /// Données d'événements d'un site pour une fenêtre (série + répartition).

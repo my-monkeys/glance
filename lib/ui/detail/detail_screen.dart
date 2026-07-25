@@ -101,8 +101,10 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
     }
     // Rechargement en fond de la même période → on garde l'affichage précédent.
     // Changement de période → on montre bien le chargement (données différentes).
-    final detail =
-        async.value ?? (_lastDetailWindow == window ? _lastDetail : null);
+    // Au démarrage à froid, on repart du cache disque plutôt qu'un spinner.
+    final detail = async.value ??
+        (_lastDetailWindow == window ? _lastDetail : null) ??
+        ref.watch(cachedDetailProvider((widget.site, window)));
     final refreshing = async.isLoading && detail != null;
     // Onglets affichés dès l'ouverture (pas de décalage) : on part de la dernière
     // réponse connue (persistée), sinon optimiste (affichés) tant que le réseau
