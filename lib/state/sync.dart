@@ -153,6 +153,27 @@ class SyncController extends Notifier<SyncState> {
     state = const SyncState(status: SyncStatus.signedOut);
   }
 
+  /// Supprime définitivement le compte (serveur + local). Irréversible : la
+  /// config synchronisée est effacée côté serveur et la session est fermée.
+  Future<void> deleteAccount() async {
+    state = state.copyWith(busy: true, clearError: true);
+    try {
+      await _api.deleteAccount();
+    } on SyncNetworkError {
+      state = state.copyWith(busy: false, error: 'Serveur injoignable. Réessayez.');
+      return;
+    } on SyncAuthError {
+      state = state.copyWith(
+        busy: false,
+        error: 'Session expirée. Reconnectez-vous puis réessayez.',
+      );
+      return;
+    }
+    await _purchases.reset();
+    await ref.read(secureStorageProvider).delete(key: _kPassword);
+    state = const SyncState(status: SyncStatus.signedOut);
+  }
+
   /// Achète « Glance Sync » (achat unique). L'achat déclenche le webhook
   /// RevenueCat qui pose `isPro` côté serveur ; on attend cette bascule avant
   /// de confirmer, puis on lance une première synchro.

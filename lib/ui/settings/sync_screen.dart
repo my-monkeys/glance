@@ -241,12 +241,54 @@ class _Account extends ConsumerWidget {
             onTap: ctrl.signOut,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              child: Text('Se déconnecter', style: GT.body(14, color: p.neg)),
+              child: Text('Se déconnecter', style: GT.body(14, color: p.fg2)),
+            ),
+          ),
+        ),
+        Center(
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: sync.busy ? null : () => _confirmDelete(context, ctrl),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              child: Text('Supprimer mon compte', style: GT.body(13, color: p.neg)),
             ),
           ),
         ),
       ],
     );
+  }
+
+  /// Suppression de compte (exigée par Apple) : confirmation explicite, puis
+  /// effacement serveur + local. Irréversible.
+  Future<void> _confirmDelete(BuildContext context, SyncController ctrl) async {
+    final p = context.glance;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: p.surface,
+        title: Text('Supprimer le compte ?',
+            style: GT.body(17, weight: 700, color: p.fg)),
+        content: Text(
+          'Votre compte Glance Sync et toute la configuration synchronisée '
+          'seront définitivement supprimés du serveur. Action irréversible. '
+          'Vos sources analytics restent sur cet appareil.',
+          style: GT.body(13.5, color: p.fg2),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text('Annuler', style: GT.body(14, color: p.fg2)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text('Supprimer',
+                style: GT.body(14, weight: 600, color: p.neg)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) await ctrl.deleteAccount();
   }
 }
 
