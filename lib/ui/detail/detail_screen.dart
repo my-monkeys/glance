@@ -104,8 +104,12 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
     final detail =
         async.value ?? (_lastDetailWindow == window ? _lastDetail : null);
     final refreshing = async.isLoading && detail != null;
-    final hasEvents =
-        ref.watch(siteHasEventsProvider(widget.site)).value ?? false;
+    // Onglets affichés dès l'ouverture (pas de décalage) : on part de la dernière
+    // réponse connue (persistée), sinon optimiste (affichés) tant que le réseau
+    // n'a pas répondu. Un site confirmé sans événements les masque.
+    final hasEvents = ref.watch(siteHasEventsProvider(widget.site)).value ??
+        ref.watch(siteHasEventsCachedProvider(widget.site)) ??
+        true;
 
     return Scaffold(
       body: Stack(

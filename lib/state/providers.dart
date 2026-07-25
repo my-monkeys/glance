@@ -290,8 +290,20 @@ final eventsProvider =
   });
 });
 
+/// Clé de persistance du flag « ce site a des événements ».
+String _hasEventsKey(Site s) => 'glance.hasEvents.${s.accountId}.${s.id}';
+
+/// Dernière réponse connue (persistée) de [siteHasEventsProvider], lue de façon
+/// synchrone. Sert à décider l'affichage de l'onglet Événements dès l'ouverture
+/// du site, avant la réponse réseau → pas de décalage de mise en page. Null tant
+/// qu'un site n'a jamais été vérifié.
+final siteHasEventsCachedProvider = Provider.autoDispose.family<bool?, Site>(
+  (ref, site) => ref.watch(sharedPrefsProvider).getBool(_hasEventsKey(site)),
+);
+
 /// Un site a-t-il des événements ? Vérifié sur ~30 jours (indépendant de la
-/// période sélectionnée) → visibilité stable de l'onglet Événements.
+/// période sélectionnée) → visibilité stable de l'onglet Événements. Le résultat
+/// est persisté pour un affichage instantané et sans décalage à la réouverture.
 final siteHasEventsProvider =
     FutureProvider.autoDispose.family<bool, Site>((ref, site) async {
   cacheFor(ref, const Duration(minutes: 10));
@@ -301,5 +313,7 @@ final siteHasEventsProvider =
   final rows = await gate
       .run(() => p.metric(site, w, MetricType.events, limit: 1))
       .catchError((_) => <MetricRow>[]);
-  return rows.isNotEmpty;
+  final has = rows.isNotEmpty;
+  ref.read(sharedPrefsProvider).setBool(_hasEventsKey(site), has);
+  return has;
 });
