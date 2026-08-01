@@ -18,7 +18,7 @@ lib/
     providers/ AnalyticsProvider (interface) + UmamiProvider, PlausibleProvider, FathomProvider (stub) + factory
     repository/AccountsRepository (comptes en prefs, creds en secure storage)
   state/       providers Riverpod (accounts, sites, home, detail), settings, home_data
-  theme/       palette (ThemeExtension light+dark), type, theme
+  theme/       palette (ThemeExtension light+dark), type, theme, motion (tokens durées/curves)
   ui/          onboarding-vide (home), home, detail, direct, add (+ site_picker), settings, widgets/
   dev/         seed.dart (amorçage --dart-define, inerte sans defines)
 ```
@@ -90,7 +90,16 @@ flutter run -d <udid> \
 ### Instance de test
 Umami `uuu.my-monkey.fr` (cookie-server). Un utilisateur **service** dédié `glance` (role admin, lecture) a été créé **directement en base** (bcrypt via `bcryptjs`, insert Postgres `umami-db`). C'est un compte technique — pas le compte perso de Maxim.
 
+## Motion & feedback (depuis 1.6.2)
+
+- **Tokens** : `theme/motion.dart` (`kMotionFast/Base/Slow`, `kCurveOut/OutCubic`) — toute nouvelle animation les utilise, pas de durées en dur.
+- **Widgets** (`ui/widgets/motion.dart`) : `GlanceSwap` (fondu+glissement entre sous-arbres, keyer l'enfant), `GlanceFadeIndexedStack` (onglets animés, état préservé), `GlanceReveal` (sections conditionnelles dépliées — les espacements conditionnels vivent DANS le child).
+- **Toasts** : `showGlanceToast(context, msg, {kind})` (`ui/widgets/toast.dart`) — overlay racine via `glanceNavKey`, appeler **avant** un éventuel `Navigator.pop`. Toute action qui réussit silencieusement doit en montrer un.
+- `showGlanceModal` : slide-up mobile par défaut, `fullscreenDialog: false` pour l'étape 2 d'un flux ; desktop = fade+scale, barrier atténué en modale-dans-modale.
+
 ## Gotchas rencontrés
+
+- **⚠️ `TickerMode` + animations implicites = gel** : couper `TickerMode(enabled: false)` sur un sous-arbre dont une animation implicite (`AnimatedOpacity`…) est en cours la fige à sa valeur courante — l'écran « sortant » reste peint en surimpression. Toute transition de visibilité d'un sous-arbre sous TickerMode doit être pilotée par un contrôleur du **parent** (cf. `GlanceFadeIndexedStack`). Symptôme vécu en 1.6.2 : écrans superposés au changement d'onglet, uniquement dans le sens retour (non couvert par le test simulateur initial — tester les deux sens).
 
 - **Chargement infini du détail** : `_window` calculé à chaque build avec `DateTime.now()` → la clé de `FutureProvider.family` changeait en continu → reload en boucle. Fix : figer `_window` dans l'état (recalcul uniquement au changement de période / refresh). Toute fenêtre passée à une `family` doit être stable entre les builds.
 - **`Cannot remove from an unmodifiable list`** : `Account.decodeList` renvoie `growable:false` ; `loadAccounts()` doit renvoyer une copie modifiable.
