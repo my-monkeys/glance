@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/models/models.dart';
+import '../theme/motion.dart';
 import '../theme/palette.dart';
 import 'add/add_source_screen.dart';
 import 'desktop/desktop_shell.dart';
@@ -28,20 +29,42 @@ void openSite(BuildContext context, Site site) {
 
 /// Présente un écran de flux (ajout de source, choix des sites…) : sur desktop,
 /// en **modale centrée** (taille type téléphone) avec un backdrop assombri ;
-/// sur mobile, en page plein écran poussée sur la pile. Renvoie la valeur que
-/// l'écran passe à `Navigator.pop`.
-Future<T?> showGlanceModal<T>(BuildContext context, Widget child) {
+/// sur mobile, en page plein écran poussée sur la pile — présentation modale
+/// (slide-up iOS) par défaut, `fullscreenDialog: false` pour l'étape suivante
+/// d'un flux déjà ouvert (slide horizontal de continuation). Renvoie la valeur
+/// que l'écran passe à `Navigator.pop`.
+Future<T?> showGlanceModal<T>(
+  BuildContext context,
+  Widget child, {
+  bool fullscreenDialog = true,
+}) {
   final desktop = MediaQuery.of(context).size.width >= kDesktopBreakpoint;
   if (!desktop) {
-    return Navigator.of(context)
-        .push<T>(MaterialPageRoute(builder: (_) => child));
+    return Navigator.of(context).push<T>(
+      MaterialPageRoute(fullscreenDialog: fullscreenDialog, builder: (_) => child),
+    );
   }
   final p = context.glance;
-  return showDialog<T>(
+  // Modale-dans-modale (éditeur de groupe → ajout de source…) : le premier
+  // barrier assombrit déjà, on n'empile pas un second plein.
+  final nested = ModalRoute.of(context) is RawDialogRoute;
+  return showGeneralDialog<T>(
     context: context,
-    barrierColor: Colors.black.withValues(alpha: 0.62),
     barrierDismissible: true,
-    builder: (_) => Center(
+    barrierLabel: 'Fermer',
+    barrierColor: Colors.black.withValues(alpha: nested ? 0.15 : 0.62),
+    transitionDuration: kMotionSlow,
+    transitionBuilder: (_, anim, _, child) {
+      final t = CurvedAnimation(parent: anim, curve: kCurveOutCubic);
+      return FadeTransition(
+        opacity: t,
+        child: ScaleTransition(
+          scale: Tween(begin: 0.96, end: 1.0).animate(t),
+          child: child,
+        ),
+      );
+    },
+    pageBuilder: (_, _, _) => Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 420, maxHeight: 680),
         child: ClipRRect(

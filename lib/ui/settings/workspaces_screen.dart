@@ -13,6 +13,7 @@ import '../widgets/chip.dart';
 import '../widgets/common.dart';
 import '../widgets/field.dart';
 import '../widgets/site_avatar.dart';
+import '../widgets/toast.dart';
 import '../widgets/workspace_switcher.dart';
 
 /// Ouvre l'éditeur d'un groupe (modale sur desktop, page sur mobile).
@@ -278,7 +279,10 @@ class _WorkspaceEditScreenState extends ConsumerState<WorkspaceEditScreen> {
         ),
       );
     }
-    if (mounted) Navigator.of(context).pop();
+    if (mounted) {
+      showGlanceToast(context, _isNew ? 'Groupe créé' : 'Groupe enregistré');
+      Navigator.of(context).pop();
+    }
   }
 
   Future<void> _delete() async {
@@ -304,7 +308,10 @@ class _WorkspaceEditScreenState extends ConsumerState<WorkspaceEditScreen> {
     );
     if (ok != true) return;
     await ref.read(workspacesProvider.notifier).remove(widget.group!.id);
-    if (mounted) Navigator.of(context).pop();
+    if (mounted) {
+      showGlanceToast(context, 'Groupe supprimé', kind: ToastKind.info);
+      Navigator.of(context).pop();
+    }
   }
 
   @override

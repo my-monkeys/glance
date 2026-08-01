@@ -14,6 +14,8 @@ import '../../theme/type.dart';
 import '../root_scaffold.dart';
 import '../widgets/common.dart';
 import '../widgets/field.dart';
+import '../widgets/motion.dart';
+import '../widgets/toast.dart';
 import 'site_picker.dart';
 
 /// Ajout d'une source en 2 étapes : fournisseur + identifiants, puis choix des
@@ -169,6 +171,7 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
       }
       if (!mounted) return;
       // Étape 2 : sélection des sites (modale sur desktop, page sur mobile).
+      // Continuation du flux déjà ouvert → slide horizontal, pas slide-up.
       final choice = await showGlanceModal<SiteChoice?>(
         context,
         SitePickerScreen(
@@ -176,6 +179,7 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
           sites: sites,
           initialSelection: widget.editing?.sites,
         ),
+        fullscreenDialog: false,
       );
       if (choice == null) {
         // annulé
@@ -188,7 +192,11 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
       await ref
           .read(accountsProvider.notifier)
           .add(account.copyWith(sites: chosen, allSites: chosen == null), creds);
-      if (mounted) Navigator.of(context).pop();
+      if (mounted) {
+        showGlanceToast(
+            context, _isEditing ? 'Source modifiée' : 'Source ajoutée');
+        Navigator.of(context).pop();
+      }
     } catch (e) {
       if (mounted) setState(() => _error = friendlyError(e));
     } finally {
@@ -287,33 +295,40 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
                       ),
                     const SizedBox(height: 14),
                   ],
-                  if (_error != null) ...[
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Icon(Icons.error_outline_rounded,
-                            size: 16, color: p.neg),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(_error!, style: GT.body(13, color: p.neg)),
-                        ),
-                      ],
+                  GlanceReveal(
+                    show: _error != null,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Row(
+                        children: [
+                          Icon(Icons.error_outline_rounded,
+                              size: 16, color: p.neg),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(_error ?? '',
+                                style: GT.body(13, color: p.neg)),
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
-                  if (_testOk != null) ...[
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Icon(Icons.check_circle_outline_rounded,
-                            size: 16, color: p.accent),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child:
-                              Text(_testOk!, style: GT.body(13, color: p.accent)),
-                        ),
-                      ],
+                  ),
+                  GlanceReveal(
+                    show: _testOk != null,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Row(
+                        children: [
+                          Icon(Icons.check_circle_outline_rounded,
+                              size: 16, color: p.accent),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(_testOk ?? '',
+                                style: GT.body(13, color: p.accent)),
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
+                  ),
                 ],
               ),
             ),

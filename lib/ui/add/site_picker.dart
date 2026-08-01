@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../data/models/models.dart';
+import '../../theme/motion.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
 import '../widgets/common.dart';
@@ -238,7 +239,8 @@ class _Check extends StatelessWidget {
   Widget build(BuildContext context) {
     final p = context.glance;
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 150),
+      duration: kMotionFast,
+      curve: kCurveOut,
       width: 24,
       height: 24,
       decoration: BoxDecoration(

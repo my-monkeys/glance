@@ -16,6 +16,7 @@ import '../add/site_picker.dart';
 import '../root_scaffold.dart';
 import '../widgets/chip.dart';
 import '../widgets/common.dart';
+import '../widgets/toast.dart';
 import 'sync_screen.dart';
 import 'transfer_screen.dart';
 import 'workspaces_screen.dart';
@@ -356,6 +357,8 @@ class SettingsScreen extends ConsumerWidget {
               ),
               onTap: () {
                 ref.read(accountsProvider.notifier).remove(a.id);
+                showGlanceToast(context, 'Source supprimée',
+                    kind: ToastKind.info);
                 Navigator.of(ctx).pop();
               },
             ),
@@ -389,6 +392,7 @@ class SettingsScreen extends ConsumerWidget {
     if (choice == null) return; // annulé
     // null = tous ; [] = aucun (masqué) ; [ids] = sélection explicite.
     await ref.read(accountsProvider.notifier).updateSites(a.id, choice.sites);
+    if (context.mounted) showGlanceToast(context, 'Sélection enregistrée');
   }
 
 }

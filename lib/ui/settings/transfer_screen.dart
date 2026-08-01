@@ -9,11 +9,14 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../../data/transfer/config_transfer.dart';
 import '../../state/providers.dart';
 import '../../state/workspaces.dart';
+import '../../theme/motion.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
 import '../root_scaffold.dart';
 import '../widgets/common.dart';
 import '../widgets/field.dart';
+import '../widgets/motion.dart';
+import '../widgets/toast.dart';
 
 /// Affiche le QR de transfert (appareil source).
 Future<void> openTransferExport(BuildContext context) =>
@@ -114,69 +117,87 @@ class _TransferExportScreenState extends ConsumerState<TransferExportScreen> {
                 physics: const BouncingScrollPhysics(),
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
                 children: [
-                  if (_error != null)
-                    _ErrorNote(error: _error!)
-                  else if (_data == null && _left == Duration.zero)
-                    _Expired(onRegen: () {
-                      setState(() {
-                        _left = ConfigTransfer.validity;
-                        _error = null;
-                      });
-                      _build();
-                    })
-                  else if (_data == null)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 60),
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          color: p.accent,
-                          strokeWidth: 2.4,
-                        ),
-                      ),
-                    )
-                  else ...[
-                    Center(
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          // Fond blanc franc : un QR sur crème se scanne mal.
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(kRadiusSm),
-                        ),
-                        child: QrImageView(
-                          data: _data!,
-                          version: QrVersions.auto,
-                          size: 260,
-                          backgroundColor: Colors.white,
-                          eyeStyle: const QrEyeStyle(
-                            eyeShape: QrEyeShape.square,
-                            color: Colors.black,
-                          ),
-                          dataModuleStyle: const QrDataModuleStyle(
-                            dataModuleShape: QrDataModuleShape.square,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ),
+                  // QR / expiré / chargement / erreur : les états se fondent
+                  // l'un dans l'autre (l'expiration ne fait plus « pouf »).
+                  GlanceSwap(
+                    child: KeyedSubtree(
+                      key: ValueKey(_error != null
+                          ? 'error'
+                          : _data != null
+                              ? 'qr'
+                              : _left == Duration.zero
+                                  ? 'expired'
+                                  : 'loading'),
+                      child: _buildExportState(p),
                     ),
-                    const SizedBox(height: 22),
-                    _CodeBox(code: _code),
-                    const SizedBox(height: 14),
-                    Center(
-                      child: Text(
-                        'Expire dans ${_left.inMinutes}:${(_left.inSeconds % 60).toString().padLeft(2, '0')}',
-                        style: GT.mono(12, color: p.fg2),
-                      ),
-                    ),
-                    const SizedBox(height: 22),
-                    _Warning(),
-                  ],
+                  ),
                 ],
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildExportState(GlancePalette p) {
+    if (_error != null) return _ErrorNote(error: _error!);
+    if (_data == null && _left == Duration.zero) {
+      return _Expired(onRegen: () {
+        setState(() {
+          _left = ConfigTransfer.validity;
+          _error = null;
+        });
+        _build();
+      });
+    }
+    if (_data == null) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 60),
+        child: Center(
+          child: CircularProgressIndicator(color: p.accent, strokeWidth: 2.4),
+        ),
+      );
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Center(
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              // Fond blanc franc : un QR sur crème se scanne mal.
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(kRadiusSm),
+            ),
+            child: QrImageView(
+              data: _data!,
+              version: QrVersions.auto,
+              size: 260,
+              backgroundColor: Colors.white,
+              eyeStyle: const QrEyeStyle(
+                eyeShape: QrEyeShape.square,
+                color: Colors.black,
+              ),
+              dataModuleStyle: const QrDataModuleStyle(
+                dataModuleShape: QrDataModuleShape.square,
+                color: Colors.black,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 22),
+        _CodeBox(code: _code),
+        const SizedBox(height: 14),
+        Center(
+          child: Text(
+            'Expire dans ${_left.inMinutes}:${(_left.inSeconds % 60).toString().padLeft(2, '0')}',
+            style: GT.mono(12, color: p.fg2),
+          ),
+        ),
+        const SizedBox(height: 22),
+        _Warning(),
+      ],
     );
   }
 }
@@ -361,15 +382,13 @@ class _TransferImportScreenState extends ConsumerState<TransferImportScreen> {
           );
       await ref.read(workspacesProvider.notifier).upsertAll(payload.workspaces);
       if (!mounted) return;
-      Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            '${payload.accounts.length} compte${payload.accounts.length > 1 ? 's' : ''} '
-            'et ${payload.workspaces.length} groupe${payload.workspaces.length > 1 ? 's' : ''} importés',
-          ),
-        ),
+      // Toast avant le pop : il vit dans l'overlay racine, pas dans la route.
+      showGlanceToast(
+        context,
+        '${payload.accounts.length} compte${payload.accounts.length > 1 ? 's' : ''} '
+        'et ${payload.workspaces.length} groupe${payload.workspaces.length > 1 ? 's' : ''} importés',
       );
+      Navigator.of(context).pop();
     } on TransferExpired {
       if (mounted) {
         setState(() => _error =
@@ -407,75 +426,88 @@ class _TransferImportScreenState extends ConsumerState<TransferImportScreen> {
                   : 'Saisissez le code affiché à côté du QR.',
             ),
             Expanded(
-              child: _scanned == null
-                  ? Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(kRadius),
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            MobileScanner(
-                              controller: _controller,
-                              onDetect: _onDetect,
-                              errorBuilder: (context, error) =>
-                                  _ScannerError(error: error),
-                            ),
-                            IgnorePointer(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: p.accent, width: 2),
-                                  borderRadius: BorderRadius.circular(kRadius),
+              // Caméra ↔ formulaire : la bascule la plus brutale de l'app,
+              // fondue sur la durée longue.
+              child: GlanceSwap(
+                duration: kMotionSlow,
+                dy: 0,
+                child: _scanned == null
+                    ? Padding(
+                        key: const ValueKey('scan'),
+                        padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(kRadius),
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              MobileScanner(
+                                controller: _controller,
+                                onDetect: _onDetect,
+                                errorBuilder: (context, error) =>
+                                    _ScannerError(error: error),
+                              ),
+                              IgnorePointer(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    border:
+                                        Border.all(color: p.accent, width: 2),
+                                    borderRadius:
+                                        BorderRadius.circular(kRadius),
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                  : ListView(
-                      physics: const BouncingScrollPhysics(),
-                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-                      children: [
-                        Center(
-                          child: Icon(Icons.qr_code_2_rounded,
-                              size: 46, color: p.accent),
-                        ),
-                        const SizedBox(height: 10),
-                        Center(
-                          child: Text('Code scanné',
-                              style: GT.body(14, color: p.fg2)),
-                        ),
-                        const SizedBox(height: 24),
-                        GlanceField(
-                          label: 'Code à 4 chiffres',
-                          controller: _code,
-                          hint: '0000',
-                          mono: true,
-                          autofocus: true,
-                          onSubmitted: (_) => _apply(),
-                        ),
-                        if (_error != null) ...[
-                          const SizedBox(height: 12),
-                          Text(_error!,
-                              style: GT.body(13, color: p.neg)),
-                        ],
-                        const SizedBox(height: 20),
-                        GlanceButton(
-                          label: 'Importer',
-                          busy: _busy,
-                          onTap: _apply,
-                        ),
-                        const SizedBox(height: 12),
-                        Center(
-                          child: GestureDetector(
-                            onTap: _rescan,
-                            child: Text('Scanner à nouveau',
-                                style: GT.body(13.5, color: p.fg3)),
+                            ],
                           ),
                         ),
-                      ],
-                    ),
+                      )
+                    : ListView(
+                        key: const ValueKey('form'),
+                        physics: const BouncingScrollPhysics(),
+                        padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+                        children: [
+                          Center(
+                            child: Icon(Icons.qr_code_2_rounded,
+                                size: 46, color: p.accent),
+                          ),
+                          const SizedBox(height: 10),
+                          Center(
+                            child: Text('Code scanné',
+                                style: GT.body(14, color: p.fg2)),
+                          ),
+                          const SizedBox(height: 24),
+                          GlanceField(
+                            label: 'Code à 4 chiffres',
+                            controller: _code,
+                            hint: '0000',
+                            mono: true,
+                            autofocus: true,
+                            onSubmitted: (_) => _apply(),
+                          ),
+                          GlanceReveal(
+                            show: _error != null,
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 12),
+                              child: Text(_error ?? '',
+                                  style: GT.body(13, color: p.neg)),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          GlanceButton(
+                            label: 'Importer',
+                            busy: _busy,
+                            onTap: _apply,
+                          ),
+                          const SizedBox(height: 12),
+                          Center(
+                            child: GestureDetector(
+                              onTap: _rescan,
+                              child: Text('Scanner à nouveau',
+                                  style: GT.body(13.5, color: p.fg3)),
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
             ),
           ],
         ),
