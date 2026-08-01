@@ -57,11 +57,15 @@ class GlanceSwap extends StatelessWidget {
 }
 
 /// Remplaçant animé d'[IndexedStack] : tous les enfants restent montés
-/// (scroll, timers, état local préservés), seul l'actif est peint — une
-/// Opacity à 0 fait sauter le paint. [TickerMode] coupe les animations des
-/// onglets cachés, [IgnorePointer] leurs interactions, [ExcludeSemantics]
-/// leur lecture d'écran.
-class GlanceFadeIndexedStack extends StatelessWidget {
+/// (scroll, timers, état local préservés), les inactifs sont en [Offstage]
+/// (ni layout ni paint), [TickerMode] coupe leurs animations, [IgnorePointer]
+/// leurs interactions, [ExcludeSemantics] leur lecture d'écran.
+///
+/// Le crossfade est piloté par un contrôleur du PARENT, hors de la portée du
+/// TickerMode des enfants : des animations implicites dans le sous-arbre
+/// seraient gelées net quand son TickerMode se coupe → l'écran sortant
+/// resterait affiché en surimpression.
+class GlanceFadeIndexedStack extends StatefulWidget {
   const GlanceFadeIndexedStack({
     super.key,
     required this.index,
@@ -74,33 +78,79 @@ class GlanceFadeIndexedStack extends StatelessWidget {
   final Duration duration;
 
   @override
+  State<GlanceFadeIndexedStack> createState() => _GlanceFadeIndexedStackState();
+}
+
+class _GlanceFadeIndexedStackState extends State<GlanceFadeIndexedStack>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller =
+      AnimationController(vsync: this, duration: widget.duration, value: 1);
+  late final CurvedAnimation _in =
+      CurvedAnimation(parent: _controller, curve: kCurveOut);
+  late final Animation<Offset> _slide =
+      Tween(begin: const Offset(0, 0.006), end: Offset.zero).animate(
+          CurvedAnimation(parent: _controller, curve: kCurveOutCubic));
+
+  /// Onglet sortant, encore peint (en fondu inverse) tant que ça anime.
+  int? _leaving;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addStatusListener((status) {
+      if (status == AnimationStatus.completed && _leaving != null) {
+        setState(() => _leaving = null);
+      }
+    });
+  }
+
+  @override
+  void didUpdateWidget(GlanceFadeIndexedStack old) {
+    super.didUpdateWidget(old);
+    if (widget.index != old.index) {
+      _leaving = old.index;
+      _controller.forward(from: 0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _in.dispose();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Stack(
       fit: StackFit.expand,
       children: [
-        for (var i = 0; i < children.length; i++)
-          ExcludeSemantics(
-            excluding: i != index,
-            child: IgnorePointer(
-              ignoring: i != index,
-              child: TickerMode(
-                enabled: i == index,
-                child: AnimatedSlide(
-                  offset: i == index ? Offset.zero : const Offset(0, 0.006),
-                  duration: duration,
-                  curve: kCurveOutCubic,
-                  child: AnimatedOpacity(
-                    opacity: i == index ? 1 : 0,
-                    duration: duration,
-                    curve: kCurveOut,
-                    child: children[i],
-                  ),
-                ),
-              ),
-            ),
-          ),
+        for (var i = 0; i < widget.children.length; i++)
+          _wrap(i, widget.children[i]),
       ],
     );
+  }
+
+  Widget _wrap(int i, Widget child) {
+    final active = i == widget.index;
+    final leaving = i == _leaving;
+    final shown = ExcludeSemantics(
+      excluding: !active,
+      child: IgnorePointer(
+        ignoring: !active,
+        child: TickerMode(enabled: active, child: child),
+      ),
+    );
+    if (active) {
+      return SlideTransition(
+        position: _slide,
+        child: FadeTransition(opacity: _in, child: shown),
+      );
+    }
+    if (leaving) {
+      return FadeTransition(opacity: ReverseAnimation(_in), child: shown);
+    }
+    return Offstage(child: shown);
   }
 }
 
