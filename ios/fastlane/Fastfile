@@ -10,8 +10,23 @@ APP_PROFILE = "Glance App Store CI"
 WIDGET_PROFILE = "Glance Widget App Store CI"
 
 platform :ios do
+  desc "Build the signed .ipa (sans upload — pour un envoi séparé, ex. MCP)"
+  lane :build do
+    build_signed_ipa
+  end
+
   desc "Build the app and upload it to TestFlight"
   lane :beta do
+    api_key = build_signed_ipa
+
+    upload_to_testflight(
+      api_key: api_key,
+      skip_waiting_for_build_processing: true
+    )
+  end
+
+  desc "Profils + archive + export signé → ios/build/Glance.ipa"
+  private_lane :build_signed_ipa do
     api_key = app_store_connect_api_key(
       key_id: ENV["ASC_KEY_ID"],
       issuer_id: ENV["ASC_ISSUER_ID"],
@@ -57,9 +72,6 @@ platform :ios do
       clean: true
     )
 
-    upload_to_testflight(
-      api_key: api_key,
-      skip_waiting_for_build_processing: true
-    )
+    api_key
   end
 end
