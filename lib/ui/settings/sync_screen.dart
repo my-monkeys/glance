@@ -3,11 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../state/sync.dart';
+import '../../theme/motion.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
 import '../root_scaffold.dart';
 import '../widgets/common.dart';
 import '../widgets/field.dart';
+import '../widgets/motion.dart';
+import '../widgets/toast.dart';
 
 /// Ouvre l'écran Glance Sync (modale sur desktop, page sur mobile).
 Future<void> openSync(BuildContext context) =>
@@ -53,13 +56,19 @@ class SyncScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 18),
             Expanded(
-              child: switch (sync.status) {
-                SyncStatus.unknown => Center(
-                    child: CircularProgressIndicator(color: p.accent, strokeWidth: 2.4),
-                  ),
-                SyncStatus.signedOut => const _AuthForm(),
-                SyncStatus.signedIn => const _Account(),
-              },
+              child: GlanceSwap(
+                child: KeyedSubtree(
+                  key: ValueKey(sync.status),
+                  child: switch (sync.status) {
+                    SyncStatus.unknown => Center(
+                        child: CircularProgressIndicator(
+                            color: p.accent, strokeWidth: 2.4),
+                      ),
+                    SyncStatus.signedOut => const _AuthForm(),
+                    SyncStatus.signedIn => const _Account(),
+                  },
+                ),
+              ),
             ),
           ],
         ),
@@ -92,7 +101,11 @@ class _AuthFormState extends ConsumerState<_AuthForm> {
     final pw = _password.text;
     if (email.isEmpty || pw.isEmpty) return;
     final ctrl = ref.read(syncControllerProvider.notifier);
-    await (_createMode ? ctrl.signUp(email, pw) : ctrl.signIn(email, pw));
+    final create = _createMode;
+    final ok = await (create ? ctrl.signUp(email, pw) : ctrl.signIn(email, pw));
+    if (ok && mounted) {
+      showGlanceToast(context, create ? 'Compte créé' : 'Connecté');
+    }
   }
 
   @override
@@ -118,10 +131,13 @@ class _AuthFormState extends ConsumerState<_AuthForm> {
           obscure: true,
           onSubmitted: (_) => _submit(),
         ),
-        if (sync.error != null) ...[
-          const SizedBox(height: 12),
-          Text(sync.error!, style: GT.body(13, color: p.neg)),
-        ],
+        GlanceReveal(
+          show: sync.error != null,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: Text(sync.error ?? '', style: GT.body(13, color: p.neg)),
+          ),
+        ),
         const SizedBox(height: 20),
         GlanceButton(
           label: _createMode ? 'Créer le compte' : 'Se connecter',
@@ -135,9 +151,14 @@ class _AuthFormState extends ConsumerState<_AuthForm> {
             onTap: () => setState(() => _createMode = !_createMode),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              child: Text(
-                _createMode ? 'J\'ai déjà un compte' : 'Créer un compte',
-                style: GT.body(14, weight: 500, color: p.accent),
+              child: GlanceSwap(
+                duration: kMotionFast,
+                dy: 4,
+                child: Text(
+                  _createMode ? 'J\'ai déjà un compte' : 'Créer un compte',
+                  key: ValueKey(_createMode),
+                  style: GT.body(14, weight: 500, color: p.accent),
+                ),
               ),
             ),
           ),
@@ -221,24 +242,43 @@ class _Account extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 16),
-        if (sync.isPro) ...[
-          GlanceButton(
-            label: 'Synchroniser maintenant',
-            icon: Icons.sync_rounded,
-            busy: sync.busy,
-            onTap: ctrl.syncNow,
+        GlanceSwap(
+          child: KeyedSubtree(
+            key: ValueKey(sync.isPro),
+            child: sync.isPro
+                ? GlanceButton(
+                    label: 'Synchroniser maintenant',
+                    icon: Icons.sync_rounded,
+                    busy: sync.busy,
+                    onTap: () async {
+                      if (await ctrl.syncNow() && context.mounted) {
+                        showGlanceToast(context, 'Synchronisé');
+                      }
+                    },
+                  )
+                : _UnlockCard(),
           ),
-        ] else
-          _UnlockCard(),
-        if (sync.error != null) ...[
-          const SizedBox(height: 12),
-          Text(sync.error!, style: GT.body(13, color: p.neg)),
-        ],
+        ),
+        GlanceReveal(
+          show: sync.error != null || sync.notice != null,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: Text(
+              sync.error ?? sync.notice ?? '',
+              style: GT.body(13, color: sync.error != null ? p.neg : p.fg2),
+            ),
+          ),
+        ),
         const SizedBox(height: 8),
         Center(
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
-            onTap: ctrl.signOut,
+            onTap: () async {
+              await ctrl.signOut();
+              if (context.mounted) {
+                showGlanceToast(context, 'Déconnecté', kind: ToastKind.info);
+              }
+            },
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               child: Text('Se déconnecter', style: GT.body(14, color: p.fg2)),
@@ -266,14 +306,11 @@ class _Account extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: p.surface,
-        title: Text('Supprimer le compte ?',
-            style: GT.body(17, weight: 700, color: p.fg)),
-        content: Text(
+        title: const Text('Supprimer le compte ?'),
+        content: const Text(
           'Votre compte Glance Sync et toute la configuration synchronisée '
           'seront définitivement supprimés du serveur. Action irréversible. '
           'Vos sources analytics restent sur cet appareil.',
-          style: GT.body(13.5, color: p.fg2),
         ),
         actions: [
           TextButton(
@@ -288,7 +325,9 @@ class _Account extends ConsumerWidget {
         ],
       ),
     );
-    if (confirmed == true) await ctrl.deleteAccount();
+    if (confirmed == true && await ctrl.deleteAccount() && context.mounted) {
+      showGlanceToast(context, 'Compte supprimé', kind: ToastKind.info);
+    }
   }
 }
 
@@ -322,13 +361,21 @@ class _UnlockCard extends ConsumerWidget {
             GlanceButton(
               label: 'Débloquer',
               busy: sync.busy,
-              onTap: ctrl.buyPro,
+              onTap: () async {
+                if (await ctrl.buyPro() && context.mounted) {
+                  showGlanceToast(context, 'Glance Sync débloqué');
+                }
+              },
             ),
             const SizedBox(height: 4),
             Center(
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
-                onTap: ctrl.restorePurchase,
+                onTap: () async {
+                  if (await ctrl.restorePurchase() && context.mounted) {
+                    showGlanceToast(context, 'Achat restauré');
+                  }
+                },
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   child: Text('Restaurer un achat',

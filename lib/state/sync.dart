@@ -19,6 +19,7 @@ class SyncState {
     this.lastSyncAt,
     this.busy = false,
     this.error,
+    this.notice,
   });
 
   final SyncStatus status;
@@ -28,6 +29,10 @@ class SyncState {
   final bool busy;
   final String? error;
 
+  /// Message d'information non bloquant (ex. « activation en cours ») —
+  /// distinct de [error] pour ne pas afficher du positif en rouge.
+  final String? notice;
+
   SyncState copyWith({
     SyncStatus? status,
     String? email,
@@ -35,6 +40,7 @@ class SyncState {
     DateTime? lastSyncAt,
     bool? busy,
     String? error,
+    String? notice,
     bool clearError = false,
   }) =>
       SyncState(
@@ -44,6 +50,9 @@ class SyncState {
         lastSyncAt: lastSyncAt ?? this.lastSyncAt,
         busy: busy ?? this.busy,
         error: clearError ? null : (error ?? this.error),
+        // clearError remet aussi le notice à zéro : les deux canaux suivent
+        // le même cycle de vie (nouvelle opération = messages précédents purgés).
+        notice: clearError ? null : (notice ?? this.notice),
       );
 }
 
@@ -155,67 +164,75 @@ class SyncController extends Notifier<SyncState> {
 
   /// Supprime définitivement le compte (serveur + local). Irréversible : la
   /// config synchronisée est effacée côté serveur et la session est fermée.
-  Future<void> deleteAccount() async {
+  /// Renvoie vrai si la suppression a bien eu lieu.
+  Future<bool> deleteAccount() async {
     state = state.copyWith(busy: true, clearError: true);
     try {
       await _api.deleteAccount();
     } on SyncNetworkError {
       state = state.copyWith(busy: false, error: 'Serveur injoignable. Réessayez.');
-      return;
+      return false;
     } on SyncAuthError {
       state = state.copyWith(
         busy: false,
         error: 'Session expirée. Reconnectez-vous puis réessayez.',
       );
-      return;
+      return false;
     }
     await _purchases.reset();
     await ref.read(secureStorageProvider).delete(key: _kPassword);
     state = const SyncState(status: SyncStatus.signedOut);
+    return true;
   }
 
   /// Achète « Glance Sync » (achat unique). L'achat déclenche le webhook
   /// RevenueCat qui pose `isPro` côté serveur ; on attend cette bascule avant
-  /// de confirmer, puis on lance une première synchro.
-  Future<void> buyPro() async {
-    if (state.status != SyncStatus.signedIn) return;
+  /// de confirmer, puis on lance une première synchro. Renvoie vrai si le Pro
+  /// est actif à l'issue de l'appel.
+  Future<bool> buyPro() async {
+    if (state.status != SyncStatus.signedIn) return false;
     state = state.copyWith(busy: true, clearError: true);
     final outcome = await _purchases.buy();
     switch (outcome) {
       case PurchaseOutcome.cancelled:
         state = state.copyWith(busy: false);
+        return false;
       case PurchaseOutcome.error:
         state = state.copyWith(busy: false, error: 'Achat impossible. Réessayez.');
+        return false;
       case PurchaseOutcome.purchased:
         final activated = await _awaitProActivation();
         if (activated) {
           state = state.copyWith(busy: false, isPro: true, clearError: true);
           await push();
-        } else {
-          state = state.copyWith(
-            busy: false,
-            error: 'Achat validé — activation en cours, réessayez la sync dans un instant.',
-          );
+          return true;
         }
+        state = state.copyWith(
+          busy: false,
+          notice: 'Achat validé — activation en cours, réessayez la sync dans un instant.',
+        );
+        return false;
     }
   }
 
   /// Restaure un achat existant (changement d'appareil, réinstallation).
-  Future<void> restorePurchase() async {
-    if (state.status != SyncStatus.signedIn) return;
+  /// Renvoie vrai si le Pro est actif à l'issue de l'appel.
+  Future<bool> restorePurchase() async {
+    if (state.status != SyncStatus.signedIn) return false;
     state = state.copyWith(busy: true, clearError: true);
     final entitled = await _purchases.restore();
     if (!entitled) {
-      state = state.copyWith(busy: false, error: 'Aucun achat à restaurer.');
-      return;
+      state = state.copyWith(busy: false, notice: 'Aucun achat à restaurer.');
+      return false;
     }
     final activated = await _awaitProActivation();
     if (activated) {
       state = state.copyWith(busy: false, isPro: true, clearError: true);
       await push();
-    } else {
-      state = state.copyWith(busy: false, error: 'Achat restauré — activation en cours…');
+      return true;
     }
+    state = state.copyWith(busy: false, notice: 'Achat restauré — activation en cours…');
+    return false;
   }
 
   /// Demande au serveur de vérifier l'achat auprès de RevenueCat (avec retries
@@ -233,13 +250,15 @@ class SyncController extends Notifier<SyncState> {
   }
 
   /// Télécharge le blob distant et l'applique à la config locale.
-  Future<void> pull() async {
-    if (state.status != SyncStatus.signedIn) return;
+  /// Renvoie faux sur échec (réseau, déchiffrement) — l'appelant décide s'il
+  /// veut le signaler (la sync auto reste silencieuse).
+  Future<bool> pull() async {
+    if (state.status != SyncStatus.signedIn) return false;
     final password = await _password();
-    if (password == null) return;
+    if (password == null) return false;
     try {
       final remote = await _api.pull();
-      if (remote.blob == null) return; // rien encore côté serveur
+      if (remote.blob == null) return true; // rien encore côté serveur
       final payload = await SyncCrypto.decrypt(remote.blob!, password);
       applying = true;
       try {
@@ -248,37 +267,47 @@ class SyncController extends Notifier<SyncState> {
         applying = false;
       }
       state = state.copyWith(lastSyncAt: DateTime.now(), clearError: true);
+      return true;
     } on SyncBadPassword {
       // Config chiffrée avec un autre mot de passe (changé ailleurs).
       state = state.copyWith(error: 'Impossible de déchiffrer la config distante.');
+      return false;
     } catch (_) {
-      // Réseau : silencieux, on retentera.
+      return false; // réseau : on retentera
     }
   }
 
   /// Chiffre la config locale et l'envoie. Réservé aux comptes Pro.
-  Future<void> push() async {
-    if (state.status != SyncStatus.signedIn) return;
+  /// Renvoie faux sur échec.
+  Future<bool> push() async {
+    if (state.status != SyncStatus.signedIn) return false;
     final password = await _password();
-    if (password == null) return;
+    if (password == null) return false;
     try {
       final payload = await _build();
       final blob = await SyncCrypto.encrypt(payload, password);
       await _api.push(blob, DateTime.now().millisecondsSinceEpoch);
       state = state.copyWith(lastSyncAt: DateTime.now(), clearError: true);
+      return true;
     } on SyncProRequired {
       state = state.copyWith(isPro: false, error: 'Sync réservée à Glance Sync (Pro).');
+      return false;
     } catch (_) {
-      // Réseau : silencieux.
+      return false; // réseau : on retentera
     }
   }
 
   /// Synchronisation manuelle : récupère puis envoie l'état courant.
-  Future<void> syncNow() async {
+  /// Contrairement à la sync auto, un échec est signalé (pas de faux succès).
+  Future<bool> syncNow() async {
     state = state.copyWith(busy: true, clearError: true);
-    await pull();
-    if (state.isPro) await push();
+    var ok = await pull();
+    if (state.isPro) ok = await push() && ok;
     state = state.copyWith(busy: false);
+    if (!ok && state.error == null) {
+      state = state.copyWith(error: 'Serveur injoignable. Réessayez.');
+    }
+    return ok;
   }
 
   Future<TransferPayload> _build() async {

@@ -10,6 +10,7 @@ import 'detail/detail_screen.dart';
 import 'direct/direct_screen.dart';
 import 'home/home_screen.dart';
 import 'settings/settings_screen.dart';
+import 'widgets/motion.dart';
 import 'widgets/tab_bar.dart';
 
 /// Ouvre un site. Sur desktop (master-détail), sélectionne le site dans le
@@ -70,7 +71,10 @@ class RootScaffold extends ConsumerStatefulWidget {
 class _RootScaffoldState extends ConsumerState<RootScaffold> {
   GlanceTab _tab = GlanceTab.sites;
 
-  void _go(GlanceTab t) => setState(() => _tab = t);
+  void _go(GlanceTab t) {
+    if (t != _tab) HapticFeedback.selectionClick();
+    setState(() => _tab = t);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +91,7 @@ class _RootScaffoldState extends ConsumerState<RootScaffold> {
       child: Scaffold(
         body: Stack(
           children: [
-            IndexedStack(
+            GlanceFadeIndexedStack(
               index: _tab.index,
               children: [
                 HomeScreen(onGoSettings: () => _go(GlanceTab.settings)),

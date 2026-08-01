@@ -13,6 +13,7 @@ import 'state/widget_publisher.dart';
 import 'state/workspaces.dart';
 import 'theme/theme.dart';
 import 'ui/root_scaffold.dart';
+import 'ui/widgets/toast.dart';
 
 class GlanceApp extends ConsumerWidget {
   const GlanceApp({super.key});
@@ -22,6 +23,8 @@ class GlanceApp extends ConsumerWidget {
     final theme = ref.watch(settingsProvider.select((s) => s.theme));
     return MaterialApp(
       title: 'Glance',
+      // Donne au toaster l'accès à l'overlay racine (au-dessus des dialogs).
+      navigatorKey: glanceNavKey,
       debugShowCheckedModeBanner: false,
       theme: glanceTheme(Brightness.light),
       darkTheme: glanceTheme(Brightness.dark),

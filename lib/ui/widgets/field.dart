@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../theme/motion.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
 
@@ -94,35 +95,47 @@ class GlanceButton extends StatelessWidget {
     final p = context.glance;
     return GestureDetector(
       onTap: busy ? null : onTap,
-      child: Container(
+      child: AnimatedContainer(
+        duration: kMotionFast,
+        curve: kCurveOut,
         height: 52,
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: onTap == null ? p.accent.withValues(alpha: 0.5) : p.accent,
           borderRadius: BorderRadius.circular(15),
         ),
-        child: busy
-            ? SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.4,
-                  color: p.accentInk,
-                ),
-              )
-            : Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (icon != null) ...[
-                    Icon(icon, size: 18, color: p.accentInk),
-                    const SizedBox(width: 8),
-                  ],
-                  Text(
-                    label,
-                    style: GT.body(16, weight: 600, color: p.accentInk),
+        // Hauteur fixe → le crossfade spinner/label ne bouge pas le layout.
+        child: AnimatedSwitcher(
+          duration: kMotionFast,
+          switchInCurve: kCurveOut,
+          switchOutCurve: kCurveOut,
+          child: busy
+              ? SizedBox(
+                  key: const ValueKey('busy'),
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.4,
+                    color: p.accentInk,
                   ),
-                ],
-              ),
+                )
+              // Clé sur le libellé : un changement de label (toggle
+              // login/signup, picker…) crossfade aussi, pas que busy.
+              : Row(
+                  key: ValueKey('label:$label'),
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (icon != null) ...[
+                      Icon(icon, size: 18, color: p.accentInk),
+                      const SizedBox(width: 8),
+                    ],
+                    Text(
+                      label,
+                      style: GT.body(16, weight: 600, color: p.accentInk),
+                    ),
+                  ],
+                ),
+        ),
       ),
     );
   }
@@ -155,19 +168,27 @@ class GlanceButtonOutline extends StatelessWidget {
           borderRadius: BorderRadius.circular(15),
           border: Border.all(color: p.line),
         ),
-        child: busy
-            ? SizedBox(
-                width: 18,
-                height: 18,
-                child: CircularProgressIndicator(strokeWidth: 2.2, color: p.fg2),
-              )
-            : Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (leading != null) ...[leading!, const SizedBox(width: 8)],
-                  Text(label, style: GT.body(15, weight: 500, color: p.fg)),
-                ],
-              ),
+        child: AnimatedSwitcher(
+          duration: kMotionFast,
+          switchInCurve: kCurveOut,
+          switchOutCurve: kCurveOut,
+          child: busy
+              ? SizedBox(
+                  key: const ValueKey('busy'),
+                  width: 18,
+                  height: 18,
+                  child:
+                      CircularProgressIndicator(strokeWidth: 2.2, color: p.fg2),
+                )
+              : Row(
+                  key: const ValueKey('label'),
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (leading != null) ...[leading!, const SizedBox(width: 8)],
+                    Text(label, style: GT.body(15, weight: 500, color: p.fg)),
+                  ],
+                ),
+        ),
       ),
     );
   }
