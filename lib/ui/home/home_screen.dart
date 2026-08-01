@@ -13,6 +13,7 @@ import '../../state/period_state.dart';
 import '../../state/providers.dart';
 import '../../state/settings.dart';
 import '../../state/workspaces.dart';
+import '../../theme/motion.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
 import '../root_scaffold.dart';
@@ -23,6 +24,7 @@ import '../widgets/day_nav.dart';
 import '../widgets/site_avatar.dart';
 import '../widgets/field.dart';
 import '../widgets/glance_chart.dart';
+import '../widgets/motion.dart';
 import '../widgets/pulse_dot.dart';
 import '../widgets/sparkline.dart';
 import '../widgets/workspace_switcher.dart';
@@ -145,73 +147,37 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ref.read(settingsProvider.notifier).setHomeView(v),
                 onNewGroup: () => openWorkspaceEditor(context, null),
               ),
-              if (periodState.canNavigateDays) ...[
-                const SizedBox(height: 14),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20),
+              GlanceReveal(
+                show: periodState.canNavigateDays,
+                child: const Padding(
+                  padding: EdgeInsets.fromLTRB(20, 14, 20, 0),
                   child: DayNav(),
                 ),
-              ],
+              ),
               const SizedBox(height: 18),
 
-              if (sitesAsync.hasError && sites.isEmpty)
-                _ErrorBox(
-                  message: 'Chargement impossible.',
-                  onRetry: () => ref.invalidate(sitesProvider),
-                )
-              else if (sites.isEmpty && sitesAsync.isLoading)
-                const _HomeSkeleton()
-              else if (sites.isEmpty)
-                group != null
-                    ? _EmptyGroupBox(group: group)
-                    : _EmptyBox(
-                        onChoose: widget.onGoSettings,
-                        onAdd: () => openAddSource(context),
-                      )
-              else ...[
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: totals.hasAny
-                      ? _TotalCard(data: totals.data, unit: window.unit.api)
-                      : const _TotalCardSkeleton(),
+              // Erreur / squelette / vide / contenu : les états se fondent au
+              // lieu de se remplacer d'un coup.
+              GlanceSwap(
+                child: KeyedSubtree(
+                  key: ValueKey(sitesAsync.hasError && sites.isEmpty
+                      ? 'error'
+                      : sites.isEmpty && sitesAsync.isLoading
+                          ? 'skeleton'
+                          : sites.isEmpty
+                              ? 'empty'
+                              : 'content'),
+                  child: _buildBody(
+                    sitesAsync: sitesAsync,
+                    sites: sites,
+                    group: group,
+                    totals: totals,
+                    window: window,
+                    viewMode: viewMode,
+                    orderedSites: orderedSites,
+                  ),
                 ),
-                const SizedBox(height: 22),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: viewMode == HomeViewMode.grid
-                      ? GridView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          padding: EdgeInsets.zero,
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            mainAxisSpacing: 12,
-                            crossAxisSpacing: 12,
-                            childAspectRatio: 1.12,
-                          ),
-                          itemCount: orderedSites.length,
-                          itemBuilder: (context, i) => _SiteStatSlot(
-                            key: ValueKey(orderedSites[i]),
-                            site: orderedSites[i],
-                            window: window,
-                            grid: true,
-                          ),
-                        )
-                      : Column(
-                          children: [
-                            for (final s in orderedSites) ...[
-                              _SiteStatSlot(
-                                key: ValueKey(s),
-                                site: s,
-                                window: window,
-                              ),
-                              const SizedBox(height: 12),
-                            ],
-                          ],
-                        ),
-                ),
-              ],
+              ),
             ],
           ),
         ),
@@ -220,6 +186,89 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           left: 0,
           right: 0,
           child: RefreshBar(visible: refreshing),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBody({
+    required AsyncValue<List<Site>> sitesAsync,
+    required List<Site> sites,
+    required Workspace? group,
+    required HomeTotals totals,
+    required DateWindow window,
+    required HomeViewMode viewMode,
+    required List<Site> orderedSites,
+  }) {
+    if (sitesAsync.hasError && sites.isEmpty) {
+      return _ErrorBox(
+        message: 'Chargement impossible.',
+        onRetry: () => ref.invalidate(sitesProvider),
+      );
+    }
+    if (sites.isEmpty && sitesAsync.isLoading) return const _HomeSkeleton();
+    if (sites.isEmpty) {
+      return group != null
+          ? _EmptyGroupBox(group: group)
+          : _EmptyBox(
+              onChoose: widget.onGoSettings,
+              onAdd: () => openAddSource(context),
+            );
+    }
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: GlanceSwap(
+            child: KeyedSubtree(
+              key: ValueKey(totals.hasAny),
+              child: totals.hasAny
+                  ? _TotalCard(data: totals.data, unit: window.unit.api)
+                  : const _TotalCardSkeleton(),
+            ),
+          ),
+        ),
+        const SizedBox(height: 22),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          // Liste ↔ grille : fondu pur, les cartes gardent leur ValueKey.
+          child: GlanceSwap(
+            dy: 0,
+            child: viewMode == HomeViewMode.grid
+                ? GridView.builder(
+                    key: const ValueKey('grid'),
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    padding: EdgeInsets.zero,
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 12,
+                      crossAxisSpacing: 12,
+                      childAspectRatio: 1.12,
+                    ),
+                    itemCount: orderedSites.length,
+                    itemBuilder: (context, i) => _SiteStatSlot(
+                      key: ValueKey(orderedSites[i]),
+                      site: orderedSites[i],
+                      window: window,
+                      grid: true,
+                    ),
+                  )
+                : Column(
+                    key: const ValueKey('list'),
+                    children: [
+                      for (final s in orderedSites) ...[
+                        _SiteStatSlot(
+                          key: ValueKey(s),
+                          site: s,
+                          window: window,
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+                    ],
+                  ),
+          ),
         ),
       ],
     );
@@ -496,7 +545,9 @@ class _ViewToggle extends StatelessWidget {
       return GestureDetector(
         onTap: () => onChanged(m),
         behavior: HitTestBehavior.opaque,
-        child: Container(
+        child: AnimatedContainer(
+          duration: kMotionFast,
+          curve: kCurveOut,
           width: 34,
           height: 30,
           alignment: Alignment.center,

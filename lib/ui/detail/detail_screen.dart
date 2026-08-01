@@ -10,6 +10,7 @@ import '../../data/models/period.dart';
 import '../../state/period_state.dart';
 import '../../state/providers.dart';
 import '../../state/settings.dart';
+import '../../theme/motion.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
 import '../widgets/chip.dart';
@@ -17,6 +18,7 @@ import '../widgets/common.dart';
 import '../widgets/day_nav.dart';
 import '../widgets/events_chart.dart';
 import '../widgets/glance_chart.dart';
+import '../widgets/motion.dart';
 import '../widgets/pulse_dot.dart';
 
 class DetailScreen extends ConsumerStatefulWidget {
@@ -180,49 +182,62 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                 ],
               ),
             ),
-            if (periodState.canNavigateDays) ...[
-              const SizedBox(height: 14),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20),
+            GlanceReveal(
+              show: periodState.canNavigateDays,
+              child: const Padding(
+                padding: EdgeInsets.fromLTRB(20, 14, 20, 0),
                 child: DayNav(),
               ),
-            ],
+            ),
             const SizedBox(height: 18),
 
-            // Onglets Vue d'ensemble / Événements (le 2e uniquement si events).
-            if (hasEvents) ...[
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+            // Onglets Vue d'ensemble / Événements (le 2e uniquement si
+            // events) : la barre se déplie au lieu de pousser le contenu.
+            GlanceReveal(
+              show: hasEvents,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
                 child: _SegTabs(
                   current: _tab,
                   onChanged: (t) => setState(() => _tab = t),
                 ),
               ),
-              const SizedBox(height: 20),
-            ],
+            ),
 
-            if (_tab == _DetailTab.events && hasEvents)
-              _EventsTab(site: widget.site, window: window)
-            else if (async.hasError && detail == null)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
-                child: Center(
-                  child: Text('Chargement impossible.',
-                      style: GT.body(15, color: p.fg2)),
-                ),
-              )
-            else if (detail == null)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 60),
-                child: Center(
-                  child: CircularProgressIndicator(
-                    color: p.accent,
-                    strokeWidth: 2.4,
-                  ),
-                ),
-              )
-            else
-              _DetailBody(detail: detail, window: window),
+            GlanceSwap(
+              child: KeyedSubtree(
+                key: ValueKey(_tab == _DetailTab.events && hasEvents
+                    ? 'events'
+                    : async.hasError && detail == null
+                        ? 'error'
+                        : detail == null
+                            ? 'loading'
+                            : 'stats'),
+                child: _tab == _DetailTab.events && hasEvents
+                    ? _EventsTab(site: widget.site, window: window)
+                    : async.hasError && detail == null
+                        ? Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 40),
+                            child: Center(
+                              child: Text('Chargement impossible.',
+                                  style: GT.body(15, color: p.fg2)),
+                            ),
+                          )
+                        : detail == null
+                            ? Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 60),
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                    color: p.accent,
+                                    strokeWidth: 2.4,
+                                  ),
+                                ),
+                              )
+                            : _DetailBody(detail: detail, window: window),
+              ),
+            ),
           ],
         ),
           ),
@@ -475,7 +490,8 @@ class _SegTabs extends StatelessWidget {
           onTap: () => onChanged(tab),
           behavior: HitTestBehavior.opaque,
           child: AnimatedContainer(
-            duration: const Duration(milliseconds: 150),
+            duration: kMotionFast,
+            curve: kCurveOut,
             height: 38,
             alignment: Alignment.center,
             decoration: BoxDecoration(
@@ -654,7 +670,8 @@ class _EventChip extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: AnimatedOpacity(
-        duration: const Duration(milliseconds: 150),
+        duration: kMotionFast,
+        curve: kCurveOut,
         opacity: on ? 1 : 0.4,
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),

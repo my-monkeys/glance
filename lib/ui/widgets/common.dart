@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/format.dart';
+import '../../theme/motion.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
 
@@ -23,7 +24,8 @@ class GlanceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final p = context.glance;
     final card = AnimatedContainer(
-      duration: const Duration(milliseconds: 160),
+      duration: kMotionFast,
+      curve: kCurveOut,
       padding: padding,
       decoration: BoxDecoration(
         color: p.surface,
@@ -75,7 +77,8 @@ class RefreshBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final p = context.glance;
     return AnimatedOpacity(
-      duration: const Duration(milliseconds: 200),
+      duration: kMotionBase,
+      curve: kCurveOut,
       opacity: visible ? 1 : 0,
       child: SizedBox(
         height: 2.5,
@@ -225,6 +228,30 @@ class MetricBars extends StatelessWidget {
   }
 }
 
+/// Coche ronde de sélection (cercle accent quand cochée).
+class GlanceCheck extends StatelessWidget {
+  const GlanceCheck({super.key, required this.on});
+  final bool on;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.glance;
+    return AnimatedContainer(
+      duration: kMotionFast,
+      curve: kCurveOut,
+      width: 24,
+      height: 24,
+      decoration: BoxDecoration(
+        color: on ? p.accent : Colors.transparent,
+        shape: BoxShape.circle,
+        border: Border.all(color: on ? p.accent : p.fg3, width: 2),
+      ),
+      child:
+          on ? Icon(Icons.check_rounded, size: 15, color: p.accentInk) : null,
+    );
+  }
+}
+
 /// Interrupteur façon iOS (44×27, pastille coulissante).
 class GlanceToggle extends StatelessWidget {
   const GlanceToggle({super.key, required this.value, required this.onTap});
@@ -238,8 +265,8 @@ class GlanceToggle extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        curve: Curves.easeOut,
+        duration: kMotionBase,
+        curve: kCurveOut,
         width: 44,
         height: 27,
         decoration: BoxDecoration(
@@ -250,8 +277,8 @@ class GlanceToggle extends StatelessWidget {
         child: Stack(
           children: [
             AnimatedAlign(
-              duration: const Duration(milliseconds: 180),
-              curve: Curves.easeOut,
+              duration: kMotionBase,
+              curve: kCurveOut,
               alignment: value ? Alignment.centerRight : Alignment.centerLeft,
               child: Padding(
                 padding: const EdgeInsets.all(2),

@@ -11,6 +11,7 @@ import '../../theme/palette.dart';
 import '../../theme/type.dart';
 import '../root_scaffold.dart';
 import '../widgets/common.dart';
+import '../widgets/motion.dart';
 import '../widgets/site_avatar.dart';
 import '../widgets/pulse_dot.dart';
 import '../widgets/workspace_switcher.dart';
@@ -143,43 +144,61 @@ class _DirectScreenState extends ConsumerState<DirectScreen> {
                   ],
                 ),
               ),
-              if (sites.isEmpty && sitesAsync.isLoading)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 40),
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      color: p.accent,
-                      strokeWidth: 2.4,
-                    ),
-                  ),
-                )
-              else if (shown.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 30),
-                  child: Center(
-                    child: Text(
-                      onlyLive
-                          ? 'Aucun visiteur en direct pour l\'instant.'
-                          : 'Aucun site.',
-                      style: GT.body(14, color: p.fg3),
-                    ),
-                  ),
-                )
-              else ...[
-                for (final e in shown) ...[
-                  _LiveRow(site: e.site, live: e.live, loading: e.loading),
-                  const SizedBox(height: 10),
-                ],
-                if (hiddenCount > 0)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      '$hiddenCount site${hiddenCount > 1 ? 's' : ''} sans visiteur masqué${hiddenCount > 1 ? 's' : ''}',
-                      textAlign: TextAlign.center,
-                      style: GT.body(12, color: p.fg3),
-                    ),
-                  ),
-              ],
+              GlanceSwap(
+                child: KeyedSubtree(
+                  key: ValueKey(sites.isEmpty && sitesAsync.isLoading
+                      ? 'loading'
+                      : shown.isEmpty
+                          ? 'empty'
+                          : 'list'),
+                  child: sites.isEmpty && sitesAsync.isLoading
+                      ? Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 40),
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              color: p.accent,
+                              strokeWidth: 2.4,
+                            ),
+                          ),
+                        )
+                      : shown.isEmpty
+                          ? Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 30),
+                              child: Center(
+                                child: Text(
+                                  onlyLive
+                                      ? 'Aucun visiteur en direct pour l\'instant.'
+                                      : 'Aucun site.',
+                                  style: GT.body(14, color: p.fg3),
+                                ),
+                              ),
+                            )
+                          : Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                for (final e in shown) ...[
+                                  _LiveRow(
+                                    key: ValueKey(e.site),
+                                    site: e.site,
+                                    live: e.live,
+                                    loading: e.loading,
+                                  ),
+                                  const SizedBox(height: 10),
+                                ],
+                                if (hiddenCount > 0)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 4),
+                                    child: Text(
+                                      '$hiddenCount site${hiddenCount > 1 ? 's' : ''} sans visiteur masqué${hiddenCount > 1 ? 's' : ''}',
+                                      textAlign: TextAlign.center,
+                                      style: GT.body(12, color: p.fg3),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                ),
+              ),
             ],
           ),
         ),
@@ -195,7 +214,12 @@ class _DirectScreenState extends ConsumerState<DirectScreen> {
 }
 
 class _LiveRow extends StatelessWidget {
-  const _LiveRow({required this.site, required this.live, this.loading = false});
+  const _LiveRow({
+    super.key,
+    required this.site,
+    required this.live,
+    this.loading = false,
+  });
   final Site site;
   final int live;
   final bool loading;

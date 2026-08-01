@@ -618,18 +618,7 @@ class _SiteRow extends StatelessWidget {
               ],
             ),
           ),
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 150),
-            width: 24,
-            height: 24,
-            decoration: BoxDecoration(
-              color: on ? p.accent : Colors.transparent,
-              shape: BoxShape.circle,
-              border: Border.all(color: on ? p.accent : p.fg3, width: 2),
-            ),
-            child:
-                on ? Icon(Icons.check_rounded, size: 15, color: p.accentInk) : null,
-          ),
+          GlanceCheck(on: on),
         ],
       ),
     );

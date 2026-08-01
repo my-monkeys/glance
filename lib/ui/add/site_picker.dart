@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../data/models/models.dart';
-import '../../theme/motion.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
 import '../widgets/common.dart';
@@ -151,7 +150,7 @@ class _SitePickerScreenState extends State<SitePickerScreen> {
                             ],
                           ),
                         ),
-                        _Check(on: _all),
+                        GlanceCheck(on: _all),
                       ],
                     ),
                   ),
@@ -197,7 +196,7 @@ class _SitePickerScreenState extends State<SitePickerScreen> {
                               ],
                             ),
                           ),
-                          _Check(on: _all || _selected.contains(s.id)),
+                          GlanceCheck(on: _all || _selected.contains(s.id)),
                         ],
                       ),
                     ),
@@ -231,26 +230,3 @@ class _SitePickerScreenState extends State<SitePickerScreen> {
   }
 }
 
-class _Check extends StatelessWidget {
-  const _Check({required this.on});
-  final bool on;
-
-  @override
-  Widget build(BuildContext context) {
-    final p = context.glance;
-    return AnimatedContainer(
-      duration: kMotionFast,
-      curve: kCurveOut,
-      width: 24,
-      height: 24,
-      decoration: BoxDecoration(
-        color: on ? p.accent : Colors.transparent,
-        shape: BoxShape.circle,
-        border: Border.all(color: on ? p.accent : p.fg3, width: 2),
-      ),
-      child: on
-          ? Icon(Icons.check_rounded, size: 15, color: p.accentInk)
-          : null,
-    );
-  }
-}

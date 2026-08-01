@@ -23,6 +23,7 @@ import '../settings/workspaces_screen.dart';
 import '../widgets/chip.dart';
 import '../widgets/common.dart';
 import '../widgets/glance_chart.dart';
+import '../widgets/motion.dart';
 import '../widgets/pulse_dot.dart';
 import '../widgets/site_avatar.dart';
 import '../widgets/sparkline.dart';
@@ -546,7 +547,16 @@ class _Center extends ConsumerWidget {
       alignment: Alignment.topCenter,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: _centerMaxWidth),
-        child: body,
+        // Fondu pur entre aperçu / site / réglages (et entre deux sites : la
+        // ValueKey du DetailScreen alimente le switcher — l'ancien reste
+        // affiché pendant que le nouveau apparaît, pas de trou blanc).
+        child: GlanceSwap(
+          dy: 0,
+          child: KeyedSubtree(
+            key: ValueKey((nav.view, nav.site)),
+            child: body,
+          ),
+        ),
       ),
     );
   }

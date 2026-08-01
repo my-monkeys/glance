@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../theme/motion.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
 
@@ -23,7 +24,8 @@ class GlanceChip extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
+        duration: kMotionFast,
+        curve: kCurveOut,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
         decoration: BoxDecoration(
           color: selected ? p.accent : p.chip,
