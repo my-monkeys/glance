@@ -9,7 +9,7 @@ Package Android : `fr.mymonkey.glance` · AAB signé produit par la CI (`android
 
 **Nom de l'application** (30 car. max)
 ```
-Glance — Analytics
+Glance — Umami & Plausible
 ```
 
 **Description courte** (80 car. max)
@@ -49,7 +49,7 @@ TRANSFERT EN UN SCAN
 RESPECTUEUX ET OUVERT
 • Aucun serveur intermédiaire : Glance parle directement à vos instances Umami et Plausible.
 • Vos identifiants restent chiffrés sur votre appareil.
-• 100 % gratuit et open source — un projet du collectif My-Monkey.
+• Gratuit et open source — un projet du collectif My-Monkey (une synchro chiffrée optionnelle entre appareils est proposée en achat unique).
 
 Glance ne collecte, ne vend et ne partage aucune donnée. Il affiche simplement les statistiques que vos propres outils produisent déjà.
 ```
@@ -60,7 +60,7 @@ Glance ne collecte, ne vend et ne partage aucune donnée. Il affiche simplement 
 
 **App name**
 ```
-Glance — Analytics
+Glance — Umami & Plausible
 ```
 
 **Short description** (80 chars)
@@ -99,7 +99,7 @@ ONE‑SCAN TRANSFER
 RESPECTFUL AND OPEN
 • No middle server: Glance talks straight to your Umami and Plausible instances.
 • Your credentials stay encrypted on your device.
-• 100% free and open source — a project by the My‑Monkey collective.
+• Free and open source — a project by the My‑Monkey collective (an optional encrypted cross‑device sync is available as a one‑time purchase).
 
 Glance collects, sells and shares no data. It simply displays the statistics your own tools already produce.
 ```
@@ -123,8 +123,8 @@ Glance collects, sells and shares no data. It simply displays the statistics you
 - Aucun contenu violent/sexuel/haineux/jeux d'argent → classification **Tout public / PEGI 3**.
 - Pas d'interactions sociales, pas d'UGC, pas de partage de localisation.
 
-## Assets requis (voir store/play/assets/)
-- [ ] Icône 512×512 PNG (32 bits, alpha) — généré depuis favicon
-- [ ] Feature graphic 1024×500 PNG/JPEG
-- [ ] 2 à 8 captures téléphone (min 320 px, ratio 16:9 ou 9:16) — depuis docs/screenshots
+## Assets requis (voir store/play/assets/) — PRÊTS
+- [x] Icône 512×512 PNG — `icon-512.png`
+- [x] Feature graphic 1024×500 — `feature-1024x500.png`
+- [x] Captures téléphone (5, format 1200×2400 = 2:1, conforme Play) — `screenshot-1-list` / `-2-grid` / `-3-detail` / `-4-events` / `-5-live` (régénérées via l'émulateur Android, sites de démo neutres, aucun contenu adulte)
 - [ ] (option) captures tablette
