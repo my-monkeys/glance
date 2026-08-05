@@ -48,3 +48,8 @@ app.*.map.json
 .cache_ggshield
 Glance-*.dmg
 .asc-tmp/
+
+# artefacts de rendu des slides Play
+store/play/_build/png/
+store/play/_build/html/
+store/play/_build/_cap_*.png
