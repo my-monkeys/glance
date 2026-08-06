@@ -48,8 +48,8 @@ jobs:
           storeFile=glance-release.jks
           EOF
 
-      - run: flutter build apk --release
-      - run: flutter build appbundle --release
+      - run: flutter build apk --release --dart-define=REVENUECAT_ANDROID_KEY=goog_ivIRytOgBwElLycnoazwlvrrkzF
+      - run: flutter build appbundle --release --dart-define=REVENUECAT_ANDROID_KEY=goog_ivIRytOgBwElLycnoazwlvrrkzF
 
       - name: Renommer les binaires (noms propres)
         run: |
