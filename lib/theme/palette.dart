@@ -15,6 +15,7 @@ class GlancePalette extends ThemeExtension<GlancePalette> {
     required this.accentInk,
     required this.accentSoft,
     required this.neg,
+    required this.forecast,
     required this.chip,
     required this.shadow,
   });
@@ -29,6 +30,10 @@ class GlancePalette extends ThemeExtension<GlancePalette> {
   final Color accentInk;
   final Color accentSoft;
   final Color neg;
+
+  /// Courbe de prévision (pointillé orange sur les graphes). Distinct de [neg]
+  /// (terracotta des deltas négatifs) : ocre doré, même registre chaud.
+  final Color forecast;
   final Color chip;
   final List<BoxShadow> shadow;
 
@@ -44,6 +49,7 @@ class GlancePalette extends ThemeExtension<GlancePalette> {
     accentInk: Color(0xFFFFFFFF),
     accentSoft: Color(0x1F3B7A5A), // rgba(59,122,90,.12)
     neg: Color(0xFFB15A42),
+    forecast: Color(0xFFC98A2E),
     chip: Color(0xFFF0EDE7),
     shadow: [
       BoxShadow(color: Color(0x0A282319), blurRadius: 2, offset: Offset(0, 1)),
@@ -63,6 +69,7 @@ class GlancePalette extends ThemeExtension<GlancePalette> {
     accentInk: Color(0xFF0E1A12),
     accentSoft: Color(0x1F5AA57E),
     neg: Color(0xFFCF7A5F),
+    forecast: Color(0xFFE0A458),
     chip: Color(0xFF2A271E),
     shadow: [
       BoxShadow(color: Color(0x33000000), blurRadius: 22, offset: Offset(0, 8)),
@@ -81,6 +88,7 @@ class GlancePalette extends ThemeExtension<GlancePalette> {
     Color? accentInk,
     Color? accentSoft,
     Color? neg,
+    Color? forecast,
     Color? chip,
     List<BoxShadow>? shadow,
   }) {
@@ -95,6 +103,7 @@ class GlancePalette extends ThemeExtension<GlancePalette> {
       accentInk: accentInk ?? this.accentInk,
       accentSoft: accentSoft ?? this.accentSoft,
       neg: neg ?? this.neg,
+      forecast: forecast ?? this.forecast,
       chip: chip ?? this.chip,
       shadow: shadow ?? this.shadow,
     );
@@ -114,6 +123,7 @@ class GlancePalette extends ThemeExtension<GlancePalette> {
       accentInk: Color.lerp(accentInk, other.accentInk, t)!,
       accentSoft: Color.lerp(accentSoft, other.accentSoft, t)!,
       neg: Color.lerp(neg, other.neg, t)!,
+      forecast: Color.lerp(forecast, other.forecast, t)!,
       chip: Color.lerp(chip, other.chip, t)!,
       shadow: t < 0.5 ? shadow : other.shadow,
     );

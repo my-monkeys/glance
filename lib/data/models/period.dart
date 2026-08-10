@@ -40,7 +40,9 @@ enum Period {
   h24('24h', '24 h'),
   d7('7j', '7 jours'),
   d30('30j', '30 j'),
+  thisMonth('mois', 'Ce mois-ci'),
   m12('12m', '12 m'),
+  thisYear('annee', 'Cette année'),
   custom('perso', 'Perso');
 
   const Period(this.key, this.label);
@@ -99,9 +101,21 @@ enum Period {
           end,
           TimeUnit.day,
         );
+      case Period.thisMonth:
+        return DateWindow(
+          DateTime(n.year, n.month, 1),
+          _ceil(n, TimeUnit.day),
+          TimeUnit.day,
+        );
       case Period.m12:
         return DateWindow(
           DateTime(n.year, n.month - 11, 1),
+          _ceil(n, TimeUnit.month),
+          TimeUnit.month,
+        );
+      case Period.thisYear:
+        return DateWindow(
+          DateTime(n.year, 1, 1),
           _ceil(n, TimeUnit.month),
           TimeUnit.month,
         );

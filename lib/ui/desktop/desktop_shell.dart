@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/format.dart';
+import '../../core/predict.dart';
 import '../../data/models/models.dart';
 import '../../data/models/period.dart';
 import '../../data/models/workspace.dart';
@@ -702,6 +703,11 @@ class _OverviewState extends ConsumerState<_Overview> {
                     showPageviews: true,
                     visitorsTotal: data.totalVisitors,
                     pageviewsTotal: data.totalPageviews,
+                    forecast: buildForecast(
+                      series: data.totalSeries,
+                      window: window,
+                      reference: data.totalRefSeries,
+                    ),
                     hidden: hidden,
                     onToggle: (k) =>
                         ref.read(settingsProvider.notifier).toggleSeries(k),

@@ -30,7 +30,7 @@ lib/
 1. **Accueil vide brandé** (aucun compte) → « Ajouter une source ».
 2. **Ajout en 2 étapes** : fournisseur + identifiants → `listSites()` → **écran de choix des sites** (`site_picker`) : *tous les sites* (suit aussi les futurs) **ou** sélection explicite.
 3. Plusieurs comptes/fournisseurs coexistent. Home = union des sites sélectionnés de chaque compte.
-4. Détail par site : périodes (`today/24h/7j/30j/12m/perso`), graphe, KPIs, live, top pages/sources/pays.
+4. Détail par site : périodes (`today/24h/7j/30j/mois/12m/annee/perso`), graphe, KPIs, live, top pages/sources/pays. `mois` (« Ce mois-ci ») et `annee` (« Cette année ») sont calendaires : du 1er du mois / 1er janvier à maintenant.
 
 La sélection de sites est éditable après coup : Réglages → tap sur le compte → « Choisir les sites ».
 
@@ -54,6 +54,14 @@ La sélection de sites est éditable après coup : Réglages → tap sur le comp
 - `ui/widgets/glance_chart.dart` (fl_chart) : courbe **lissée** (`isCurved`, `curveSmoothness`, cap/join round), **aire dégradée**, **échelle Y arrondie**, labels X selon la granularité, tooltip tactile. Deux courbes — **Visiteurs** (vert, aire) + **Pages vues** (gris) — avec légende cliquable (masquer/afficher) sur home/détail. (Les *visites* ne sont volontairement PAS tracées : par heure elles sont égales aux visiteurs — cf. gotcha `sessions ≠ visites` — donc redondantes ; elles restent en carte KPI du détail.) Remplace la barre de la maquette. Sparkline compacte des cartes = `ui/widgets/sparkline.dart`.
 - `ui/widgets/events_chart.dart` : **multi-lignes, une couleur par événement** (palette `kEventPalette`), échelle Y partagée, tooltip listant chaque événement. Onglet Événements du détail : légende = puces cliquables (cocher/décocher les courbes ; au-delà de 6 events les moins fréquents sont masqués par défaut), barres de répartition colorées assorties.
 - Helpers partagés dans `ui/widgets/chart_util.dart` (`chartNiceMax`, `chartTooltipDate`).
+
+### Prévision (pointillé orange)
+
+Les gros graphes (home/détail/desktop) prolongent la courbe visiteurs d'une **prévision en pointillé orange** (`palette.forecast`) quand la fenêtre contient du futur. Moteur pur dans `core/predict.dart` (testé dans `test/predict_test.dart`) :
+- **Modèle** : « observé + rythme attendu × temps restant ». Pour les périodes calendaires (`today`/`mois`/`annee`), le rythme attendu = profil de la **période précédente équivalente** (hier / mois dernier / année dernière) rescalé par le ratio observé/référence — la série de référence est fetchée en plus par `siteStatsProvider`/`detailProvider` (`forecastReferenceWindow`, best-effort) et portée par `SiteStats.refSeries` / `SiteDetail.refSeries` / `HomeData.totalRefSeries`. Pour les fenêtres glissantes (24h/7j/30j/12m), on ne complète que le bucket courant, au rythme moyen des buckets écoulés (pas de fetch en plus).
+- La détection se fait **sur la fenêtre, pas sur la `Period`** (`forecastSpecFor`) : deux périodes qui résolvent la même fenêtre (ex. 12 m en décembre ≡ cette année) affichent la même prévision.
+- Le total projeté de la légende = `total visiteurs uniques × growth` (ne PAS sommer les buckets projetés : un visiteur peut apparaître dans plusieurs buckets).
+- Légende « Prévision » basculable, clé `forecast` dans `settings.hiddenSeries` (comme visiteurs/pages vues).
 
 ## API par fournisseur
 

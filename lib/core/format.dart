@@ -8,9 +8,13 @@ String fmtCount(num n) {
     return '${_frNum.format((n / 1000000))} M'
         .replaceAll(RegExp(r'(\.\d).*M'), r'$1 M');
   }
-  if (n >= 100000) {
+  // Dès 10 000 le nombre complet déborde des labels d'axe (36 px réservés).
+  if (n >= 10000) {
     final v = n / 1000;
-    return '${v.toStringAsFixed(0)} k';
+    final s = v == v.roundToDouble()
+        ? v.toStringAsFixed(0)
+        : v.toStringAsFixed(1).replaceAll('.', ',');
+    return '$s k';
   }
   return _frNum.format(n.round());
 }

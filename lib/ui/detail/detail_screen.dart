@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/countries.dart';
 import '../../core/format.dart';
+import '../../core/predict.dart';
 import '../../data/models/models.dart';
 import '../../data/models/period.dart';
 import '../../state/period_state.dart';
@@ -263,6 +264,11 @@ class _DetailBody extends ConsumerWidget {
     final p = context.glance;
     final s = detail.summary;
     final hidden = ref.watch(settingsProvider.select((s) => s.hiddenSeries));
+    final forecast = buildForecast(
+      series: detail.series,
+      window: window,
+      reference: detail.refSeries,
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -293,6 +299,7 @@ class _DetailBody extends ConsumerWidget {
                 showPageviews: true,
                 visitorsTotal: s.visitors,
                 pageviewsTotal: s.pageviews,
+                forecast: forecast,
                 hidden: hidden,
                 onToggle: (k) =>
                     ref.read(settingsProvider.notifier).toggleSeries(k),
