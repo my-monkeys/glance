@@ -30,7 +30,9 @@ class StatsCache {
     Period.h24,
     Period.d7,
     Period.d30,
+    Period.thisMonth,
     Period.m12,
+    Period.thisYear,
   ];
 
   /// Au-delà de cet âge, la donnée cachée est ignorée (on repart sur un
@@ -141,11 +143,14 @@ List<MetricRow> _rowsFromJson(List<dynamic> j) => [
 Map<String, dynamic> _statsToJson(SiteStats v) => {
   's': _summaryToJson(v.summary),
   'se': _seriesToJson(v.series),
+  if (v.refSeries != null) 'rf': _seriesToJson(v.refSeries!),
 };
 
 SiteStats _statsFromJson(Map<String, dynamic> j) => SiteStats(
   summary: _summaryFromJson(j['s'] as Map<String, dynamic>),
   series: _seriesFromJson(j['se'] as List<dynamic>),
+  refSeries:
+      j['rf'] == null ? null : _seriesFromJson(j['rf'] as List<dynamic>),
 );
 
 Map<String, dynamic> _detailToJson(SiteDetail v) => {
@@ -155,6 +160,7 @@ Map<String, dynamic> _detailToJson(SiteDetail v) => {
   'tp': _rowsToJson(v.topPages),
   'sr': _rowsToJson(v.sources),
   'co': _rowsToJson(v.countries),
+  if (v.refSeries != null) 'rf': _seriesToJson(v.refSeries!),
 };
 
 SiteDetail _detailFromJson(Map<String, dynamic> j) => SiteDetail(
@@ -166,4 +172,6 @@ SiteDetail _detailFromJson(Map<String, dynamic> j) => SiteDetail(
   countries: _rowsFromJson(j['co'] as List<dynamic>),
   live: 0,
   livePages: const [],
+  refSeries:
+      j['rf'] == null ? null : _seriesFromJson(j['rf'] as List<dynamic>),
 );

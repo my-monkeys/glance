@@ -2,9 +2,13 @@ import '../data/models/models.dart';
 
 /// Stats d'un site sur une fenêtre (chargées indépendamment du live).
 class SiteStats {
-  const SiteStats({required this.summary, required this.series});
+  const SiteStats({required this.summary, required this.series, this.refSeries});
   final StatsSummary summary;
   final List<SeriesPoint> series;
+
+  /// Série de la période précédente équivalente (profil pour la prévision).
+  /// Null quand la fenêtre n'en a pas besoin (cf. `forecastReferenceWindow`).
+  final List<SeriesPoint>? refSeries;
 }
 
 /// Agrégat de la home pendant le chargement incrémental : totaux calculés sur
@@ -32,12 +36,14 @@ class SiteCard {
     required this.summary,
     required this.series,
     required this.live,
+    this.refSeries,
   });
 
   final Site site;
   final StatsSummary summary;
   final List<SeriesPoint> series;
   final int live;
+  final List<SeriesPoint>? refSeries;
 
   double? get deltaPct => summary.visitorsDeltaPct;
   bool get up => (deltaPct ?? 0) >= 0;
@@ -53,6 +59,7 @@ class HomeData {
     required this.totalPageviews,
     required this.totalLive,
     required this.totalSeries,
+    this.totalRefSeries,
   });
 
   final List<SiteCard> cards;
@@ -62,6 +69,9 @@ class HomeData {
   final int totalPageviews;
   final int totalLive;
   final List<SeriesPoint> totalSeries;
+
+  /// Série de référence cumulée (profil pour la prévision de la courbe totale).
+  final List<SeriesPoint>? totalRefSeries;
 
   double? get totalDeltaPct {
     final p = prevTotalVisitors;
@@ -107,6 +117,25 @@ class HomeData {
       total.add(SeriesPoint(buckets[i].t, vu, pv));
     }
 
+    // Référence cumulée (mêmes fenêtres de référence pour toutes les cartes).
+    final refBuckets = cards.isEmpty
+        ? null
+        : cards
+            .firstWhere((c) => c.refSeries != null, orElse: () => cards.first)
+            .refSeries;
+    List<SeriesPoint>? totalRef;
+    if (refBuckets != null) {
+      totalRef = <SeriesPoint>[];
+      for (var i = 0; i < refBuckets.length; i++) {
+        var vu = 0.0;
+        for (final c in cards) {
+          final r = c.refSeries;
+          if (r != null && i < r.length) vu += r[i].visitors;
+        }
+        totalRef.add(SeriesPoint(refBuckets[i].t, vu, 0));
+      }
+    }
+
     return HomeData(
       cards: cards,
       totalVisitors: totalVisitors,
@@ -115,6 +144,7 @@ class HomeData {
       totalPageviews: totalPageviews,
       totalLive: totalLive,
       totalSeries: total,
+      totalRefSeries: totalRef,
     );
   }
 }

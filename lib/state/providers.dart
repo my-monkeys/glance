@@ -14,6 +14,7 @@ import '../data/providers/provider_factory.dart';
 import '../data/repository/accounts_repository.dart';
 import '../data/favicon_cache.dart';
 import '../data/stats_cache.dart';
+import '../core/predict.dart';
 import '../core/semaphore.dart';
 import 'home_data.dart';
 import 'workspaces.dart';
@@ -224,11 +225,21 @@ final siteStatsProvider =
   final (site, w) = key;
   final gate = ref.watch(fetchGateProvider);
   final p = await _providerFor(ref, site);
+  // Série de la période précédente équivalente quand la fenêtre permet une
+  // prévision profilée (aujourd'hui / ce mois-ci / cette année). Best-effort :
+  // un échec ne bloque pas les stats (la prévision retombe sur le rythme moyen).
+  final refW = forecastReferenceWindow(w);
   return gate.run(() async {
-    final r = await Future.wait([p.summary(site, w), p.series(site, w)]);
+    final r = await Future.wait([
+      p.summary(site, w),
+      p.series(site, w),
+      if (refW != null)
+        p.series(site, refW).catchError((_) => <SeriesPoint>[]),
+    ]);
     final stats = SiteStats(
       summary: r[0] as StatsSummary,
       series: r[1] as List<SeriesPoint>,
+      refSeries: refW == null ? null : r[2] as List<SeriesPoint>,
     );
     ref.read(statsCacheProvider).writeStats(site, w, stats);
     return stats;
@@ -261,6 +272,7 @@ final homeTotalsProvider =
         summary: sv.summary,
         series: sv.series,
         live: live.value ?? 0,
+        refSeries: sv.refSeries,
       ));
     } else {
       pending++;
@@ -281,6 +293,7 @@ final detailProvider =
   cacheSession(ref);
   final (site, w) = key;
   final p = await _providerFor(ref, site);
+  final refW = forecastReferenceWindow(w);
   final r = await Future.wait([
     p.summary(site, w),
     p.series(site, w),
@@ -289,6 +302,7 @@ final detailProvider =
     p.metric(site, w, MetricType.countries, limit: 6),
     p.active(site).catchError((_) => 0),
     p.livePages(site).catchError((_) => <LivePage>[]),
+    if (refW != null) p.series(site, refW).catchError((_) => <SeriesPoint>[]),
   ]);
   final detail = SiteDetail(
     summary: r[0] as StatsSummary,
@@ -299,6 +313,7 @@ final detailProvider =
     countries: r[4] as List<MetricRow>,
     live: r[5] as int,
     livePages: r[6] as List<LivePage>,
+    refSeries: refW == null ? null : r[7] as List<SeriesPoint>,
   );
   ref.read(statsCacheProvider).writeDetail(site, w, detail);
   return detail;

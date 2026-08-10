@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/format.dart';
+import '../../core/predict.dart';
 import '../../data/models/models.dart';
 import '../../data/models/period.dart';
 import '../../data/models/workspace.dart';
@@ -223,7 +224,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: KeyedSubtree(
               key: ValueKey(totals.hasAny),
               child: totals.hasAny
-                  ? _TotalCard(data: totals.data, unit: window.unit.api)
+                  ? _TotalCard(data: totals.data, window: window)
                   : const _TotalCardSkeleton(),
             ),
           ),
@@ -398,14 +399,19 @@ class _SiteStatSlot extends ConsumerWidget {
 }
 
 class _TotalCard extends ConsumerWidget {
-  const _TotalCard({required this.data, required this.unit});
+  const _TotalCard({required this.data, required this.window});
   final HomeData data;
-  final String unit;
+  final DateWindow window;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final p = context.glance;
     final hidden = ref.watch(settingsProvider.select((s) => s.hiddenSeries));
+    final forecast = buildForecast(
+      series: data.totalSeries,
+      window: window,
+      reference: data.totalRefSeries,
+    );
     return GlanceCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -442,11 +448,12 @@ class _TotalCard extends ConsumerWidget {
           const SizedBox(height: 14),
           GlanceChart(
             series: data.totalSeries,
-            unit: unit,
+            unit: window.unit.api,
             height: 156,
             showPageviews: true,
             visitorsTotal: data.totalVisitors,
             pageviewsTotal: data.totalPageviews,
+            forecast: forecast,
             hidden: hidden,
             onToggle: (k) => ref.read(settingsProvider.notifier).toggleSeries(k),
           ),

@@ -115,6 +115,7 @@ class SiteDetail {
     required this.countries,
     required this.live,
     required this.livePages,
+    this.refSeries,
   });
 
   final StatsSummary summary;
@@ -125,6 +126,9 @@ class SiteDetail {
   final List<MetricRow> countries;
   final int live;
   final List<LivePage> livePages;
+
+  /// Série de la période précédente équivalente (profil pour la prévision).
+  final List<SeriesPoint>? refSeries;
 }
 
 /// Série temporelle d'un seul nom d'événement (nombre par bucket porté par
