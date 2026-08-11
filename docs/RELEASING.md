@@ -33,6 +33,16 @@ ID="Developer ID Application: Maxim Costa (5C67TFSJ2B)"
 ENT="macos/Runner/Release-hardened.entitlements"
 
 # 2. Sign inside-out (hardened runtime + timestamp)
+# ⚠️ Sparkle embarque des bundles imbriqués (XPC + Updater.app + Autoupdate) que
+# la signature du .framework seul ne re-signe PAS → notarization « Invalid »
+# (« not signed with a valid Developer ID certificate », vécu sur 1.7.0).
+# Les signer individuellement d'abord, du plus profond au moins profond ;
+# --preserve-metadata=entitlements garde le sandbox des XPC.
+SP="$APP/Contents/Frameworks/Sparkle.framework"
+codesign -f -s "$ID" -o runtime --timestamp --preserve-metadata=entitlements "$SP/Versions/B/XPCServices/Downloader.xpc"
+codesign -f -s "$ID" -o runtime --timestamp --preserve-metadata=entitlements "$SP/Versions/B/XPCServices/Installer.xpc"
+codesign -f -s "$ID" -o runtime --timestamp "$SP/Versions/B/Autoupdate"
+codesign -f -s "$ID" -o runtime --timestamp "$SP/Versions/B/Updater.app"
 find "$APP/Contents/Frameworks" -maxdepth 1 -name "*.framework" \
   -exec codesign --force --options runtime --timestamp --sign "$ID" {} \;
 # L'extension widget doit être signée avec SES entitlements (sandbox + app-group),
