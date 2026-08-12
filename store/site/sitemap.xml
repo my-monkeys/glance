@@ -1,15 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://glance-analytics.com/</loc>
-    <lastmod>2026-07-13</lastmod>
+    <lastmod>2026-08-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://glance-analytics.com/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://glance-analytics.com/en/"/>
+  </url>
+  <url>
+    <loc>https://glance-analytics.com/en/</loc>
+    <lastmod>2026-08-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://glance-analytics.com/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://glance-analytics.com/en/"/>
   </url>
   <url>
     <loc>https://glance-analytics.com/privacy.html</loc>
     <lastmod>2026-07-11</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://glance-analytics.com/privacy.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://glance-analytics.com/en/privacy.html"/>
+  </url>
+  <url>
+    <loc>https://glance-analytics.com/en/privacy.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://glance-analytics.com/privacy.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://glance-analytics.com/en/privacy.html"/>
   </url>
 </urlset>
