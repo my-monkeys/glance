@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script>document.documentElement.className+=" js";</script>
+<script>(function(){try{if(localStorage.getItem('glance-lang')==='fr')location.replace('/')}catch(e){}})();</script>
 <title>Glance — Umami & Plausible client for Mac, iOS & Android · Free and open source</title>
 <meta name="description" content="Glance: a clean mobile & desktop client for your Umami and Plausible analytics. All your sites on iOS, Android, macOS and Windows — open source, no third-party server.">
 <link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml">
@@ -60,6 +61,38 @@ a{color:#3B7A5A;text-decoration:none}a:hover{color:#2F6349}
 .btn-g:hover{border-color:rgba(30,25,15,.3);color:#211E19}
 .btn-d{background:#211E19;color:#F7F5F1}.btn-d:hover{background:#000;color:#F7F5F1}
 .btn-sm{padding:9px 15px;font-size:14px;border-radius:11px}
+.nav .btn-sm{min-width:104px;justify-content:center}
+.nav .lang{min-width:0;gap:7px}
+.langw{position:relative;display:inline-flex}
+.lang-tip{position:absolute;top:calc(100% + 14px);right:0;width:252px;background:#fff;border:1.5px solid rgba(30,25,15,.14);border-radius:14px;padding:14px 16px;box-shadow:0 12px 34px rgba(40,35,25,.16);z-index:60;animation:tipfloat 2.6s ease-in-out infinite}
+.lang-tip[hidden]{display:none}
+.lang-tip::before{content:"";position:absolute;top:-7px;right:26px;width:12px;height:12px;background:#fff;border-left:1.5px solid rgba(30,25,15,.14);border-top:1.5px solid rgba(30,25,15,.14);transform:rotate(45deg)}
+.lang-tip p{margin:0 0 10px;font-size:13.5px;line-height:1.45;color:#211E19;padding-right:16px}
+.lang-tip .go{display:block;width:100%;text-align:center;padding:9px 0;border-radius:10px;background:#3B7A5A;color:#fff;font-family:'Fredoka',sans-serif;font-weight:500;font-size:13.5px}
+.lang-tip .go:hover{background:#336b4f;color:#fff}
+.lang-tip .x{position:absolute;top:8px;right:8px;width:22px;height:22px;border:0;border-radius:7px;background:rgba(30,25,15,.06);color:#8C857A;font-size:11px;cursor:pointer;line-height:1}
+.lang-tip .x:hover{background:rgba(30,25,15,.12);color:#211E19}
+@keyframes tipfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+@media (max-width:640px){.lang-tip{position:fixed;top:auto;bottom:14px;left:14px;right:14px;width:auto;animation:none}.lang-tip::before{display:none}}
+.fab{position:fixed;right:22px;bottom:22px;z-index:55;width:54px;height:54px;border-radius:50%;background:#3B7A5A;color:#fff;border:0;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(59,122,90,.38);transition:transform .15s ease,box-shadow .15s ease}
+.fab:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(59,122,90,.45)}
+.fbk-ov{position:fixed;inset:0;z-index:70;background:rgba(30,25,15,.38);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:18px}
+.fbk-ov[hidden]{display:none}
+.fbk{background:#fff;border-radius:20px;padding:26px 26px 22px;width:100%;max-width:400px;box-shadow:0 24px 60px rgba(30,25,15,.25)}
+.fbk h3{font-family:'Fredoka',sans-serif;font-weight:600;font-size:22px;letter-spacing:-.4px;margin:0 0 6px;color:#211E19}
+.fbk .sub{font-size:14px;color:#8C857A;margin:0 0 16px;line-height:1.5}
+.fbk textarea,.fbk input{width:100%;border:1.5px solid rgba(30,25,15,.14);border-radius:12px;padding:11px 13px;font-family:'Geist',system-ui,sans-serif;font-size:14px;color:#211E19;background:#fff;outline:none;resize:vertical}
+.fbk textarea:focus,.fbk input:focus{border-color:#3B7A5A}
+.fbk textarea{min-height:110px;margin-bottom:10px}
+.fbk input{margin-bottom:16px}
+.fbk .row{display:flex;gap:10px}
+.fbk .row .btn{flex:1;justify-content:center;border:1.5px solid transparent}
+.fbk .row .btn-g{border-color:rgba(30,25,15,.14)}
+.fbk .err{color:#B15A42;font-size:13px;margin:0 0 12px}
+.fbk .err[hidden]{display:none}
+.fbk [hidden]{display:none}
+
+
 .sec{padding:96px 76px}
 .chip{display:inline-flex;align-items:center;gap:8px;padding:9px 15px;border-radius:999px;background:#F0EDE7;color:#3f3a32;font-size:14px;font-weight:500}
 .chip .cd{width:8px;height:8px;border-radius:50%;background:#3B7A5A}
@@ -261,7 +294,7 @@ a{color:#3B7A5A;text-decoration:none}a:hover{color:#2F6349}
 </head>
 <body>
 <div class="board"><div class="page">
-<nav class="nav"><div class="fx ac gap12"><span class="mark"><svg width="40" height="40" viewBox="0 0 72 72" fill="none"><path d="M14 48C21 48 24 30 31 30C37 30 37 41 43 41C49 41 50 24 55 24" stroke="#F7F5F1" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="55" cy="24" r="6" fill="#F7F5F1"/></svg></span><span class="wordmark">Glance</span></div><div class="navlinks"><a href="#feat">Features</a><a href="#desk">Desktop</a><a href="#priv">Privacy</a><a href="#faq">FAQ</a><a href="#os">Open source</a><a href="/" data-lang="fr" class="mono" style="font-size:12px;letter-spacing:1px">FR</a></div><div class="fx ac gap12"><a class="btn btn-g btn-sm" href="https://github.com/my-monkeys/glance"><svg width="17" height="17" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>Star</a><a class="btn btn-p btn-sm" href="#install">Install</a></div></nav>
+<nav class="nav"><div class="fx ac gap12"><span class="mark"><svg width="40" height="40" viewBox="0 0 72 72" fill="none"><path d="M14 48C21 48 24 30 31 30C37 30 37 41 43 41C49 41 50 24 55 24" stroke="#F7F5F1" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="55" cy="24" r="6" fill="#F7F5F1"/></svg></span><span class="wordmark">Glance</span></div><div class="navlinks"><a href="#feat">Features</a><a href="#desk">Desktop</a><a href="#priv">Privacy</a><a href="#faq">FAQ</a><a href="#os">Open source</a></div><div class="fx ac gap12"><span class="langw"><a class="btn btn-g btn-sm lang" href="/" data-lang="fr" aria-label="Passer en français"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.7 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.7-3.8-9s1.3-6.4 3.8-9z"/></svg>FR</a><span class="lang-tip" hidden><p>Ce site existe aussi en français.</p><a class="go" href="/" data-lang="fr">Passer en français</a><button class="x" aria-label="Fermer">✕</button></span></span><a class="btn btn-g btn-sm" href="https://github.com/my-monkeys/glance"><svg width="17" height="17" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>Star</a><a class="btn btn-p btn-sm" href="#install">Install</a></div></nav>
 
 <div class="sec" style="padding-top:64px;padding-bottom:56px"><div class="hero2">
 <div><div class="kick">Free · Open source</div><h1 class="h1" style="margin-top:20px">Your stats,<br><span class="ta">in one place.</span></h1><p class="lead" style="margin-top:22px;max-width:460px">A <strong style="font-weight:600;color:inherit">free and open source</strong> client, clean and readable, on top of Umami and Plausible. All your sites in one place, on iOS, Android, macOS and Windows — without ever leaving your instance.</p>
@@ -357,5 +390,31 @@ a{color:#3B7A5A;text-decoration:none}a:hover{color:#2F6349}
 })();
 </script>
 <script>document.addEventListener("click",function(e){var a=e.target&&e.target.closest&&e.target.closest("[data-lang]");if(a){try{localStorage.setItem("glance-lang",a.getAttribute("data-lang"))}catch(_){}}});</script>
+<script>(function(){var tip=document.querySelector('.lang-tip');if(!tip)return;try{if(localStorage.getItem('glance-lang'))return;if(localStorage.getItem('glance-lang-tip'))return;var fr=/^fr/i.test(navigator.language||'');var pageFr=document.documentElement.lang==='fr';if(fr===pageFr)return;tip.hidden=false;tip.querySelector('.x').addEventListener('click',function(){tip.hidden=true;try{localStorage.setItem('glance-lang-tip','1')}catch(_){}})}catch(e){}})();</script>
+<button class="fab" aria-label="Send feedback" title="Send feedback"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 01-9 8.4 8.9 8.9 0 01-3.9-.9L3 20l1-4.9a8.4 8.4 0 015-11.7 8.4 8.4 0 0112 8.1z"/></svg></button>
+<div class="fbk-ov" hidden><div class="fbk">
+<div data-f="form"><h3>Feedback or bug?</h3><p class="sub">Tell us what works or what doesn't — every message helps.</p>
+<textarea maxlength="4000" placeholder="Your message…"></textarea>
+<input type="email" autocomplete="email" placeholder="Email (optional, so we can reply)">
+<p class="err" hidden>Sending failed. Please try again in a moment.</p>
+<div class="row"><button type="button" class="btn btn-g" data-f="cancel">Cancel</button><button type="button" class="btn btn-p" data-f="send">Send</button></div></div>
+<div data-f="done" hidden style="text-align:center"><h3>Thank you&nbsp;🙏</h3><p class="sub">Your feedback landed safely.</p>
+<button type="button" class="btn btn-p" data-f="close" style="justify-content:center;width:100%">Close</button></div>
+</div></div>
+<script>(function(){var fab=document.querySelector('.fab'),ov=document.querySelector('.fbk-ov');if(!fab||!ov)return;
+var form=ov.querySelector('[data-f="form"]'),done=ov.querySelector('[data-f="done"]'),ta=ov.querySelector('textarea'),em=ov.querySelector('input'),err=ov.querySelector('.err'),send=ov.querySelector('[data-f="send"]');
+function show(){ov.hidden=false;form.hidden=false;done.hidden=true;err.hidden=true;setTimeout(function(){ta.focus()},60)}
+function hide(){ov.hidden=true}
+fab.addEventListener('click',show);
+ov.addEventListener('click',function(e){if(e.target===ov)hide()});
+ov.querySelector('[data-f="cancel"]').addEventListener('click',hide);
+ov.querySelector('[data-f="close"]').addEventListener('click',hide);
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!ov.hidden)hide()});
+send.addEventListener('click',function(){var msg=ta.value.trim();if(msg.length<2){ta.focus();return}
+send.disabled=true;err.hidden=true;
+fetch('https://git.my-monkey.fr/api/feedback',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({product:'glance',message:msg,email:em.value.trim()||undefined,context:'site · '+document.documentElement.lang})})
+.then(function(r){if(!r.ok)throw 0;form.hidden=true;done.hidden=false;ta.value='';em.value=''})
+.catch(function(){err.hidden=false})
+.finally(function(){send.disabled=false})});})();</script>
 </body>
 </html>
