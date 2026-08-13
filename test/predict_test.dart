@@ -115,6 +115,32 @@ void main() {
       expect(f.points[1].visitors, closeTo(4 + 10 * 0.5, 0.001));
     });
 
+    test('référence morte sur le reste → repli sur le rythme moyen', () {
+      final w = Period.today.window(now: now);
+      final series = [
+        for (var h = 0; h < 12; h++)
+          SeriesPoint(DateTime(2026, 8, 11, h), 20, 0),
+        SeriesPoint(DateTime(2026, 8, 11, 12), 10, 0),
+      ];
+      // Hier : collecte morte à partir de midi (instance down).
+      final reference = [
+        for (var h = 0; h < 24; h++)
+          SeriesPoint(DateTime(2026, 8, 10, h), h < 12 ? 10.0 : 0.0, 0),
+      ];
+
+      final f = buildForecast(
+        series: series,
+        window: w,
+        reference: reference,
+        now: now,
+      )!;
+
+      // Sans le garde-fou, tous les buckets restants seraient à 0. Avec :
+      // rythme moyen des 12 buckets complets (20/h).
+      expect(f.points.last.visitors, closeTo(20, 0.001));
+      expect(f.points[1].visitors, greaterThan(10)); // bucket courant complété
+    });
+
     test('série désalignée sur le bucket courant → pas de prévision', () {
       final w = Period.d7.window(now: now);
       final series = [SeriesPoint(DateTime(2026, 8, 5), 10, 0)];

@@ -157,6 +157,22 @@ Forecast? buildForecast({
     if (upToNow > 0) ratio = obsSum / upToNow;
   }
 
+  // Référence morte sur le reste de la période (ex. instance analytics down
+  // pendant la période de référence — vécu le 12/08 : 12 h sans collecte) :
+  // le profil donnerait une prévision plate à zéro. On retombe sur le rythme
+  // moyen observé, comme sans référence.
+  if (ratio != null) {
+    var refRest = refAt(i) * (1 - f);
+    var t2 = _next(curStart, unit);
+    var j2 = i + 1;
+    while (t2.isBefore(spec.until)) {
+      refRest += refAt(j2);
+      t2 = _next(t2, unit);
+      j2++;
+    }
+    if (refRest <= 0) ratio = null;
+  }
+
   // Complétion du bucket courant, puis buckets futurs jusqu'à `until`.
   final double projCur;
   if (ratio != null) {
