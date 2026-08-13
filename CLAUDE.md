@@ -63,6 +63,10 @@ Les gros graphes (home/détail/desktop) prolongent la courbe visiteurs d'une **p
 - Le total projeté de la légende = `total visiteurs uniques × growth` (ne PAS sommer les buckets projetés : un visiteur peut apparaître dans plusieurs buckets).
 - Légende « Prévision » basculable, clé `forecast` dans `settings.hiddenSeries` (comme visiteurs/pages vues).
 
+## Navigation interne (« Entre vos sites »)
+
+Reprise mobile de la vue « referrals » du dashboard monkey : les referrers de chaque site sont croisés avec les domaines de TOUS les sites suivis (`core/internal_traffic.dart`, testé) → visiteurs que vos sites s'envoient entre eux. `state/internal_traffic.dart` : `siteReferrersProvider` (metric sources limit 50, cache session) + `internalTrafficProvider` (composition au fil de l'eau, pattern homeTotals). UI : carte compacte sur l'accueil (masquée si zéro flux) → écran `ui/network/internal_screen.dart` (KPI, qui envoie/reçoit, flux) ; badge « INTERNE » sur les sources du détail (self exclu). **Fenêtre courante seulement** — pas de séries journalières (N×30 appels, trop pour mobile).
+
 ## API par fournisseur
 
 ### Umami (self-hosted, **v3** — vérifié sur `uuu.my-monkey.fr`)

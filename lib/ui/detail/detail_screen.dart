@@ -5,8 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/countries.dart';
 import '../../core/format.dart';
+import '../../core/internal_traffic.dart';
 import '../../core/predict.dart';
 import '../../data/models/models.dart';
+import '../../state/internal_traffic.dart';
 import '../../data/models/period.dart';
 import '../../state/period_state.dart';
 import '../../state/providers.dart';
@@ -236,7 +238,11 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                                   ),
                                 ),
                               )
-                            : _DetailBody(detail: detail, window: window),
+                            : _DetailBody(
+                                detail: detail,
+                                window: window,
+                                site: widget.site,
+                              ),
               ),
             ),
           ],
@@ -255,9 +261,14 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
 }
 
 class _DetailBody extends ConsumerWidget {
-  const _DetailBody({required this.detail, required this.window});
+  const _DetailBody({
+    required this.detail,
+    required this.window,
+    required this.site,
+  });
   final SiteDetail detail;
   final DateWindow window;
+  final Site site;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -389,7 +400,17 @@ class _DetailBody extends ConsumerWidget {
         _MetricCard(
           title: 'Sources',
           rows: detail.sources
-              .map((r) => MetricBarRow(label: r.label, value: r.value))
+              .map((r) => MetricBarRow(
+                    label: r.label,
+                    value: r.value,
+                    // Referrer venant d'un de vos propres sites suivis.
+                    badge: ref
+                                .watch(knownDomainsProvider)
+                                .contains(normDomain(r.label)) &&
+                            normDomain(r.label) != normDomain(site.domain)
+                        ? 'INTERNE'
+                        : null,
+                  ))
               .toList(),
         ),
         const SizedBox(height: 14),
