@@ -10,6 +10,7 @@ import '../../data/models/models.dart';
 import '../../data/models/period.dart';
 import '../../data/models/workspace.dart';
 import '../../state/home_data.dart';
+import '../../state/internal_traffic.dart';
 import '../../state/period_state.dart';
 import '../../state/providers.dart';
 import '../../state/settings.dart';
@@ -17,6 +18,7 @@ import '../../state/workspaces.dart';
 import '../../theme/motion.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
+import '../network/internal_screen.dart';
 import '../root_scaffold.dart';
 import '../settings/workspaces_screen.dart';
 import '../widgets/chip.dart';
@@ -229,6 +231,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
         ),
+        _InternalCard(window: window),
         const SizedBox(height: 22),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -395,6 +398,66 @@ class _SiteStatSlot extends ConsumerWidget {
       live: live.value ?? 0,
     );
     return grid ? _SiteGridCard(card: card) : _SiteCardTile(card: card);
+  }
+}
+
+/// Carte compacte « Entre vos sites » : total de la navigation interne sur la
+/// période + top émetteurs. Masquée tant qu'aucun flux interne n'est détecté.
+class _InternalCard extends ConsumerWidget {
+  const _InternalCard({required this.window});
+  final DateWindow window;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final p = context.glance;
+    final state = ref.watch(internalTrafficProvider(window));
+    if (state.data.isEmpty) return const SizedBox.shrink();
+    final top =
+        state.data.sources.take(2).map((s) => s.domain).join(' · ');
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
+      child: GlanceCard(
+        padding: const EdgeInsets.fromLTRB(16, 13, 14, 13),
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const InternalTrafficScreen()),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                color: p.accentSoft,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(Icons.sync_alt_rounded, size: 18, color: p.accent),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Entre vos sites',
+                      style: GT.body(14, weight: 500, color: p.fg)),
+                  const SizedBox(height: 2),
+                  Text(
+                    top,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GT.mono(10, color: p.fg3),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 10),
+            Text(fmtInt(state.data.total),
+                style: GT.mono(14, weight: 600, color: p.accent)),
+            const SizedBox(width: 4),
+            Icon(Icons.chevron_right_rounded, size: 20, color: p.fg3),
+          ],
+        ),
+      ),
+    );
   }
 }
 

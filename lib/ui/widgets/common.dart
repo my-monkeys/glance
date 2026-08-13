@@ -199,13 +199,40 @@ class MetricBars extends StatelessWidget {
                       const SizedBox(width: 8),
                     ],
                     Expanded(
-                      child: Text(
-                        r.label,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: mono
-                            ? GT.mono(12, color: p.fg)
-                            : GT.body(13, color: p.fg),
+                      child: Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              r.label,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: mono
+                                  ? GT.mono(12, color: p.fg)
+                                  : GT.body(13, color: p.fg),
+                            ),
+                          ),
+                          if (r.badge != null) ...[
+                            const SizedBox(width: 7),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: p.accentSoft,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                r.badge!,
+                                style: GT.mono(
+                                  8.5,
+                                  weight: 600,
+                                  color: p.accent,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -306,12 +333,14 @@ class MetricBarRow {
     this.flag,
     this.pctText,
     this.color,
+    this.badge,
   });
   final String label;
   final int value;
   final String? flag;
   final String? pctText;
   final Color? color; // couleur de barre (ex. par événement)
+  final String? badge; // pastille après le libellé (ex. « INTERNE »)
 }
 
 class _Bar extends StatelessWidget {
