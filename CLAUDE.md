@@ -100,7 +100,7 @@ flutter run -d <udid> \
 - iOS deployment target **15.0** (Podfile + pbxproj). Intégration **CocoaPods** (SPM désactivé : `flutter config --no-enable-swift-package-manager`), sinon conflit plugins/Pods au build.
 
 ### Instance de test
-Umami `uuu.my-monkey.fr` (cookie-server). Un utilisateur **service** dédié `glance` (role admin, lecture) a été créé **directement en base** (bcrypt via `bcryptjs`, insert Postgres `umami-db`). C'est un compte technique — pas le compte perso de Maxim.
+Umami `uuu.my-monkey.fr` (dev-cookie). Un utilisateur **service** dédié `glance` (role admin, lecture) a été créé **directement en base** (bcrypt via `bcryptjs`, insert Postgres `umami-db`). C'est un compte technique — pas le compte perso de Maxim.
 
 ## Motion & feedback (depuis 1.6.2)
 
