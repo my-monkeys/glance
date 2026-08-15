@@ -78,9 +78,11 @@ a{color:#3B7A5A;text-decoration:none}a:hover{color:#2F6349}
 .lang-tip .x{position:absolute;top:8px;right:8px;width:22px;height:22px;border:0;border-radius:7px;background:rgba(30,25,15,.06);color:#8C857A;font-size:11px;cursor:pointer;line-height:1}
 .lang-tip .x:hover{background:rgba(30,25,15,.12);color:#211E19}
 @keyframes tipfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+/* Mobile : la bulle s'étale sous la nav (252px ne tiennent pas alignés au bouton),
+   et sa flèche est ramenée sous le sélecteur de langue par --tip-arrow (posé en JS). */
 @media (max-width:640px){
-.lang-tip{position:fixed;top:auto;bottom:94px;left:14px;right:14px;width:auto;animation:none}
-.lang-tip::before{display:none}
+.lang-tip{position:fixed;top:var(--tip-top,64px);bottom:auto;left:12px;right:12px;width:auto;animation:none}
+.lang-tip::before{right:auto;left:var(--tip-arrow,84%);transform:translateX(-50%) rotate(45deg)}
 .lang-tip p{padding-right:30px}
 .lang-tip .x{width:30px;height:30px;font-size:13px;top:9px;right:9px}
 }
@@ -493,7 +495,37 @@ a{color:#3B7A5A;text-decoration:none}a:hover{color:#2F6349}
 })();
 </script>
 <script>document.addEventListener("click",function(e){var a=e.target&&e.target.closest&&e.target.closest("[data-lang]");if(a){try{localStorage.setItem("glance-lang",a.getAttribute("data-lang"))}catch(_){}}});</script>
-<script>(function(){var tip=document.querySelector('.lang-tip');if(!tip)return;try{if(localStorage.getItem('glance-lang'))return;if(localStorage.getItem('glance-lang-tip'))return;var fr=/^fr/i.test(navigator.language||'');var pageFr=document.documentElement.lang==='fr';if(fr===pageFr)return;tip.hidden=false;tip.querySelector('.x').addEventListener('click',function(){tip.hidden=true;try{localStorage.setItem('glance-lang-tip','1')}catch(_){}})}catch(e){}})();</script>
+<script>
+(function () {
+  var tip = document.querySelector('.lang-tip');
+  if (!tip) return;
+  try {
+    if (localStorage.getItem('glance-lang') || localStorage.getItem('glance-lang-tip')) return;
+    var wantsFr = /^fr/i.test(navigator.language || '');
+    if (wantsFr === (document.documentElement.lang === 'fr')) return;
+
+    var btn = document.querySelector('.langw .lang');
+    // Mobile : la bulle est fixée pleine largeur, donc sa flèche ne tombe plus
+    // d'elle-même sous le bouton de langue — on la replace à la main.
+    function place() {
+      if (!btn) return;
+      var b = btn.getBoundingClientRect();
+      tip.style.setProperty('--tip-top', Math.round(b.bottom + 10) + 'px');
+      tip.style.setProperty('--tip-arrow', Math.round(b.left + b.width / 2 - tip.getBoundingClientRect().left) + 'px');
+    }
+
+    tip.hidden = false;
+    place();
+    addEventListener('resize', place);
+    addEventListener('orientationchange', place);
+
+    tip.querySelector('.x').addEventListener('click', function () {
+      tip.hidden = true;
+      try { localStorage.setItem('glance-lang-tip', '1'); } catch (_) {}
+    });
+  } catch (e) {}
+})();
+</script>
 <button class="fab" aria-label="Send feedback" title="Send feedback"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 01-9 8.4 8.9 8.9 0 01-3.9-.9L3 20l1-4.9a8.4 8.4 0 015-11.7 8.4 8.4 0 0112 8.1z"/></svg></button>
 <div class="fbk-ov" hidden><div class="fbk">
 <div data-f="form"><h3>Feedback or bug?</h3><p class="sub">Tell us what works or what doesn't — every message helps.</p>
