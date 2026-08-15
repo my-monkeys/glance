@@ -2,67 +2,26 @@ PODS:
   - auto_updater_macos (0.0.1):
     - FlutterMacOS
     - Sparkle
-  - flutter_secure_storage_darwin (10.0.0):
-    - Flutter
-    - FlutterMacOS
-  - flutter_timezone (0.1.0):
-    - FlutterMacOS
   - FlutterMacOS (1.0.0)
-  - mobile_scanner (7.0.0):
-    - Flutter
-    - FlutterMacOS
-  - purchases_flutter (10.4.2):
-    - FlutterMacOS
-    - PurchasesHybridCommon (= 18.22.1)
-  - PurchasesHybridCommon (18.22.1):
-    - RevenueCat (= 5.81.0)
-  - RevenueCat (5.81.0)
-  - shared_preferences_foundation (0.0.1):
-    - Flutter
-    - FlutterMacOS
   - Sparkle (2.9.4)
 
 DEPENDENCIES:
   - auto_updater_macos (from `Flutter/ephemeral/.symlinks/plugins/auto_updater_macos/macos`)
-  - flutter_secure_storage_darwin (from `Flutter/ephemeral/.symlinks/plugins/flutter_secure_storage_darwin/darwin`)
-  - flutter_timezone (from `Flutter/ephemeral/.symlinks/plugins/flutter_timezone/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
-  - mobile_scanner (from `Flutter/ephemeral/.symlinks/plugins/mobile_scanner/darwin`)
-  - purchases_flutter (from `Flutter/ephemeral/.symlinks/plugins/purchases_flutter/macos`)
-  - shared_preferences_foundation (from `Flutter/ephemeral/.symlinks/plugins/shared_preferences_foundation/darwin`)
 
 SPEC REPOS:
   trunk:
-    - PurchasesHybridCommon
-    - RevenueCat
     - Sparkle
 
 EXTERNAL SOURCES:
   auto_updater_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/auto_updater_macos/macos
-  flutter_secure_storage_darwin:
-    :path: Flutter/ephemeral/.symlinks/plugins/flutter_secure_storage_darwin/darwin
-  flutter_timezone:
-    :path: Flutter/ephemeral/.symlinks/plugins/flutter_timezone/macos
   FlutterMacOS:
     :path: Flutter/ephemeral
-  mobile_scanner:
-    :path: Flutter/ephemeral/.symlinks/plugins/mobile_scanner/darwin
-  purchases_flutter:
-    :path: Flutter/ephemeral/.symlinks/plugins/purchases_flutter/macos
-  shared_preferences_foundation:
-    :path: Flutter/ephemeral/.symlinks/plugins/shared_preferences_foundation/darwin
 
 SPEC CHECKSUMS:
   auto_updater_macos: 3a42f1a06be6981f1a18be37e6e7bf86aa732118
-  flutter_secure_storage_darwin: acdb3f316ed05a3e68f856e0353b133eec373a23
-  flutter_timezone: d272288c69082ad571630e0d17140b3d6b93dc0c
   FlutterMacOS: d0db08ddef1a9af05a5ec4b724367152bb0500b1
-  mobile_scanner: 9157936403f5a0644ca3779a38ff8404c5434a93
-  purchases_flutter: 17bb5ac3310147079bc40e483ae387dda170ac21
-  PurchasesHybridCommon: 5759975e7b63c093772fd92d8a9e5edbc6a809a8
-  RevenueCat: c692d9b9d123ce98acea28796abcd81f63e9f34a
-  shared_preferences_foundation: 7036424c3d8ec98dfe75ff1667cb0cd531ec82bb
   Sparkle: 855a03e2323e88e399729d9f8fc80b080a4946b3
 
 PODFILE CHECKSUM: 13edfb9e70ac3646927b8e6c9a212ad1d0fa29b2

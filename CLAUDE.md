@@ -97,7 +97,9 @@ flutter run -d <udid> \
 ```
 
 - Piloter le simulateur : **idb** (`idb ui tap/text/swipe --udid …`), coordonnées en **points logiques** (= pixels du screenshot / 3 sur @3x). Screenshots via `xcrun simctl io <udid> screenshot`.
-- iOS deployment target **15.0** (Podfile + pbxproj). Intégration **CocoaPods** (SPM désactivé : `flutter config --no-enable-swift-package-manager`), sinon conflit plugins/Pods au build.
+- iOS deployment target **15.0** (Podfile + pbxproj).
+- **Plugins via Swift Package Manager** (iOS depuis un moment, macOS depuis 2026-08-15 avec Flutter 3.44). Ne pas remettre `flutter config --no-enable-swift-package-manager` : les deux pbxproj référencent désormais `FlutterGeneratedPluginSwiftPackage`. `auto_updater_macos` ne supporte pas SPM et reste en pod — d'où un `pod install` toujours joué et un `Podfile.lock` réduit à lui + Sparkle. Les versions RevenueCat sont figées dans les `Package.resolved` (commités côté macOS ; iOS n'a pas les siens, à corriger un jour).
+- ⚠️ **Xcode beta casse le build macOS universel.** Le `lipo` d'Xcode 27 beta refuse `-verify_arch arm64 x86_64` (« requires exactly one input file ») ; `thinFramework` (`flutter_tools/…/build_system/targets/darwin.dart`) en fait un échec au message trompeur — « Binary … does not contain architectures "arm64 x86_64" » suivi d'un `lipo -info` qui montre les deux. Rien à voir avec les Pods ni le projet : builder avec la toolchain stable, `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer flutter build macos --release` (ou `sudo xcode-select -s /Applications/Xcode.app`).
 
 ### Instance de test
 Umami `uuu.my-monkey.fr` (dev-cookie). Un utilisateur **service** dédié `glance` (role admin, lecture) a été créé **directement en base** (bcrypt via `bcryptjs`, insert Postgres `umami-db`). C'est un compte technique — pas le compte perso de Maxim.
