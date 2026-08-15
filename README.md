@@ -29,9 +29,15 @@ sites in one place.
 - 🔌 **Multi-tool, multi-account** — connect Umami (self-hosted) or Plausible in
   seconds; add as many accounts as you like. Fathom is on the way.
 - 📈 **Charts that read at a glance** — smooth visitors + page views curves,
-  with periods from *today* to *12 months* (and a custom range).
+  across eight ranges from *today* to *this year* (plus a custom one).
+- 🔮 **Forecast** — on a period still running, the curve keeps going as a dotted
+  line: where today, this month or this year lands at the current pace.
 - 🟢 **Real-time** — see who's on each of your sites right now.
 - 🔎 **Per-site detail** — top pages, referrers, countries and custom events.
+- 🔗 **Internal traffic** — the visitors your sites send each other, matched
+  across every site you track.
+- 🗂️ **Site groups** — a reading scope: totals, charts and live counts only
+  count the sites in the group.
 - 🖥️ **Everywhere** — iOS, Android, macOS and Windows, from the same codebase.
 - 🔒 **Private by design** — your credentials stay on your device.
 
@@ -59,23 +65,39 @@ configurable **per-site** widget where you pick which site to watch.
 <img src="docs/screenshots/widget-android-site.png" width="205" alt="Per-site widget — the site you choose, with its visitors, trend and page views" />
 </div>
 
+## Your setup follows you
+
+- **Site groups** — split your sites by client or by project. A group is a
+  reading scope, so every number on screen only counts its sites.
+- **QR transfer** — moving to a new device? Show an encrypted QR code, scan it
+  from the other device: accounts, credentials and groups move across, without
+  going through the network. Free.
+- **Glance Sync** *(paid add-on, one-time purchase)* — backs up your accounts
+  and groups and restores them on every device. Your setup is encrypted
+  on-device **before** upload: the server only ever stores an unreadable blob.
+
 ## Private by design
 
 Glance talks **directly** to your analytics instance — nothing is proxied
 through a third-party server. Your credentials are stored locally and encrypted
-in the device keychain, and they never leave your device.
+in the device keychain, and they never leave your device. The only exception is
+Glance Sync, which you opt into — and even then, what reaches the server is
+encrypted end-to-end.
 
 ## Install
 
-Glance is multi-platform. Availability by store:
+Glance is multi-platform:
 
-- **iOS** — TestFlight today, App Store soon.
-- **macOS** — via [Homebrew](https://brew.sh) (with the first public release):
+- **iOS** — [App Store](https://apps.apple.com/app/glance-analytics/id6789938289)
+- **Android** — [Play Store](https://play.google.com/store/apps/details?id=fr.mymonkey.glance)
+- **macOS** — via [Homebrew](https://brew.sh) (auto-updates through Sparkle):
 
   ```sh
   brew install --cask my-monkeys/tap/glance
   ```
-- **Windows / Android** — coming soon.
+
+  Or grab the `.dmg` from the releases page. Requires macOS 12 (Monterey) or newer.
+- **Windows** — the `.zip` from the releases page (x64).
 
 Builds are published on the [Releases](https://github.com/my-monkeys/glance/releases)
 page.
