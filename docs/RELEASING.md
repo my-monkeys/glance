@@ -17,7 +17,13 @@ GitHub Releases and installed via the Homebrew cask
 Xcode-beta 27's `lipo` has stricter CLI parsing that breaks Flutter's
 `thinFramework` step (`lipo <file> -verify_arch arm64 x86_64` →
 *"requires exactly one input file"*), so `flutter build macos` fails at packaging
-with *"does not contain architectures"*. Force the stable Xcode for the build:
+with *"does not contain architectures"* — while the `lipo -info` printed right
+below shows both architectures.
+
+The build machine was switched back to the stable toolchain on 2026-08-16
+(`sudo xcode-select -s /Applications/Xcode.app`), so a plain
+`flutter build macos --release` works. The explicit prefix below stays in the
+steps as a safety net — keep it if you ever switch back to the beta:
 
 ```sh
 export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
