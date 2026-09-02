@@ -23,6 +23,7 @@ import '../root_scaffold.dart';
 import '../settings/workspaces_screen.dart';
 import '../widgets/chip.dart';
 import '../widgets/common.dart';
+import '../widgets/compare_toggle.dart';
 import '../widgets/day_nav.dart';
 import '../widgets/site_avatar.dart';
 import '../widgets/field.dart';
@@ -99,7 +100,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final sitesAsync = ref.watch(visibleSitesProvider);
     final sites = sitesAsync.value ?? const <Site>[];
     final group = ref.watch(activeWorkspaceProvider);
-    final totals = ref.watch(homeTotalsProvider(window));
+    final totals = ref.watch(homeTotalsProvider((window, periodState.compare)));
     final now = DateTime.now();
     final viewMode = ref.watch(settingsProvider.select((s) => s.homeView));
     // Barre de chargement tant que des sites arrivent encore.
@@ -155,6 +156,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 child: const Padding(
                   padding: EdgeInsets.fromLTRB(20, 14, 20, 0),
                   child: DayNav(),
+                ),
+              ),
+              GlanceReveal(
+                show: periodState.canNavigateMonths,
+                child: const Padding(
+                  padding: EdgeInsets.fromLTRB(20, 14, 20, 0),
+                  child: MonthNav(),
+                ),
+              ),
+              GlanceReveal(
+                show: periodState.canNavigateYears,
+                child: const Padding(
+                  padding: EdgeInsets.fromLTRB(20, 14, 20, 0),
+                  child: YearNav(),
                 ),
               ),
               const SizedBox(height: 18),
@@ -354,6 +369,8 @@ class _Header extends ConsumerWidget {
                 ),
               ),
               const SizedBox(width: 10),
+              const CompareToggle(),
+              const SizedBox(width: 8),
               _ViewToggle(mode: viewMode, onChanged: onViewMode),
             ],
           ),
@@ -394,7 +411,9 @@ class _SiteStatSlot extends ConsumerWidget {
     final card = SiteCard(
       site: site,
       summary: sv.summary,
-      series: sv.series,
+      // Rogne le préfixe vide sur une fenêtre large (« Tout ») : sans effet
+      // ailleurs — sinon la sparkline reste plate jusqu'à la vraie 1ère donnée.
+      series: displaySeries(sv.series, window),
       live: live.value ?? 0,
     );
     return grid ? _SiteGridCard(card: card) : _SiteCardTile(card: card);
@@ -470,8 +489,12 @@ class _TotalCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final p = context.glance;
     final hidden = ref.watch(settingsProvider.select((s) => s.hiddenSeries));
+    // Rogne le préfixe vide sur une fenêtre large (« Tout ») : sans effet
+    // ailleurs. La prévision (bucket courant) en bénéficie aussi — la moyenne
+    // n'est plus tirée vers le bas par des années à zéro.
+    final series = displaySeries(data.totalSeries, window);
     final forecast = buildForecast(
-      series: data.totalSeries,
+      series: series,
       window: window,
       reference: data.totalRefSeries,
     );
@@ -510,13 +533,14 @@ class _TotalCard extends ConsumerWidget {
           ),
           const SizedBox(height: 14),
           GlanceChart(
-            series: data.totalSeries,
+            series: series,
             unit: window.unit.api,
             height: 156,
             showPageviews: true,
             visitorsTotal: data.totalVisitors,
             pageviewsTotal: data.totalPageviews,
             forecast: forecast,
+            compareSeries: data.totalCompareSeries,
             hidden: hidden,
             onToggle: (k) => ref.read(settingsProvider.notifier).toggleSeries(k),
           ),

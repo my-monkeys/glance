@@ -91,7 +91,7 @@ class _WidgetSync extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final periodState = ref.watch(periodProvider);
     final window = periodState.window();
-    ref.listen(homeTotalsProvider(window), (prev, next) {
+    ref.listen(homeTotalsProvider((window, periodState.compare)), (prev, next) {
       if (next.data.cards.isNotEmpty && !next.loading) {
         WidgetPublisher.publish(next.data, periodState.period.label);
       }

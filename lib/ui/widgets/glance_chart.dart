@@ -23,6 +23,7 @@ class GlanceChart extends StatelessWidget {
     this.pageviewsTotal,
     this.visitorsTotal,
     this.forecast,
+    this.compareSeries,
     this.hidden = const {},
     this.onToggle,
   });
@@ -30,6 +31,7 @@ class GlanceChart extends StatelessWidget {
   static const kVisitors = 'visitors';
   static const kPageviews = 'pageviews';
   static const kForecast = 'forecast';
+  static const kCompare = 'compare';
 
   final List<SeriesPoint> series;
   final String unit; // 'hour' | 'day' | 'month'
@@ -46,8 +48,13 @@ class GlanceChart extends StatelessWidget {
   /// courbe visiteurs jusqu'à la fin de la période calendaire.
   final Forecast? forecast;
 
-  /// Séries masquées (clés [kVisitors]/[kPageviews]/[kForecast]) et bascule via
-  /// la légende.
+  /// Courbe de la période précédente équivalente (bascule « Comparer »),
+  /// superposée sur les mêmes positions de bucket que [series] (pas les mêmes
+  /// dates réelles — l'axe X reste celui de la période courante).
+  final List<SeriesPoint>? compareSeries;
+
+  /// Séries masquées (clés [kVisitors]/[kPageviews]/[kForecast]/[kCompare]) et
+  /// bascule via la légende.
   final Set<String> hidden;
   final void Function(String key)? onToggle;
 
@@ -73,6 +80,11 @@ class GlanceChart extends StatelessWidget {
     final hasFc = fcStart >= 0;
     final showFc = hasFc && !hidden.contains(kForecast);
 
+    // Comparaison : superposée par position de bucket (pas par date — ses
+    // dates réelles sont celles de la période d'avant).
+    final cmp = compareSeries ?? const <SeriesPoint>[];
+    final showCompare = cmp.isNotEmpty && !hidden.contains(kCompare);
+
     final visitors = series.map((e) => e.visitors).toList();
     final views = series.map((e) => e.pageviews).toList();
     // Échelle : le max ne couvre que les courbes visibles (rescale au masquage).
@@ -80,6 +92,7 @@ class GlanceChart extends StatelessWidget {
       if (showVisitors) ...visitors,
       if (showViews) ...views,
       if (showFc) ...fcPoints.map((e) => e.visitors),
+      if (showCompare) ...cmp.map((e) => e.visitors),
     ].fold<double>(0, math.max);
     final maxY = chartNiceMax(rawMax);
     final yInterval = maxY / 4;
@@ -95,15 +108,33 @@ class GlanceChart extends StatelessWidget {
       for (var k = 0; k < fcPoints.length; k++)
         FlSpot((fcStart + k).toDouble(), fcPoints[k].visitors),
     ];
+    final cmpSpots = [
+      for (var i = 0; i < cmp.length; i++) FlSpot(i.toDouble(), cmp[i].visitors),
+    ];
     final lastObsX = (series.length - 1).toDouble();
 
-    // Axe X : étendu aux buckets futurs quand la prévision est affichée.
-    final xCount = showFc
-        ? math.max(series.length, fcStart + fcPoints.length)
-        : series.length;
+    // Axe X : étendu aux buckets futurs (prévision) ou à ceux de la période
+    // précédente quand elle est plus longue (comparaison — ex. mois en cours
+    // face au mois précédent en entier).
+    final xCount = [
+      series.length,
+      if (showFc) fcStart + fcPoints.length,
+      if (showCompare) cmp.length,
+    ].reduce(math.max);
     final lastX = (xCount - 1).toDouble();
-    DateTime timeAt(int i) =>
-        i < series.length ? series[i].t : fcPoints[i - fcStart].t;
+    // Au-delà des buckets observés/prévus (seule la comparaison s'y étend),
+    // le calendrier de la période courante se prolonge par pas d'unité — ces
+    // dates existent (ex. les jours à venir du mois), seule la donnée manque.
+    DateTime timeAt(int i) {
+      if (i < series.length) return series[i].t;
+      if (hasFc && i < fcStart + fcPoints.length) return fcPoints[i - fcStart].t;
+      final base = series.first.t;
+      return switch (unit) {
+        'hour' => DateTime(base.year, base.month, base.day, base.hour + i),
+        'month' => DateTime(base.year, base.month + i, 1),
+        _ => DateTime(base.year, base.month, base.day + i),
+      };
+    }
 
     // Une barre lissée avec point terminal. `area` = aire dégradée sous la courbe.
     LineChartBarData lineBar(
@@ -167,10 +198,27 @@ class GlanceChart extends StatelessWidget {
           ),
         );
 
-    // Courbes visibles dans l'ordre de tracé (prévision dessous → pages vues →
-    // visiteurs avec aire dessus). Clé/libellé et barre construits ensemble :
-    // le tooltip mappe barIndex → libellé sans risque de désync.
+    // Comparaison : pointillé neutre, pas d'aire ni de point terminal (elle
+    // ne « vit » pas comme la courbe courante).
+    LineChartBarData compareBar() => LineChartBarData(
+          spots: cmpSpots,
+          isCurved: true,
+          curveSmoothness: 0.32,
+          preventCurveOverShooting: true,
+          color: p.fg3,
+          barWidth: 1.8,
+          isStrokeCapRound: true,
+          isStrokeJoinRound: true,
+          dashArray: [3, 4],
+          dotData: const FlDotData(show: false),
+        );
+
+    // Courbes visibles dans l'ordre de tracé (comparaison dessous → prévision
+    // → pages vues → visiteurs avec aire dessus). Clé/libellé et barre
+    // construits ensemble : le tooltip mappe barIndex → libellé sans risque
+    // de désync.
     final drawn = <({String label, LineChartBarData bar})>[
+      if (showCompare) (label: 'période précédente', bar: compareBar()),
       if (showFc) (label: 'prévision', bar: forecastBar()),
       if (showViews)
         (label: 'pages vues', bar: lineBar(viewSpots, altColor, 1.8)),
@@ -380,6 +428,13 @@ class GlanceChart extends StatelessWidget {
                   approx: true,
                   on: showFc,
                   onTap: onToggle == null ? null : () => onToggle!(kForecast),
+                ),
+              if (cmp.isNotEmpty)
+                _LegendItem(
+                  color: p.fg3,
+                  label: 'Période précédente',
+                  on: showCompare,
+                  onTap: onToggle == null ? null : () => onToggle!(kCompare),
                 ),
             ],
           ),

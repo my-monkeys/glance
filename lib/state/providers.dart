@@ -246,13 +246,35 @@ final siteStatsProvider =
   });
 });
 
+/// Série de la période précédente équivalente, pour la comparaison superposée
+/// sur le graphique (bascule « Comparer »). Fetch distinct de `refSeries`
+/// (qui sert au profilage de la prévision, toujours calculée pour les 3
+/// périodes calendaires) : celui-ci n'est déclenché que si l'appelant le
+/// demande explicitement (watch conditionnel, cf. [homeTotalsProvider]).
+final siteCompareSeriesProvider = FutureProvider.autoDispose
+    .family<List<SeriesPoint>?, (Site, DateWindow)>((ref, key) async {
+  cacheSession(ref);
+  final (site, w) = key;
+  final prevW = previousPeriodWindow(w);
+  if (prevW == null) return null;
+  final gate = ref.watch(fetchGateProvider);
+  final p = await _providerFor(ref, site);
+  return gate
+      .run(() => p.series(site, prevW))
+      .catchError((_) => <SeriesPoint>[]);
+});
+
 /// Agrégat vivant de la home : recalculé à chaque site qui se charge (watch de
 /// tous les providers par site). Fournit les totaux sur les sites déjà chargés.
 ///
 /// Porté par le **groupe actif** : les totaux, la courbe et les cartes ne
-/// comptent que ses sites. « Tous » = le périmètre entier.
+/// comptent que ses sites. « Tous » = le périmètre entier. [compare] déclenche
+/// en plus, par site, le fetch de la période précédente (cf.
+/// [siteCompareSeriesProvider]) — pas de coût quand la comparaison est
+/// désactivée.
 final homeTotalsProvider =
-    Provider.autoDispose.family<HomeTotals, DateWindow>((ref, w) {
+    Provider.autoDispose.family<HomeTotals, (DateWindow, bool)>((ref, key) {
+  final (w, compare) = key;
   final sitesAsync = ref.watch(visibleSitesProvider);
   final sites = sitesAsync.value ?? const <Site>[];
   final cards = <SiteCard>[];
@@ -262,6 +284,7 @@ final homeTotalsProvider =
   for (final s in sites) {
     final stats = ref.watch(siteStatsProvider((s, w)));
     final live = ref.watch(siteLiveProvider(s));
+    final cmp = compare ? ref.watch(siteCompareSeriesProvider((s, w))) : null;
     if (stats.isLoading || live.isLoading) loading = true;
     // Seed depuis le cache disque au démarrage à froid : la carte s'affiche
     // avec la dernière valeur connue au lieu d'un squelette, le refresh corrige.
@@ -273,6 +296,7 @@ final homeTotalsProvider =
         series: sv.series,
         live: live.value ?? 0,
         refSeries: sv.refSeries,
+        compareSeries: cmp?.value,
       ));
     } else {
       pending++;

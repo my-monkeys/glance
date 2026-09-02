@@ -71,6 +71,70 @@ ForecastSpec? forecastSpecFor(DateWindow w, {DateTime? now}) {
 DateWindow? forecastReferenceWindow(DateWindow w, {DateTime? now}) =>
     forecastSpecFor(w, now: now)?.reference;
 
+/// Fenêtre « période précédente équivalente », pour la comparaison superposée
+/// sur le graphique (bascule « Comparer »). Distincte de [forecastReferenceWindow] :
+/// celle-ci ne sert qu'aux fenêtres calendaires en cours (pour profiler la
+/// prévision) ; celle-ci se calcule pour toute fenêtre comparable — passée ou
+/// en cours —, à la demande explicite de l'utilisateur.
+///
+/// Détection par la forme de [w] seule (comme [forecastSpecFor]) : un début
+/// aligné sur le 1er du mois/de l'année donne le mois/l'année civile d'avant
+/// (même s'il est plus court/long que [w] — un mois « en cours » se compare au
+/// mois précédent en entier) ; sinon on décale [w] d'un cran de sa propre durée
+/// (24 h avant, 7/30 j avant, 12 m avant…). Null pour une fenêtre trop large
+/// (« Tout », > 400 j) où un « avant » n'a pas de sens.
+DateWindow? previousPeriodWindow(DateWindow w) {
+  final span = w.end.difference(w.start);
+  if (span.inDays > 400) return null;
+  switch (w.unit) {
+    case TimeUnit.hour:
+      final dayStart = DateTime(w.start.year, w.start.month, w.start.day);
+      if (w.start == dayStart) {
+        return DateWindow(
+          dayStart.subtract(const Duration(days: 1)),
+          dayStart,
+          TimeUnit.hour,
+        );
+      }
+      return DateWindow(w.start.subtract(span), w.start, TimeUnit.hour);
+    case TimeUnit.day:
+      final monthStart = DateTime(w.start.year, w.start.month, 1);
+      if (w.start == monthStart) {
+        return DateWindow(
+          DateTime(w.start.year, w.start.month - 1, 1),
+          monthStart,
+          TimeUnit.day,
+        );
+      }
+      return DateWindow(w.start.subtract(span), w.start, TimeUnit.day);
+    case TimeUnit.month:
+      final yearStart = DateTime(w.start.year, 1, 1);
+      if (w.start == yearStart) {
+        return DateWindow(
+          DateTime(w.start.year - 1, 1, 1),
+          yearStart,
+          TimeUnit.month,
+        );
+      }
+      return DateWindow(w.start.subtract(span), w.start, TimeUnit.month);
+  }
+}
+
+/// Série prête à afficher pour une fenêtre large (« Tout ») : écarte les
+/// buckets vides en tête pour ne pas peindre un graphe majoritairement plat
+/// avant la première vraie donnée (cf. absence d'API « première donnée » chez
+/// Umami/Plausible — on la déduit de la série déjà récupérée). Sans effet sur
+/// les fenêtres normales (seule une fenêtre de plus de 400 j est concernée).
+/// Garde la série intacte si elle est entièrement vide (état « zéro »
+/// légitime) ou si le rognage la réduirait à moins de 2 points.
+List<SeriesPoint> displaySeries(List<SeriesPoint> series, DateWindow window) {
+  if (window.end.difference(window.start).inDays <= 400) return series;
+  final i = series.indexWhere((p) => p.visitors > 0 || p.pageviews > 0);
+  if (i <= 0) return series;
+  final trimmed = series.sublist(i);
+  return trimmed.length >= 2 ? trimmed : series;
+}
+
 /// Prévision prête à tracer.
 class Forecast {
   const Forecast({required this.points, required this.growth});

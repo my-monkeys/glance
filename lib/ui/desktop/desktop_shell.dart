@@ -93,8 +93,9 @@ class _Sidebar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final p = context.glance;
     final nav = ref.watch(desktopNavProvider);
-    final window = ref.watch(periodProvider).window();
-    final totals = ref.watch(homeTotalsProvider(window));
+    final periodState = ref.watch(periodProvider);
+    final window = periodState.window();
+    final totals = ref.watch(homeTotalsProvider((window, periodState.compare)));
     // Périmètre = le groupe actif (tous les sites si aucun n'est sélectionné).
     final sitesAsync = ref.watch(visibleSitesProvider);
     final sites = sitesAsync.value ?? const <Site>[];
@@ -615,7 +616,7 @@ class _OverviewState extends ConsumerState<_Overview> {
     final p = context.glance;
     final periodState = ref.watch(periodProvider);
     final window = periodState.window();
-    final totals = ref.watch(homeTotalsProvider(window));
+    final totals = ref.watch(homeTotalsProvider((window, periodState.compare)));
     final data = totals.data;
     final hidden = ref.watch(settingsProvider.select((s) => s.hiddenSeries));
     final refreshing = totals.loading && data.cards.isNotEmpty;
@@ -697,17 +698,18 @@ class _OverviewState extends ConsumerState<_Overview> {
                   ),
                   const SizedBox(height: 16),
                   GlanceChart(
-                    series: data.totalSeries,
+                    series: displaySeries(data.totalSeries, window),
                     unit: window.unit.api,
                     height: 220,
                     showPageviews: true,
                     visitorsTotal: data.totalVisitors,
                     pageviewsTotal: data.totalPageviews,
                     forecast: buildForecast(
-                      series: data.totalSeries,
+                      series: displaySeries(data.totalSeries, window),
                       window: window,
                       reference: data.totalRefSeries,
                     ),
+                    compareSeries: data.totalCompareSeries,
                     hidden: hidden,
                     onToggle: (k) =>
                         ref.read(settingsProvider.notifier).toggleSeries(k),

@@ -18,6 +18,7 @@ import '../../theme/palette.dart';
 import '../../theme/type.dart';
 import '../widgets/chip.dart';
 import '../widgets/common.dart';
+import '../widgets/compare_toggle.dart';
 import '../widgets/day_nav.dart';
 import '../widgets/events_chart.dart';
 import '../widgets/glance_chart.dart';
@@ -167,21 +168,29 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
             const SizedBox(height: 16),
             // Périodes.
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: ChipRow(
+              padding: const EdgeInsets.fromLTRB(20, 0, 16, 0),
+              child: Row(
                 children: [
-                  for (final per in Period.values)
-                    GlanceChip(
-                      label: per.label,
-                      selected: periodState.period == per,
-                      onTap: () {
-                        if (per == Period.custom) {
-                          _pickCustom();
-                        } else {
-                          ref.read(periodProvider.notifier).set(per);
-                        }
-                      },
+                  Expanded(
+                    child: ChipRow(
+                      children: [
+                        for (final per in Period.values)
+                          GlanceChip(
+                            label: per.label,
+                            selected: periodState.period == per,
+                            onTap: () {
+                              if (per == Period.custom) {
+                                _pickCustom();
+                              } else {
+                                ref.read(periodProvider.notifier).set(per);
+                              }
+                            },
+                          ),
+                      ],
                     ),
+                  ),
+                  const SizedBox(width: 10),
+                  const CompareToggle(),
                 ],
               ),
             ),
@@ -190,6 +199,20 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
               child: const Padding(
                 padding: EdgeInsets.fromLTRB(20, 14, 20, 0),
                 child: DayNav(),
+              ),
+            ),
+            GlanceReveal(
+              show: periodState.canNavigateMonths,
+              child: const Padding(
+                padding: EdgeInsets.fromLTRB(20, 14, 20, 0),
+                child: MonthNav(),
+              ),
+            ),
+            GlanceReveal(
+              show: periodState.canNavigateYears,
+              child: const Padding(
+                padding: EdgeInsets.fromLTRB(20, 14, 20, 0),
+                child: YearNav(),
               ),
             ),
             const SizedBox(height: 18),
@@ -275,11 +298,19 @@ class _DetailBody extends ConsumerWidget {
     final p = context.glance;
     final s = detail.summary;
     final hidden = ref.watch(settingsProvider.select((s) => s.hiddenSeries));
+    // Rogne le préfixe vide sur une fenêtre large (« Tout ») : sans effet
+    // ailleurs. La prévision (bucket courant) en bénéficie aussi — la moyenne
+    // n'est plus tirée vers le bas par des années à zéro.
+    final series = displaySeries(detail.series, window);
     final forecast = buildForecast(
-      series: detail.series,
+      series: series,
       window: window,
       reference: detail.refSeries,
     );
+    final compare = ref.watch(periodProvider.select((p) => p.compare));
+    final compareSeries = compare
+        ? ref.watch(siteCompareSeriesProvider((site, window))).value
+        : null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -304,13 +335,14 @@ class _DetailBody extends ConsumerWidget {
               ),
               const SizedBox(height: 14),
               GlanceChart(
-                series: detail.series,
+                series: series,
                 unit: detail.unit,
                 height: 172,
                 showPageviews: true,
                 visitorsTotal: s.visitors,
                 pageviewsTotal: s.pageviews,
                 forecast: forecast,
+                compareSeries: compareSeries,
                 hidden: hidden,
                 onToggle: (k) =>
                     ref.read(settingsProvider.notifier).toggleSeries(k),

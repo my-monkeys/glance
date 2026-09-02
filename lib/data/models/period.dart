@@ -43,6 +43,7 @@ enum Period {
   thisMonth('mois', 'Ce mois-ci'),
   m12('12m', '12 m'),
   thisYear('annee', 'Cette année'),
+  allTime('tout', 'Tout'),
   custom('perso', 'Perso');
 
   const Period(this.key, this.label);
@@ -63,11 +64,15 @@ enum Period {
 
   /// Résout la fenêtre. Pour [custom], passer [customStart]/[customEnd].
   /// [dayOffset] décale d'un nombre de jours pour [today] (0 = aujourd'hui).
+  /// [monthOffset]/[yearOffset] font de même pour [thisMonth]/[thisYear] :
+  /// naviguer mois par mois ou année par année (0 = période courante).
   DateWindow window({
     DateTime? now,
     DateTime? customStart,
     DateTime? customEnd,
     int dayOffset = 0,
+    int monthOffset = 0,
+    int yearOffset = 0,
   }) {
     final n = now ?? DateTime.now();
     switch (this) {
@@ -102,11 +107,13 @@ enum Period {
           TimeUnit.day,
         );
       case Period.thisMonth:
-        return DateWindow(
-          DateTime(n.year, n.month, 1),
-          _ceil(n, TimeUnit.day),
-          TimeUnit.day,
-        );
+        final start = DateTime(n.year, n.month + monthOffset, 1);
+        // Mois courant (offset 0) : fin qui grandit avec « aujourd'hui ».
+        // Mois passé : fin figée au 1er du mois suivant.
+        final end = monthOffset == 0
+            ? _ceil(n, TimeUnit.day)
+            : DateTime(n.year, n.month + monthOffset + 1, 1);
+        return DateWindow(start, end, TimeUnit.day);
       case Period.m12:
         return DateWindow(
           DateTime(n.year, n.month - 11, 1),
@@ -114,8 +121,17 @@ enum Period {
           TimeUnit.month,
         );
       case Period.thisYear:
+        final start = DateTime(n.year + yearOffset, 1, 1);
+        final end = yearOffset == 0
+            ? _ceil(n, TimeUnit.month)
+            : DateTime(n.year + yearOffset + 1, 1, 1);
+        return DateWindow(start, end, TimeUnit.month);
+      case Period.allTime:
+        // Pas de date de première donnée connue côté API (Umami/Plausible ne
+        // l'exposent pas) : on cadre large, d'il y a 10 ans à aujourd'hui — la
+        // courbe est simplement plate avant la vraie première donnée.
         return DateWindow(
-          DateTime(n.year, 1, 1),
+          DateTime(n.year - 10, 1, 1),
           _ceil(n, TimeUnit.month),
           TimeUnit.month,
         );

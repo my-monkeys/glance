@@ -37,6 +37,7 @@ class SiteCard {
     required this.series,
     required this.live,
     this.refSeries,
+    this.compareSeries,
   });
 
   final Site site;
@@ -44,6 +45,11 @@ class SiteCard {
   final List<SeriesPoint> series;
   final int live;
   final List<SeriesPoint>? refSeries;
+
+  /// Série de la période précédente équivalente, superposée sur le graphique
+  /// quand la comparaison est activée (cf. `PeriodState.compare`). Null tant
+  /// qu'elle n'a pas été demandée ou que la période n'a pas d'équivalent.
+  final List<SeriesPoint>? compareSeries;
 
   double? get deltaPct => summary.visitorsDeltaPct;
   bool get up => (deltaPct ?? 0) >= 0;
@@ -60,6 +66,7 @@ class HomeData {
     required this.totalLive,
     required this.totalSeries,
     this.totalRefSeries,
+    this.totalCompareSeries,
   });
 
   final List<SiteCard> cards;
@@ -72,6 +79,9 @@ class HomeData {
 
   /// Série de référence cumulée (profil pour la prévision de la courbe totale).
   final List<SeriesPoint>? totalRefSeries;
+
+  /// Série de comparaison cumulée (période précédente, toutes cartes).
+  final List<SeriesPoint>? totalCompareSeries;
 
   double? get totalDeltaPct {
     final p = prevTotalVisitors;
@@ -136,6 +146,27 @@ class HomeData {
       }
     }
 
+    // Comparaison cumulée (même principe que la référence de prévision
+    // ci-dessus, mais indépendante : demandée explicitement par l'utilisateur,
+    // pas seulement pour les 3 périodes calendaires).
+    final compareBuckets = cards.isEmpty
+        ? null
+        : cards
+            .firstWhere((c) => c.compareSeries != null, orElse: () => cards.first)
+            .compareSeries;
+    List<SeriesPoint>? totalCompare;
+    if (compareBuckets != null) {
+      totalCompare = <SeriesPoint>[];
+      for (var i = 0; i < compareBuckets.length; i++) {
+        var vu = 0.0;
+        for (final c in cards) {
+          final cs = c.compareSeries;
+          if (cs != null && i < cs.length) vu += cs[i].visitors;
+        }
+        totalCompare.add(SeriesPoint(compareBuckets[i].t, vu, 0));
+      }
+    }
+
     return HomeData(
       cards: cards,
       totalVisitors: totalVisitors,
@@ -145,6 +176,7 @@ class HomeData {
       totalLive: totalLive,
       totalSeries: total,
       totalRefSeries: totalRef,
+      totalCompareSeries: totalCompare,
     );
   }
 }

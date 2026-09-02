@@ -21,6 +21,151 @@ void main() {
       expect(w.end, DateTime(2026, 9, 1));
       expect(w.unit, TimeUnit.month);
     });
+
+    test('thisMonth avec monthOffset : mois précédent, bornes figées', () {
+      final w = Period.thisMonth.window(now: now, monthOffset: -1);
+      expect(w.start, DateTime(2026, 7, 1));
+      expect(w.end, DateTime(2026, 8, 1));
+      expect(w.unit, TimeUnit.day);
+    });
+
+    test('thisMonth avec monthOffset : changement d\'année', () {
+      final w = Period.thisMonth.window(now: now, monthOffset: -8);
+      expect(w.start, DateTime(2025, 12, 1));
+      expect(w.end, DateTime(2026, 1, 1));
+      expect(w.unit, TimeUnit.day);
+    });
+
+    test('thisYear avec yearOffset : année précédente, bornes figées', () {
+      final w = Period.thisYear.window(now: now, yearOffset: -1);
+      expect(w.start, DateTime(2025, 1, 1));
+      expect(w.end, DateTime(2026, 1, 1));
+      expect(w.unit, TimeUnit.month);
+    });
+
+    test('allTime : 10 ans en arrière à aujourd\'hui, unité mois', () {
+      final w = Period.allTime.window(now: now);
+      expect(w.start, DateTime(2016, 1, 1));
+      expect(w.end, DateTime(2026, 9, 1));
+      expect(w.unit, TimeUnit.month);
+    });
+  });
+
+  group('previousPeriodWindow', () {
+    test('today : la journée calendaire d\'avant (pas un décalage de span)',
+        () {
+      final w = Period.today.window(now: now);
+      final prev = previousPeriodWindow(w)!;
+      expect(prev.start, DateTime(2026, 8, 10));
+      expect(prev.end, DateTime(2026, 8, 11));
+      expect(prev.unit, TimeUnit.hour);
+    });
+
+    test('h24 (glissante, non calendaire) : 24 h avant', () {
+      final w = Period.h24.window(now: now);
+      final prev = previousPeriodWindow(w)!;
+      expect(prev.end, w.start);
+      expect(w.start.difference(prev.start), w.end.difference(w.start));
+      expect(prev.unit, TimeUnit.hour);
+    });
+
+    test('d7 : les 7 jours avant', () {
+      final w = Period.d7.window(now: now);
+      final prev = previousPeriodWindow(w)!;
+      expect(prev.end, w.start);
+      expect(w.start.difference(prev.start), w.end.difference(w.start));
+      expect(prev.unit, TimeUnit.day);
+    });
+
+    test('d30 : les 30 jours avant', () {
+      final w = Period.d30.window(now: now);
+      final prev = previousPeriodWindow(w)!;
+      expect(prev.end, w.start);
+      expect(w.start.difference(prev.start), w.end.difference(w.start));
+      expect(prev.unit, TimeUnit.day);
+    });
+
+    test('thisMonth (en cours) : le mois calendaire précédent en entier', () {
+      final w = Period.thisMonth.window(now: now);
+      final prev = previousPeriodWindow(w)!;
+      expect(prev.start, DateTime(2026, 7, 1));
+      expect(prev.end, DateTime(2026, 8, 1));
+      expect(prev.unit, TimeUnit.day);
+    });
+
+    test('thisMonth (navigué, monthOffset) : le mois d\'avant celui-là', () {
+      final w = Period.thisMonth.window(now: now, monthOffset: -1); // juillet
+      final prev = previousPeriodWindow(w)!;
+      expect(prev.start, DateTime(2026, 6, 1));
+      expect(prev.end, DateTime(2026, 7, 1));
+    });
+
+    test('thisYear : l\'année civile précédente en entier', () {
+      final w = Period.thisYear.window(now: now);
+      final prev = previousPeriodWindow(w)!;
+      expect(prev.start, DateTime(2025, 1, 1));
+      expect(prev.end, DateTime(2026, 1, 1));
+      expect(prev.unit, TimeUnit.month);
+    });
+
+    test('m12 (glissante, non calendaire) : décalée d\'un span identique', () {
+      final w = Period.m12.window(now: now);
+      final prev = previousPeriodWindow(w)!;
+      expect(prev.end, w.start);
+      expect(w.start.difference(prev.start), w.end.difference(w.start));
+      expect(prev.unit, TimeUnit.month);
+    });
+
+    test('allTime : null (fenêtre > 400 j, pas de "avant" pertinent)', () {
+      final w = Period.allTime.window(now: now);
+      expect(previousPeriodWindow(w), isNull);
+    });
+  });
+
+  group('displaySeries', () {
+    DateWindow wideWindow() =>
+        DateWindow(DateTime(2016, 1, 1), DateTime(2026, 9, 1), TimeUnit.month);
+    DateWindow normalWindow() =>
+        DateWindow(DateTime(2026, 8, 1), DateTime(2026, 8, 12), TimeUnit.day);
+
+    test('fenêtre large : écarte le préfixe vide', () {
+      final series = [
+        SeriesPoint(DateTime(2026, 1, 1), 0, 0),
+        SeriesPoint(DateTime(2026, 2, 1), 0, 0),
+        SeriesPoint(DateTime(2026, 3, 1), 5, 12),
+        SeriesPoint(DateTime(2026, 4, 1), 8, 20),
+      ];
+      final trimmed = displaySeries(series, wideWindow());
+      expect(trimmed.length, 2);
+      expect(trimmed.first.t, DateTime(2026, 3, 1));
+    });
+
+    test('fenêtre large mais entièrement vide : série inchangée', () {
+      final series = [
+        SeriesPoint(DateTime(2026, 1, 1), 0, 0),
+        SeriesPoint(DateTime(2026, 2, 1), 0, 0),
+      ];
+      expect(displaySeries(series, wideWindow()), series);
+    });
+
+    test('fenêtre large, un seul point réel : pas de rognage sous 2 points',
+        () {
+      final series = [
+        SeriesPoint(DateTime(2026, 1, 1), 0, 0),
+        SeriesPoint(DateTime(2026, 2, 1), 0, 0),
+        SeriesPoint(DateTime(2026, 3, 1), 3, 3),
+      ];
+      expect(displaySeries(series, wideWindow()), series);
+    });
+
+    test('fenêtre normale : jamais de rognage même avec un préfixe vide', () {
+      final series = [
+        SeriesPoint(DateTime(2026, 8, 1), 0, 0),
+        SeriesPoint(DateTime(2026, 8, 2), 0, 0),
+        SeriesPoint(DateTime(2026, 8, 3), 4, 9),
+      ];
+      expect(displaySeries(series, normalWindow()), series);
+    });
   });
 
   group('forecastSpecFor', () {
