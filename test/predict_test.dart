@@ -158,6 +158,24 @@ void main() {
       expect(displaySeries(series, wideWindow()), series);
     });
 
+    test(
+        'fenêtre large, visite isolée tôt (blip) : rogne après le vrai creux, pas au blip',
+        () {
+      final series = [
+        SeriesPoint(DateTime(2016, 3, 1), 1, 1), // blip (test/bot) isolé
+        SeriesPoint(DateTime(2016, 4, 1), 0, 0),
+        SeriesPoint(DateTime(2016, 5, 1), 0, 0),
+        SeriesPoint(DateTime(2016, 6, 1), 0, 0),
+        SeriesPoint(DateTime(2016, 7, 1), 0, 0),
+        SeriesPoint(DateTime(2016, 8, 1), 0, 0),
+        SeriesPoint(DateTime(2026, 5, 1), 40, 90), // vrai démarrage
+        SeriesPoint(DateTime(2026, 6, 1), 60, 140),
+      ];
+      final trimmed = displaySeries(series, wideWindow());
+      expect(trimmed.length, 2);
+      expect(trimmed.first.t, DateTime(2026, 5, 1));
+    });
+
     test('fenêtre normale : jamais de rognage même avec un préfixe vide', () {
       final series = [
         SeriesPoint(DateTime(2026, 8, 1), 0, 0),

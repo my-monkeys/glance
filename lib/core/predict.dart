@@ -127,11 +127,31 @@ DateWindow? previousPeriodWindow(DateWindow w) {
 /// les fenêtres normales (seule une fenêtre de plus de 400 j est concernée).
 /// Garde la série intacte si elle est entièrement vide (état « zéro »
 /// légitime) ou si le rognage la réduirait à moins de 2 points.
+///
+/// Rogne après le **dernier creux d'au moins 2 buckets vides**, pas au premier
+/// bucket non nul : une visite isolée (test, bot) tôt dans les 10 ans ne doit
+/// pas ancrer le rognage avant le vrai début de l'activité — elle laisserait
+/// un long plat résiduel entre elle et le vrai démarrage.
 List<SeriesPoint> displaySeries(List<SeriesPoint> series, DateWindow window) {
   if (window.end.difference(window.start).inDays <= 400) return series;
-  final i = series.indexWhere((p) => p.visitors > 0 || p.pageviews > 0);
-  if (i <= 0) return series;
-  final trimmed = series.sublist(i);
+  const gapLen = 2;
+  bool empty(SeriesPoint p) => p.visitors <= 0 && p.pageviews <= 0;
+  var cut = 0;
+  var i = 0;
+  while (i < series.length) {
+    if (!empty(series[i])) {
+      i++;
+      continue;
+    }
+    var j = i;
+    while (j < series.length && empty(series[j])) {
+      j++;
+    }
+    if (j - i >= gapLen) cut = j;
+    i = j;
+  }
+  if (cut <= 0) return series;
+  final trimmed = series.sublist(cut);
   return trimmed.length >= 2 ? trimmed : series;
 }
 
