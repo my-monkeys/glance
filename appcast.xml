@@ -5,6 +5,19 @@
     <description>Mises à jour de Glance (macOS)</description>
     <language>fr</language>
     <item>
+      <title>1.9.1</title>
+      <link>https://github.com/my-monkeys/glance/releases/tag/v1.9.1</link>
+      <sparkle:version>16</sparkle:version>
+      <sparkle:shortVersionString>1.9.1</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>12.0</sparkle:minimumSystemVersion>
+      <pubDate>Thu, 03 Sep 2026 08:13:29 +0000</pubDate>
+      <enclosure
+        url="https://github.com/my-monkeys/glance/releases/download/v1.9.1/Glance-1.9.1.dmg"
+        sparkle:edSignature="C8crGNZOMgJfXCG41hRn6ejQ0MKY0mHQkWfDjAAqMFJYpGQyJKXAFGh4iDeHMnAIIGzrpMI0c4dGw+UgtwzsCg=="
+        length="33754925"
+        type="application/octet-stream" />
+    </item>
+    <item>
       <title>1.9.0</title>
       <link>https://github.com/my-monkeys/glance/releases/tag/v1.9.0</link>
       <sparkle:version>15</sparkle:version>
