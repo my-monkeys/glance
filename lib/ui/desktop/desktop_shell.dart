@@ -21,14 +21,13 @@ import '../detail/detail_screen.dart';
 import '../root_scaffold.dart';
 import '../settings/settings_screen.dart';
 import '../settings/workspaces_screen.dart';
-import '../widgets/chip.dart';
 import '../widgets/common.dart';
 import '../widgets/glance_chart.dart';
 import '../widgets/motion.dart';
 import '../widgets/pulse_dot.dart';
 import '../widgets/site_avatar.dart';
 import '../widgets/sparkline.dart';
-import '../widgets/unit_picker.dart';
+import '../widgets/period_controls.dart';
 import '../widgets/workspace_switcher.dart';
 
 /// Largeur minimale pour basculer en shell desktop master-détail.
@@ -693,18 +692,7 @@ class _OverviewState extends ConsumerState<_Overview> {
               ],
             ),
             const SizedBox(height: 16),
-            ChipRow(
-              children: [
-                for (final per in Period.values)
-                  GlanceChip(
-                    label: per.label,
-                    selected: periodState.period == per,
-                    onTap: () => per == Period.custom
-                        ? _pickCustom()
-                        : ref.read(periodProvider.notifier).set(per),
-                  ),
-              ],
-            ),
+            PeriodControls(onPickCustom: _pickCustom),
             const SizedBox(height: 20),
             GlanceCard(
               padding: const EdgeInsets.all(20),
@@ -729,11 +717,6 @@ class _OverviewState extends ConsumerState<_Overview> {
                                 style: GT.body(12.5, color: p.fg3)),
                           ],
                         ),
-                      ),
-                      const Spacer(),
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: UnitPicker(window: window),
                       ),
                     ],
                   ),

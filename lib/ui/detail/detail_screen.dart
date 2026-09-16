@@ -15,15 +15,13 @@ import '../../state/settings.dart';
 import '../../theme/motion.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
-import '../widgets/chip.dart';
 import '../widgets/common.dart';
-import '../widgets/compare_toggle.dart';
 import '../widgets/day_nav.dart';
 import '../widgets/events_chart.dart';
 import '../widgets/glance_chart.dart';
 import '../widgets/motion.dart';
 import '../widgets/pulse_dot.dart';
-import '../widgets/unit_picker.dart';
+import '../widgets/period_controls.dart';
 import 'metric_sections.dart';
 
 class DetailScreen extends ConsumerStatefulWidget {
@@ -192,34 +190,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                // Périodes.
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 16, 0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: ChipRow(
-                          children: [
-                            for (final per in Period.values)
-                              GlanceChip(
-                                label: per.label,
-                                selected: periodState.period == per,
-                                onTap: () {
-                                  if (per == Period.custom) {
-                                    _pickCustom();
-                                  } else {
-                                    ref.read(periodProvider.notifier).set(per);
-                                  }
-                                },
-                              ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      const CompareToggle(),
-                    ],
-                  ),
-                ),
+                PeriodControls(onPickCustom: _pickCustom),
                 GlanceReveal(
                   show: periodState.canNavigateDays,
                   child: const Padding(
@@ -348,11 +319,6 @@ class _DetailBody extends ConsumerWidget {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 10),
                     child: DeltaText(s.visitorsDeltaPct, fontSize: 13),
-                  ),
-                  const Spacer(),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: UnitPicker(window: window),
                   ),
                 ],
               ),
@@ -632,13 +598,7 @@ class _EventsTabState extends ConsumerState<_EventsTab> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  SectionLabel('Événements déclenchés'),
-                  const Spacer(),
-                  UnitPicker(window: widget.window),
-                ],
-              ),
+              SectionLabel('Événements déclenchés'),
               const SizedBox(height: 8),
               Text(fmtInt(data.total), style: GT.stat(54, color: p.fg)),
               const SizedBox(height: 16),

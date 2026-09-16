@@ -15,15 +15,12 @@ import '../../state/period_state.dart';
 import '../../state/providers.dart';
 import '../../state/settings.dart';
 import '../../state/workspaces.dart';
-import '../../theme/motion.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
 import '../network/internal_screen.dart';
 import '../root_scaffold.dart';
 import '../settings/workspaces_screen.dart';
-import '../widgets/chip.dart';
 import '../widgets/common.dart';
-import '../widgets/compare_toggle.dart';
 import '../widgets/day_nav.dart';
 import '../widgets/site_avatar.dart';
 import '../widgets/field.dart';
@@ -31,7 +28,7 @@ import '../widgets/glance_chart.dart';
 import '../widgets/motion.dart';
 import '../widgets/pulse_dot.dart';
 import '../widgets/sparkline.dart';
-import '../widgets/unit_picker.dart';
+import '../widgets/period_controls.dart';
 import '../widgets/workspace_switcher.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -155,9 +152,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 period: periodState.period,
                 now: now,
                 viewMode: viewMode,
-                onPeriod: (per) => per == Period.custom
-                    ? _pickCustom()
-                    : ref.read(periodProvider.notifier).set(per),
+                onPickCustom: _pickCustom,
                 onViewMode: (v) =>
                     ref.read(settingsProvider.notifier).setHomeView(v),
                 onNewGroup: () => openWorkspaceEditor(context, null),
@@ -318,7 +313,7 @@ class _Header extends ConsumerWidget {
     required this.period,
     required this.now,
     required this.viewMode,
-    required this.onPeriod,
+    required this.onPickCustom,
     required this.onViewMode,
     required this.onNewGroup,
   });
@@ -326,7 +321,7 @@ class _Header extends ConsumerWidget {
   final Period period;
   final DateTime now;
   final HomeViewMode viewMode;
-  final ValueChanged<Period> onPeriod;
+  final VoidCallback onPickCustom;
   final ValueChanged<HomeViewMode> onViewMode;
   final VoidCallback onNewGroup;
 
@@ -367,28 +362,10 @@ class _Header extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 16),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 16, 0),
-          child: Row(
-            children: [
-              Expanded(
-                child: ChipRow(
-                  children: [
-                    for (final per in Period.values)
-                      GlanceChip(
-                        label: per.label,
-                        selected: period == per,
-                        onTap: () => onPeriod(per),
-                      ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 10),
-              const CompareToggle(),
-              const SizedBox(width: 8),
-              _ViewToggle(mode: viewMode, onChanged: onViewMode),
-            ],
-          ),
+        PeriodControls(
+          onPickCustom: onPickCustom,
+          viewMode: viewMode,
+          onViewMode: onViewMode,
         ),
       ],
     );
@@ -543,15 +520,7 @@ class _TotalCard extends ConsumerWidget {
             children: [
               DeltaText(data.totalDeltaPct),
               const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'vs période préc.',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: GT.body(12, color: p.fg2),
-                ),
-              ),
-              UnitPicker(window: window),
+              Text('vs période préc.', style: GT.body(12, color: p.fg2)),
             ],
           ),
           const SizedBox(height: 14),
@@ -647,52 +616,6 @@ List<double> _sparkOf(SiteCard c) {
   final v = c.series.map((e) => e.visitors).toList();
   if (v.length < 2) return const [0, 0];
   return v;
-}
-
-/// Bascule liste / grille (segmenté à deux icônes).
-class _ViewToggle extends StatelessWidget {
-  const _ViewToggle({required this.mode, required this.onChanged});
-  final HomeViewMode mode;
-  final ValueChanged<HomeViewMode> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final p = context.glance;
-    Widget seg(HomeViewMode m, IconData icon) {
-      final on = mode == m;
-      return GestureDetector(
-        onTap: () => onChanged(m),
-        behavior: HitTestBehavior.opaque,
-        child: AnimatedContainer(
-          duration: kMotionFast,
-          curve: kCurveOut,
-          width: 34,
-          height: 30,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: on ? p.accent : Colors.transparent,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(icon, size: 17, color: on ? p.accentInk : p.fg2),
-        ),
-      );
-    }
-
-    return Container(
-      padding: const EdgeInsets.all(3),
-      decoration: BoxDecoration(
-        color: p.chip,
-        borderRadius: BorderRadius.circular(11),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          seg(HomeViewMode.list, Icons.view_agenda_outlined),
-          seg(HomeViewMode.grid, Icons.grid_view_rounded),
-        ],
-      ),
-    );
-  }
 }
 
 /// Grille 2 colonnes de cartes de sites.

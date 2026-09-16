@@ -123,13 +123,30 @@ de se rafraîchir **sans aucune erreur**.
 `windowProvider` rend `null` tant que « Tout » attend sa date de première donnée :
 l'appelant montre son squelette sans rien déclencher.
 
+### La barre de contrôles
+
+`PeriodControls` (`ui/widgets/period_controls.dart`), sous le titre de chaque
+écran : les périodes sur toute la largeur, puis un bouton **« Affichage »** qui
+ouvre une feuille — comparaison, découpage, courbe ou barres — et, sur
+l'accueil, la bascule liste/grille à droite.
+
+Les réglages tenaient auparavant dans des boutons sans libellé posés **à droite
+des périodes**, qu'ils recouvraient : deux flèches ne disent pas « comparer à la
+période précédente », et les premières périodes n'étaient plus atteignables sans
+faire défiler. Dans une feuille, chaque réglage porte son nom et une phrase.
+
+⚠️ Quand la comparaison est active, l'indication vit **sur la ligne du bouton**,
+pas sur une ligne à elle : une ligne qui apparaît et disparaît ferait sauter tout
+l'écran. Et c'est un `Expanded`, pas un `Flexible` suivi d'un `Spacer` — les deux
+se disputeraient la place et le texte se ferait tronquer alors qu'il y en a.
+
 ### Découpage du graphique (heure / jour / mois)
 
-`UnitPicker`, en haut à droite des grands graphiques, n'offre que
+Dans la feuille « Affichage », le découpage n'offre que
 `allowedUnits(window)` — la règle d'Umami (`getMinimumUnit` : heure jusqu'à 30 j,
 jour jusqu'à 7 mois, mois au-delà), bornée à **800 buckets** et à au moins 3 (pour
 ne pas proposer « Mois » sur sept jours, qui donnerait une seule barre). Rien à
-choisir sur « Aujourd'hui » → le sélecteur disparaît.
+choisir sur « Aujourd'hui » → la section disparaît de la feuille.
 
 ⚠️ La granularité est appliquée **avant** le calcul des bornes (`Period.window(unit:)`),
 jamais posée après coup dans le 3ᵉ champ de `DateWindow` : une journée demandée en
