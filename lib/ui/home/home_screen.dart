@@ -31,6 +31,7 @@ import '../widgets/glance_chart.dart';
 import '../widgets/motion.dart';
 import '../widgets/pulse_dot.dart';
 import '../widgets/sparkline.dart';
+import '../widgets/unit_picker.dart';
 import '../widgets/workspace_switcher.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -72,7 +73,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       // Rafraîchit en place la SEULE fenêtre courante (les autres périodes
       // restent en cache) → valeurs mises à jour sans squelette. Limité au
       // groupe affiché : inutile de solliciter les sites qu'on ne regarde pas.
-      final w = ref.read(periodProvider).window();
+      final w = ref.read(windowProvider);
+      if (w == null) return;
       for (final s in ref.read(visibleSitesProvider).value ?? const <Site>[]) {
         ref.invalidate(siteStatsProvider((s, w)));
       }
@@ -95,12 +97,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
 
     final periodState = ref.watch(periodProvider);
-    final window = periodState.window();
+    // Null tant que « Tout » attend la date de première donnée : on ne lance
+    // rien sur une fenêtre provisoire, qui serait refetchée juste après.
+    final window = ref.watch(windowProvider);
     // Périmètre = le groupe actif (tous les sites si aucun n'est sélectionné).
     final sitesAsync = ref.watch(visibleSitesProvider);
-    final sites = sitesAsync.value ?? const <Site>[];
+    final sites = window == null ? const <Site>[] : (sitesAsync.value ?? const <Site>[]);
     final group = ref.watch(activeWorkspaceProvider);
-    final totals = ref.watch(homeTotalsProvider((window, periodState.compare)));
+    final totals = window == null
+        ? HomeTotals(
+            data: HomeData.empty,
+            pending: 0,
+            siteCount: 0,
+            loading: true,
+          )
+        : ref.watch(homeTotalsProvider((window, periodState.compare)));
     final now = DateTime.now();
     final viewMode = ref.watch(settingsProvider.select((s) => s.homeView));
     // Barre de chargement tant que des sites arrivent encore.
@@ -124,7 +135,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             // Ne réactualise que la fenêtre courante (cache des autres périodes
             // préservé) ; les valeurs se mettent à jour en place.
             for (final s in sites) {
-              ref.invalidate(siteStatsProvider((s, window)));
+              if (window != null) ref.invalidate(siteStatsProvider((s, window)));
             }
             ref.invalidate(siteLiveProvider);
             await ref.read(sitesProvider.future);
@@ -178,22 +189,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               // lieu de se remplacer d'un coup.
               GlanceSwap(
                 child: KeyedSubtree(
-                  key: ValueKey(sitesAsync.hasError && sites.isEmpty
-                      ? 'error'
-                      : sites.isEmpty && sitesAsync.isLoading
-                          ? 'skeleton'
-                          : sites.isEmpty
-                              ? 'empty'
-                              : 'content'),
-                  child: _buildBody(
-                    sitesAsync: sitesAsync,
-                    sites: sites,
-                    group: group,
-                    totals: totals,
-                    window: window,
-                    viewMode: viewMode,
-                    orderedSites: orderedSites,
-                  ),
+                  key: ValueKey(window == null
+                      ? 'skeleton'
+                      : sitesAsync.hasError && sites.isEmpty
+                          ? 'error'
+                          : sites.isEmpty && sitesAsync.isLoading
+                              ? 'skeleton'
+                              : sites.isEmpty
+                                  ? 'empty'
+                                  : 'content'),
+                  child: window == null
+                      ? const _HomeSkeleton()
+                      : _buildBody(
+                          sitesAsync: sitesAsync,
+                          sites: sites,
+                          group: group,
+                          totals: totals,
+                          window: window,
+                          viewMode: viewMode,
+                          orderedSites: orderedSites,
+                        ),
                 ),
               ),
             ],
@@ -534,7 +549,7 @@ class _TotalCard extends ConsumerWidget {
           const SizedBox(height: 14),
           GlanceChart(
             series: series,
-            unit: window.unit.api,
+            unit: window.unit,
             height: 156,
             showPageviews: true,
             visitorsTotal: data.totalVisitors,
@@ -542,6 +557,8 @@ class _TotalCard extends ConsumerWidget {
             forecast: forecast,
             compareSeries: data.totalCompareSeries,
             hidden: hidden,
+            style: ref.watch(settingsProvider.select((s) => s.chartStyle)),
+            trailing: UnitPicker(window: window),
             onToggle: (k) => ref.read(settingsProvider.notifier).toggleSeries(k),
           ),
         ],

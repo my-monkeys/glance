@@ -204,6 +204,29 @@ class SettingsScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  Text('Graphiques', style: GT.body(15, color: p.fg)),
+                  const SizedBox(height: 4),
+                  Text('Courbe lissée ou barres',
+                      style: GT.body(12.5, color: p.fg3)),
+                  const SizedBox(height: 12),
+                  ChipRow(
+                    children: [
+                      for (final style in ChartStyle.values)
+                        GlanceChip(
+                          label: style.label,
+                          selected: settings.chartStyle == style,
+                          onTap: () => notifier.setChartStyle(style),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 13, 16, 14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
                   Text('Période par défaut', style: GT.body(15, color: p.fg)),
                   const SizedBox(height: 4),
                   Text('À l\'ouverture de l\'application',

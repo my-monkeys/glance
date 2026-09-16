@@ -155,7 +155,7 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
       // le listing (email/mdp) et les stats (clé API) sont indépendants — une
       // mauvaise clé passait inaperçue (sites listés mais stats en échec 401).
       try {
-        await provider.summary(sites.first, const PeriodState().window());
+        await provider.summary(sites.first, const PeriodState().resolve());
       } on DioException catch (e) {
         final code = e.response?.statusCode ?? 0;
         if (code == 401 || code == 403) {

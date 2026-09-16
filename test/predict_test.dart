@@ -116,15 +116,21 @@ void main() {
       expect(prev.unit, TimeUnit.month);
     });
 
-    test('allTime : null (fenêtre > 400 j, pas de "avant" pertinent)', () {
+    test('allTime : null (pas de "avant" pertinent)', () {
       final w = Period.allTime.window(now: now);
       expect(previousPeriodWindow(w), isNull);
     });
   });
 
   group('displaySeries', () {
-    DateWindow wideWindow() =>
-        DateWindow(DateTime(2016, 1, 1), DateTime(2026, 9, 1), TimeUnit.month);
+    // « Tout » : le rognage se déclenche sur ce drapeau, pas sur la durée — un
+    // site jeune a un « Tout » de trois mois.
+    DateWindow wideWindow() => DateWindow(
+          DateTime(2016, 1, 1),
+          DateTime(2026, 9, 1),
+          TimeUnit.month,
+          allTime: true,
+        );
     DateWindow normalWindow() =>
         DateWindow(DateTime(2026, 8, 1), DateTime(2026, 8, 12), TimeUnit.day);
 

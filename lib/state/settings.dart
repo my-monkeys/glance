@@ -19,6 +19,15 @@ enum ThemeChoice {
 /// Disposition de la liste des sites sur l'accueil.
 enum HomeViewMode { list, grid }
 
+/// Rendu des grands graphiques.
+enum ChartStyle {
+  curve('Courbe'),
+  bars('Barres');
+
+  const ChartStyle(this.label);
+  final String label;
+}
+
 @immutable
 class Settings {
   const Settings({
@@ -29,6 +38,7 @@ class Settings {
     this.hiddenSeries = const {},
     this.defaultPeriod = Period.d7,
     this.hideZeroSites = false,
+    this.chartStyle = ChartStyle.curve,
   });
 
   final ThemeChoice theme;
@@ -38,6 +48,7 @@ class Settings {
   final Set<String> hiddenSeries; // séries masquées sur les gros graphes
   final Period defaultPeriod; // période affichée au lancement
   final bool hideZeroSites; // masque les sites à 0 visiteur (liste desktop)
+  final ChartStyle chartStyle; // courbe lissée ou barres
 
   Settings copyWith({
     ThemeChoice? theme,
@@ -47,6 +58,7 @@ class Settings {
     Set<String>? hiddenSeries,
     Period? defaultPeriod,
     bool? hideZeroSites,
+    ChartStyle? chartStyle,
   }) => Settings(
     theme: theme ?? this.theme,
     refreshSeconds: refreshSeconds ?? this.refreshSeconds,
@@ -55,6 +67,7 @@ class Settings {
     hiddenSeries: hiddenSeries ?? this.hiddenSeries,
     defaultPeriod: defaultPeriod ?? this.defaultPeriod,
     hideZeroSites: hideZeroSites ?? this.hideZeroSites,
+    chartStyle: chartStyle ?? this.chartStyle,
   );
 }
 
@@ -66,6 +79,7 @@ class SettingsNotifier extends Notifier<Settings> {
   static const _kHiddenSeries = 'glance.chart.hidden';
   static const _kDefaultPeriod = 'glance.period.default';
   static const _kHideZeroSites = 'glance.sites.hideZero';
+  static const _kChartStyle = 'glance.chart.style';
 
   SharedPreferences get _p => ref.read(sharedPrefsProvider);
 
@@ -87,6 +101,10 @@ class SettingsNotifier extends Notifier<Settings> {
       defaultPeriod:
           Period.fromKey(_p.getString(_kDefaultPeriod) ?? Period.d7.key),
       hideZeroSites: _p.getBool(_kHideZeroSites) ?? false,
+      chartStyle: ChartStyle.values.firstWhere(
+        (v) => v.name == _p.getString(_kChartStyle),
+        orElse: () => ChartStyle.curve,
+      ),
     );
   }
 
@@ -105,6 +123,11 @@ class SettingsNotifier extends Notifier<Settings> {
   void setDirectOnlyLive(bool v) {
     _p.setBool(_kDirectOnlyLive, v);
     state = state.copyWith(directOnlyLive: v);
+  }
+
+  void setChartStyle(ChartStyle v) {
+    _p.setString(_kChartStyle, v.name);
+    state = state.copyWith(chartStyle: v);
   }
 
   void setHideZeroSites(bool v) {

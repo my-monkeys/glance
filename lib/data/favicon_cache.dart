@@ -12,10 +12,14 @@ class Favicon {
   final bool isSvg;
 }
 
-/// Récupère et met en cache le favicon d'un domaine. On ne contacte que le site
-/// lui-même (que l'utilisateur possède) : on lit son HTML, on suit le
-/// `<link rel="icon">` et on télécharge l'icône. Cache disque persistant pour ne
-/// pas re-télécharger à chaque affichage.
+/// Récupère et met en cache les petites icônes de l'app, sur disque comme en
+/// mémoire : le favicon d'un site suivi ([get], qui lit le HTML du site et suit
+/// son `<link rel="icon">`) et n'importe quelle icône désignée par son URL
+/// ([fromUrl] — favicon d'un domaine référent, logo de navigateur ou de système
+/// servi par l'instance Umami).
+///
+/// Les `.ico` sont décodés nativement par Flutter (vérifié sur de vrais fichiers
+/// ICO 32 bits non-PNG) : aucun décodeur à embarquer.
 class FaviconCache {
   FaviconCache(this._dio);
   final Dio _dio;
@@ -41,39 +45,50 @@ class FaviconCache {
     return fav;
   }
 
-  Future<Favicon?> _load(String domain) async {
-    final dir = await _cacheDir();
-    final key = _key(domain);
-    final rasterFile = File('${dir.path}/$key.img');
-    final svgFile = File('${dir.path}/$key.svg');
-    final missFile = File('${dir.path}/$key.miss');
+  /// Icône d'une URL connue d'avance, rangée sous [cacheKey]. Sert aux icônes
+  /// qui n'ont pas à être devinées : favicon d'un domaine référent, logo de
+  /// navigateur ou de système d'une instance Umami.
+  Future<Favicon?> fromUrl(String cacheKey, String url) async {
+    if (_mem.containsKey(cacheKey)) return _mem[cacheKey];
+    final fav = await _cached(cacheKey, () => _tryDownload(url));
+    _mem[cacheKey] = fav;
+    return fav;
+  }
 
-    // Cache disque.
+  /// Lit le cache disque, sinon appelle [fetch] et écrit le résultat. Un échec
+  /// est mémorisé 7 jours pour ne pas re-tenter à chaque affichage.
+  Future<Favicon?> _cached(String key, Future<Favicon?> Function() fetch) async {
+    final dir = await _cacheDir();
+    final safeKey = _key(key);
+    final rasterFile = File('${dir.path}/$safeKey.img');
+    final svgFile = File('${dir.path}/$safeKey.svg');
+    final missFile = File('${dir.path}/$safeKey.miss');
+
     if (rasterFile.existsSync() && rasterFile.lengthSync() > 0) {
       return Favicon(await rasterFile.readAsBytes(), isSvg: false);
     }
     if (svgFile.existsSync() && svgFile.lengthSync() > 0) {
       return Favicon(await svgFile.readAsBytes(), isSvg: true);
     }
-    // Échec récent mémorisé (évite de re-tenter en boucle pendant 7 jours).
     if (missFile.existsSync() &&
         DateTime.now().difference(missFile.lastModifiedSync()).inDays < 7) {
       return null;
     }
 
     try {
-      final fav = await _fetch(domain);
+      final fav = await fetch();
       if (fav == null) {
         missFile.writeAsStringSync('');
         return null;
       }
-      final file = fav.isSvg ? svgFile : rasterFile;
-      await file.writeAsBytes(fav.bytes);
+      await (fav.isSvg ? svgFile : rasterFile).writeAsBytes(fav.bytes);
       return fav;
     } catch (_) {
       return null;
     }
   }
+
+  Future<Favicon?> _load(String domain) => _cached(domain, () => _fetch(domain));
 
   Future<Favicon?> _fetch(String domain) async {
     final origin = 'https://$domain';

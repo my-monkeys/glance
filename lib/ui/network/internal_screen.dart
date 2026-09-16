@@ -20,9 +20,11 @@ class InternalTrafficScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final p = context.glance;
     final periodState = ref.watch(periodProvider);
-    final window = periodState.window();
-    final state = ref.watch(internalTrafficProvider(window));
-    final t = state.data;
+    final window = ref.watch(windowProvider);
+    final state = window == null
+        ? null
+        : ref.watch(internalTrafficProvider(window));
+    final t = state?.data ?? const InternalTraffic([]);
 
     return Scaffold(
       backgroundColor: p.bg,
@@ -69,11 +71,11 @@ class InternalTrafficScreen extends ConsumerWidget {
                     children: [
                       Text(fmtInt(t.total), style: GT.stat(40, color: p.fg)),
                       const SizedBox(width: 10),
-                      if (state.pending > 0)
+                      if ((state?.pending ?? 0) > 0)
                         Padding(
                           padding: const EdgeInsets.only(bottom: 8),
                           child: Text(
-                            '${state.pending} site(s) en cours…',
+                            '${state?.pending ?? 0} site(s) en cours…',
                             style: GT.mono(10, color: p.fg3),
                           ),
                         ),
@@ -87,7 +89,7 @@ class InternalTrafficScreen extends ConsumerWidget {
                 ],
               ),
             ),
-            if (t.isEmpty && !state.loading) ...[
+            if (t.isEmpty && !(state?.loading ?? true)) ...[
               const SizedBox(height: 26),
               Center(
                 child: Text(

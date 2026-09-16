@@ -16,7 +16,8 @@ class CompareToggle extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final p = context.glance;
     final state = ref.watch(periodProvider);
-    if (previousPeriodWindow(state.window()) == null) {
+    final window = ref.watch(windowProvider);
+    if (window == null || previousPeriodWindow(window) == null) {
       return const SizedBox.shrink();
     }
     final on = state.compare;

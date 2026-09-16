@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/format.dart';
 import '../../data/models/models.dart';
+import '../../data/models/period.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
 import 'chart_util.dart';
@@ -37,7 +38,7 @@ class EventsChart extends StatelessWidget {
 
   final List<EventSeries> series; // séries visibles
   final Map<String, Color> colors; // nom → couleur (stable)
-  final String unit;
+  final TimeUnit unit;
   final double height;
 
   @override

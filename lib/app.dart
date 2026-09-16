@@ -90,7 +90,10 @@ class _WidgetSync extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final periodState = ref.watch(periodProvider);
-    final window = periodState.window();
+    // Toujours monté : s'il résolvait la fenêtre lui-même, il maintiendrait en
+    // vie une seconde grappe de providers pour tous les sites.
+    final window = ref.watch(windowProvider);
+    if (window == null) return child;
     ref.listen(homeTotalsProvider((window, periodState.compare)), (prev, next) {
       if (next.data.cards.isNotEmpty && !next.loading) {
         WidgetPublisher.publish(next.data, periodState.period.label);

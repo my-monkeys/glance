@@ -25,44 +25,41 @@ class ForecastSpec {
 ForecastSpec? forecastSpecFor(DateWindow w, {DateTime? now}) {
   final n = now ?? DateTime.now();
   if (!w.end.isAfter(n)) return null;
-  switch (w.unit) {
-    case TimeUnit.hour:
-      final dayStart = DateTime(n.year, n.month, n.day);
-      if (w.start == dayStart) {
-        return ForecastSpec(
-          until: DateTime(n.year, n.month, n.day + 1),
-          reference: DateWindow(
-            DateTime(n.year, n.month, n.day - 1),
-            dayStart,
-            TimeUnit.hour,
-          ),
-        );
-      }
-    case TimeUnit.day:
-      final monthStart = DateTime(n.year, n.month, 1);
-      if (w.start == monthStart) {
-        return ForecastSpec(
-          until: DateTime(n.year, n.month + 1, 1),
-          reference: DateWindow(
-            DateTime(n.year, n.month - 1, 1),
-            monthStart,
-            TimeUnit.day,
-          ),
-        );
-      }
-    case TimeUnit.month:
-      final yearStart = DateTime(n.year, 1, 1);
-      if (w.start == yearStart) {
-        return ForecastSpec(
-          until: DateTime(n.year + 1, 1, 1),
-          reference: DateWindow(
-            DateTime(n.year - 1, 1, 1),
-            yearStart,
-            TimeUnit.month,
-          ),
-        );
-      }
-    }
+  // « Tout » n'est pas une période calendaire : rien à projeter au-delà du
+  // bucket courant.
+  if (w.allTime) return ForecastSpec(until: w.end);
+
+  // L'alignement se lit sur le DÉBUT seul, du plus large au plus étroit — pas
+  // sur la granularité, qui est désormais choisie par l'utilisateur. Croiser
+  // les deux ferait prendre « ce mois-ci en granularité heure », le 1er du
+  // mois, pour « aujourd'hui » : la prévision s'arrêterait au lendemain.
+  final yearStart = DateTime(n.year, 1, 1);
+  final monthStart = DateTime(n.year, n.month, 1);
+  final dayStart = DateTime(n.year, n.month, n.day);
+
+  if (w.start == yearStart && w.end.isAfter(monthStart)) {
+    return ForecastSpec(
+      until: DateTime(n.year + 1, 1, 1),
+      reference: DateWindow(DateTime(n.year - 1, 1, 1), yearStart, w.unit),
+    );
+  }
+  if (w.start == monthStart) {
+    return ForecastSpec(
+      until: DateTime(n.year, n.month + 1, 1),
+      reference:
+          DateWindow(DateTime(n.year, n.month - 1, 1), monthStart, w.unit),
+    );
+  }
+  if (w.start == dayStart) {
+    return ForecastSpec(
+      until: DateTime(n.year, n.month, n.day + 1),
+      reference: DateWindow(
+        DateTime(n.year, n.month, n.day - 1),
+        dayStart,
+        w.unit,
+      ),
+    );
+  }
   return ForecastSpec(until: w.end);
 }
 
@@ -84,6 +81,9 @@ DateWindow? forecastReferenceWindow(DateWindow w, {DateTime? now}) =>
 /// (24 h avant, 7/30 j avant, 12 m avant…). Null pour une fenêtre trop large
 /// (« Tout », > 400 j) où un « avant » n'a pas de sens.
 DateWindow? previousPeriodWindow(DateWindow w) {
+  // « Tout » n'a pas d'« avant » : l'historique complet se compare au néant, ce
+  // qui donnait un delta « ×N » trompeur.
+  if (w.allTime) return null;
   final span = w.end.difference(w.start);
   if (span.inDays > 400) return null;
   switch (w.unit) {
@@ -120,11 +120,15 @@ DateWindow? previousPeriodWindow(DateWindow w) {
   }
 }
 
-/// Série prête à afficher pour une fenêtre large (« Tout ») : écarte les
-/// buckets vides en tête pour ne pas peindre un graphe majoritairement plat
-/// avant la première vraie donnée (cf. absence d'API « première donnée » chez
-/// Umami/Plausible — on la déduit de la série déjà récupérée). Sans effet sur
-/// les fenêtres normales (seule une fenêtre de plus de 400 j est concernée).
+/// Série prête à afficher pour la période « Tout » : écarte les buckets vides
+/// en tête pour ne pas peindre un graphe majoritairement plat avant la première
+/// vraie donnée. Sans effet sur les autres fenêtres.
+///
+/// Reste utile même quand le début vient de `dataRange` : un site Umami créé il
+/// y a des années avec une visite de test, puis laissé dormant, a une « première
+/// donnée » bien antérieure à son activité réelle. Et Plausible comme Fathom ne
+/// donnent pas de plage du tout.
+///
 /// Garde la série intacte si elle est entièrement vide (état « zéro »
 /// légitime) ou si le rognage la réduirait à moins de 2 points.
 ///
@@ -133,7 +137,7 @@ DateWindow? previousPeriodWindow(DateWindow w) {
 /// pas ancrer le rognage avant le vrai début de l'activité — elle laisserait
 /// un long plat résiduel entre elle et le vrai démarrage.
 List<SeriesPoint> displaySeries(List<SeriesPoint> series, DateWindow window) {
-  if (window.end.difference(window.start).inDays <= 400) return series;
+  if (!window.allTime) return series;
   const gapLen = 2;
   bool empty(SeriesPoint p) => p.visitors <= 0 && p.pageviews <= 0;
   var cut = 0;
@@ -231,8 +235,16 @@ Forecast? buildForecast({
   final refAvg = ref.isEmpty ? 0.0 : refSum / ref.length;
   double refAt(int j) => j < ref.length ? ref[j].visitors : refAvg;
 
+  // Le profil est indexé bucket à bucket : si la référence n'a pas été
+  // récupérée dans la même granularité que la série observée, ses valeurs
+  // seraient appliquées à des buckets d'une autre durée (une moyenne
+  // journalière sur des heures surestime d'un facteur 24). Mieux vaut alors le
+  // rythme moyen observé.
+  final refConsistent =
+      ref.isEmpty || (ref.length * 2 >= series.length && series.length * 2 >= ref.length);
+
   double? ratio;
-  if (refSum > 0) {
+  if (refSum > 0 && refConsistent) {
     var upToNow = 0.0;
     for (var j = 0; j < i; j++) {
       upToNow += refAt(j);

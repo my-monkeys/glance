@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:glance/data/models/dimension.dart';
 import 'package:glance/data/models/models.dart';
 import 'package:glance/data/models/period.dart';
 import 'package:glance/data/stats_cache.dart';
@@ -45,27 +46,66 @@ void main() {
       expect(back.series[1].pageviews, 620);
     });
 
-    test('le détail exclut le live (jamais de « en direct » périmé)', () async {
+    test('aller-retour des lignes d\'une dimension, valeur brute comprise',
+        () async {
       final c = await cache();
       final w = Period.d30.window();
-      final detail = SiteDetail(
-        summary: summary,
-        series: series,
-        unit: 'day',
-        topPages: const [MetricRow(label: '/en', value: 300)],
-        sources: const [MetricRow(label: 'google.com', value: 244)],
-        countries: const [MetricRow(label: 'France', value: 8, code: 'FR')],
-        live: 5,
-        livePages: const [LivePage('/en', 3)],
-      );
-      c.writeDetail(site, w, detail);
+      c.writeMetric(site, w, MetricType.browsers, const [
+        MetricRow(label: 'Chrome', value: 289, code: 'chrome'),
+        MetricRow(label: 'Safari (iOS)', value: 58, code: 'ios'),
+      ]);
 
-      final back = c.readDetail(site, w)!;
-      expect(back.live, 0);
-      expect(back.livePages, isEmpty);
-      expect(back.topPages.single.label, '/en');
-      expect(back.countries.single.code, 'FR');
-      expect(back.summary.visitors, 411);
+      final back = c.readMetric(site, w, MetricType.browsers)!;
+      expect(back, hasLength(2));
+      expect(back.first.label, 'Chrome');
+      // Le code brut est ce dont dérive l'icône : il doit survivre au cache.
+      expect(back.first.code, 'chrome');
+      expect(back.last.value, 58);
+      // Une dimension jamais écrite ne renvoie rien (pas la précédente).
+      expect(c.readMetric(site, w, MetricType.countries), isNull);
+    });
+
+    test('écrire une dimension ne rajeunit pas les autres', () async {
+      SharedPreferences.setMockInitialValues({});
+      final prefs = await SharedPreferences.getInstance();
+      final c = StatsCache(prefs);
+      final w = Period.d30.window(); // unit=day → péremption 3 jours
+
+      // Une dimension écrite il y a dix jours, l'autre à l'instant.
+      final old = DateTime.now()
+          .subtract(const Duration(days: 10))
+          .millisecondsSinceEpoch;
+      prefs.setString(
+        'glance.cache2.m.a1.s1.30j@day',
+        jsonEncode({
+          'at': DateTime.now().millisecondsSinceEpoch,
+          'd': {
+            'path': {
+              'at': old,
+              'r': [
+                {'l': '/vieux', 'v': 3},
+              ],
+            },
+          },
+        }),
+      );
+      c.writeMetric(site, w, MetricType.browsers, const [
+        MetricRow(label: 'Chrome', value: 1, code: 'chrome'),
+      ]);
+
+      expect(c.readMetric(site, w, MetricType.browsers), hasLength(1));
+      expect(c.readMetric(site, w, MetricType.pages), isNull);
+    });
+
+    test('la granularité fait partie de la clé', () async {
+      final c = await cache();
+      final day = Period.d30.window();
+      final hour = Period.d30.window(unit: TimeUnit.hour);
+      c.writeStats(site, day, SiteStats(summary: summary, series: series));
+
+      expect(c.readStats(site, day), isNotNull);
+      // Même période, autre découpage : ce sont deux séries différentes.
+      expect(c.readStats(site, hour), isNull);
     });
 
     test('une fenêtre non standard (jour passé) n\'est pas persistée', () async {
@@ -86,7 +126,7 @@ void main() {
           .subtract(const Duration(days: 10))
           .millisecondsSinceEpoch;
       prefs.setString(
-        'glance.cache.stats.a1.s1.7j',
+        'glance.cache2.stats.a1.s1.7j@day',
         jsonEncode({
           'at': old,
           'd': {

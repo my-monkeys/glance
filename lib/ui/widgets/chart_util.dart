@@ -2,6 +2,8 @@ import 'dart:math' as math;
 
 import 'package:intl/intl.dart';
 
+import '../../data/models/period.dart';
+
 /// Arrondit un maximum vers une valeur « ronde » avec un peu de marge, pour une
 /// échelle Y lisible. Partagé par les graphiques.
 double chartNiceMax(double m) {
@@ -25,13 +27,8 @@ double chartNiceMax(double m) {
 }
 
 /// Date d'entête de tooltip selon la granularité.
-String chartTooltipDate(DateTime t, String unit) {
-  switch (unit) {
-    case 'hour':
-      return DateFormat("d MMM · HH'h'", 'fr_FR').format(t);
-    case 'month':
-      return DateFormat('MMMM yyyy', 'fr_FR').format(t);
-    default:
-      return DateFormat('EEE d MMM', 'fr_FR').format(t);
-  }
-}
+String chartTooltipDate(DateTime t, TimeUnit unit) => switch (unit) {
+  TimeUnit.hour => DateFormat("d MMM · HH'h'", 'fr_FR').format(t),
+  TimeUnit.day => DateFormat('EEE d MMM', 'fr_FR').format(t),
+  TimeUnit.month => DateFormat('MMMM yyyy', 'fr_FR').format(t),
+};

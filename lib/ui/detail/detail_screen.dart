@@ -3,13 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/countries.dart';
 import '../../core/format.dart';
-import '../../core/internal_traffic.dart';
 import '../../core/predict.dart';
 import '../../data/models/models.dart';
-import '../../state/internal_traffic.dart';
 import '../../data/models/period.dart';
+import '../../state/home_data.dart';
+import '../../state/metric_sections.dart';
 import '../../state/period_state.dart';
 import '../../state/providers.dart';
 import '../../state/settings.dart';
@@ -24,6 +23,8 @@ import '../widgets/events_chart.dart';
 import '../widgets/glance_chart.dart';
 import '../widgets/motion.dart';
 import '../widgets/pulse_dot.dart';
+import '../widgets/unit_picker.dart';
+import 'metric_sections.dart';
 
 class DetailScreen extends ConsumerStatefulWidget {
   const DetailScreen({super.key, required this.site, this.embedded = false});
@@ -43,10 +44,10 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
   _DetailTab _tab = _DetailTab.overview;
   Timer? _timer;
 
-  // Cache anti-flash : garde le dernier détail affiché pendant un rechargement
-  // en fond de la même fenêtre.
-  SiteDetail? _lastDetail;
-  DateWindow? _lastDetailWindow;
+  // Cache anti-flash : garde les dernières stats affichées pendant un
+  // rechargement en fond de la même fenêtre.
+  SiteStats? _lastStats;
+  DateWindow? _lastStatsWindow;
 
   @override
   void initState() {
@@ -54,20 +55,36 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
     final secs = ref.read(settingsProvider).refreshSeconds;
     _timer = Timer.periodic(Duration(seconds: secs), (_) {
       if (!mounted) return;
-      final w = ref.read(periodProvider).window();
-      ref.invalidate(detailProvider((widget.site, w)));
-      ref.invalidate(eventsProvider((widget.site, w)));
+      _refreshVisible();
     });
     // Rafraîchit en fond à l'ouverture si des données sont déjà en cache
     // (réouverture d'un site récent) : on affiche le cache tout de suite et on
     // met à jour derrière, sans repasser par le spinner.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      final w = ref.read(periodProvider).window();
-      if (ref.read(detailProvider((widget.site, w))).hasValue) {
-        ref.invalidate(detailProvider((widget.site, w)));
+      final w = ref.read(windowProvider);
+      if (w != null && ref.read(siteStatsProvider((widget.site, w))).hasValue) {
+        _refreshVisible();
       }
     });
+  }
+
+  /// N'invalide que ce qui est à l'écran. Rafraîchir les familles entières
+  /// relancerait toutes les dimensions et toutes les périodes visitées depuis
+  /// l'ouverture de l'app.
+  void _refreshVisible() {
+    final w = ref.read(windowProvider);
+    if (w == null) return;
+    ref.invalidate(siteStatsProvider((widget.site, w)));
+    ref.invalidate(siteLiveProvider(widget.site));
+    ref.invalidate(siteLivePagesProvider(widget.site));
+    if (_tab == _DetailTab.events) {
+      ref.invalidate(eventsProvider((widget.site, w)));
+      return;
+    }
+    for (final dim in ref.read(metricSectionsProvider).values) {
+      ref.invalidate(siteMetricProvider((widget.site, w, dim)));
+    }
   }
 
   @override
@@ -99,22 +116,29 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
   Widget build(BuildContext context) {
     final p = context.glance;
     final periodState = ref.watch(periodProvider);
-    final window = periodState.window();
-    final async = ref.watch(detailProvider((widget.site, window)));
+    final window = ref.watch(windowProvider);
+
+    final async = window == null
+        ? const AsyncValue<SiteStats>.loading()
+        : ref.watch(siteStatsProvider((widget.site, window)));
     if (async.hasValue) {
-      _lastDetail = async.value;
-      _lastDetailWindow = window;
+      _lastStats = async.value;
+      _lastStatsWindow = window;
     }
     // Rechargement en fond de la même période → on garde l'affichage précédent.
-    // Changement de période → on montre bien le chargement (données différentes).
-    // Au démarrage à froid, on repart du cache disque plutôt qu'un spinner.
-    final detail = async.value ??
-        (_lastDetailWindow == window ? _lastDetail : null) ??
-        ref.watch(cachedDetailProvider((widget.site, window)));
-    final refreshing = async.isLoading && detail != null;
-    // Onglets affichés dès l'ouverture (pas de décalage) : on part de la dernière
-    // réponse connue (persistée), sinon optimiste (affichés) tant que le réseau
-    // n'a pas répondu. Un site confirmé sans événements les masque.
+    // Changement de période → on montre bien le chargement (données
+    // différentes). Au démarrage à froid, on repart du cache disque.
+    final stats = async.value ??
+        (_lastStatsWindow == window ? _lastStats : null) ??
+        (window == null
+            ? null
+            : ref.watch(cachedStatsProvider((widget.site, window))));
+    final refreshing = async.isLoading && stats != null;
+    final live = ref.watch(siteLiveProvider(widget.site)).value ?? 0;
+
+    // Onglets affichés dès l'ouverture (pas de décalage) : on part de la
+    // dernière réponse connue (persistée), sinon optimiste (affichés) tant que
+    // le réseau n'a pas répondu. Un site confirmé sans événements les masque.
     final hasEvents = ref.watch(siteHasEventsProvider(widget.site)).value ??
         ref.watch(siteHasEventsCachedProvider(widget.site)) ??
         true;
@@ -123,153 +147,140 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
       body: Stack(
         children: [
           RefreshIndicator(
-        color: p.accent,
-        backgroundColor: p.surface,
-        onRefresh: () async {
-          ref.invalidate(detailProvider((widget.site, window)));
-          await ref.read(detailProvider((widget.site, window)).future);
-        },
-        child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(
-            parent: BouncingScrollPhysics(),
-          ),
-          padding: EdgeInsets.fromLTRB(
-            0,
-            MediaQuery.of(context).padding.top + 14,
-            0,
-            40,
-          ),
-          children: [
-            // En-tête.
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: [
-                  if (!widget.embedded) ...[
-                    GlanceIconButton(
-                      icon: Icons.arrow_back_ios_new_rounded,
-                      onTap: () => Navigator.of(context).pop(),
-                    ),
-                    const SizedBox(width: 12),
-                  ],
-                  Expanded(
-                    child: Text(
-                      widget.site.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: GT.display(26, color: p.fg),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  LivePill(count: detail?.live ?? 0, text: '${detail?.live ?? 0}'),
-                ],
+            color: p.accent,
+            backgroundColor: p.surface,
+            onRefresh: () async {
+              _refreshVisible();
+              if (window != null) {
+                await ref.read(siteStatsProvider((widget.site, window)).future);
+              }
+            },
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
               ),
-            ),
-            const SizedBox(height: 16),
-            // Périodes.
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 16, 0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: ChipRow(
-                      children: [
-                        for (final per in Period.values)
-                          GlanceChip(
-                            label: per.label,
-                            selected: periodState.period == per,
-                            onTap: () {
-                              if (per == Period.custom) {
-                                _pickCustom();
-                              } else {
-                                ref.read(periodProvider.notifier).set(per);
-                              }
-                            },
-                          ),
+              padding: EdgeInsets.fromLTRB(
+                0,
+                MediaQuery.of(context).padding.top + 14,
+                0,
+                40,
+              ),
+              children: [
+                // En-tête.
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    children: [
+                      if (!widget.embedded) ...[
+                        GlanceIconButton(
+                          icon: Icons.arrow_back_ios_new_rounded,
+                          onTap: () => Navigator.of(context).pop(),
+                        ),
+                        const SizedBox(width: 12),
                       ],
+                      Expanded(
+                        child: Text(
+                          widget.site.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GT.display(26, color: p.fg),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      LivePill(count: live, text: '$live'),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // Périodes.
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 16, 0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: ChipRow(
+                          children: [
+                            for (final per in Period.values)
+                              GlanceChip(
+                                label: per.label,
+                                selected: periodState.period == per,
+                                onTap: () {
+                                  if (per == Period.custom) {
+                                    _pickCustom();
+                                  } else {
+                                    ref.read(periodProvider.notifier).set(per);
+                                  }
+                                },
+                              ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      const CompareToggle(),
+                    ],
+                  ),
+                ),
+                GlanceReveal(
+                  show: periodState.canNavigateDays,
+                  child: const Padding(
+                    padding: EdgeInsets.fromLTRB(20, 14, 20, 0),
+                    child: DayNav(),
+                  ),
+                ),
+                GlanceReveal(
+                  show: periodState.canNavigateMonths,
+                  child: const Padding(
+                    padding: EdgeInsets.fromLTRB(20, 14, 20, 0),
+                    child: MonthNav(),
+                  ),
+                ),
+                GlanceReveal(
+                  show: periodState.canNavigateYears,
+                  child: const Padding(
+                    padding: EdgeInsets.fromLTRB(20, 14, 20, 0),
+                    child: YearNav(),
+                  ),
+                ),
+                const SizedBox(height: 18),
+
+                // Onglets Vue d'ensemble / Événements (le 2e uniquement s'il y
+                // a des événements) : la barre se déplie au lieu de pousser le
+                // contenu.
+                GlanceReveal(
+                  show: hasEvents,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                    child: _SegTabs(
+                      current: _tab,
+                      onChanged: (t) => setState(() => _tab = t),
                     ),
                   ),
-                  const SizedBox(width: 10),
-                  const CompareToggle(),
-                ],
-              ),
-            ),
-            GlanceReveal(
-              show: periodState.canNavigateDays,
-              child: const Padding(
-                padding: EdgeInsets.fromLTRB(20, 14, 20, 0),
-                child: DayNav(),
-              ),
-            ),
-            GlanceReveal(
-              show: periodState.canNavigateMonths,
-              child: const Padding(
-                padding: EdgeInsets.fromLTRB(20, 14, 20, 0),
-                child: MonthNav(),
-              ),
-            ),
-            GlanceReveal(
-              show: periodState.canNavigateYears,
-              child: const Padding(
-                padding: EdgeInsets.fromLTRB(20, 14, 20, 0),
-                child: YearNav(),
-              ),
-            ),
-            const SizedBox(height: 18),
-
-            // Onglets Vue d'ensemble / Événements (le 2e uniquement si
-            // events) : la barre se déplie au lieu de pousser le contenu.
-            GlanceReveal(
-              show: hasEvents,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                child: _SegTabs(
-                  current: _tab,
-                  onChanged: (t) => setState(() => _tab = t),
                 ),
-              ),
-            ),
 
-            GlanceSwap(
-              child: KeyedSubtree(
-                key: ValueKey(_tab == _DetailTab.events && hasEvents
-                    ? 'events'
-                    : async.hasError && detail == null
-                        ? 'error'
-                        : detail == null
-                            ? 'loading'
+                GlanceSwap(
+                  child: KeyedSubtree(
+                    key: ValueKey(_tab == _DetailTab.events && hasEvents
+                        ? 'events'
+                        : window == null || stats == null
+                            ? (async.hasError ? 'error' : 'loading')
                             : 'stats'),
-                child: _tab == _DetailTab.events && hasEvents
-                    ? _EventsTab(site: widget.site, window: window)
-                    : async.hasError && detail == null
-                        ? Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 40),
-                            child: Center(
-                              child: Text('Chargement impossible.',
-                                  style: GT.body(15, color: p.fg2)),
-                            ),
-                          )
-                        : detail == null
-                            ? Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 60),
-                                child: Center(
-                                  child: CircularProgressIndicator(
-                                    color: p.accent,
-                                    strokeWidth: 2.4,
-                                  ),
-                                ),
-                              )
+                    child: _tab == _DetailTab.events && hasEvents
+                        ? (window == null
+                            ? const _Loading()
+                            : _EventsTab(site: widget.site, window: window))
+                        : window == null || stats == null
+                            ? (async.hasError
+                                ? const _LoadError()
+                                : const _Loading())
                             : _DetailBody(
-                                detail: detail,
+                                stats: stats,
                                 window: window,
                                 site: widget.site,
                               ),
-              ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
           ),
           Positioned(
             top: MediaQuery.of(context).padding.top,
@@ -285,32 +296,36 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
 
 class _DetailBody extends ConsumerWidget {
   const _DetailBody({
-    required this.detail,
+    required this.stats,
     required this.window,
     required this.site,
   });
-  final SiteDetail detail;
+  final SiteStats stats;
   final DateWindow window;
   final Site site;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final p = context.glance;
-    final s = detail.summary;
+    final s = stats.summary;
     final hidden = ref.watch(settingsProvider.select((s) => s.hiddenSeries));
-    // Rogne le préfixe vide sur une fenêtre large (« Tout ») : sans effet
-    // ailleurs. La prévision (bucket courant) en bénéficie aussi — la moyenne
-    // n'est plus tirée vers le bas par des années à zéro.
-    final series = displaySeries(detail.series, window);
+    // Rogne le préfixe vide sur « Tout » : sans effet ailleurs. La prévision
+    // (bucket courant) en bénéficie aussi — la moyenne n'est plus tirée vers le
+    // bas par des années à zéro.
+    final series = displaySeries(stats.series, window);
     final forecast = buildForecast(
       series: series,
       window: window,
-      reference: detail.refSeries,
+      reference: stats.refSeries,
     );
     final compare = ref.watch(periodProvider.select((p) => p.compare));
     final compareSeries = compare
         ? ref.watch(siteCompareSeriesProvider((site, window))).value
         : null;
+    final live = ref.watch(siteLiveProvider(site)).value ?? 0;
+    final livePages =
+        ref.watch(siteLivePagesProvider(site)).value ?? const <LivePage>[];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -336,7 +351,7 @@ class _DetailBody extends ConsumerWidget {
               const SizedBox(height: 14),
               GlanceChart(
                 series: series,
-                unit: detail.unit,
+                unit: window.unit,
                 height: 172,
                 showPageviews: true,
                 visitorsTotal: s.visitors,
@@ -344,6 +359,8 @@ class _DetailBody extends ConsumerWidget {
                 forecast: forecast,
                 compareSeries: compareSeries,
                 hidden: hidden,
+                style: ref.watch(settingsProvider.select((s) => s.chartStyle)),
+                trailing: UnitPicker(window: window),
                 onToggle: (k) =>
                     ref.read(settingsProvider.notifier).toggleSeries(k),
               ),
@@ -380,11 +397,11 @@ class _DetailBody extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     SectionLabel('En direct maintenant'),
-                    LivePill(count: detail.live, text: '${detail.live}'),
+                    LivePill(count: live, text: '$live'),
                   ],
                 ),
                 const SizedBox(height: 6),
-                if (detail.livePages.isEmpty)
+                if (livePages.isEmpty)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: Text(
@@ -393,7 +410,7 @@ class _DetailBody extends ConsumerWidget {
                     ),
                   )
                 else
-                  for (final lp in detail.livePages)
+                  for (final lp in livePages)
                     Container(
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       decoration: BoxDecoration(
@@ -421,48 +438,47 @@ class _DetailBody extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 14),
-        _MetricCard(
-          title: 'Pages populaires',
-          rows: detail.topPages
-              .map((r) => MetricBarRow(label: r.label, value: r.value))
-              .toList(),
-          mono: true,
-        ),
-        const SizedBox(height: 14),
-        _MetricCard(
-          title: 'Sources',
-          rows: detail.sources
-              .map((r) => MetricBarRow(
-                    label: r.label,
-                    value: r.value,
-                    // Referrer venant d'un de vos propres sites suivis.
-                    badge: ref
-                                .watch(knownDomainsProvider)
-                                .contains(normDomain(r.label)) &&
-                            normDomain(r.label) != normDomain(site.domain)
-                        ? 'INTERNE'
-                        : null,
-                  ))
-              .toList(),
-        ),
-        const SizedBox(height: 14),
-        _MetricCard(
-          title: 'Pays',
-          leadingFlag: true,
-          rows: detail.countries
-              .map((r) => MetricBarRow(
-                    label: r.label,
-                    value: r.value,
-                    flag: r.code != null ? countryFlag(r.code!) : null,
-                  ))
-              .toList(),
-          valueLabel: (row) => s.visitors == 0
-              ? fmtInt(row.value)
-              : fmtPct(row.value / s.visitors * 100, decimals: 0),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: MetricSectionGrid(
+            site: site,
+            window: window,
+            visitors: s.visitors,
+          ),
         ),
       ],
     );
   }
+}
+
+class _Loading extends StatelessWidget {
+  const _Loading();
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 60),
+        child: Center(
+          child: CircularProgressIndicator(
+            color: context.glance.accent,
+            strokeWidth: 2.4,
+          ),
+        ),
+      );
+}
+
+class _LoadError extends StatelessWidget {
+  const _LoadError();
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+        child: Center(
+          child: Text(
+            'Chargement impossible.',
+            style: GT.body(15, color: context.glance.fg2),
+          ),
+        ),
+      );
 }
 
 class _Kpi extends StatelessWidget {
@@ -485,47 +501,6 @@ class _Kpi extends StatelessWidget {
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
               child: Text(value, style: GT.stat(22, color: p.fg)),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _MetricCard extends StatelessWidget {
-  const _MetricCard({
-    required this.title,
-    required this.rows,
-    this.mono = false,
-    this.leadingFlag = false,
-    this.valueLabel,
-  });
-
-  final String title;
-  final List<MetricBarRow> rows;
-  final bool mono;
-  final bool leadingFlag;
-  final String Function(MetricBarRow row)? valueLabel;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: GlanceCard(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: SectionLabel(title),
-            ),
-            MetricBars(
-              rows: rows,
-              mono: mono,
-              leadingFlag: leadingFlag,
-              valueLabel: valueLabel,
             ),
           ],
         ),
@@ -610,19 +585,7 @@ class _EventsTabState extends ConsumerState<_EventsTab> {
     final data = async.value;
 
     if (data == null) {
-      if (async.hasError) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
-          child: Center(
-            child: Text('Chargement impossible.',
-                style: GT.body(15, color: p.fg2)),
-          ),
-        );
-      }
-      return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 60),
-        child: Center(child: CircularProgressIndicator(strokeWidth: 2.4)),
-      );
+      return async.hasError ? const _LoadError() : const _Loading();
     }
 
     if (data.isEmpty) {
@@ -662,7 +625,13 @@ class _EventsTabState extends ConsumerState<_EventsTab> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SectionLabel('Événements déclenchés'),
+              Row(
+                children: [
+                  SectionLabel('Événements déclenchés'),
+                  const Spacer(),
+                  UnitPicker(window: widget.window),
+                ],
+              ),
               const SizedBox(height: 8),
               Text(fmtInt(data.total), style: GT.stat(54, color: p.fg)),
               const SizedBox(height: 16),
@@ -693,16 +662,32 @@ class _EventsTabState extends ConsumerState<_EventsTab> {
           ),
         ),
         const SizedBox(height: 20),
-        _MetricCard(
-          title: 'Par événement',
-          mono: true,
-          rows: data.breakdown
-              .map((r) => MetricBarRow(
-                    label: r.label,
-                    value: r.value,
-                    color: colors[r.label],
-                  ))
-              .toList(),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: GlanceCard(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: SectionLabel('Par événement'),
+                ),
+                MetricBars(
+                  rows: data.breakdown
+                      .map((r) => MetricBarRow(
+                            label: r.label,
+                            value: r.value,
+                            color: colors[r.label],
+                          ))
+                      .toList(),
+                  mono: true,
+                  total: data.total,
+                  accountId: widget.site.accountId,
+                ),
+              ],
+            ),
+          ),
         ),
         const SizedBox(height: 24),
       ],

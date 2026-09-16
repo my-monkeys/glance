@@ -28,6 +28,7 @@ import '../widgets/motion.dart';
 import '../widgets/pulse_dot.dart';
 import '../widgets/site_avatar.dart';
 import '../widgets/sparkline.dart';
+import '../widgets/unit_picker.dart';
 import '../widgets/workspace_switcher.dart';
 
 /// Largeur minimale pour basculer en shell desktop master-détail.
@@ -94,8 +95,15 @@ class _Sidebar extends ConsumerWidget {
     final p = context.glance;
     final nav = ref.watch(desktopNavProvider);
     final periodState = ref.watch(periodProvider);
-    final window = periodState.window();
-    final totals = ref.watch(homeTotalsProvider((window, periodState.compare)));
+    final window = ref.watch(windowProvider);
+    final totals = window == null
+        ? HomeTotals(
+            data: HomeData.empty,
+            pending: 0,
+            siteCount: 0,
+            loading: true,
+          )
+        : ref.watch(homeTotalsProvider((window, periodState.compare)));
     // Périmètre = le groupe actif (tous les sites si aucun n'est sélectionné).
     final sitesAsync = ref.watch(visibleSitesProvider);
     final sites = sitesAsync.value ?? const <Site>[];
@@ -582,7 +590,8 @@ class _OverviewState extends ConsumerState<_Overview> {
       if (!mounted) return;
       // Rafraîchit en place la seule fenêtre courante (autres périodes en
       // cache), limité au groupe affiché.
-      final w = ref.read(periodProvider).window();
+      final w = ref.read(windowProvider);
+      if (w == null) return;
       for (final s in ref.read(visibleSitesProvider).value ?? const <Site>[]) {
         ref.invalidate(siteStatsProvider((s, w)));
       }
@@ -615,8 +624,15 @@ class _OverviewState extends ConsumerState<_Overview> {
   Widget build(BuildContext context) {
     final p = context.glance;
     final periodState = ref.watch(periodProvider);
-    final window = periodState.window();
-    final totals = ref.watch(homeTotalsProvider((window, periodState.compare)));
+    final window = ref.watch(windowProvider);
+    final totals = window == null
+        ? HomeTotals(
+            data: HomeData.empty,
+            pending: 0,
+            siteCount: 0,
+            loading: true,
+          )
+        : ref.watch(homeTotalsProvider((window, periodState.compare)));
     final data = totals.data;
     final hidden = ref.watch(settingsProvider.select((s) => s.hiddenSeries));
     final refreshing = totals.loading && data.cards.isNotEmpty;
@@ -697,23 +713,29 @@ class _OverviewState extends ConsumerState<_Overview> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  GlanceChart(
-                    series: displaySeries(data.totalSeries, window),
-                    unit: window.unit.api,
-                    height: 220,
-                    showPageviews: true,
-                    visitorsTotal: data.totalVisitors,
-                    pageviewsTotal: data.totalPageviews,
-                    forecast: buildForecast(
+                  if (window == null)
+                    const SizedBox(height: 220)
+                  else
+                    GlanceChart(
                       series: displaySeries(data.totalSeries, window),
-                      window: window,
-                      reference: data.totalRefSeries,
+                      unit: window.unit,
+                      height: 220,
+                      showPageviews: true,
+                      visitorsTotal: data.totalVisitors,
+                      pageviewsTotal: data.totalPageviews,
+                      forecast: buildForecast(
+                        series: displaySeries(data.totalSeries, window),
+                        window: window,
+                        reference: data.totalRefSeries,
+                      ),
+                      compareSeries: data.totalCompareSeries,
+                      hidden: hidden,
+                      style: ref
+                          .watch(settingsProvider.select((s) => s.chartStyle)),
+                      trailing: UnitPicker(window: window),
+                      onToggle: (k) =>
+                          ref.read(settingsProvider.notifier).toggleSeries(k),
                     ),
-                    compareSeries: data.totalCompareSeries,
-                    hidden: hidden,
-                    onToggle: (k) =>
-                        ref.read(settingsProvider.notifier).toggleSeries(k),
-                  ),
                 ],
               ),
             ),

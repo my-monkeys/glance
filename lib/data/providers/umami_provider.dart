@@ -343,17 +343,27 @@ class UmamiProvider extends AnalyticsProvider {
     TimeUnit.month => DateTime(t.year, t.month + 1, 1),
   };
 
+  /// Au-delà, la série ne se lit plus et la remplir coûte plus que ce qu'elle
+  /// apprend. `allowedUnits` (data/models/period.dart) n'offre jamais une
+  /// granularité qui y mène ; si on y arrive quand même, mieux vaut une erreur
+  /// visible qu'une courbe tronquée par la fin, qui passerait pour un trou de
+  /// collecte.
+  static const _maxBuckets = 2000;
+
   List<DateTime> _buckets(DateWindow w) {
     final out = <DateTime>[];
     var c = _truncate(w.start, w.unit);
     // Borne de fin exclusive : `w.end` est plafonné au début de l'unité
     // suivante, donc on s'arrête avant (pas de bucket futur vide).
     final end = _truncate(w.end, w.unit);
-    var guard = 0;
-    while (c.isBefore(end) && guard < 2000) {
+    while (c.isBefore(end)) {
+      if (out.length >= _maxBuckets) {
+        throw StateError(
+          'Découpage trop fin : plus de $_maxBuckets points sur la période.',
+        );
+      }
       out.add(c);
       c = _advance(c, w.unit);
-      guard++;
     }
     return out;
   }

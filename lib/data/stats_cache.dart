@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'models/dimension.dart';
 import 'models/models.dart';
 import 'models/period.dart';
 import '../state/home_data.dart';
@@ -13,15 +14,16 @@ import '../state/home_data.dart';
 /// Le cache mémoire de session (`cacheSession`) couvre déjà la navigation en
 /// cours ; celui-ci survit à la fermeture de l'app.
 ///
-/// **Clé stable par période** (`7j`, `30j`…), pas par fenêtre absolue : la
-/// fenêtre alignée bouge chaque jour, donc on garde « le dernier 7 j connu » et
-/// le refetch corrige les chiffres. Les fenêtres de navigation jour-à-jour ou
-/// personnalisées ne sont pas persistées (elles renvoient un bucket null).
+/// **Clé stable par période et granularité** (`7j@day`, `7j@hour`…), pas par
+/// fenêtre absolue : la fenêtre alignée bouge chaque jour, donc on garde « le
+/// dernier 7 j connu » et le refetch corrige les chiffres. Les fenêtres de
+/// navigation jour-à-jour, personnalisées ou « Tout » ne sont pas persistées
+/// (elles renvoient un bucket null).
 class StatsCache {
   StatsCache(this._prefs);
   final SharedPreferences _prefs;
 
-  static const _prefix = 'glance.cache.';
+  static const _prefix = 'glance.cache2.';
 
   /// Périodes « live » (offset 0) persistables. Une fenêtre qui n'égale aucune
   /// de leurs fenêtres courantes est une navigation ponctuelle → non persistée.
@@ -45,7 +47,11 @@ class StatsCache {
 
   String? _bucket(DateWindow w) {
     for (final per in _buckets) {
-      if (per.window() == w) return per.key;
+      // La granularité fait partie de l'identité : « 7 j en heures » et
+      // « 7 j en jours » sont deux séries différentes. Sans elle, une
+      // granularité forcée ne trouverait aucune correspondance et le cache
+      // disque s'éteindrait sans rien dire.
+      if (per.window(unit: w.unit) == w) return '${per.key}@${w.unit.api}';
     }
     return null;
   }
@@ -53,14 +59,22 @@ class StatsCache {
   String _key(String kind, Site s, String bucket) =>
       '$_prefix$kind.${s.accountId}.${s.id}.$bucket';
 
-  Map<String, dynamic>? _read(String kind, Site s, DateWindow w) {
+  Map<String, dynamic>? _read(
+    String kind,
+    Site s,
+    DateWindow w, {
+    bool ignoreAge = false,
+  }) {
     final bucket = _bucket(w);
     if (bucket == null) return null;
     final raw = _prefs.getString(_key(kind, s, bucket));
     if (raw == null) return null;
     final env = jsonDecode(raw) as Map<String, dynamic>;
-    final age = DateTime.now().millisecondsSinceEpoch - (env['at'] as int? ?? 0);
-    if (age > _maxAge(w.unit).inMilliseconds) return null;
+    if (!ignoreAge) {
+      final age =
+          DateTime.now().millisecondsSinceEpoch - (env['at'] as int? ?? 0);
+      if (age > _maxAge(w.unit).inMilliseconds) return null;
+    }
     return env['d'] as Map<String, dynamic>;
   }
 
@@ -83,15 +97,35 @@ class StatsCache {
   void writeStats(Site s, DateWindow w, SiteStats v) =>
       _write('stats', s, w, _statsToJson(v));
 
-  // --- Détail (live volontairement exclu : jamais de « en direct » périmé) ---
+  // --- Métriques, une entrée par dimension ---
+  //
+  // Un seul enregistrement par (site, période), indexé par dimension : une clé
+  // de préférences par dimension ferait ~2 000 entrées pour vingt sites, dans
+  // un fichier relu et réécrit à chaque écriture.
 
-  SiteDetail? readDetail(Site s, DateWindow w) {
-    final d = _read('detail', s, w);
-    return d == null ? null : _detailFromJson(d);
+  List<MetricRow>? readMetric(Site s, DateWindow w, MetricType type) {
+    final entry = _read('m', s, w)?[type.key];
+    if (entry is! Map) return null;
+    // Horodatage **par dimension** : écrire les navigateurs ne doit pas
+    // rajeunir des chemins récupérés cinq heures plus tôt.
+    final age = DateTime.now().millisecondsSinceEpoch - (entry['at'] as int? ?? 0);
+    if (age > _maxAge(w.unit).inMilliseconds) return null;
+    return _rowsFromJson(entry['r'] as List<dynamic>);
   }
 
-  void writeDetail(Site s, DateWindow w, SiteDetail v) =>
-      _write('detail', s, w, _detailToJson(v));
+  void writeMetric(
+    Site s,
+    DateWindow w,
+    MetricType type,
+    List<MetricRow> rows,
+  ) {
+    final data = _read('m', s, w, ignoreAge: true) ?? <String, dynamic>{};
+    data[type.key] = {
+      'at': DateTime.now().millisecondsSinceEpoch,
+      'r': _rowsToJson(rows),
+    };
+    _write('m', s, w, data);
+  }
 }
 
 // --- Sérialisation (clés courtes, live/livePages non persistés) ---
@@ -149,29 +183,6 @@ Map<String, dynamic> _statsToJson(SiteStats v) => {
 SiteStats _statsFromJson(Map<String, dynamic> j) => SiteStats(
   summary: _summaryFromJson(j['s'] as Map<String, dynamic>),
   series: _seriesFromJson(j['se'] as List<dynamic>),
-  refSeries:
-      j['rf'] == null ? null : _seriesFromJson(j['rf'] as List<dynamic>),
-);
-
-Map<String, dynamic> _detailToJson(SiteDetail v) => {
-  's': _summaryToJson(v.summary),
-  'se': _seriesToJson(v.series),
-  'u': v.unit,
-  'tp': _rowsToJson(v.topPages),
-  'sr': _rowsToJson(v.sources),
-  'co': _rowsToJson(v.countries),
-  if (v.refSeries != null) 'rf': _seriesToJson(v.refSeries!),
-};
-
-SiteDetail _detailFromJson(Map<String, dynamic> j) => SiteDetail(
-  summary: _summaryFromJson(j['s'] as Map<String, dynamic>),
-  series: _seriesFromJson(j['se'] as List<dynamic>),
-  unit: j['u'] as String,
-  topPages: _rowsFromJson(j['tp'] as List<dynamic>),
-  sources: _rowsFromJson(j['sr'] as List<dynamic>),
-  countries: _rowsFromJson(j['co'] as List<dynamic>),
-  live: 0,
-  livePages: const [],
   refSeries:
       j['rf'] == null ? null : _seriesFromJson(j['rf'] as List<dynamic>),
 );

@@ -1,9 +1,13 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../core/format.dart';
+import '../../data/models/dimension.dart';
 import '../../theme/motion.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
+import 'metric_icon.dart';
 
 /// Carte surface standard (bordure fine + rayon + ombre douce).
 class GlanceCard extends StatelessWidget {
@@ -159,34 +163,95 @@ class DeltaText extends StatelessWidget {
   }
 }
 
-/// Liste « label · valeur + barre » (pages, sources, pays).
+/// Hauteur d'une ligne de métrique (libellé + barre + marges). Sert à réserver
+/// la place des lignes manquantes pour que des cartes côte à côte gardent la
+/// même hauteur quand on change de sous-dimension.
+const double kMetricRowHeight = 46;
+
+/// Liste « libellé · valeur + barre » (pages, sources, pays…).
 class MetricBars extends StatelessWidget {
   const MetricBars({
     super.key,
     required this.rows,
     this.mono = false,
-    this.leadingFlag = false,
+    this.total,
+    this.accountId,
+    this.reserveRows = 0,
     this.valueLabel,
   });
 
   final List<MetricBarRow> rows;
-  final bool mono; // libellé en police mono (chemins de pages)
-  final bool leadingFlag; // préfixe drapeau (pays)
+
+  /// Libellé en police à chasse fixe (chemins, requêtes, résolutions).
+  final bool mono;
+
+  /// Univers auquel rapporter chaque valeur pour afficher un pourcentage.
+  /// Null = une seule colonne, comme avant.
+  ///
+  /// C'est un total du résumé (visiteurs), jamais la somme des lignes reçues :
+  /// celle-ci dépend du nombre de lignes demandées, si bien qu'afficher une
+  /// ligne de plus changerait tous les pourcentages déjà lus.
+  final int? total;
+
+  /// Compte auquel appartiennent ces lignes — nécessaire dès qu'une ligne porte
+  /// une icône, dont la source dépend de l'instance.
+  final String? accountId;
+
+  /// Complète avec du vide jusqu'à ce nombre de lignes (hauteur stable).
+  final int reserveRows;
+
   final String Function(MetricBarRow row)? valueLabel;
+
+  /// Largeur du plus large des textes, mesurée sur les chaînes réellement
+  /// rendues : les nombres français sont groupés par une espace fine insécable
+  /// dont l'avance ne se déduit pas du nombre de caractères.
+  static double _widest(Iterable<String> texts, TextStyle style) {
+    final painter = TextPainter(textDirection: TextDirection.ltr);
+    var w = 0.0;
+    for (final t in texts) {
+      painter.text = TextSpan(text: t, style: style);
+      painter.layout();
+      w = math.max(w, painter.width);
+    }
+    painter.dispose();
+    return w;
+  }
 
   @override
   Widget build(BuildContext context) {
     final p = context.glance;
     if (rows.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        child: Text('Aucune donnée', style: GT.body(13, color: p.fg3)),
+      return SizedBox(
+        height: reserveRows > 0 ? reserveRows * kMetricRowHeight : null,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          child: Text('Aucune donnée', style: GT.body(13, color: p.fg3)),
+        ),
       );
     }
     final maxV = rows.map((r) => r.value).fold<int>(1, (a, b) => b > a ? b : a);
+
+    final numStyle = GT.mono(12, color: p.fg2);
+    final pctStyle = GT.mono(11, color: p.fg3);
+    final values = [
+      for (final r in rows) valueLabel?.call(r) ?? fmtInt(r.value),
+    ];
+    // Au-delà de 100 %, c'est un artefact de comptage (un visiteur peut
+    // apparaître dans plusieurs valeurs d'une même dimension) : on borne
+    // plutôt que d'afficher « 134 % ».
+    final pcts = total == null || total == 0
+        ? const <String>[]
+        : [
+            for (final r in rows)
+              fmtPct((r.value / total! * 100).clamp(0, 100), decimals: 0),
+          ];
+    final numWidth = _widest(values, numStyle);
+    final pctWidth = pcts.isEmpty ? 0.0 : _widest(pcts, pctStyle);
+
+    final missing = reserveRows - rows.length;
     return Column(
       children: [
-        for (final r in rows)
+        for (var i = 0; i < rows.length; i++)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 7),
             child: Column(
@@ -194,16 +259,20 @@ class MetricBars extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    if (leadingFlag && r.flag != null) ...[
-                      Text(r.flag!, style: const TextStyle(fontSize: 15)),
-                      const SizedBox(width: 8),
+                    if (rows[i].icon != MetricIconKind.none) ...[
+                      MetricIcon(
+                        kind: rows[i].icon,
+                        code: rows[i].code,
+                        accountId: accountId ?? '',
+                      ),
+                      const SizedBox(width: 9),
                     ],
                     Expanded(
                       child: Row(
                         children: [
                           Flexible(
                             child: Text(
-                              r.label,
+                              rows[i].label,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: mono
@@ -211,7 +280,7 @@ class MetricBars extends StatelessWidget {
                                   : GT.body(13, color: p.fg),
                             ),
                           ),
-                          if (r.badge != null) ...[
+                          if (rows[i].badge != null) ...[
                             const SizedBox(width: 7),
                             Container(
                               padding: const EdgeInsets.symmetric(
@@ -223,7 +292,7 @@ class MetricBars extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
-                                r.badge!,
+                                rows[i].badge!,
                                 style: GT.mono(
                                   8.5,
                                   weight: 600,
@@ -236,20 +305,41 @@ class MetricBars extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 10),
-                    Text(
-                      valueLabel?.call(r) ?? fmtInt(r.value),
-                      style: GT.mono(12, color: p.fg2),
+                    // Colonnes de largeur fixe : sans ça les bords gauches des
+                    // nombres partent en dents de scie d'une ligne à l'autre.
+                    SizedBox(
+                      width: numWidth,
+                      child: Text(
+                        values[i],
+                        textAlign: TextAlign.right,
+                        style: numStyle,
+                      ),
                     ),
+                    if (pctWidth > 0) ...[
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 7),
+                        child: Container(width: 1, height: 11, color: p.line),
+                      ),
+                      SizedBox(
+                        width: pctWidth,
+                        child: Text(
+                          pcts[i],
+                          textAlign: TextAlign.right,
+                          style: pctStyle,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
                 const SizedBox(height: 6),
                 _Bar(
-                  fraction: (r.value / maxV).clamp(0.02, 1.0),
-                  color: r.color,
+                  fraction: (rows[i].value / maxV).clamp(0.02, 1.0),
+                  color: rows[i].color,
                 ),
               ],
             ),
           ),
+        if (missing > 0) SizedBox(height: missing * kMetricRowHeight),
       ],
     );
   }
@@ -330,17 +420,22 @@ class MetricBarRow {
   const MetricBarRow({
     required this.label,
     required this.value,
-    this.flag,
-    this.pctText,
     this.color,
     this.badge,
+    this.icon = MetricIconKind.none,
+    this.code,
   });
   final String label;
   final int value;
-  final String? flag;
-  final String? pctText;
   final Color? color; // couleur de barre (ex. par événement)
   final String? badge; // pastille après le libellé (ex. « INTERNE »)
+
+  /// Famille d'icône à poser devant le libellé.
+  final MetricIconKind icon;
+
+  /// Valeur brute du fournisseur, dont dérive l'icône (domaine, slug de
+  /// navigateur, code pays). Le libellé, lui, est mis en forme pour la lecture.
+  final String? code;
 }
 
 class _Bar extends StatelessWidget {

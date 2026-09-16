@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+import 'period.dart';
+
 /// Un site suivi (un « website » côté Umami/Plausible).
 @immutable
 class Site {
@@ -112,34 +114,6 @@ class LivePage {
   final int count;
 }
 
-/// Bundle complet pour l'écran de détail (évite N appels séparés côté UI).
-@immutable
-class SiteDetail {
-  const SiteDetail({
-    required this.summary,
-    required this.series,
-    required this.unit,
-    required this.topPages,
-    required this.sources,
-    required this.countries,
-    required this.live,
-    required this.livePages,
-    this.refSeries,
-  });
-
-  final StatsSummary summary;
-  final List<SeriesPoint> series;
-  final String unit; // 'hour' | 'day' | 'month'
-  final List<MetricRow> topPages;
-  final List<MetricRow> sources;
-  final List<MetricRow> countries;
-  final int live;
-  final List<LivePage> livePages;
-
-  /// Série de la période précédente équivalente (profil pour la prévision).
-  final List<SeriesPoint>? refSeries;
-}
-
 /// Série temporelle d'un seul nom d'événement (nombre par bucket porté par
 /// [SeriesPoint.visitors] — champ réutilisé comme « compte »).
 @immutable
@@ -166,7 +140,7 @@ class EventsData {
 
   final int total;
   final List<EventSeries> series; // triées par total desc
-  final String unit;
+  final TimeUnit unit;
 
   bool get isEmpty => series.isEmpty;
 

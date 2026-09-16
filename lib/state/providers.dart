@@ -11,6 +11,7 @@ import 'package:dio/dio.dart';
 import '../data/models/period.dart';
 import '../data/providers/analytics_provider.dart';
 import '../data/providers/provider_factory.dart';
+import '../data/providers/umami_provider.dart';
 import '../data/repository/accounts_repository.dart';
 import '../data/favicon_cache.dart';
 import '../data/stats_cache.dart';
@@ -76,11 +77,13 @@ final cachedStatsProvider =
   return ref.watch(statsCacheProvider).readStats(site, w);
 });
 
-/// Idem pour le détail complet d'un site (live exclu du cache).
-final cachedDetailProvider =
-    Provider.autoDispose.family<SiteDetail?, (Site, DateWindow)>((ref, key) {
-  final (site, w) = key;
-  return ref.watch(statsCacheProvider).readDetail(site, w);
+/// Dernières lignes connues (persistées) d'une dimension, lues de façon
+/// synchrone → les cartes de données s'affichent au démarrage à froid sans
+/// attendre le réseau.
+final cachedMetricProvider = Provider.autoDispose
+    .family<List<MetricRow>?, (Site, DateWindow, MetricType)>((ref, key) {
+  final (site, w, type) = key;
+  return ref.watch(statsCacheProvider).readMetric(site, w, type);
 });
 
 /// Cache de favicons (mémoire + disque). Une seule instance pour l'app.
@@ -97,6 +100,34 @@ final faviconProvider =
   cacheFor(ref, const Duration(minutes: 30));
   if (domain.trim().isEmpty) return null;
   return ref.watch(faviconCacheProvider).get(domain.trim());
+});
+
+/// Plafond propre aux icônes. Une carte de données peut en demander quarante
+/// d'un coup : sans plafond dédié, elles entreraient en concurrence avec les
+/// requêtes de statistiques — l'inverse du but recherché.
+final iconGateProvider = Provider<Semaphore>((ref) => Semaphore(4));
+
+/// Icône dont l'URL est connue d'avance (favicon d'un domaine référent, logo
+/// de navigateur ou de système servi par une instance Umami).
+final iconProvider = FutureProvider.autoDispose
+    .family<Favicon?, ({String cacheKey, String url})>((ref, src) async {
+  cacheFor(ref, const Duration(minutes: 30));
+  final gate = ref.watch(iconGateProvider);
+  return gate.run(
+    () => ref.watch(faviconCacheProvider).fromUrl(src.cacheKey, src.url),
+  );
+});
+
+/// Origine de l'instance Umami d'un compte (`https://hôte`), null pour les
+/// autres fournisseurs. Normalisée : l'URL peut avoir été saisie sans schéma.
+final instanceBaseProvider = Provider.family<String?, String>((ref, accountId) {
+  for (final a in ref.watch(accountsProvider)) {
+    if (a.id != accountId) continue;
+    return a.kind == ProviderKind.umami
+        ? UmamiProvider.normalizeBase(a.baseUrl)
+        : null;
+  }
+  return null;
 });
 
 final accountsRepoProvider = Provider<AccountsRepository>(
@@ -209,6 +240,62 @@ Future<AnalyticsProvider> _providerFor(Ref ref, Site site) =>
 /// Plafonne la concurrence des requêtes analytics (chargement incrémental).
 final fetchGateProvider = Provider<Semaphore>((ref) => Semaphore(6));
 
+String _dataStartKey(Site s) => 'glance.dataStart.${s.accountId}.${s.id}';
+
+/// Date de première donnée d'un site, telle que la donne le fournisseur.
+/// Persistée : au lancement suivant, « Tout » s'ouvre sans attendre le réseau.
+/// Null quand le fournisseur ne sait pas répondre (Plausible, Fathom).
+final siteDataStartProvider =
+    FutureProvider.family<DateTime?, Site>((ref, site) async {
+  // Une résolution par session : la date de naissance d'un site ne bouge pas.
+  ref.keepAlive();
+  final gate = ref.watch(fetchGateProvider);
+  final p = await _providerFor(ref, site);
+  final range = await gate.run(() => p.dataRange(site)).catchError((_) => null);
+  if (range == null) return null;
+  ref
+      .read(sharedPrefsProvider)
+      .setInt(_dataStartKey(site), range.start.millisecondsSinceEpoch);
+  return range.start;
+});
+
+/// Début de l'historique commun aux sites affichés, pour la période « Tout ».
+///
+/// Tout-ou-rien : tant qu'un site n'a pas répondu, on ne propose pas de borne.
+/// Une borne qui reculerait à chaque réponse ferait repartir, à chaque fois,
+/// une vague de requêtes sur une fenêtre différente.
+///
+/// La fenêtre est **commune à tous les sites** parce que l'accueil additionne
+/// les séries bucket par bucket (`HomeData.fromCards`) : des fenêtres
+/// différentes y feraient additionner 2019 avec 2024.
+final allTimeStartProvider = Provider<DateTime?>((ref) {
+  final sitesAsync = ref.watch(visibleSitesProvider);
+  final sites = sitesAsync.value;
+  if (sites == null) return null;
+  if (sites.isEmpty) return DateTime.now();
+
+  final prefs = ref.watch(sharedPrefsProvider);
+  DateTime? min;
+  var known = 0;
+  for (final s in sites) {
+    final cached = prefs.getInt(_dataStartKey(s));
+    final resolved = ref.watch(siteDataStartProvider(s));
+    // Le fournisseur ne sait pas dater ses données : on n'attend pas après lui,
+    // le cadrage large et le rognage à l'affichage prennent le relais.
+    if (resolved.hasValue && resolved.value == null) {
+      known++;
+      continue;
+    }
+    final ms = resolved.value?.millisecondsSinceEpoch ?? cached;
+    if (ms == null) continue;
+    known++;
+    final t = DateTime.fromMillisecondsSinceEpoch(ms);
+    if (min == null || t.isBefore(min)) min = t;
+  }
+  if (known < sites.length) return null;
+  return min ?? DateTime.now().subtract(const Duration(days: 3650));
+});
+
 /// Visiteurs en direct d'un site (indépendant de la période sélectionnée).
 final siteLiveProvider = FutureProvider.autoDispose.family<int, Site>((ref, site) async {
   cacheFor(ref, _cacheTtl);
@@ -311,36 +398,36 @@ final homeTotalsProvider =
   );
 });
 
-/// Détail complet d'un site (tout en parallèle).
-final detailProvider =
-    FutureProvider.autoDispose.family<SiteDetail, (Site, DateWindow)>((ref, key) async {
-  cacheSession(ref);
-  final (site, w) = key;
+/// Nombre de lignes demandées par dimension : on en affiche huit, on garde de
+/// quoi ouvrir « Voir tout » sans repasser par le réseau.
+const kMetricFetchLimit = 30;
+
+/// Lignes d'une dimension pour un site et une fenêtre. Une carte de données =
+/// un provider : changer de sous-dimension ne recharge que celle-là.
+///
+/// `cacheFor` et non `cacheSession` : avec seize dimensions et neuf périodes,
+/// un keepAlive sans limite retiendrait tout ce qui a été feuilleté dans la
+/// session, et un rafraîchissement de famille entière relancerait des dizaines
+/// de requêtes.
+final siteMetricProvider = FutureProvider.autoDispose
+    .family<List<MetricRow>, (Site, DateWindow, MetricType)>((ref, key) async {
+  cacheFor(ref, _cacheTtl);
+  final (site, w, type) = key;
+  final gate = ref.watch(fetchGateProvider);
   final p = await _providerFor(ref, site);
-  final refW = forecastReferenceWindow(w);
-  final r = await Future.wait([
-    p.summary(site, w),
-    p.series(site, w),
-    p.metric(site, w, MetricType.pages, limit: 6),
-    p.metric(site, w, MetricType.referrers, limit: 6),
-    p.metric(site, w, MetricType.countries, limit: 6),
-    p.active(site).catchError((_) => 0),
-    p.livePages(site).catchError((_) => <LivePage>[]),
-    if (refW != null) p.series(site, refW).catchError((_) => <SeriesPoint>[]),
-  ]);
-  final detail = SiteDetail(
-    summary: r[0] as StatsSummary,
-    series: r[1] as List<SeriesPoint>,
-    unit: w.unit.api,
-    topPages: r[2] as List<MetricRow>,
-    sources: r[3] as List<MetricRow>,
-    countries: r[4] as List<MetricRow>,
-    live: r[5] as int,
-    livePages: r[6] as List<LivePage>,
-    refSeries: refW == null ? null : r[7] as List<SeriesPoint>,
-  );
-  ref.read(statsCacheProvider).writeDetail(site, w, detail);
-  return detail;
+  final rows =
+      await gate.run(() => p.metric(site, w, type, limit: kMetricFetchLimit));
+  ref.read(statsCacheProvider).writeMetric(site, w, type, rows);
+  return rows;
+});
+
+/// Pages consultées dans les dernières minutes (indépendant de la période).
+final siteLivePagesProvider =
+    FutureProvider.autoDispose.family<List<LivePage>, Site>((ref, site) async {
+  cacheFor(ref, _cacheTtl);
+  final gate = ref.watch(fetchGateProvider);
+  final p = await _providerFor(ref, site);
+  return gate.run(() => p.livePages(site)).catchError((_) => <LivePage>[]);
 });
 
 /// Données d'événements d'un site pour une fenêtre (série + répartition).
@@ -353,7 +440,7 @@ final eventsProvider =
   return gate.run(() async {
     final series = await p.eventSeries(site, w);
     final total = series.fold<int>(0, (a, b) => a + b.total);
-    return EventsData(total: total, series: series, unit: w.unit.api);
+    return EventsData(total: total, series: series, unit: w.unit);
   });
 });
 

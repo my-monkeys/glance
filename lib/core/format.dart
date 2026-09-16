@@ -1,5 +1,7 @@
 import 'package:intl/intl.dart';
 
+import '../data/models/period.dart';
+
 final _frNum = NumberFormat.decimalPattern('fr_FR');
 
 /// 1204 -> "1 204", 1204000 -> "1,2 M" au-delà de 100 000 pour rester lisible.
@@ -35,15 +37,11 @@ String fmtDuration(Duration d) {
   return '$m m ${s.toString().padLeft(2, '0')}';
 }
 
-/// Formatte une date d'axe selon la granularité.
-String fmtAxis(DateTime t, String unit) {
-  switch (unit) {
-    case 'hour':
-      return '${DateFormat('HH', 'fr_FR').format(t)}h';
-    case 'month':
-      return DateFormat('MMM', 'fr_FR').format(t);
-    case 'day':
-    default:
-      return DateFormat('d', 'fr_FR').format(t);
-  }
-}
+/// Formatte une date d'axe selon la granularité. Le switch est exhaustif à
+/// dessein : un repli silencieux sur « jour » ferait afficher un axe faux au
+/// lieu de faire échouer la compilation.
+String fmtAxis(DateTime t, TimeUnit unit) => switch (unit) {
+  TimeUnit.hour => '${DateFormat('HH', 'fr_FR').format(t)}h',
+  TimeUnit.day => DateFormat('d', 'fr_FR').format(t),
+  TimeUnit.month => DateFormat('MMM', 'fr_FR').format(t),
+};

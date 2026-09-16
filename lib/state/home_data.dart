@@ -77,6 +77,17 @@ class HomeData {
   final int totalLive;
   final List<SeriesPoint> totalSeries;
 
+  /// Agrégat sans aucun site chargé — ce que montre un écran en attente.
+  static final empty = HomeData(
+    cards: const [],
+    totalVisitors: 0,
+    prevTotalVisitors: null,
+    totalVisits: 0,
+    totalPageviews: 0,
+    totalLive: 0,
+    totalSeries: const [],
+  );
+
   /// Série de référence cumulée (profil pour la prévision de la courbe totale).
   final List<SeriesPoint>? totalRefSeries;
 
