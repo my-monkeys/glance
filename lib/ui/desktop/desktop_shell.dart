@@ -192,6 +192,7 @@ class _Sidebar extends ConsumerWidget {
                   _SiteTile(
                     key: ValueKey(c.site),
                     card: c,
+                    window: window,
                     selected: nav.isSite(c.site),
                     onTap: () =>
                         ref.read(desktopNavProvider.notifier).openSite(c.site),
@@ -315,17 +316,28 @@ class _SiteTile extends StatelessWidget {
   const _SiteTile({
     super.key,
     required this.card,
+    required this.window,
     required this.selected,
     required this.onTap,
   });
   final SiteCard card;
+
+  /// Null tant que « Tout » attend sa borne — la liste est alors vide de toute
+  /// façon, mais le type dit la vérité plutôt que de forcer.
+  final DateWindow? window;
   final bool selected;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final p = context.glance;
-    final spark = card.series.map((e) => e.visitors).toList();
+    // Rogne le préfixe vide sur « Tout » : la fenêtre commence à la première
+    // donnée du plus ancien des sites, donc un site plus jeune y traîne un long
+    // trait plat — indiscernable d'un creux à cette taille.
+    final w = window;
+    final spark = (w == null ? card.series : displaySeries(card.series, w))
+        .map((e) => e.visitors)
+        .toList();
     return _TileFrame(
       selected: selected,
       onTap: onTap,

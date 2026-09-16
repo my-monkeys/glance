@@ -96,7 +96,11 @@ class _WidgetSync extends ConsumerWidget {
     if (window == null) return child;
     ref.listen(homeTotalsProvider((window, periodState.compare)), (prev, next) {
       if (next.data.cards.isNotEmpty && !next.loading) {
-        WidgetPublisher.publish(next.data, periodState.period.label);
+        WidgetPublisher.publish(
+          next.data,
+          periodState.period.label,
+          window,
+        );
       }
     });
     return child;

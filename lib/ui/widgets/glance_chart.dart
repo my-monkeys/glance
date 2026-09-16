@@ -307,9 +307,11 @@ class _BarsBody extends StatelessWidget {
   final ChartModel model;
   final GlancePalette palette;
 
-  /// En deçà, une barre n'est plus qu'un trait : la courbe redevient le bon
-  /// rendu. Atteignable en deux gestes avec le sélecteur de découpage.
-  static const double _minRodWidth = 2;
+  /// Largeur plancher d'une barre. Un découpage fin en donne des centaines :
+  /// elles deviennent des traits, et c'est très bien — on a demandé des barres,
+  /// on garde des barres. Sous un demi-pixel, en revanche, fl_chart ne peint
+  /// plus rien du tout.
+  static const double _minRodWidth = 0.5;
 
   @override
   Widget build(BuildContext context) {
@@ -323,11 +325,12 @@ class _BarsBody extends StatelessWidget {
             .where((s) => s.role != ChartSeriesRole.compare)
             .toList(growable: false);
         final perGroup = rods.isEmpty ? 1 : rods.length;
+        // L'espacement entre barres d'un même groupe disparaît avant les
+        // barres elles-mêmes : sur un découpage fin, chaque pixel compte.
+        final raw = available / m.xCount / perGroup;
+        final barsSpace = raw > 3 ? 1.0 : 0.0;
         final rodWidth =
-            (available / m.xCount / perGroup - 1).clamp(0.5, 18.0).toDouble();
-        if (rodWidth < _minRodWidth) {
-          return _CurveBody(model: m, palette: p);
-        }
+            (raw - barsSpace).clamp(_minRodWidth, 18.0).toDouble();
 
         final compare = m.drawn
             .where((s) => s.role == ChartSeriesRole.compare)
@@ -372,7 +375,7 @@ class _BarsBody extends StatelessWidget {
               for (var x = 0; x < m.xCount; x++)
                 BarChartGroupData(
                   x: x,
-                  barsSpace: 1,
+                  barsSpace: barsSpace,
                   barRods: [
                     for (final s in rods)
                       if (s.at(x) case final v?
@@ -382,17 +385,27 @@ class _BarsBody extends StatelessWidget {
                           toY: v,
                           width: rodWidth,
                           color: s.role == ChartSeriesRole.forecast
-                              ? s.color.withValues(alpha: 0.16)
+                              ? s.color.withValues(alpha: rodWidth >= 4 ? 0.16 : 0.6)
                               : s.color,
-                          borderSide: s.role == ChartSeriesRole.forecast
+                          // La prévision se distingue par une bordure
+                          // pointillée — qui n'a plus de place sous quatre
+                          // pixels : elle y devient une barre pleine, dans sa
+                          // couleur.
+                          borderSide: s.role == ChartSeriesRole.forecast &&
+                                  rodWidth >= 4
                               ? BorderSide(color: s.color, width: 1.2)
                               : BorderSide.none,
-                          borderDashArray: s.role == ChartSeriesRole.forecast
+                          borderDashArray: s.role == ChartSeriesRole.forecast &&
+                                  rodWidth >= 4
                               ? [4, 3]
                               : null,
-                          borderRadius: BorderRadius.vertical(
-                            top: Radius.circular(rodWidth / 3),
-                          ),
+                          // Un coin arrondi sur une barre d'un pixel la ronge
+                          // entièrement.
+                          borderRadius: rodWidth < 4
+                              ? BorderRadius.zero
+                              : BorderRadius.vertical(
+                                  top: Radius.circular(rodWidth / 3),
+                                ),
                           backDrawRodData: BackgroundBarChartRodData(
                             show: compare != null && s == compareHost,
                             toY: compare?.at(x) ?? 0,

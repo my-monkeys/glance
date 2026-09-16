@@ -5,6 +5,9 @@ import 'dart:math' as math;
 import 'package:flutter/services.dart';
 import 'package:home_widget/home_widget.dart';
 
+import '../core/predict.dart';
+import '../data/models/models.dart';
+import '../data/models/period.dart';
 import 'home_data.dart';
 
 /// Publie les données de l'accueil vers les widgets d'écran d'accueil (iOS +
@@ -45,8 +48,19 @@ class WidgetPublisher {
     return out.join(',');
   }
 
-  static Future<void> publish(HomeData data, String periodLabel) async {
+  static Future<void> publish(
+    HomeData data,
+    String periodLabel,
+    DateWindow window,
+  ) async {
     if (!_supported) return;
+
+    // Rogne le préfixe vide sur « Tout » : sa fenêtre est commune à tous les
+    // sites, donc un site plus jeune que le plus ancien y traîne un long trait
+    // plat. Sur une sparkline de widget, ce plat occupe la moitié de la largeur
+    // et se lit comme une chute.
+    List<double> spark(List<SeriesPoint> series) =>
+        displaySeries(series, window).map((e) => e.visitors).toList();
 
     // Construit une fois l'ensemble des clés (source unique), puis dispatche
     // selon la plateforme. Une valeur nulle = clé absente (pas de delta, etc.).
@@ -58,8 +72,7 @@ class WidgetPublisher {
     values['total_visits'] = data.totalVisits;
     values['total_sites'] = data.cards.length;
     values['total_delta'] = data.totalDeltaPct; // double? — absent si null
-    values['total_spark'] =
-        _spark(data.totalSeries.map((e) => e.visitors).toList());
+    values['total_spark'] = _spark(spark(data.totalSeries));
 
     final top = [...data.cards]
       ..sort((a, b) => b.summary.visitors.compareTo(a.summary.visitors));
@@ -73,8 +86,7 @@ class WidgetPublisher {
       values['site_${i}_domain'] = c.site.domain;
       values['site_${i}_value'] = c.summary.visitors;
       values['site_${i}_delta'] = c.summary.visitorsDeltaPct;
-      values['site_${i}_spark'] =
-          _spark(c.series.map((e) => e.visitors).toList());
+      values['site_${i}_spark'] = _spark(spark(c.series));
     }
 
     // Tous les sites (widget « par site » configurable : sélecteur + rendu).
@@ -87,7 +99,7 @@ class WidgetPublisher {
           'p': c.summary.pageviews,
           if (c.summary.visitorsDeltaPct != null)
             'd': c.summary.visitorsDeltaPct,
-          's': _spark(c.series.map((e) => e.visitors).toList()),
+          's': _spark(spark(c.series)),
         }
     ];
     values['all_sites'] = jsonEncode(all);

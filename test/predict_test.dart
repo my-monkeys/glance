@@ -210,6 +210,38 @@ void main() {
       expect(trimmed.first.t, DateTime(2026, 5, 1));
     });
 
+    test(
+        'fenêtre large, creux de deux jours vers la fin : le préfixe est quand '
+        'même rogné', () {
+      // Le cas qui donnait un long trait plat dans les sparklines et les
+      // widgets : un site jeune dans une fenêtre « Tout » commune, avec un
+      // week-end creux vers la fin. L'ancienne coupe visait le DERNIER creux,
+      // tombait après la fin utile, et renonçait — préfixe vide compris.
+      final series = [
+        for (var i = 0; i < 20; i++) SeriesPoint(DateTime(2026, 6, 1 + i), 0, 0),
+        for (var i = 0; i < 10; i++)
+          SeriesPoint(DateTime(2026, 6, 21 + i), 30 + i.toDouble(), 60),
+        SeriesPoint(DateTime(2026, 7, 1), 0, 0),
+        SeriesPoint(DateTime(2026, 7, 2), 0, 0),
+        SeriesPoint(DateTime(2026, 7, 3), 25, 50),
+      ];
+      final trimmed = displaySeries(series, wideWindow());
+      expect(trimmed.length, 13);
+      expect(trimmed.first.t, DateTime(2026, 6, 21));
+    });
+
+    test('fenêtre large finissant sur des buckets vides : pas de rognage tardif',
+        () {
+      final series = [
+        SeriesPoint(DateTime(2026, 5, 1), 10, 20),
+        SeriesPoint(DateTime(2026, 6, 1), 12, 24),
+        SeriesPoint(DateTime(2026, 7, 1), 0, 0),
+        SeriesPoint(DateTime(2026, 8, 1), 0, 0),
+      ];
+      // La coupe viserait la fin de la série : mieux vaut tout garder.
+      expect(displaySeries(series, wideWindow()), series);
+    });
+
     test('fenêtre normale : jamais de rognage même avec un préfixe vide', () {
       final series = [
         SeriesPoint(DateTime(2026, 8, 1), 0, 0),

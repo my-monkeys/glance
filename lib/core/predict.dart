@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import '../data/models/models.dart';
 import '../data/models/period.dart';
 
@@ -151,27 +153,36 @@ DateWindow? previousPeriodWindow(DateWindow w) {
 }
 
 /// Série prête à afficher pour la période « Tout » : écarte les buckets vides
-/// en tête pour ne pas peindre un graphe majoritairement plat avant la première
-/// vraie donnée. Sans effet sur les autres fenêtres.
+/// en tête pour ne pas peindre un long trait plat avant la première vraie
+/// donnée. Sans effet sur les autres fenêtres.
 ///
-/// Reste utile même quand le début vient de `dataRange` : un site Umami créé il
-/// y a des années avec une visite de test, puis laissé dormant, a une « première
-/// donnée » bien antérieure à son activité réelle. Et Plausible comme Fathom ne
-/// donnent pas de plage du tout.
+/// Indispensable depuis que « Tout » a une fenêtre **commune** à tous les
+/// sites : elle commence à la première donnée du plus ancien, si bien qu'un
+/// site créé trois mois plus tard traîne trois mois de zéros — ce qui se voyait
+/// surtout sur les sparklines et les widgets, trop petits pour qu'on distingue
+/// un plat d'un creux.
+///
+/// Deux coupes possibles, dans cet ordre :
+///  - le préfixe vide, jusqu'à la première donnée ;
+///  - un **grand trou** situé après elle, qui trahit une visite isolée (test,
+///    robot) suivie de mois de silence avant le vrai démarrage. « Grand » veut
+///    dire au moins [_gapShare] de la série : un site qui n'a personne pendant
+///    deux jours ne doit pas voir son historique rogné pour autant.
 ///
 /// Garde la série intacte si elle est entièrement vide (état « zéro »
 /// légitime) ou si le rognage la réduirait à moins de 2 points.
-///
-/// Rogne après le **dernier creux d'au moins 2 buckets vides**, pas au premier
-/// bucket non nul : une visite isolée (test, bot) tôt dans les 10 ans ne doit
-/// pas ancrer le rognage avant le vrai début de l'activité — elle laisserait
-/// un long plat résiduel entre elle et le vrai démarrage.
 List<SeriesPoint> displaySeries(List<SeriesPoint> series, DateWindow window) {
   if (!window.allTime) return series;
-  const gapLen = 2;
   bool empty(SeriesPoint p) => p.visitors <= 0 && p.pageviews <= 0;
-  var cut = 0;
-  var i = 0;
+
+  final first = series.indexWhere((p) => !empty(p));
+  if (first < 0) return series; // jamais aucune donnée : rien à rogner
+  var cut = first;
+
+  // Un trou doit peser dans la série pour être pris pour un « avant le début ».
+  const gapShare = 0.15;
+  final minGap = math.max(2, (series.length * gapShare).round());
+  var i = first;
   while (i < series.length) {
     if (!empty(series[i])) {
       i++;
@@ -181,9 +192,10 @@ List<SeriesPoint> displaySeries(List<SeriesPoint> series, DateWindow window) {
     while (j < series.length && empty(series[j])) {
       j++;
     }
-    if (j - i >= gapLen) cut = j;
+    if (j - i >= minGap && j < series.length) cut = j;
     i = j;
   }
+
   if (cut <= 0) return series;
   final trimmed = series.sublist(cut);
   return trimmed.length >= 2 ? trimmed : series;
