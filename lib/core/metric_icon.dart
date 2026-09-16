@@ -6,12 +6,18 @@ import 'internal_traffic.dart';
 /// D'où vient l'icône d'une ligne de métrique, et sous quelle clé la ranger.
 /// Fonctions pures : elles se testent sans Flutter ni réseau.
 
-/// Nom de fichier des images d'une instance Umami : minuscules, espaces et
-/// soulignés en tirets (« Android OS » → `android-os`, « Windows 10 » →
-/// `windows-10`). Idempotent — les valeurs `browser` d'Umami sont déjà des
-/// slugs.
-String umamiSlug(String raw) =>
-    raw.trim().toLowerCase().replaceAll(RegExp(r'[\s_]+'), '-');
+/// Nom de fichier des images d'une instance Umami : minuscules, et **tout**
+/// caractère non alphanumérique en tiret — c'est la règle d'Umami, vérifiée
+/// contre ses fichiers : « Windows 8.1 » donne `windows-8-1.png` et « OS/2 »
+/// `os-2.png`. Ne remplacer que les espaces laisserait un point dans le nom, et
+/// une barre oblique sortirait même du dossier.
+///
+/// Idempotent : les valeurs `browser` d'Umami sont déjà des slugs.
+String umamiSlug(String raw) => raw
+    .trim()
+    .toLowerCase()
+    .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
+    .replaceAll(RegExp(r'^-+|-+$'), '');
 
 /// Source réseau de l'icône d'une ligne, ou null quand elle se dessine
 /// localement (appareil, drapeau) ou qu'il n'y a rien à montrer.

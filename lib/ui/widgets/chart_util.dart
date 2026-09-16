@@ -11,15 +11,20 @@ double chartNiceMax(double m) {
   final v = m * 1.15;
   final mag = math.pow(10, (math.log(v) / math.ln10).floor()).toDouble();
   final norm = v / mag;
+  // Uniquement des multiples que quatre graduations divisent proprement : avec
+  // 2,5 l'intervalle vaut 0,625 × 10^k et deux libellés arrondis finissent
+  // identiques (« 3 » et « 3 »).
   double nice;
   if (norm <= 1) {
     nice = 1;
   } else if (norm <= 2) {
     nice = 2;
-  } else if (norm <= 2.5) {
-    nice = 2.5;
+  } else if (norm <= 4) {
+    nice = 4;
   } else if (norm <= 5) {
     nice = 5;
+  } else if (norm <= 8) {
+    nice = 8;
   } else {
     nice = 10;
   }

@@ -14,6 +14,18 @@ void main() {
       expect(umamiSlug('chrome'), 'chrome');
       expect(umamiSlug('edge-chromium'), 'edge-chromium');
     });
+
+    test('remplace TOUT caractère non alphanumérique, comme Umami', () {
+      // Vérifié contre les fichiers de l'instance : windows-8-1.png et
+      // os-2.png existent, windows-8.1.png non.
+      expect(umamiSlug('Windows 8.1'), 'windows-8-1');
+      expect(umamiSlug('OS/2'), 'os-2');
+      expect(umamiSlug('Windows 3.11'), 'windows-3-11');
+    });
+
+    test('une barre oblique ne peut pas sortir du dossier d\'images', () {
+      expect(umamiSlug('../../etc/passwd'), 'etc-passwd');
+    });
   });
 
   group('metricIconSource', () {

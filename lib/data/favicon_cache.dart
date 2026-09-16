@@ -163,8 +163,13 @@ class FaviconCache {
       // Rejette le HTML (SPA qui répond index.html sur un chemin manquant).
       if (ct.contains('text/html') || (_looksHtml(bytes) && !isSvg)) return null;
       return Favicon(bytes, isSvg: isSvg);
-    } catch (_) {
-      return null;
+    } on DioException catch (e) {
+      // Une réponse du serveur (404, 403…) est un vrai « pas d'icône », qu'on
+      // mémorise. Une panne de réseau, elle, ne dit rien de l'icône : la
+      // relancer évite d'inscrire une absence pour une semaine parce que le
+      // Wi-Fi a coupé une seconde.
+      if (e.response != null) return null;
+      rethrow;
     }
   }
 

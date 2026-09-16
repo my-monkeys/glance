@@ -22,45 +22,78 @@ class ForecastSpec {
 /// par fenêtre (et non par [Period]) est volontaire : deux périodes qui
 /// résolvent la même fenêtre (ex. « 12 m » en décembre ≡ « Cette année »)
 /// affichent les mêmes données, donc la même prévision.
+/// Ce qu'une fenêtre recouvre : une journée, un mois, une année, ou rien de
+/// calendaire (fenêtre glissante).
+enum CalendarScope { day, month, year, sliding }
+
+/// Portée calendaire d'une fenêtre, déduite de son début, de sa fin **et** de
+/// sa granularité — les trois sont nécessaires.
+///
+/// Le début seul confond, le 1er du mois, « aujourd'hui » et « ce mois-ci »,
+/// et projetterait trente jours à partir de onze heures observées. La
+/// granularité seule confond « ce mois-ci » découpé en heures avec
+/// « aujourd'hui ». C'est la **fin** qui tranche : une journée ne dure pas plus
+/// de vingt-quatre heures, un mois pas plus d'un mois.
+///
+/// Reste un cas que rien ne peut départager : le 1er du mois, « aujourd'hui »
+/// et « ce mois-ci » découpé en heures donnent la même fenêtre au bucket près.
+/// On retient alors la portée la plus étroite — un horizon sous-estimé se lit,
+/// là où un horizon surestimé donne un chiffre aberrant.
+CalendarScope calendarScopeOf(DateWindow w) {
+  if (w.allTime) return CalendarScope.sliding;
+  final dayStart = DateTime(w.start.year, w.start.month, w.start.day);
+  final monthStart = DateTime(w.start.year, w.start.month, 1);
+  final yearStart = DateTime(w.start.year, 1, 1);
+
+  if (w.unit == TimeUnit.hour &&
+      w.start == dayStart &&
+      !w.end.isAfter(DateTime(dayStart.year, dayStart.month, dayStart.day + 1))) {
+    return CalendarScope.day;
+  }
+  if (w.unit != TimeUnit.month &&
+      w.start == monthStart &&
+      !w.end.isAfter(DateTime(monthStart.year, monthStart.month + 1, 1))) {
+    return CalendarScope.month;
+  }
+  if (w.start == yearStart &&
+      !w.end.isAfter(DateTime(yearStart.year + 1, 1, 1))) {
+    return CalendarScope.year;
+  }
+  return CalendarScope.sliding;
+}
+
 ForecastSpec? forecastSpecFor(DateWindow w, {DateTime? now}) {
   final n = now ?? DateTime.now();
   if (!w.end.isAfter(n)) return null;
-  // « Tout » n'est pas une période calendaire : rien à projeter au-delà du
-  // bucket courant.
-  if (w.allTime) return ForecastSpec(until: w.end);
 
-  // L'alignement se lit sur le DÉBUT seul, du plus large au plus étroit — pas
-  // sur la granularité, qui est désormais choisie par l'utilisateur. Croiser
-  // les deux ferait prendre « ce mois-ci en granularité heure », le 1er du
-  // mois, pour « aujourd'hui » : la prévision s'arrêterait au lendemain.
-  final yearStart = DateTime(n.year, 1, 1);
-  final monthStart = DateTime(n.year, n.month, 1);
-  final dayStart = DateTime(n.year, n.month, n.day);
-
-  if (w.start == yearStart && w.end.isAfter(monthStart)) {
-    return ForecastSpec(
-      until: DateTime(n.year + 1, 1, 1),
-      reference: DateWindow(DateTime(n.year - 1, 1, 1), yearStart, w.unit),
-    );
+  switch (calendarScopeOf(w)) {
+    case CalendarScope.day:
+      final dayStart = DateTime(n.year, n.month, n.day);
+      return ForecastSpec(
+        until: DateTime(n.year, n.month, n.day + 1),
+        reference: DateWindow(
+          DateTime(n.year, n.month, n.day - 1),
+          dayStart,
+          w.unit,
+        ),
+      );
+    case CalendarScope.month:
+      final monthStart = DateTime(n.year, n.month, 1);
+      return ForecastSpec(
+        until: DateTime(n.year, n.month + 1, 1),
+        reference:
+            DateWindow(DateTime(n.year, n.month - 1, 1), monthStart, w.unit),
+      );
+    case CalendarScope.year:
+      final yearStart = DateTime(n.year, 1, 1);
+      return ForecastSpec(
+        until: DateTime(n.year + 1, 1, 1),
+        reference: DateWindow(DateTime(n.year - 1, 1, 1), yearStart, w.unit),
+      );
+    case CalendarScope.sliding:
+      // Fenêtre glissante : on ne complète que le bucket courant.
+      return ForecastSpec(until: w.end);
   }
-  if (w.start == monthStart) {
-    return ForecastSpec(
-      until: DateTime(n.year, n.month + 1, 1),
-      reference:
-          DateWindow(DateTime(n.year, n.month - 1, 1), monthStart, w.unit),
-    );
-  }
-  if (w.start == dayStart) {
-    return ForecastSpec(
-      until: DateTime(n.year, n.month, n.day + 1),
-      reference: DateWindow(
-        DateTime(n.year, n.month, n.day - 1),
-        dayStart,
-        w.unit,
-      ),
-    );
-  }
-  return ForecastSpec(until: w.end);
 }
 
 /// Fenêtre de référence à récupérer en plus de la série courante (null si la
@@ -86,37 +119,34 @@ DateWindow? previousPeriodWindow(DateWindow w) {
   if (w.allTime) return null;
   final span = w.end.difference(w.start);
   if (span.inDays > 400) return null;
-  switch (w.unit) {
-    case TimeUnit.hour:
+
+  // La portée se lit sur la fenêtre entière, pas sur sa granularité : depuis
+  // que le découpage se choisit, « ce mois-ci » peut être en heures — et se
+  // comparerait alors à la veille au lieu du mois précédent.
+  switch (calendarScopeOf(w)) {
+    case CalendarScope.day:
       final dayStart = DateTime(w.start.year, w.start.month, w.start.day);
-      if (w.start == dayStart) {
-        return DateWindow(
-          dayStart.subtract(const Duration(days: 1)),
-          dayStart,
-          TimeUnit.hour,
-        );
-      }
-      return DateWindow(w.start.subtract(span), w.start, TimeUnit.hour);
-    case TimeUnit.day:
+      return DateWindow(
+        DateTime(dayStart.year, dayStart.month, dayStart.day - 1),
+        dayStart,
+        w.unit,
+      );
+    case CalendarScope.month:
       final monthStart = DateTime(w.start.year, w.start.month, 1);
-      if (w.start == monthStart) {
-        return DateWindow(
-          DateTime(w.start.year, w.start.month - 1, 1),
-          monthStart,
-          TimeUnit.day,
-        );
-      }
-      return DateWindow(w.start.subtract(span), w.start, TimeUnit.day);
-    case TimeUnit.month:
+      return DateWindow(
+        DateTime(monthStart.year, monthStart.month - 1, 1),
+        monthStart,
+        w.unit,
+      );
+    case CalendarScope.year:
       final yearStart = DateTime(w.start.year, 1, 1);
-      if (w.start == yearStart) {
-        return DateWindow(
-          DateTime(w.start.year - 1, 1, 1),
-          yearStart,
-          TimeUnit.month,
-        );
-      }
-      return DateWindow(w.start.subtract(span), w.start, TimeUnit.month);
+      return DateWindow(
+        DateTime(yearStart.year - 1, 1, 1),
+        yearStart,
+        w.unit,
+      );
+    case CalendarScope.sliding:
+      return DateWindow(w.start.subtract(span), w.start, w.unit);
   }
 }
 
@@ -235,13 +265,17 @@ Forecast? buildForecast({
   final refAvg = ref.isEmpty ? 0.0 : refSum / ref.length;
   double refAt(int j) => j < ref.length ? ref[j].visitors : refAvg;
 
-  // Le profil est indexé bucket à bucket : si la référence n'a pas été
-  // récupérée dans la même granularité que la série observée, ses valeurs
-  // seraient appliquées à des buckets d'une autre durée (une moyenne
-  // journalière sur des heures surestime d'un facteur 24). Mieux vaut alors le
-  // rythme moyen observé.
-  final refConsistent =
-      ref.isEmpty || (ref.length * 2 >= series.length && series.length * 2 >= ref.length);
+  // Le profil est indexé bucket à bucket : une référence récupérée dans une
+  // autre granularité appliquerait ses valeurs à des buckets d'une autre durée
+  // (une moyenne journalière sur des heures surestime d'un facteur vingt-quatre).
+  // On la compare à SA fenêtre, pas à la série en cours : celle-ci n'est qu'un
+  // préfixe de la période — un mois entamé le 2 ne compte qu'un bucket face aux
+  // trente de sa référence, ce qui est normal.
+  final refWindow = spec.reference;
+  final refConsistent = ref.isEmpty ||
+      refWindow == null ||
+      (ref.length * 2 >= refWindow.bucketCount &&
+          refWindow.bucketCount * 2 >= ref.length);
 
   double? ratio;
   if (refSum > 0 && refConsistent) {

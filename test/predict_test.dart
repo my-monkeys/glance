@@ -122,6 +122,34 @@ void main() {
     });
   });
 
+  group('previousPeriodWindow face au découpage choisi', () {
+    test('« ce mois-ci » en heures se compare au mois précédent, pas à la veille',
+        () {
+      final now = DateTime(2026, 9, 5, 14, 30);
+      final w = Period.thisMonth.window(now: now, unit: TimeUnit.hour);
+      final prev = previousPeriodWindow(w)!;
+      expect(prev.start, DateTime(2026, 8, 1));
+      expect(prev.end, DateTime(2026, 9, 1));
+      expect(prev.unit, TimeUnit.hour);
+    });
+
+    test('« cette année » en jours se compare à l\'année précédente', () {
+      final now = DateTime(2026, 3, 20, 10, 0);
+      final w = Period.thisYear.window(now: now, unit: TimeUnit.day);
+      final prev = previousPeriodWindow(w)!;
+      expect(prev.start, DateTime(2025, 1, 1));
+      expect(prev.end, DateTime(2026, 1, 1));
+    });
+
+    test('une fenêtre glissante se décale de sa propre durée', () {
+      final now = DateTime(2026, 9, 16, 14, 0);
+      final w = Period.d30.window(now: now, unit: TimeUnit.hour);
+      final prev = previousPeriodWindow(w)!;
+      expect(prev.end, w.start);
+      expect(w.start.difference(prev.start), w.end.difference(w.start));
+    });
+  });
+
   group('displaySeries', () {
     // « Tout » : le rognage se déclenche sur ce drapeau, pas sur la durée — un
     // site jeune a un « Tout » de trois mois.
@@ -224,6 +252,49 @@ void main() {
       final spec = forecastSpecFor(w, now: now)!;
       expect(spec.until, w.end);
       expect(spec.reference, isNull);
+    });
+
+    test(
+        "le 1er du mois, « aujourd'hui » n'est pas confondu avec « ce mois-ci »",
+        () {
+      // Les deux périodes commencent le même jour : seule la granularité les
+      // distingue. Confondues, elles projetteraient trente jours à partir de
+      // onze heures observées.
+      final now = DateTime(2026, 9, 1, 10, 30);
+      final spec = forecastSpecFor(Period.today.window(now: now), now: now)!;
+      expect(spec.until, DateTime(2026, 9, 2));
+      expect(spec.reference!.start, DateTime(2026, 8, 31));
+      expect(spec.reference!.unit, TimeUnit.hour);
+    });
+
+    test('le 1er du mois, « ce mois-ci » projette bien la fin du mois', () {
+      final now = DateTime(2026, 9, 1, 10, 30);
+      final spec = forecastSpecFor(Period.thisMonth.window(now: now), now: now)!;
+      expect(spec.until, DateTime(2026, 10, 1));
+      expect(spec.reference!.start, DateTime(2026, 8, 1));
+    });
+
+    test('le 1er janvier, « cette année » reste « cette année »', () {
+      final now = DateTime(2027, 1, 1, 9, 0);
+      final spec = forecastSpecFor(Period.thisYear.window(now: now), now: now)!;
+      expect(spec.until, DateTime(2028, 1, 1));
+      expect(spec.reference!.start, DateTime(2026, 1, 1));
+    });
+
+    test('en janvier, « ce mois-ci » ne devient pas « cette année »', () {
+      final now = DateTime(2027, 1, 10, 12, 0);
+      final spec = forecastSpecFor(Period.thisMonth.window(now: now), now: now)!;
+      expect(spec.until, DateTime(2027, 2, 1));
+    });
+
+    test('la référence suit la granularité forcée, sinon le profil se décale',
+        () {
+      // Profil indexé bucket à bucket : une référence en jours appliquée à des
+      // buckets horaires surestimerait d'un facteur vingt-quatre.
+      final now = DateTime(2026, 9, 16, 14, 0);
+      final w = Period.thisMonth.window(now: now, unit: TimeUnit.hour);
+      final spec = forecastSpecFor(w, now: now)!;
+      expect(spec.reference!.unit, TimeUnit.hour);
     });
 
     test('fenêtre entièrement passée (hier) → rien à projeter', () {

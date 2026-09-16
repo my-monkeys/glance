@@ -270,6 +270,12 @@ final siteDataStartProvider =
 /// différentes y feraient additionner 2019 avec 2024.
 final allTimeStartProvider = Provider<DateTime?>((ref) {
   final sitesAsync = ref.watch(visibleSitesProvider);
+  // La liste des sites a échoué : cadrer large plutôt que rendre null, sinon
+  // l'écran reste sur un squelette éternel au lieu de montrer son erreur et son
+  // bouton « Réessayer ».
+  if (sitesAsync.hasError) {
+    return DateTime.now().subtract(const Duration(days: 3650));
+  }
   final sites = sitesAsync.value;
   if (sites == null) return null;
   if (sites.isEmpty) return DateTime.now();

@@ -640,6 +640,14 @@ class _OverviewState extends ConsumerState<_Overview> {
     final group = ref.watch(activeWorkspaceProvider);
     final scope = group?.name ?? 'Tous les sites';
 
+    // Fenêtre pas encore résolue (« Tout » attend la date de première donnée) :
+    // un « 0 visiteur » en gros chiffres se lirait comme une réponse.
+    if (window == null) {
+      return Center(
+        child: CircularProgressIndicator(color: p.accent, strokeWidth: 2.4),
+      );
+    }
+
     // Aucun site dans le périmètre → dashboard vide trompeur : on montre un état
     // dédié plutôt qu'un graphe vide et des KPI à zéro.
     final sitesAsync = ref.watch(visibleSitesProvider);
@@ -711,36 +719,32 @@ class _OverviewState extends ConsumerState<_Overview> {
                         ),
                       ),
                       const Spacer(),
-                      if (window != null)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: UnitPicker(window: window),
-                        ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: UnitPicker(window: window),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 16),
-                  if (window == null)
-                    const SizedBox(height: 220)
-                  else
-                    GlanceChart(
+                  GlanceChart(
+                    series: displaySeries(data.totalSeries, window),
+                    unit: window.unit,
+                    height: 220,
+                    showPageviews: true,
+                    visitorsTotal: data.totalVisitors,
+                    pageviewsTotal: data.totalPageviews,
+                    forecast: buildForecast(
                       series: displaySeries(data.totalSeries, window),
-                      unit: window.unit,
-                      height: 220,
-                      showPageviews: true,
-                      visitorsTotal: data.totalVisitors,
-                      pageviewsTotal: data.totalPageviews,
-                      forecast: buildForecast(
-                        series: displaySeries(data.totalSeries, window),
-                        window: window,
-                        reference: data.totalRefSeries,
-                      ),
-                      compareSeries: data.totalCompareSeries,
-                      hidden: hidden,
-                      style: ref
-                          .watch(settingsProvider.select((s) => s.chartStyle)),
-                      onToggle: (k) =>
-                          ref.read(settingsProvider.notifier).toggleSeries(k),
+                      window: window,
+                      reference: data.totalRefSeries,
                     ),
+                    compareSeries: data.totalCompareSeries,
+                    hidden: hidden,
+                    style: ref
+                        .watch(settingsProvider.select((s) => s.chartStyle)),
+                    onToggle: (k) =>
+                        ref.read(settingsProvider.notifier).toggleSeries(k),
+                  ),
                 ],
               ),
             ),

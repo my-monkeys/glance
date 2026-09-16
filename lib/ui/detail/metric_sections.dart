@@ -121,9 +121,11 @@ class MetricSectionCard extends ConsumerStatefulWidget {
 }
 
 class _MetricSectionCardState extends ConsumerState<MetricSectionCard> {
-  // Dernières lignes affichées, par dimension : un rechargement en fond garde
-  // l'affichage précédent au lieu de repasser par un squelette.
-  final Map<MetricType, List<MetricRow>> _last = {};
+  // Dernières lignes affichées, par fenêtre ET par dimension : un rechargement
+  // en fond garde l'affichage précédent au lieu de repasser par un squelette.
+  // La fenêtre fait partie de la clé, sinon changer de période afficherait les
+  // chiffres de la précédente sous le nouveau libellé.
+  final Map<(DateWindow, MetricType), List<MetricRow>> _last = {};
 
   @override
   Widget build(BuildContext context) {
@@ -131,10 +133,11 @@ class _MetricSectionCardState extends ConsumerState<MetricSectionCard> {
     final dim = ref.watch(metricSectionsProvider)[widget.section]!;
     final async =
         ref.watch(siteMetricProvider((widget.site, widget.window, dim)));
-    if (async.hasValue) _last[dim] = async.value!;
+    final memo = (widget.window, dim);
+    if (async.hasValue) _last[memo] = async.value!;
     final rows = async.value ??
         ref.watch(cachedMetricProvider((widget.site, widget.window, dim))) ??
-        _last[dim];
+        _last[memo];
 
     return GlanceCard(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),

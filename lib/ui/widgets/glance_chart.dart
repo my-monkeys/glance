@@ -332,6 +332,16 @@ class _BarsBody extends StatelessWidget {
         final compare = m.drawn
             .where((s) => s.role == ChartSeriesRole.compare)
             .firstOrNull;
+        // La comparaison se peint derrière une barre : il lui en faut une.
+        // Si les visiteurs sont masqués, elle s'accroche à la première barre
+        // restante — sinon elle disparaîtrait du tracé alors que sa légende
+        // reste allumée et que l'échelle continue de la compter.
+        final compareHost = rods.isEmpty
+            ? null
+            : rods.firstWhere(
+                (s) => s.role == ChartSeriesRole.visitors,
+                orElse: () => rods.first,
+              );
 
         return BarChart(
           BarChartData(
@@ -384,8 +394,7 @@ class _BarsBody extends StatelessWidget {
                             top: Radius.circular(rodWidth / 3),
                           ),
                           backDrawRodData: BackgroundBarChartRodData(
-                            show: compare != null &&
-                                s.role == ChartSeriesRole.visitors,
+                            show: compare != null && s == compareHost,
                             toY: compare?.at(x) ?? 0,
                             color: p.fg3.withValues(alpha: 0.22),
                           ),

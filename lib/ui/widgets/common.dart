@@ -203,10 +203,16 @@ class MetricBars extends StatelessWidget {
   final String Function(MetricBarRow row)? valueLabel;
 
   /// Largeur du plus large des textes, mesurée sur les chaînes réellement
-  /// rendues : les nombres français sont groupés par une espace fine insécable
-  /// dont l'avance ne se déduit pas du nombre de caractères.
-  static double _widest(Iterable<String> texts, TextStyle style) {
-    final painter = TextPainter(textDirection: TextDirection.ltr);
+  /// rendues, à l'échelle de texte réelle : les nombres français sont groupés
+  /// par une espace fine insécable dont l'avance ne se déduit pas du nombre de
+  /// caractères, et un réglage d'accessibilité les élargit tous.
+  static double _widest(
+    Iterable<String> texts,
+    TextStyle style,
+    TextScaler scaler,
+  ) {
+    final painter =
+        TextPainter(textDirection: TextDirection.ltr, textScaler: scaler);
     var w = 0.0;
     for (final t in texts) {
       painter.text = TextSpan(text: t, style: style);
@@ -249,8 +255,9 @@ class MetricBars extends StatelessWidget {
             for (final r in rows)
               fmtPct((r.value / total! * 100).clamp(0, 100), decimals: 0),
           ];
-    final numWidth = _widest(values, numStyle);
-    final pctWidth = pcts.isEmpty ? 0.0 : _widest(pcts, pctStyle);
+    final scaler = MediaQuery.textScalerOf(context);
+    final numWidth = _widest(values, numStyle, scaler);
+    final pctWidth = pcts.isEmpty ? 0.0 : _widest(pcts, pctStyle, scaler);
 
     final missing = reserveRows - rows.length;
     return Column(

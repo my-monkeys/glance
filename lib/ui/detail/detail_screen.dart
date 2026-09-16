@@ -259,8 +259,11 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
 
                 GlanceSwap(
                   child: KeyedSubtree(
+                    // La fenêtre fait partie de la clé : l'onglet Événements
+                    // garde sinon les courbes décochées d'une autre période,
+                    // dont les noms peuvent ne plus exister.
                     key: ValueKey(_tab == _DetailTab.events && hasEvents
-                        ? 'events'
+                        ? ('events', window)
                         : window == null || stats == null
                             ? (async.hasError ? 'error' : 'loading')
                             : 'stats'),
