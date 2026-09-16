@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 
 import '../../core/countries.dart';
+import '../../core/entities.dart';
 import '../models/models.dart';
 import '../models/period.dart';
 import 'analytics_provider.dart';
@@ -105,23 +106,19 @@ class UmamiProvider extends AnalyticsProvider {
 
   @override
   Future<StatsSummary> summary(Site site, DateWindow w) async {
-    // Période précédente de même durée pour le delta (le champ `comparison` de
-    // v3 n'est pas peuplé sans params dédiés → on interroge nous-mêmes).
-    final span = w.end.difference(w.start);
-    final prevStart = w.start.subtract(span).millisecondsSinceEpoch;
-
-    final results = await Future.wait([
-      _get('/api/websites/${site.id}/stats', {
-        'startAt': w.startMs,
-        'endAt': w.endMs,
-      }),
-      _get('/api/websites/${site.id}/stats', {
-        'startAt': prevStart,
-        'endAt': w.startMs,
-      }).catchError((_) => <String, dynamic>{}),
-    ]);
-    final d = results[0] as Map;
-    final prev = results[1] as Map;
+    final d = await _get('/api/websites/${site.id}/stats', {
+      'startAt': w.startMs,
+      'endAt': w.endMs,
+    }) as Map;
+    // v3 peuple `comparison` avec la période précédente de même durée — vérifié
+    // au chiffre près contre un appel manuel. Un 2e aller-retour serait payé
+    // pour chaque site de l'accueil, à chaque rafraîchissement.
+    final prev = d['comparison'] is Map
+        ? (d['comparison'] as Map)
+        : await _get('/api/websites/${site.id}/stats', {
+            'startAt': w.start.subtract(w.end.difference(w.start)).millisecondsSinceEpoch,
+            'endAt': w.startMs,
+          }).catchError((_) => <String, dynamic>{}) as Map;
 
     int n(dynamic v) => _vp(v).$1;
     final visits = n(d['visits']);
@@ -185,12 +182,9 @@ class UmamiProvider extends AnalyticsProvider {
     MetricType type, {
     int limit = 8,
   }) async {
-    final apiType = switch (type) {
-      MetricType.pages => 'path', // v3 : `url` a été renommé `path`
-      MetricType.sources => 'referrer',
-      MetricType.countries => 'country',
-      MetricType.events => 'event',
-    };
+    // Les clés de dimension sont exactement celles de l'API v3 (`url` y a été
+    // renommé `path`).
+    final apiType = type.key;
     final d = await _get('/api/websites/${site.id}/metrics', {
       'startAt': w.startMs,
       'endAt': w.endMs,
@@ -201,6 +195,16 @@ class UmamiProvider extends AnalyticsProvider {
     return list
         .map((e) => _row(type, (e['x'] ?? '').toString(), (e['y'] as num?)?.round() ?? 0))
         .toList(growable: false);
+  }
+
+  @override
+  Future<DataRange?> dataRange(Site site) async {
+    final d = await _get('/api/websites/${site.id}/daterange');
+    if (d is! Map) return null;
+    final start = DateTime.tryParse('${d['startDate']}');
+    final end = DateTime.tryParse('${d['endDate']}');
+    if (start == null || end == null) return null;
+    return DataRange(start.toLocal(), end.toLocal());
   }
 
   @override
@@ -271,15 +275,41 @@ class UmamiProvider extends AnalyticsProvider {
   MetricRow _row(MetricType type, String x, int y) {
     switch (type) {
       case MetricType.pages:
-        return MetricRow(label: x.isEmpty ? '/' : x, value: y);
-      case MetricType.sources:
+      case MetricType.entryPages:
+      case MetricType.exitPages:
+        return MetricRow(label: x.isEmpty ? '/' : x, value: y, code: x);
+      case MetricType.referrers:
         if (x.isEmpty) return MetricRow(label: 'Accès direct', value: y);
         final host = x.replaceFirst(RegExp(r'^https?://'), '').split('/').first;
-        return MetricRow(label: host.isEmpty ? 'Accès direct' : host, value: y);
+        if (host.isEmpty) return MetricRow(label: 'Accès direct', value: y);
+        return MetricRow(label: host, value: y, code: host);
+      case MetricType.channels:
+        return MetricRow(label: channelName(x), value: y, code: x);
       case MetricType.countries:
         return MetricRow(label: countryName(x), value: y, code: x);
+      case MetricType.browsers:
+        return MetricRow(label: browserName(x), value: y, code: x);
+      case MetricType.devices:
+        return MetricRow(label: deviceName(x), value: y, code: x);
+      case MetricType.languages:
+        return MetricRow(label: languageName(x), value: y, code: x);
+      case MetricType.operatingSystems:
+        return MetricRow(
+          label: x.isEmpty ? 'Inconnu' : x,
+          value: y,
+          code: x,
+        );
+      case MetricType.pageTitles:
+      case MetricType.queries:
+      case MetricType.screens:
+      case MetricType.regions:
+      case MetricType.cities:
       case MetricType.events:
-        return MetricRow(label: x.isEmpty ? '(sans nom)' : x, value: y);
+        return MetricRow(
+          label: x.isEmpty ? 'Inconnu' : x,
+          value: y,
+          code: x,
+        );
     }
   }
 

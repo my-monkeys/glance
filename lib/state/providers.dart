@@ -322,7 +322,7 @@ final detailProvider =
     p.summary(site, w),
     p.series(site, w),
     p.metric(site, w, MetricType.pages, limit: 6),
-    p.metric(site, w, MetricType.sources, limit: 6),
+    p.metric(site, w, MetricType.referrers, limit: 6),
     p.metric(site, w, MetricType.countries, limit: 6),
     p.active(site).catchError((_) => 0),
     p.livePages(site).catchError((_) => <LivePage>[]),

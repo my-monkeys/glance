@@ -95,6 +95,15 @@ class MetricRow {
   final String? code; // ex: code pays "FR"
 }
 
+/// Plage réellement couverte par les données d'un site (première et dernière
+/// mesure), telle que la donne le fournisseur.
+@immutable
+class DataRange {
+  const DataRange(this.start, this.end);
+  final DateTime start;
+  final DateTime end;
+}
+
 /// Une page vue en direct.
 @immutable
 class LivePage {

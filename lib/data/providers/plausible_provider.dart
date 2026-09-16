@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/countries.dart';
+import '../../core/entities.dart';
 import '../models/models.dart';
 import '../models/period.dart';
 import 'analytics_provider.dart';
@@ -290,12 +291,29 @@ class PlausibleProvider extends AnalyticsProvider {
     MetricType type, {
     int limit = 8,
   }) async {
+    // Dimensions de la Stats API v2. Celles que Plausible n'expose pas (titre
+    // de page, requête d'URL, résolution d'écran) renvoient une liste vide : la
+    // carte dit « Aucune donnée » au lieu de disparaître, sinon la mise en page
+    // sauterait d'un fournisseur à l'autre.
     final dim = switch (type) {
       MetricType.pages => 'event:page',
-      MetricType.sources => 'visit:source',
+      MetricType.entryPages => 'visit:entry_page',
+      MetricType.exitPages => 'visit:exit_page',
+      MetricType.referrers => 'visit:source',
+      MetricType.channels => 'visit:channel',
+      MetricType.browsers => 'visit:browser',
+      MetricType.operatingSystems => 'visit:os',
+      MetricType.devices => 'visit:device',
       MetricType.countries => 'visit:country',
+      MetricType.regions => 'visit:region',
+      MetricType.cities => 'visit:city',
+      MetricType.languages => null,
+      MetricType.pageTitles => null,
+      MetricType.queries => null,
+      MetricType.screens => null,
       MetricType.events => 'event:name',
     };
+    if (dim == null) return const [];
     final metric = type == MetricType.events ? 'events' : 'visitors';
     final res = await _query({
       'site_id': site.id,
@@ -308,10 +326,19 @@ class PlausibleProvider extends AnalyticsProvider {
     final rows = _rows(res).map((r) {
       final label = (r['dimensions'] as List).first.toString();
       final value = ((r['metrics'] as List).first as num).round();
-      if (type == MetricType.countries) {
-        return MetricRow(label: countryName(label), value: value, code: label);
-      }
-      return MetricRow(label: label.isEmpty ? '/' : label, value: value);
+      return switch (type) {
+        MetricType.countries =>
+          MetricRow(label: countryName(label), value: value, code: label),
+        MetricType.channels =>
+          MetricRow(label: channelName(label), value: value, code: label),
+        MetricType.devices =>
+          MetricRow(label: deviceName(label), value: value, code: label),
+        _ => MetricRow(
+            label: label.isEmpty ? '/' : label,
+            value: value,
+            code: label,
+          ),
+      };
     }).toList();
     if (type == MetricType.events) {
       // « pageview » n'est pas un événement personnalisé.

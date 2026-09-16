@@ -16,7 +16,7 @@ final siteReferrersProvider = FutureProvider.autoDispose
   final gate = ref.watch(fetchGateProvider);
   final reg = ref.watch(providerRegistryProvider);
   final p = await reg.forAccount(site.accountId);
-  return gate.run(() => p.metric(site, w, MetricType.sources, limit: 50));
+  return gate.run(() => p.metric(site, w, MetricType.referrers, limit: 50));
 });
 
 /// Domaines normalisés de TOUT le périmètre suivi (pas seulement le groupe

@@ -46,7 +46,9 @@ class InternalTraffic {
     final flows = <InternalFlow>[];
     referrersByDest.forEach((dest, rows) {
       for (final r in rows) {
-        final src = normDomain(r.label);
+        // `code` porte l'hôte brut ; `label` peut être une mise en forme
+        // (« Accès direct »), qui ne doit pas être prise pour un domaine.
+        final src = normDomain(r.code ?? r.label);
         if (r.value <= 0 || src == dest || !knownDomains.contains(src)) continue;
         flows.add(InternalFlow(src, dest, r.value));
       }

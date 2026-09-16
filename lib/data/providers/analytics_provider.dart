@@ -1,10 +1,11 @@
 import 'package:dio/dio.dart';
 
 import '../models/account.dart';
+import '../models/dimension.dart';
 import '../models/models.dart';
 import '../models/period.dart';
 
-enum MetricType { pages, sources, countries, events }
+export '../models/dimension.dart';
 
 /// État de santé d'un compte (pour signaler un souci d'auth dans l'UI).
 enum AccountHealth {
@@ -45,6 +46,12 @@ abstract class AnalyticsProvider {
 
   /// Une série temporelle par nom d'événement (triées par total décroissant).
   Future<List<EventSeries>> eventSeries(Site site, DateWindow w);
+
+  /// Plage réellement couverte par les données du site (première et dernière
+  /// mesure). Null quand le fournisseur ne sait pas la donner — l'appelant
+  /// retombe alors sur un cadrage large. Sert à caler la période « Tout » sur
+  /// les vraies données plutôt que sur une borne arbitraire.
+  Future<DataRange?> dataRange(Site site) async => null;
 
   /// Diagnostic léger du compte : valide les identifiants (et la clé pour les
   /// fournisseurs à clé). Par défaut, dérivé de [verify] : 401/403 → badAuth,
