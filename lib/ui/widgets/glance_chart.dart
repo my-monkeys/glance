@@ -28,7 +28,6 @@ class GlanceChart extends StatelessWidget {
     this.hidden = const {},
     this.onToggle,
     this.style = ChartStyle.curve,
-    this.trailing,
   });
 
   static const kVisitors = ChartModel.kVisitorsKey;
@@ -61,9 +60,6 @@ class GlanceChart extends StatelessWidget {
   final void Function(String key)? onToggle;
 
   final ChartStyle style;
-
-  /// Posé à droite de la légende — le sélecteur de découpage y vit.
-  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -102,56 +98,41 @@ class GlanceChart extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.only(bottom: 10, left: 2),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Wrap(
+            spacing: 16,
+            runSpacing: 6,
             children: [
-              Expanded(
-                child: Wrap(
-                  spacing: 16,
-                  runSpacing: 6,
-                  children: [
-                    if (visitorsTotal != null)
-                      _LegendItem(
-                        color: p.accent,
-                        label: 'Visiteurs',
-                        value: visitorsTotal,
-                        on: !hidden.contains(kVisitors),
-                        onTap:
-                            onToggle == null ? null : () => onToggle!(kVisitors),
-                      ),
-                    _LegendItem(
-                      color: p.fg2,
-                      label: 'Pages vues',
-                      value: pageviewsTotal,
-                      on: !hidden.contains(kPageviews),
-                      onTap:
-                          onToggle == null ? null : () => onToggle!(kPageviews),
-                    ),
-                    if (model.hasForecast)
-                      _LegendItem(
-                        color: p.forecast,
-                        label: 'Prévision',
-                        value: projected,
-                        approx: true,
-                        on: !hidden.contains(kForecast),
-                        onTap:
-                            onToggle == null ? null : () => onToggle!(kForecast),
-                      ),
-                    if (hasCompare)
-                      _LegendItem(
-                        color: p.fg3,
-                        label: 'Période précédente',
-                        on: !hidden.contains(kCompare),
-                        onTap:
-                            onToggle == null ? null : () => onToggle!(kCompare),
-                      ),
-                  ],
+              if (visitorsTotal != null)
+                _LegendItem(
+                  color: p.accent,
+                  label: 'Visiteurs',
+                  value: visitorsTotal,
+                  on: !hidden.contains(kVisitors),
+                  onTap: onToggle == null ? null : () => onToggle!(kVisitors),
                 ),
+              _LegendItem(
+                color: p.fg2,
+                label: 'Pages vues',
+                value: pageviewsTotal,
+                on: !hidden.contains(kPageviews),
+                onTap: onToggle == null ? null : () => onToggle!(kPageviews),
               ),
-              if (trailing != null) ...[
-                const SizedBox(width: 10),
-                trailing!,
-              ],
+              if (model.hasForecast)
+                _LegendItem(
+                  color: p.forecast,
+                  label: 'Prévision',
+                  value: projected,
+                  approx: true,
+                  on: !hidden.contains(kForecast),
+                  onTap: onToggle == null ? null : () => onToggle!(kForecast),
+                ),
+              if (hasCompare)
+                _LegendItem(
+                  color: p.fg3,
+                  label: 'Période précédente',
+                  on: !hidden.contains(kCompare),
+                  onTap: onToggle == null ? null : () => onToggle!(kCompare),
+                ),
             ],
           ),
         ),
@@ -176,10 +157,7 @@ List<TextSpan> _tooltipLines({
   for (final s in only ?? model.drawn) {
     final v = s.at(x);
     if (v == null) continue;
-    // Le point de raccord de la prévision duplique la valeur observée.
-    if (s.role == ChartSeriesRole.forecast &&
-        x == model.fcStart &&
-        model.fcStart < model.series.length - 1) {
+    if (s.role == ChartSeriesRole.forecast && model.isForecastBridge(x)) {
       continue;
     }
     final fc = s.role == ChartSeriesRole.forecast;
@@ -387,7 +365,9 @@ class _BarsBody extends StatelessWidget {
                   barsSpace: 1,
                   barRods: [
                     for (final s in rods)
-                      if (s.at(x) case final v?)
+                      if (s.at(x) case final v?
+                          when !(s.role == ChartSeriesRole.forecast &&
+                              m.isForecastBridge(x)))
                         BarChartRodData(
                           toY: v,
                           width: rodWidth,

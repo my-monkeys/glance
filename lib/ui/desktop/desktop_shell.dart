@@ -710,6 +710,12 @@ class _OverviewState extends ConsumerState<_Overview> {
                           ],
                         ),
                       ),
+                      const Spacer(),
+                      if (window != null)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: UnitPicker(window: window),
+                        ),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -732,7 +738,6 @@ class _OverviewState extends ConsumerState<_Overview> {
                       hidden: hidden,
                       style: ref
                           .watch(settingsProvider.select((s) => s.chartStyle)),
-                      trailing: UnitPicker(window: window),
                       onToggle: (k) =>
                           ref.read(settingsProvider.notifier).toggleSeries(k),
                     ),

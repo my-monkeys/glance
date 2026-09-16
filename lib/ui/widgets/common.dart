@@ -214,7 +214,9 @@ class MetricBars extends StatelessWidget {
       w = math.max(w, painter.width);
     }
     painter.dispose();
-    return w;
+    // Arrondi au pixel supérieur : une largeur au demi-pixel près ferait
+    // retourner à la ligne le texte qu'on vient justement de mesurer.
+    return w.ceilToDouble() + 1;
   }
 
   @override
@@ -222,7 +224,9 @@ class MetricBars extends StatelessWidget {
     final p = context.glance;
     if (rows.isEmpty) {
       return SizedBox(
-        height: reserveRows > 0 ? reserveRows * kMetricRowHeight : null,
+        // Quelques lignes seulement : réserver la hauteur pleine laisserait
+        // 300 px de blanc sous un « Aucune donnée ».
+        height: reserveRows > 0 ? math.min(reserveRows, 3) * kMetricRowHeight : null,
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 10),
           child: Text('Aucune donnée', style: GT.body(13, color: p.fg3)),
@@ -312,6 +316,8 @@ class MetricBars extends StatelessWidget {
                       child: Text(
                         values[i],
                         textAlign: TextAlign.right,
+                        maxLines: 1,
+                        softWrap: false,
                         style: numStyle,
                       ),
                     ),
@@ -325,6 +331,8 @@ class MetricBars extends StatelessWidget {
                         child: Text(
                           pcts[i],
                           textAlign: TextAlign.right,
+                          maxLines: 1,
+                          softWrap: false,
                           style: pctStyle,
                         ),
                       ),

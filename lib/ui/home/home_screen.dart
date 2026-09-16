@@ -543,7 +543,15 @@ class _TotalCard extends ConsumerWidget {
             children: [
               DeltaText(data.totalDeltaPct),
               const SizedBox(width: 8),
-              Text('vs période préc.', style: GT.body(12, color: p.fg2)),
+              Expanded(
+                child: Text(
+                  'vs période préc.',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GT.body(12, color: p.fg2),
+                ),
+              ),
+              UnitPicker(window: window),
             ],
           ),
           const SizedBox(height: 14),
@@ -558,7 +566,6 @@ class _TotalCard extends ConsumerWidget {
             compareSeries: data.totalCompareSeries,
             hidden: hidden,
             style: ref.watch(settingsProvider.select((s) => s.chartStyle)),
-            trailing: UnitPicker(window: window),
             onToggle: (k) => ref.read(settingsProvider.notifier).toggleSeries(k),
           ),
         ],

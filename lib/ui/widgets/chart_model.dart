@@ -175,6 +175,12 @@ class ChartModel {
 
   double get lastX => (xCount - 1).toDouble();
 
+  /// Le premier point de la prévision recopie un bucket déjà observé, pour que
+  /// la courbe se raccorde sans saut. En barres il n'a rien à raccorder : il
+  /// dessinerait une barre en double sur une valeur déjà présente.
+  bool isForecastBridge(int x) =>
+      hasForecast && x == fcStart && fcStart < series.length - 1;
+
   bool get isEmpty => series.isEmpty || drawn.isEmpty;
 
   /// Date d'un index d'axe. Au-delà des buckets observés ou projetés (seule la

@@ -346,6 +346,11 @@ class _DetailBody extends ConsumerWidget {
                     padding: const EdgeInsets.only(bottom: 10),
                     child: DeltaText(s.visitorsDeltaPct, fontSize: 13),
                   ),
+                  const Spacer(),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: UnitPicker(window: window),
+                  ),
                 ],
               ),
               const SizedBox(height: 14),
@@ -360,7 +365,6 @@ class _DetailBody extends ConsumerWidget {
                 compareSeries: compareSeries,
                 hidden: hidden,
                 style: ref.watch(settingsProvider.select((s) => s.chartStyle)),
-                trailing: UnitPicker(window: window),
                 onToggle: (k) =>
                     ref.read(settingsProvider.notifier).toggleSeries(k),
               ),

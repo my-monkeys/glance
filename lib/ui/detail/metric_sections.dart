@@ -294,46 +294,46 @@ class _SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = context.glance;
-    return Row(
+    // Le sélecteur prend sa propre ligne : à côté du titre, quatre libellés ne
+    // tiennent pas sur un téléphone et le premier — celui qui est actif —
+    // partirait hors champ.
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SectionLabel(section.label),
-        const Spacer(),
-        Flexible(
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            reverse: true,
-            physics: const BouncingScrollPhysics(),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                for (final t in section.dimensions)
-                  GestureDetector(
-                    onTap: () => onPick(t),
-                    behavior: HitTestBehavior.opaque,
-                    child: AnimatedContainer(
-                      duration: kMotionFast,
-                      curve: kCurveOut,
-                      margin: const EdgeInsets.only(left: 4),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: t == current ? p.accentSoft : Colors.transparent,
-                        borderRadius: BorderRadius.circular(7),
-                      ),
-                      child: Text(
-                        t.label,
-                        style: GT.mono(
-                          10.5,
-                          weight: t == current ? 600 : 400,
-                          color: t == current ? p.accent : p.fg3,
-                        ),
+        const SizedBox(height: 8),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          physics: const BouncingScrollPhysics(),
+          child: Row(
+            children: [
+              for (final t in section.dimensions)
+                GestureDetector(
+                  onTap: () => onPick(t),
+                  behavior: HitTestBehavior.opaque,
+                  child: AnimatedContainer(
+                    duration: kMotionFast,
+                    curve: kCurveOut,
+                    margin: const EdgeInsets.only(right: 5),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 9,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: t == current ? p.accentSoft : p.chip,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      t.label,
+                      style: GT.mono(
+                        10.5,
+                        weight: t == current ? 600 : 400,
+                        color: t == current ? p.accent : p.fg2,
                       ),
                     ),
                   ),
-              ],
-            ),
+                ),
+            ],
           ),
         ),
       ],

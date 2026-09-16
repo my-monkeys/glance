@@ -12,14 +12,18 @@
 
 ```
 lib/
-  core/        format, countries (nom+drapeau), errors, pool (limiteur de concurrence)
+  core/        format, countries (nom+drapeau), entities (navigateurs/appareils/canaux/langues en FR),
+               metric_icon (URL + clé de cache d'une icône), errors, pool (limiteur de concurrence)
   data/
-    models/    Site, StatsSummary, SeriesPoint, MetricRow, LivePage, SiteDetail, Account, Period
+    models/    Site, StatsSummary, SeriesPoint, MetricRow, LivePage, DataRange, Account, Period,
+               dimension (MetricType + MetricSection)
     providers/ AnalyticsProvider (interface) + UmamiProvider, PlausibleProvider, FathomProvider (stub) + factory
     repository/AccountsRepository (comptes en prefs, creds en secure storage)
-  state/       providers Riverpod (accounts, sites, home, detail), settings, home_data
+  state/       providers Riverpod (accounts, sites, home, métriques, icônes), period_state (+ windowProvider),
+               settings, home_data, metric_sections
   theme/       palette (ThemeExtension light+dark), type, theme, motion (tokens durées/curves)
-  ui/          onboarding-vide (home), home, detail, direct, add (+ site_picker), settings, widgets/
+  ui/          onboarding-vide (home), home, detail (+ metric_sections), direct, add (+ site_picker),
+               settings, widgets/
   dev/         seed.dart (amorçage --dart-define, inerte sans defines)
 ```
 
@@ -45,12 +49,111 @@ La sélection de sites est éditable après coup : Réglages → tap sur le comp
 - Accueil : cartes **triées par visiteurs** (chargés en tête, squelettes à la suite) ; `ValueKey(site)` sur chaque slot → Flutter déplace au lieu de reconstruire. Direct trie par live.
 - Auto-refresh / pull : `ref.invalidate(siteStatsProvider)` + `ref.invalidate(siteLiveProvider)` (familles entières) → refetch en place, valeurs précédentes conservées (pas de flash). Une fine `RefreshBar` en haut tant que `homeTotals.loading`.
 
+## Les données d'un site : quatre sections, façon Umami
+
+Le détail d'un site montre **Pages** (Chemins / Entrée / Sortie / Titre),
+**Sources** (Référents / Canaux / Requêtes), **Environnement** (Navigateurs / OS /
+Appareils / Écrans) et **Emplacement** (Pays / Régions / Villes / Langues) — le
+découpage et les libellés d'Umami, pour qu'on retrouve son vocabulaire.
+
+- `data/models/dimension.dart` : `MetricType` (16 dimensions) + `MetricSection`
+  (leur regroupement) + la famille d'icône de chacune. `MetricType.key` est la clé
+  d'API Umami **et** la clé de persistance — ne jamais la dériver de `name`.
+- Un provider par dimension : `siteMetricProvider((site, window, type))`, en
+  `cacheFor` (pas `cacheSession` : 16 dimensions × 9 périodes retiendraient tout ce
+  qui a été feuilleté). Changer de sous-dimension ne recharge que celle-là.
+- La sous-dimension choisie est persistée par section (`metricSectionsProvider`),
+  pas par site : c'est une habitude de lecture.
+- **Le rafraîchissement n'invalide que les 4 clés affichées** — `ref.invalidate` sur
+  la famille entière relancerait des dizaines de requêtes par tick.
+- Grille : `MetricSectionGrid` répartit en colonnes-seaux (`LayoutBuilder` +
+  `Row` de `Column`), 1 à 3 colonnes selon `constraints.maxWidth` — **jamais**
+  `MediaQuery.size` : le panneau central du bureau est plus étroit que la fenêtre,
+  et franchir `kDesktopBreakpoint` fait apparaître 320 px de barre latérale, donc
+  *élargir* la fenêtre peut *réduire* la place. Une `GridView` imposerait à chaque
+  rangée la hauteur de sa plus haute carte ; ici `MetricBars.reserveRows` garde
+  toutes les cartes à la même hauteur.
+- **Pourcentage = part de `summary.visitors`**, jamais la somme des lignes reçues
+  (qui dépend du nombre de lignes demandées : en afficher une de plus changerait
+  tous les pourcentages). Vérifié sur l'instance : toutes les dimensions Umami
+  comptent des visiteurs uniques (`max(y) ≤ visitors` sur 3 sites × 9 dimensions).
+  Les dimensions multivaluées (chemins, titres) dépassent 100 % cumulés — c'est
+  correct (« part des visiteurs qui ont vu cette page »), et chaque ligne est
+  bornée à 100 %.
+
+## Icônes des lignes de données
+
+`core/metric_icon.dart` (pur, testé) dit d'où vient l'icône ; `FaviconCache.fromUrl`
+la télécharge et la garde sur disque ; `iconProvider` la sert, derrière un
+**sémaphore dédié** (`iconGateProvider`, 4) — une carte peut en demander 40 d'un
+coup, elles ne doivent pas concurrencer les requêtes de statistiques.
+
+- **Référents** → `icons.duckduckgo.com/ip3/<domaine>.ico`, comme Umami. Le domaine
+  passe par `normDomain` (sans `www.`, sans port) : sinon 404, et un échec est
+  mémorisé 7 jours.
+- **Navigateurs / OS** → `<instance>/images/{browser,os}/<slug>.png`, servis
+  publiquement par Umami. ⚠️ Le slug vient du **code brut**, jamais du libellé
+  français : `browserName('crios')` vaut « Chrome (iOS) », dont le slug n'existe pas.
+  La clé de cache porte l'hôte de l'instance — deux comptes peuvent servir des
+  images différentes sous le même nom.
+- **Appareils / pays** → dessinés localement (glyphe Material, drapeau émoji).
+- Flutter décode nativement les `.ico`, y compris les vrais ICO 32 bits non-PNG
+  (vérifié sur google.com et github.com) : aucun décodeur à embarquer.
+
 ## Période partagée (synchro entre écrans)
 
-`periodProvider` (`state/period_state.dart`, `NotifierProvider<PeriodNotifier, PeriodState>`) porte la période sélectionnée pour **tout** l'app. Accueil et détail lisent/écrivent le même état → ouvrir un site conserve la période de l'accueil, changer la période n'importe où se répercute partout. La fenêtre est **alignée sur la grille** (cf. `Period.window` : borne de fin plafonnée à l'unité suivante) donc `window()` renvoie une valeur **stable** entre deux builds d'une même heure/jour → la clé des `family` ne change pas, pas de reload en boucle (plus besoin de figer la fenêtre en state).
+`periodProvider` (`state/period_state.dart`) porte la période **et la granularité**
+sélectionnées pour toute l'app. La fenêtre est **alignée sur la grille** (cf.
+`Period.window` : borne de fin plafonnée à l'unité suivante) donc elle est **stable**
+entre deux builds d'une même heure/jour → la clé des `family` ne change pas, pas de
+reload en boucle.
+
+⚠️ **Tous les écrans et toutes les minuteries lisent `windowProvider`**, jamais
+`PeriodState.resolve()` (volontairement renommé pour que le compilateur signale les
+oublis). Deux exceptions commentées : `siteHasEventsProvider` (30 j fixes,
+indépendants de la période) et le test de connexion d'`add_source_screen`. Un écran
+qui résoudrait la fenêtre lui-même ferait fetcher une seconde grappe complète, et
+son `invalidate` viserait une clé que plus personne n'écoute — le graphe cesserait
+de se rafraîchir **sans aucune erreur**.
+
+`windowProvider` rend `null` tant que « Tout » attend sa date de première donnée :
+l'appelant montre son squelette sans rien déclencher.
+
+### Découpage du graphique (heure / jour / mois)
+
+`UnitPicker`, en haut à droite des grands graphiques, n'offre que
+`allowedUnits(window)` — la règle d'Umami (`getMinimumUnit` : heure jusqu'à 30 j,
+jour jusqu'à 7 mois, mois au-delà), bornée à **800 buckets** et à au moins 3 (pour
+ne pas proposer « Mois » sur sept jours, qui donnerait une seule barre). Rien à
+choisir sur « Aujourd'hui » → le sélecteur disparaît.
+
+⚠️ La granularité est appliquée **avant** le calcul des bornes (`Period.window(unit:)`),
+jamais posée après coup dans le 3ᵉ champ de `DateWindow` : une journée demandée en
+granularité jour donnerait alors une fenêtre plus courte qu'un bucket, donc une
+**série vide et un graphe blanc, sans erreur**.
+
+⚠️ Pas de `TimeUnit.year` : Umami la ramène de toute façon à `month`, et recoller
+les 12 mois côté client surcompterait les visiteurs uniques.
+
+### « Tout » part des vraies données
+
+`/api/websites/:id/daterange` donne la première (et la dernière) mesure d'un site.
+`siteDataStartProvider` la résout et la persiste ; `allTimeStartProvider` en prend
+le minimum sur les sites affichés, **tout-ou-rien** (une borne qui reculerait à
+chaque réponse relancerait une vague de requêtes par site).
+
+⚠️ **Seul le début vient de l'API.** `endDate` bouge à chaque visite enregistrée :
+l'utiliser ferait changer la clé des providers à chaque build — le bug
+« chargement infini » documenté plus bas, en pire (`cacheSession` ne libère rien).
+La fin reste `_ceil(now, unit)`, comme pour toutes les autres périodes.
+
+⚠️ La fenêtre de « Tout » est **commune à tous les sites** de l'accueil :
+`HomeData.fromCards` additionne les séries **par index de bucket**, donc des
+fenêtres par site y additionneraient 2019 avec 2024.
 
 ## Graphiques (point clé de la demande)
 
+- `ui/widgets/chart_model.dart` : `ChartModel` décide une fois pour toutes des séries visibles, de l'échelle, de l'axe des temps — la courbe et les barres partagent exactement les mêmes décisions. Le réglage « Courbe / Barres » (Réglages → Apparence) choisit le moteur. En barres, la comparaison passe **derrière** la barre courante (`backDrawRodData`) et la prévision devient un remplissage bordé de pointillés (une barre ne se trace pas en trait discontinu) ; sous 2 px de large, le rendu **revient à la courbe**. `EventsChart` reste en lignes : 8 séries groupées y donneraient des barres d'un pixel.
 - `ui/widgets/glance_chart.dart` (fl_chart) : courbe **lissée** (`isCurved`, `curveSmoothness`, cap/join round), **aire dégradée**, **échelle Y arrondie**, labels X selon la granularité, tooltip tactile. Deux courbes — **Visiteurs** (vert, aire) + **Pages vues** (gris) — avec légende cliquable (masquer/afficher) sur home/détail. (Les *visites* ne sont volontairement PAS tracées : par heure elles sont égales aux visiteurs — cf. gotcha `sessions ≠ visites` — donc redondantes ; elles restent en carte KPI du détail.) Remplace la barre de la maquette. Sparkline compacte des cartes = `ui/widgets/sparkline.dart`.
 - `ui/widgets/events_chart.dart` : **multi-lignes, une couleur par événement** (palette `kEventPalette`), échelle Y partagée, tooltip listant chaque événement. Onglet Événements du détail : légende = puces cliquables (cocher/décocher les courbes ; au-delà de 6 events les moins fréquents sont masqués par défaut), barres de répartition colorées assorties.
 - Helpers partagés dans `ui/widgets/chart_util.dart` (`chartNiceMax`, `chartTooltipDate`).
@@ -72,10 +175,12 @@ Reprise mobile de la vue « referrals » du dashboard monkey : les referrers de 
 ### Umami (self-hosted, **v3** — vérifié sur `uuu.my-monkey.fr`)
 - Auth : `POST /api/auth/login` {username,password} → `{token, user:{isAdmin,role}}`. Bearer réutilisé, re-login auto sur 401.
 - **Liste des sites** : `/api/websites` ne renvoie **que** les sites possédés/partagés → un compte **admin** doit passer par **`/api/admin/websites`** (routage selon `isAdmin`).
-- `/api/websites/:id/stats` → nombres **plats** `{pageviews,visitors,visits,bounces,totaltime}` (le champ `comparison` n'est pas peuplé sans params dédiés → on fait un **2e appel** sur la période précédente pour le delta).
+- `/api/websites/:id/stats` → nombres **plats** `{pageviews,visitors,visits,bounces,totaltime}` **+ `comparison`**, qui contient la période précédente de même durée (vérifié au chiffre près contre un appel manuel). Le 2ᵉ appel d'avant a disparu ; le repli reste en place si le champ manque.
+- `/api/websites/:id/daterange` → `{startDate, endDate}` : la vraie plage de données du site.
 - `/api/websites/:id/pageviews?unit=&timezone=` → `{pageviews:[{x,y}], sessions:[{x,y}]}`, `x` = `"YYYY-MM-DD HH:MM:SS"`. On remplit des buckets continus. **`sessions` = visiteurs uniques par bucket, pas les visites** (cf. gotchas).
 - `/api/websites/:id/active` → `{visitors:N}`.
-- `/api/websites/:id/metrics?type=` : **`path`** (pages, ⚠️ pas `url` en v3), `referrer` (sources), `country` (pays).
+- `/api/websites/:id/metrics?type=` — 17 dimensions vérifiées sur l'instance : `path` (⚠️ pas `url` en v3), `entry`, `exit`, `title`, `referrer`, `channel`, `query`, `browser`, `os`, `device`, `screen`, `country`, `region`, `city`, `language`, `event`, `tag`. ⚠️ `region` et `city` répondent 200 mais **vides** sur `uuu.my-monkey.fr` : l'instance n'a pas de base GeoLite City (0 ligne sur 33 637 sessions). Le paramètre `metric=views|visitors` n'existe pas : les valeurs sont toujours des **visiteurs uniques**.
+- `unit=` de `/pageviews` accepte `hour|day|month|year` — **pas `week`**.
 
 ### Plausible (Stats API v2, implémenté d'après la doc — à valider sur instance)
 - `POST /api/v2/query` Bearer, `{site_id, metrics, date_range, dimensions:['time:day'|'event:page'|…], timezone}`.
@@ -119,7 +224,8 @@ Umami `uuu.my-monkey.fr` (dev-cookie). Un utilisateur **service** dédié `glanc
 - **Chargement infini du détail** : `_window` calculé à chaque build avec `DateTime.now()` → la clé de `FutureProvider.family` changeait en continu → reload en boucle. Fix : figer `_window` dans l'état (recalcul uniquement au changement de période / refresh). Toute fenêtre passée à une `family` doit être stable entre les builds.
 - **`Cannot remove from an unmodifiable list`** : `Account.decodeList` renvoie `growable:false` ; `loadAccounts()` doit renvoyer une copie modifiable.
 - **Delta « explosif »** : quand la période précédente ≈ 0 (Umami récemment ajouté), le % explose. Au-delà de +400 %, `DeltaText` bascule en multiplicateur « ×N ».
-- Umami v3 : `type=path` (pas `url`) ; sites admin via `/api/admin/websites` ; deltas via 2e appel stats.
+- Umami v3 : `type=path` (pas `url`) ; sites admin via `/api/admin/websites`.
+- **⚠️ Le `guard` de `_buckets` tronquait la FIN de la série** (les données les plus récentes) sans lever d'erreur. Il lève maintenant : une série tronquée ressemble à un trou de collecte, une erreur se voit.
 - **⚠️ `sessions` de `/pageviews` = visiteurs *uniques*, PAS les visites.** Vérifié sur toutes les instances/granularités : la série `sessions` de `/api/websites/:id/pageviews` est *strictement égale* aux `visitors` de `/stats` par bucket (une personne = 1 session/bucket). Donc `SeriesPoint.visitors` (courbe verte) vient de `sessions` et `SeriesPoint.pageviews` (gris) de `pageviews`. Ne PAS croire « sessions = visites » (ça donnerait deux courbes identiques). Les **visites** (`visit_id`, navigations distinctes) sont un autre nombre (≥ visiteurs) mais **Umami ne les expose pas en série** — et par bucket fin (heure) elles = visiteurs, l'écart (visites totales > visiteurs) ne venant que de la déduplication inter-bucket. On a donc choisi de **ne PAS tracer les visites** (redondantes) ; elles restent en résumé (`StatsSummary.visits`, carte KPI du détail). Si un jour on veut la courbe : 1 appel `/stats` par point (reconstitution) — cf. historique git.
 
 ## Pas encore fait
