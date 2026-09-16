@@ -240,7 +240,10 @@ enum Period {
         final s = customStart ?? _startOfDay(n).subtract(const Duration(days: 29));
         final e = customEnd ?? n;
         final u = unit ?? _naturalUnitForSpan(e.difference(s));
-        return DateWindow(s, e, u);
+        // Fin plafonnée comme partout ailleurs : sans ça, une sélection qui
+        // s'arrête à 23 h 59 exclut son dernier jour de la courbe, alors qu'il
+        // compte dans les totaux.
+        return DateWindow(s, _ceil(e, u), u);
     }
   }
 

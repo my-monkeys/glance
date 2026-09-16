@@ -70,6 +70,20 @@ void main() {
     });
   });
 
+  group('période personnalisée', () {
+    test('le dernier jour choisi figure dans la fenêtre', () {
+      // Les écrans passent la fin de sélection à 23 h 59 ; sans plafonnement,
+      // le bucket de ce jour-là n'est jamais demandé.
+      final w = Period.custom.window(
+        now: now,
+        customStart: DateTime(2026, 9, 1),
+        customEnd: DateTime(2026, 9, 10, 23, 59),
+      );
+      expect(w.unit, TimeUnit.day);
+      expect(w.end, DateTime(2026, 9, 11));
+    });
+  });
+
   group('période « Tout »', () {
     test('sans date de première donnée : cadrage large, marqué allTime', () {
       final w = Period.allTime.window(now: now);

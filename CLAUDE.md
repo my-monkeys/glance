@@ -97,6 +97,10 @@ coup, elles ne doivent pas concurrencer les requêtes de statistiques.
   La clé de cache porte l'hôte de l'instance — deux comptes peuvent servir des
   images différentes sous le même nom.
 - **Appareils / pays** → dessinés localement (glyphe Material, drapeau émoji).
+- ⚠️ Le slug remplace **tout** caractère non alphanumérique par un tiret, pas
+  seulement les espaces : « Windows 8.1 » donne `windows-8-1.png`. Et seule une
+  réponse du serveur vaut « pas d'icône » — une coupure réseau ne doit pas
+  inscrire une absence pour sept jours.
 - Flutter décode nativement les `.ico`, y compris les vrais ICO 32 bits non-PNG
   (vérifié sur google.com et github.com) : aucun décodeur à embarquer.
 
@@ -149,7 +153,23 @@ La fin reste `_ceil(now, unit)`, comme pour toutes les autres périodes.
 
 ⚠️ La fenêtre de « Tout » est **commune à tous les sites** de l'accueil :
 `HomeData.fromCards` additionne les séries **par index de bucket**, donc des
-fenêtres par site y additionneraient 2019 avec 2024.
+fenêtres par site y additionneraient 2019 avec 2024. Corollaire assumé : changer
+de groupe pendant que « Tout » est actif peut déplacer la borne commune, donc
+tout recharger. C'est le prix d'un total juste.
+
+### La portée d'une fenêtre ne se devine pas de son début seul
+
+`calendarScopeOf` (core/predict.dart) dit ce qu'une fenêtre recouvre — jour,
+mois, année, ou rien de calendaire — et la prévision comme la comparaison s'y
+adossent. Il lui faut les **trois** informations :
+- le début seul confond, le 1er du mois, « aujourd'hui » et « ce mois-ci » ;
+- la granularité seule confond « ce mois-ci » en heures avec « aujourd'hui » ;
+- c'est la **fin** qui tranche : une journée ne dure pas plus de 24 h.
+
+Reste un cas que rien ne départage : le 1er du mois, « aujourd'hui » et « ce
+mois-ci en heures » donnent la même fenêtre. On retient la portée la plus
+étroite — un horizon sous-estimé se lit, un horizon surestimé donne un chiffre
+aberrant (mesuré avant correction : une prévision à ×65 sur l'écran du jour).
 
 ## Graphiques (point clé de la demande)
 
