@@ -238,8 +238,9 @@ DateTime _next(DateTime t, TimeUnit u) => switch (u) {
 ///   chaque bucket restant est le bucket homologue de la référence, rescalé par
 ///   le ratio observé/référence à l'instant équivalent — la prévision épouse
 ///   le profil réel (creux de la nuit, week-ends…).
-/// - Sans référence, le rythme attendu est la moyenne des buckets complets déjà
-///   observés (projection plate, honnête à défaut de profil).
+/// - Sans référence, le bucket courant se complète à son propre rythme, adossé
+///   au dernier bucket complet ; les buckets futurs le reprennent (projection
+///   plate, honnête à défaut de profil).
 ///
 /// Null si rien à projeter (fenêtre passée, série vide ou désalignée).
 Forecast? buildForecast({
@@ -265,7 +266,6 @@ Forecast? buildForecast({
   for (final p in series) {
     obsSum += p.visitors;
   }
-  final avgPrev = i == 0 ? 0.0 : (obsSum - obsCur) / i;
 
   // Profil de référence indexé bucket à bucket ; au-delà de sa longueur (mois
   // plus court…), sa moyenne. Ignoré s'il est vide ou nul.
@@ -319,8 +319,13 @@ Forecast? buildForecast({
   final double projCur;
   if (ratio != null) {
     projCur = obsCur + refAt(i) * (1 - f) * ratio;
-  } else if (avgPrev > 0) {
-    projCur = obsCur + avgPrev * (1 - f);
+  } else if (i > 0) {
+    // Rythme attendu du bucket entier : son propre rythme pour la part écoulée,
+    // le dernier bucket complet pour le reste. Pas la moyenne de toute la
+    // fenêtre : sur « 12 m », elle mêle les mois d'avant le lancement et
+    // projetait 1 565 sur un mois parti pour 4 000 (vécu le 09/10).
+    final expected = obsCur + series[i - 1].visitors * (1 - f);
+    projCur = obsCur + expected * (1 - f);
   } else {
     // Aucune base : run-rate borné (évite l'explosion en tout début de bucket).
     projCur = obsCur / (f < 0.25 ? 0.25 : f);
@@ -334,7 +339,9 @@ Forecast? buildForecast({
   var t = _next(curStart, unit);
   var j = i + 1;
   while (t.isBefore(spec.until)) {
-    final v = ratio != null ? refAt(j) * ratio : (avgPrev > 0 ? avgPrev : projCur);
+    // Sans profil, les buckets futurs reprennent le dernier rythme connu : la
+    // moyenne de la fenêtre traînerait les mois d'avant le lancement.
+    final v = ratio != null ? refAt(j) * ratio : projCur;
     points.add(SeriesPoint(t, v, 0));
     projSum += v;
     t = _next(t, unit);

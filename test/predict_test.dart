@@ -371,7 +371,8 @@ void main() {
       expect(f.projectedTotal(250), 480);
     });
 
-    test('sans référence : bucket courant complété au rythme moyen', () {
+    test('sans référence : bucket courant complété à son rythme et au précédent',
+        () {
       final atNoon = DateTime(2026, 8, 11, 12); // moitié du jour → f = 0,5
       final w = Period.d7.window(now: atNoon);
       final series = [
@@ -384,7 +385,54 @@ void main() {
 
       // Pas de bucket futur (fenêtre glissante) : raccord + projection du jour.
       expect(f.points.length, 2);
-      expect(f.points[1].visitors, closeTo(4 + 10 * 0.5, 0.001));
+      // Rythme attendu du jour : 4 observés + 10 (veille) × 0,5 = 9.
+      expect(f.points[1].visitors, closeTo(4 + 9 * 0.5, 0.001));
+    });
+
+    test('12 m : le mois en cours suit sa tendance, pas la moyenne annuelle', () {
+      final on9Oct = DateTime(2026, 10, 9, 12);
+      final w = Period.m12.window(now: on9Oct);
+      // Site lancé en mai : sept mois vides, puis une croissance forte.
+      final monthly = [0, 0, 0, 0, 0, 0, 14, 549, 753, 1923, 3605];
+      final series = [
+        for (var m = 0; m < monthly.length; m++)
+          SeriesPoint(DateTime(2025, 11 + m), monthly[m].toDouble(), 0),
+        SeriesPoint(DateTime(2026, 10), 1139, 0),
+      ];
+
+      final f = buildForecast(series: series, window: w, now: on9Oct)!;
+
+      // L'ancienne moyenne sur 11 mois (~622) donnait ~1 590 : moins que
+      // septembre, alors qu'octobre tourne plus vite.
+      expect(f.points.last.visitors, greaterThan(3605));
+      expect(f.points.last.visitors, lessThan(1139 / (8.5 / 31)));
+    });
+
+    test('cette année sans référence : les mois restants suivent octobre', () {
+      final on9Oct = DateTime(2026, 10, 9, 12);
+      final w = Period.thisYear.window(now: on9Oct);
+      final monthly = [0, 0, 0, 0, 14, 549, 753, 1923, 3605];
+      final series = [
+        for (var m = 0; m < monthly.length; m++)
+          SeriesPoint(DateTime(2026, 1 + m), monthly[m].toDouble(), 0),
+        SeriesPoint(DateTime(2026, 10), 1139, 0),
+      ];
+      // L'an dernier est vide : pas de profil exploitable.
+      final reference = [
+        for (var m = 1; m <= 12; m++) SeriesPoint(DateTime(2025, m), 0, 0),
+      ];
+
+      final f = buildForecast(
+        series: series,
+        window: w,
+        reference: reference,
+        now: on9Oct,
+      )!;
+
+      final october = f.points[1].visitors;
+      expect(october, greaterThan(3605));
+      expect(f.points.last.t, DateTime(2026, 12));
+      expect(f.points.last.visitors, closeTo(october, 0.001));
     });
 
     test('référence morte sur le reste → repli sur le rythme moyen', () {
