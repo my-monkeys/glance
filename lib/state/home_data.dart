@@ -2,13 +2,22 @@ import '../data/models/models.dart';
 
 /// Stats d'un site sur une fenêtre (chargées indépendamment du live).
 class SiteStats {
-  const SiteStats({required this.summary, required this.series, this.refSeries});
+  const SiteStats({
+    required this.summary,
+    required this.series,
+    this.refSeries,
+    this.daily,
+  });
   final StatsSummary summary;
   final List<SeriesPoint> series;
 
   /// Série de la période précédente équivalente (profil pour la prévision).
   /// Null quand la fenêtre n'en a pas besoin (cf. `forecastReferenceWindow`).
   final List<SeriesPoint>? refSeries;
+
+  /// Visiteurs par jour des dernières semaines, pour la prévision jour par
+  /// jour. Null quand la fenêtre n'en a pas besoin (cf. `forecastHistoryWindow`).
+  final List<SeriesPoint>? daily;
 }
 
 /// Agrégat de la home pendant le chargement incrémental : totaux calculés sur
@@ -37,6 +46,7 @@ class SiteCard {
     required this.series,
     required this.live,
     this.refSeries,
+    this.daily,
     this.compareSeries,
   });
 
@@ -45,6 +55,7 @@ class SiteCard {
   final List<SeriesPoint> series;
   final int live;
   final List<SeriesPoint>? refSeries;
+  final List<SeriesPoint>? daily;
 
   /// Série de la période précédente équivalente, superposée sur le graphique
   /// quand la comparaison est activée (cf. `PeriodState.compare`). Null tant
@@ -66,6 +77,7 @@ class HomeData {
     required this.totalLive,
     required this.totalSeries,
     this.totalRefSeries,
+    this.totalDaily,
     this.totalCompareSeries,
   });
 
@@ -90,6 +102,9 @@ class HomeData {
 
   /// Série de référence cumulée (profil pour la prévision de la courbe totale).
   final List<SeriesPoint>? totalRefSeries;
+
+  /// Visiteurs par jour cumulés (prévision de la courbe totale).
+  final List<SeriesPoint>? totalDaily;
 
   /// Série de comparaison cumulée (période précédente, toutes cartes).
   final List<SeriesPoint>? totalCompareSeries;
@@ -187,7 +202,26 @@ class HomeData {
       totalLive: totalLive,
       totalSeries: total,
       totalRefSeries: totalRef,
+      totalDaily: _sumByDate([for (final c in cards) c.daily]),
       totalCompareSeries: totalCompare,
     );
   }
+}
+
+/// Somme par date — et non par index : chaque site a récupéré son historique
+/// à son heure, un chargement à cheval sur minuit décalerait les index d'un jour.
+/// Null si aucun site n'en a.
+List<SeriesPoint>? _sumByDate(List<List<SeriesPoint>?> all) {
+  final byDate = <DateTime, double>{};
+  var any = false;
+  for (final s in all) {
+    if (s == null) continue;
+    any = true;
+    for (final p in s) {
+      byDate[p.t] = (byDate[p.t] ?? 0) + p.visitors;
+    }
+  }
+  if (!any) return null;
+  final dates = byDate.keys.toList()..sort();
+  return [for (final d in dates) SeriesPoint(d, byDate[d]!, 0)];
 }

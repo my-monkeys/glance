@@ -489,6 +489,7 @@ class _TotalCard extends ConsumerWidget {
       series: series,
       window: window,
       reference: data.totalRefSeries,
+      daily: data.totalDaily,
     );
     return GlanceCard(
       child: Column(

@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import '../data/models/models.dart';
+import 'daily_forecast.dart';
 import '../data/models/period.dart';
 
 /// Ce que la fenêtre courante permet de projeter.
@@ -100,8 +101,28 @@ ForecastSpec? forecastSpecFor(DateWindow w, {DateTime? now}) {
 
 /// Fenêtre de référence à récupérer en plus de la série courante (null si la
 /// prévision n'en a pas besoin). Utilisé par les providers de données.
+/// Seulement en heures : au-delà, l'historique jour par jour
+/// ([forecastHistoryWindow]) prévoit mieux que le profil de la période d'avant.
 DateWindow? forecastReferenceWindow(DateWindow w, {DateTime? now}) =>
-    forecastSpecFor(w, now: now)?.reference;
+    w.unit == TimeUnit.hour ? forecastSpecFor(w, now: now)?.reference : null;
+
+/// Jours de visiteurs à récupérer pour la prévision jour par jour
+/// ([projectDays]) : de quoi mesurer le profil de la semaine **et** couvrir le
+/// mois précédent en entier, qui sert à convertir des visiteurs par jour en
+/// visiteurs uniques du mois. Null si la fenêtre se découpe en heures ou n'a
+/// rien à prévoir.
+DateWindow? forecastHistoryWindow(DateWindow w, {DateTime? now}) {
+  final n = now ?? DateTime.now();
+  if (w.unit == TimeUnit.hour || forecastSpecFor(w, now: n) == null) {
+    return null;
+  }
+  final tomorrow = DateTime(n.year, n.month, n.day + 1);
+  return DateWindow(
+    DateTime(n.year, n.month, n.day - kHistoryDays),
+    tomorrow,
+    TimeUnit.day,
+  );
+}
 
 /// Fenêtre « période précédente équivalente », pour la comparaison superposée
 /// sur le graphique (bascule « Comparer »). Distincte de [forecastReferenceWindow] :
@@ -233,6 +254,11 @@ DateTime _next(DateTime t, TimeUnit u) => switch (u) {
 
 /// Construit la prévision pour une série observée sur [window].
 ///
+/// Avec [daily] (visiteurs par jour, cf. [forecastHistoryWindow]) et une
+/// fenêtre en jours ou en mois, chaque jour restant est projeté par
+/// [projectDays] puis regroupé dans les buckets de la fenêtre. Sinon, ou si
+/// l'historique est trop court :
+///
 /// Modèle : « observé + rythme attendu × temps restant ».
 /// - Avec [reference] (période précédente équivalente), le rythme attendu de
 ///   chaque bucket restant est le bucket homologue de la référence, rescalé par
@@ -247,11 +273,16 @@ Forecast? buildForecast({
   required List<SeriesPoint> series,
   required DateWindow window,
   List<SeriesPoint>? reference,
+  List<SeriesPoint>? daily,
   DateTime? now,
 }) {
   final n = now ?? DateTime.now();
   final spec = forecastSpecFor(window, now: n);
   if (spec == null || series.isEmpty) return null;
+  if (daily != null && window.unit != TimeUnit.hour) {
+    final f = _dailyForecast(series, window.unit, spec, daily, n);
+    if (f != null) return f;
+  }
 
   final unit = window.unit;
   final curStart = _truncate(n, unit);
@@ -352,4 +383,98 @@ Forecast? buildForecast({
     points: points,
     growth: obsSum > 0 ? projSum / obsSum : 1,
   );
+}
+
+/// Prévision bâtie sur la projection jour par jour. Null si l'historique ne
+/// s'aligne pas sur aujourd'hui ou est trop court (repli sur le modèle bucket).
+Forecast? _dailyForecast(
+  List<SeriesPoint> series,
+  TimeUnit unit,
+  ForecastSpec spec,
+  List<SeriesPoint> daily,
+  DateTime n,
+) {
+  final today = DateTime(n.year, n.month, n.day);
+  final curStart = _truncate(n, unit);
+  final i = series.length - 1;
+  if (daily.isEmpty || daily.last.t != today || series[i].t != curStart) {
+    return null;
+  }
+
+  final days = <DateTime>[
+    for (var d = today; d.isBefore(spec.until); d = _next(d, TimeUnit.day)) d,
+  ];
+  final proj = projectDays(daily.sublist(0, daily.length - 1), days.length);
+  if (proj == null) return null;
+  // Aujourd'hui est entamé : il ne lui reste que l'écart à sa projection.
+  final remaining = <DateTime, double>{
+    for (var k = 0; k < days.length; k++)
+      days[k]: k == 0 ? math.max(0, proj[0] - daily.last.visitors) : proj[k],
+  };
+  double remainingIn(DateTime start) {
+    final end = _next(start, unit);
+    var sum = 0.0;
+    remaining.forEach((d, v) {
+      if (!d.isBefore(start) && d.isBefore(end)) sum += v;
+    });
+    return sum;
+  }
+
+  final obsCur = series[i].visitors;
+  final double projCur;
+  final double perDailyVisitor;
+  if (unit == TimeUnit.day) {
+    projCur = obsCur + remainingIn(curStart);
+    perDailyVisitor = 1;
+  } else {
+    // Un bucket mensuel compte des visiteurs uniques : une même personne venue
+    // trois jours y compte une fois. On convertit donc les visiteurs par jour
+    // au taux observé (mois en cours, ou mois précédent pour les mois futurs).
+    final obsDays = _dailySum(daily, curStart, _next(curStart, unit));
+    projCur = obsDays > 0
+        ? obsCur * (obsDays + remainingIn(curStart)) / obsDays
+        : obsCur + remainingIn(curStart);
+    perDailyVisitor = _uniquesPerDailyVisitor(series, daily, unit) ??
+        (obsDays > 0 ? obsCur / obsDays : 1);
+  }
+
+  var obsSum = 0.0;
+  for (final p in series) {
+    obsSum += p.visitors;
+  }
+  final points = <SeriesPoint>[
+    if (i > 0) SeriesPoint(series[i - 1].t, series[i - 1].visitors, 0),
+    SeriesPoint(curStart, projCur, 0),
+  ];
+  var projSum = obsSum - obsCur + projCur;
+  for (var t = _next(curStart, unit);
+      t.isBefore(spec.until);
+      t = _next(t, unit)) {
+    final v = remainingIn(t) * perDailyVisitor;
+    points.add(SeriesPoint(t, v, 0));
+    projSum += v;
+  }
+  return Forecast(points: points, growth: obsSum > 0 ? projSum / obsSum : 1);
+}
+
+double _dailySum(List<SeriesPoint> daily, DateTime start, DateTime end) {
+  var sum = 0.0;
+  for (final p in daily) {
+    if (!p.t.isBefore(start) && p.t.isBefore(end)) sum += p.visitors;
+  }
+  return sum;
+}
+
+/// Visiteurs uniques du dernier bucket complet rapportés à la somme de ses
+/// visiteurs par jour. Null si l'historique ne le couvre pas en entier.
+double? _uniquesPerDailyVisitor(
+  List<SeriesPoint> series,
+  List<SeriesPoint> daily,
+  TimeUnit unit,
+) {
+  if (series.length < 2) return null;
+  final prev = series[series.length - 2];
+  if (daily.first.t.isAfter(prev.t)) return null;
+  final sum = _dailySum(daily, prev.t, _next(prev.t, unit));
+  return sum > 0 ? prev.visitors / sum : null;
 }

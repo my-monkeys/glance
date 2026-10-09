@@ -291,6 +291,7 @@ class _DetailBody extends ConsumerWidget {
       series: series,
       window: window,
       reference: stats.refSeries,
+      daily: stats.daily,
     );
     final compare = ref.watch(periodProvider.select((p) => p.compare));
     final compareSeries = compare

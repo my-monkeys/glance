@@ -321,18 +321,25 @@ final siteStatsProvider =
   // Série de la période précédente équivalente quand la fenêtre permet une
   // prévision profilée (aujourd'hui / ce mois-ci / cette année). Best-effort :
   // un échec ne bloque pas les stats (la prévision retombe sur le rythme moyen).
+  // Idem pour l'historique jour par jour (prévision en jours et en mois).
   final refW = forecastReferenceWindow(w);
+  final histW = forecastHistoryWindow(w);
   return gate.run(() async {
     final r = await Future.wait([
       p.summary(site, w),
       p.series(site, w),
-      if (refW != null)
-        p.series(site, refW).catchError((_) => <SeriesPoint>[]),
+      refW == null
+          ? Future.value(null)
+          : p.series(site, refW).catchError((_) => <SeriesPoint>[]),
+      histW == null
+          ? Future.value(null)
+          : p.series(site, histW).catchError((_) => <SeriesPoint>[]),
     ]);
     final stats = SiteStats(
       summary: r[0] as StatsSummary,
       series: r[1] as List<SeriesPoint>,
-      refSeries: refW == null ? null : r[2] as List<SeriesPoint>,
+      refSeries: r[2] as List<SeriesPoint>?,
+      daily: r[3] as List<SeriesPoint>?,
     );
     ref.read(statsCacheProvider).writeStats(site, w, stats);
     return stats;
@@ -389,6 +396,7 @@ final homeTotalsProvider =
         series: sv.series,
         live: live.value ?? 0,
         refSeries: sv.refSeries,
+        daily: sv.daily,
         compareSeries: cmp?.value,
       ));
     } else {

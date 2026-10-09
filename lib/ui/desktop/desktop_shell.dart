@@ -732,6 +732,7 @@ class _OverviewState extends ConsumerState<_Overview> {
                       series: displaySeries(data.totalSeries, window),
                       window: window,
                       reference: data.totalRefSeries,
+                      daily: data.totalDaily,
                     ),
                     compareSeries: data.totalCompareSeries,
                     hidden: hidden,

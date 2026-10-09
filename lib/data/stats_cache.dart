@@ -178,6 +178,7 @@ Map<String, dynamic> _statsToJson(SiteStats v) => {
   's': _summaryToJson(v.summary),
   'se': _seriesToJson(v.series),
   if (v.refSeries != null) 'rf': _seriesToJson(v.refSeries!),
+  if (v.daily != null) 'dh': _seriesToJson(v.daily!),
 };
 
 SiteStats _statsFromJson(Map<String, dynamic> j) => SiteStats(
@@ -185,4 +186,5 @@ SiteStats _statsFromJson(Map<String, dynamic> j) => SiteStats(
   series: _seriesFromJson(j['se'] as List<dynamic>),
   refSeries:
       j['rf'] == null ? null : _seriesFromJson(j['rf'] as List<dynamic>),
+  daily: j['dh'] == null ? null : _seriesFromJson(j['dh'] as List<dynamic>),
 );
