@@ -12,21 +12,23 @@ GitHub Releases and installed via the Homebrew cask
 - App Store Connect API key for `notarytool` at
   `~/.appstoreconnect/private_keys/AuthKey_<KEY_ID>.p8` (+ key id + issuer id).
 
-## ⚠️ Gotcha — build with **stable Xcode**, not Xcode-beta
+## ⚠️ Gotcha — Xcode 27 + Flutter 3.44: `lipo -verify_arch`
 
-Xcode-beta 27's `lipo` has stricter CLI parsing that breaks Flutter's
-`thinFramework` step (`lipo <file> -verify_arch arm64 x86_64` →
-*"requires exactly one input file"*), so `flutter build macos` fails at packaging
-with *"does not contain architectures"* — while the `lipo -info` printed right
-below shows both architectures.
+Xcode 27's `lipo` (beta, then stable since October 2026) rejects several
+architectures in one `-verify_arch` call (*"requires exactly one input file"*),
+so `flutter build macos` fails at packaging with *"does not contain
+architectures"* — while the `lipo -info` printed right below shows both.
+Fixed upstream in Flutter 3.47 (`879ec7d5750`, #188625). Until the project
+moves there, apply that commit to the local SDK for the build only (see
+`CLAUDE.md` → Dev / test). A `lipo` wrapper in `PATH` does not help: Xcode
+resets `PATH` for its script phases.
 
-The build machine was switched back to the stable toolchain on 2026-08-16
-(`sudo xcode-select -s /Applications/Xcode.app`), so a plain
-`flutter build macos --release` works. The explicit prefix below stays in the
-steps as a safety net — keep it if you ever switch back to the beta:
+**Check the version of the built app before signing** — a failed build leaves
+the previous release in `build/`, and every later step happily signs it:
 
 ```sh
-export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
+/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" \
+  build/macos/Build/Products/Release/Glance.app/Contents/Info.plist
 ```
 
 ## Steps
