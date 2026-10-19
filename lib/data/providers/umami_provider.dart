@@ -3,9 +3,13 @@ import 'package:flutter_timezone/flutter_timezone.dart';
 
 import '../../core/countries.dart';
 import '../../core/entities.dart';
+import '../models/indicator.dart';
+import '../models/indicator_result.dart';
 import '../models/models.dart';
 import '../models/period.dart';
 import 'analytics_provider.dart';
+import 'buckets.dart';
+import 'umami_filters.dart';
 
 /// Client Umami (self-hosted). Auth par login username/mot de passe → token JWT
 /// Bearer, réutilisé et rafraîchi automatiquement sur 401.
@@ -61,22 +65,29 @@ class UmamiProvider extends AnalyticsProvider {
     _isAdmin = user is Map && (user['isAdmin'] == true || user['role'] == 'admin');
   }
 
-  Future<dynamic> _get(String path, [Map<String, dynamic>? query]) async {
+  /// Exécute [call] avec le Bearer ; sur 401, un seul re-login puis un rejeu.
+  Future<dynamic> _authed(
+    Future<Response<dynamic>> Function(Options) call,
+  ) async {
     if (_token == null) await _login();
     Options opts() => Options(headers: {'Authorization': 'Bearer $_token'});
     try {
-      final r = await _dio.get(path, queryParameters: query, options: opts());
-      return r.data;
+      return (await call(opts())).data;
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
         _token = null;
         await _login();
-        final r = await _dio.get(path, queryParameters: query, options: opts());
-        return r.data;
+        return (await call(opts())).data;
       }
       rethrow;
     }
   }
+
+  Future<dynamic> _get(String path, [Map<String, dynamic>? query]) =>
+      _authed((o) => _dio.get(path, queryParameters: query, options: o));
+
+  Future<dynamic> _post(String path, Map<String, dynamic> body) =>
+      _authed((o) => _dio.post(path, data: body, options: o));
 
   @override
   Future<int> verify() async {
@@ -149,7 +160,7 @@ class UmamiProvider extends AnalyticsProvider {
     final visitors = _bin(d['sessions'], w.unit);
 
     // Buckets continus (Umami renvoie une série creuse) → chart propre.
-    return _buckets(w)
+    return bucketsOf(w)
         .map(
           (b) => SeriesPoint(
             b,
@@ -236,12 +247,12 @@ class UmamiProvider extends AnalyticsProvider {
         final name = (e['x'] ?? '').toString();
         final t = _parseX((e['t'] ?? '').toString());
         if (t == null) continue;
-        final key = _truncate(t, w.unit).millisecondsSinceEpoch;
+        final key = truncateBucket(t, w.unit).millisecondsSinceEpoch;
         final y = (e['y'] as num?)?.toDouble() ?? 0;
         (byName[name] ??= {}).update(key, (v) => v + y, ifAbsent: () => y);
       }
     }
-    final buckets = _buckets(w);
+    final buckets = bucketsOf(w);
     final out = byName.entries.map((entry) {
       final points = buckets
           .map((b) =>
@@ -256,6 +267,149 @@ class UmamiProvider extends AnalyticsProvider {
     }).toList()
       ..sort((a, b) => b.total.compareTo(a.total));
     return out;
+  }
+
+  // --- indicateurs -----------------------------------------------------------
+
+  @override
+  Set<IndicatorKind> get supportedIndicators => IndicatorKind.values.toSet();
+
+  @override
+  Future<List<SeriesPoint>> eventCountSeries(
+    Site site,
+    DateWindow w,
+    EventQuery q,
+  ) async {
+    final tz = await _timezone();
+    final d = await _get('/api/websites/${site.id}/events/series', {
+      'startAt': w.startMs,
+      'endAt': w.endMs,
+      'unit': w.unit.api,
+      'timezone': tz,
+      'event': q.event,
+      ...umamiEventFilterParams(q.filters),
+    });
+    final counts = <int, double>{};
+    if (d is List) {
+      for (final e in d) {
+        // Garde-fou : ne sommer que l'événement demandé.
+        if ((e['x'] ?? '').toString() != q.event) continue;
+        final t = _parseX((e['t'] ?? '').toString());
+        if (t == null) continue;
+        final key = truncateBucket(t, w.unit).millisecondsSinceEpoch;
+        final y = (e['y'] as num?)?.toDouble() ?? 0;
+        counts.update(key, (v) => v + y, ifAbsent: () => y);
+      }
+    }
+    return bucketsOf(w)
+        .map((b) => SeriesPoint(b, counts[b.millisecondsSinceEpoch] ?? 0, 0))
+        .toList(growable: false);
+  }
+
+  @override
+  Future<List<FunnelStepResult>> funnel(
+    Site site,
+    DateWindow w,
+    FunnelIndicator f,
+  ) async {
+    final d = await _post('/api/reports/funnel', {
+      'websiteId': site.id,
+      'type': 'funnel',
+      'filters': <String, dynamic>{},
+      'parameters': {
+        'startDate': w.start.toUtc().toIso8601String(),
+        'endDate': w.end.toUtc().toIso8601String(),
+        'window': f.windowDays,
+        'steps': [
+          for (final s in f.steps)
+            {
+              'type': 'event',
+              'value': s.event,
+              if (s.filters.isNotEmpty)
+                'filters': [for (final x in s.filters) _funnelFilter(x)],
+            },
+        ],
+      },
+    });
+    final rows = d is List ? d : const [];
+    return [
+      for (var i = 0; i < rows.length && i < f.steps.length; i++)
+        FunnelStepResult(
+          event: f.steps[i].event,
+          filters: f.steps[i].filters,
+          visitors: (rows[i]['visitors'] as num?)?.round() ?? 0,
+          remaining: (rows[i]['remaining'] as num?)?.toDouble() ?? 0,
+          dropoff: (rows[i]['dropoff'] as num?)?.toDouble(),
+        ),
+    ];
+  }
+
+  /// Les filtres d'étape d'Umami n'acceptent que du texte : pas de comparaison
+  /// numérique.
+  static Map<String, String> _funnelFilter(EventFilter x) {
+    const allowed = {
+      FilterOp.eq,
+      FilterOp.neq,
+      FilterOp.contains,
+      FilterOp.notContains,
+    };
+    if (!allowed.contains(x.op)) {
+      throw ArgumentError(
+        "Opérateur « ${x.op.label} » indisponible dans un entonnoir Umami",
+      );
+    }
+    return {'property': x.property, 'operator': x.op.api, 'value': x.value};
+  }
+
+  @override
+  Future<List<MetricRow>> propertyValues(
+    Site site,
+    DateWindow w,
+    String event,
+    String property, {
+    int limit = 30,
+  }) async {
+    final d = await _get('/api/websites/${site.id}/event-data/values', {
+      'startAt': w.startMs,
+      'endAt': w.endMs,
+      'event': event,
+      'propertyName': property,
+    });
+    final list = d is List ? d : const [];
+    final rows = [
+      for (final e in list)
+        MetricRow(
+          label: (e['value'] ?? '').toString(),
+          value: (e['total'] as num?)?.round() ?? 0,
+          code: (e['value'] ?? '').toString(),
+        ),
+    ]..sort((a, b) => b.value.compareTo(a.value));
+    return rows.take(limit).toList(growable: false);
+  }
+
+  @override
+  Future<List<EventProperty>> eventProperties(
+    Site site,
+    DateWindow w,
+    String event,
+  ) async {
+    final d = await _get('/api/websites/${site.id}/event-data/properties', {
+      'startAt': w.startMs,
+      'endAt': w.endMs,
+      'event': event,
+    });
+    final seen = <String, EventProperty>{};
+    if (d is List) {
+      for (final e in d) {
+        final name = (e['propertyName'] ?? '').toString();
+        if (name.isEmpty) continue;
+        seen.putIfAbsent(
+          name,
+          () => EventProperty(name, PropertyType.fromCode(e['dataType'] as int?)),
+        );
+      }
+    }
+    return seen.values.toList(growable: false);
   }
 
   // --- helpers ---------------------------------------------------------------
@@ -319,7 +473,7 @@ class UmamiProvider extends AnalyticsProvider {
     for (final e in series) {
       final t = _parseX((e['x'] ?? '').toString());
       if (t == null) continue;
-      final key = _truncate(t, unit).millisecondsSinceEpoch;
+      final key = truncateBucket(t, unit).millisecondsSinceEpoch;
       final y = (e['y'] as num?)?.toDouble() ?? 0;
       out.update(key, (v) => v + y, ifAbsent: () => y);
     }
@@ -329,42 +483,5 @@ class UmamiProvider extends AnalyticsProvider {
   DateTime? _parseX(String x) {
     if (x.isEmpty) return null;
     return DateTime.tryParse(x) ?? DateTime.tryParse(x.replaceFirst(' ', 'T'));
-  }
-
-  DateTime _truncate(DateTime t, TimeUnit u) => switch (u) {
-    TimeUnit.hour => DateTime(t.year, t.month, t.day, t.hour),
-    TimeUnit.day => DateTime(t.year, t.month, t.day),
-    TimeUnit.month => DateTime(t.year, t.month, 1),
-  };
-
-  DateTime _advance(DateTime t, TimeUnit u) => switch (u) {
-    TimeUnit.hour => t.add(const Duration(hours: 1)),
-    TimeUnit.day => DateTime(t.year, t.month, t.day + 1),
-    TimeUnit.month => DateTime(t.year, t.month + 1, 1),
-  };
-
-  /// Au-delà, la série ne se lit plus et la remplir coûte plus que ce qu'elle
-  /// apprend. `allowedUnits` (data/models/period.dart) n'offre jamais une
-  /// granularité qui y mène ; si on y arrive quand même, mieux vaut une erreur
-  /// visible qu'une courbe tronquée par la fin, qui passerait pour un trou de
-  /// collecte.
-  static const _maxBuckets = 2000;
-
-  List<DateTime> _buckets(DateWindow w) {
-    final out = <DateTime>[];
-    var c = _truncate(w.start, w.unit);
-    // Borne de fin exclusive : `w.end` est plafonné au début de l'unité
-    // suivante, donc on s'arrête avant (pas de bucket futur vide).
-    final end = _truncate(w.end, w.unit);
-    while (c.isBefore(end)) {
-      if (out.length >= _maxBuckets) {
-        throw StateError(
-          'Découpage trop fin : plus de $_maxBuckets points sur la période.',
-        );
-      }
-      out.add(c);
-      c = _advance(c, w.unit);
-    }
-    return out;
   }
 }

@@ -3,9 +3,11 @@ import 'package:intl/intl.dart';
 
 import '../../core/countries.dart';
 import '../../core/entities.dart';
+import '../models/indicator.dart';
 import '../models/models.dart';
 import '../models/period.dart';
 import 'analytics_provider.dart';
+import 'buckets.dart';
 
 /// Client Plausible (Stats API v2 — `POST /api/v2/query`, via clé API). La Stats
 /// API ne liste pas les sites, et en Community Edition la Sites API Bearer
@@ -408,6 +410,99 @@ class PlausibleProvider extends AnalyticsProvider {
       final path = (r['dimensions'] as List).first.toString();
       final n = ((r['metrics'] as List).first as num).round();
       return LivePage(path.isEmpty ? '/' : path, n);
+    }).toList(growable: false);
+  }
+
+  // --- indicateurs -----------------------------------------------------------
+
+  @override
+  Set<IndicatorKind> get supportedIndicators => const {
+        IndicatorKind.counter,
+        IndicatorKind.ratio,
+        IndicatorKind.breakdown,
+      };
+
+  /// Les propriétés Plausible sont des textes : pas de comparaison numérique.
+  static List<dynamic> _queryFilters(EventQuery q) {
+    List<dynamic> one(EventFilter f) {
+      final op = switch (f.op) {
+        FilterOp.eq => 'is',
+        FilterOp.neq => 'is_not',
+        FilterOp.contains => 'contains',
+        FilterOp.notContains => 'contains_not',
+        _ => throw ArgumentError(
+            "Opérateur « ${f.op.label} » indisponible chez Plausible "
+            '(propriétés en texte seulement)',
+          ),
+      };
+      return [op, 'event:props:${f.property}', [f.value]];
+    }
+
+    return [
+      ['is', 'event:name', [q.event]],
+      for (final f in q.filters) one(f),
+    ];
+  }
+
+  @override
+  Future<List<SeriesPoint>> eventCountSeries(
+    Site site,
+    DateWindow w,
+    EventQuery q,
+  ) async {
+    final timeDim = switch (w.unit) {
+      TimeUnit.hour => 'time:hour',
+      TimeUnit.day => 'time:day',
+      TimeUnit.month => 'time:month',
+    };
+    final res = await _query({
+      'site_id': site.id,
+      'metrics': ['events'],
+      'date_range': [_dateFmt.format(w.start), _dateFmt.format(w.end)],
+      'dimensions': [timeDim],
+      'filters': _queryFilters(q),
+    });
+    final counts = <int, double>{};
+    for (final r in _rows(res)) {
+      final raw = ((r['dimensions'] as List).first).toString();
+      final t = DateTime.tryParse(raw) ?? DateTime.tryParse('${raw}T00:00:00');
+      if (t == null) continue;
+      final v = ((r['metrics'] as List).first as num).toDouble();
+      counts.update(truncateBucket(t, w.unit).millisecondsSinceEpoch,
+          (x) => x + v, ifAbsent: () => v);
+    }
+    // Contrairement à [eventSeries], on remplit les buckets : un ratio aligne
+    // ses deux séries par index, une série creuse les décalerait.
+    return bucketsOf(w)
+        .map((b) => SeriesPoint(b, counts[b.millisecondsSinceEpoch] ?? 0, 0))
+        .toList(growable: false);
+  }
+
+  @override
+  Future<List<MetricRow>> propertyValues(
+    Site site,
+    DateWindow w,
+    String event,
+    String property, {
+    int limit = 30,
+  }) async {
+    final res = await _query({
+      'site_id': site.id,
+      'metrics': ['events'],
+      'date_range': [_dateFmt.format(w.start), _dateFmt.format(w.end)],
+      'dimensions': ['event:props:$property'],
+      'filters': [
+        ['is', 'event:name', [event]],
+      ],
+      'order_by': [
+        ['events', 'desc'],
+      ],
+      'pagination': {'limit': limit},
+    });
+    return _rows(res).map((r) {
+      final v = ((r['dimensions'] as List).first).toString();
+      final n = ((r['metrics'] as List).first as num).round();
+      return MetricRow(label: v.isEmpty ? 'Inconnu' : v, value: n, code: v);
     }).toList(growable: false);
   }
 }

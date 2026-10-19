@@ -2,6 +2,8 @@ import 'package:dio/dio.dart';
 
 import '../models/account.dart';
 import '../models/dimension.dart';
+import '../models/indicator.dart';
+import '../models/indicator_result.dart';
 import '../models/models.dart';
 import '../models/period.dart';
 
@@ -46,6 +48,37 @@ abstract class AnalyticsProvider {
 
   /// Une série temporelle par nom d'événement (triées par total décroissant).
   Future<List<EventSeries>> eventSeries(Site site, DateWindow w);
+
+  /// Genres d'indicateurs que le fournisseur sait calculer (vide = onglet
+  /// Tableaux indisponible pour ce compte).
+  Set<IndicatorKind> get supportedIndicators => const {};
+
+  /// Nombre d'occurrences de [q] par bucket, porté par [SeriesPoint.visitors]
+  /// (pageviews à 0) — même convention que [eventSeries]. Série continue : un
+  /// ratio aligne deux séries par index.
+  Future<List<SeriesPoint>> eventCountSeries(
+          Site site, DateWindow w, EventQuery q) =>
+      throw UnsupportedError('Indicateurs non pris en charge');
+
+  Future<List<FunnelStepResult>> funnel(
+          Site site, DateWindow w, FunnelIndicator f) =>
+      throw UnsupportedError('Entonnoirs non pris en charge');
+
+  /// Valeurs d'une propriété d'événement, les plus fréquentes d'abord.
+  Future<List<MetricRow>> propertyValues(
+    Site site,
+    DateWindow w,
+    String event,
+    String property, {
+    int limit = 30,
+  }) =>
+      throw UnsupportedError('Répartitions non prises en charge');
+
+  /// Propriétés connues d'un événement. Vide = le fournisseur ne sait pas les
+  /// lister : l'éditeur retombe sur une saisie libre.
+  Future<List<EventProperty>> eventProperties(
+          Site site, DateWindow w, String event) async =>
+      const [];
 
   /// Plage réellement couverte par les données du site (première et dernière
   /// mesure). Null quand le fournisseur ne sait pas la donner — l'appelant
