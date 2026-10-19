@@ -43,7 +43,9 @@ void cacheFor(Ref ref, Duration duration) {
 /// valeurs en place. Les autres périodes restent servies depuis le cache.
 void cacheSession(Ref ref) => ref.keepAlive();
 
-const _cacheTtl = Duration(minutes: 3);
+/// Durée de garde des résultats par site et par fenêtre (partagée avec les
+/// indicateurs, qui ont la même fraîcheur attendue).
+const kStatsCacheTtl = Duration(minutes: 3);
 
 /// Injecté au démarrage (voir main.dart).
 final sharedPrefsProvider = Provider<SharedPreferences>(
@@ -220,7 +222,7 @@ final sitesProvider = FutureProvider<List<Site>>((ref) async {
 /// Diagnostic léger, mis en cache : recalculé au retour sur l'écran passé le TTL.
 final accountHealthProvider =
     FutureProvider.autoDispose.family<AccountHealth, String>((ref, accountId) async {
-  cacheFor(ref, _cacheTtl);
+  cacheFor(ref, kStatsCacheTtl);
   final reg = ref.watch(providerRegistryProvider);
   final p = await reg.forAccount(accountId);
   return p.health();
@@ -234,7 +236,7 @@ final accountSitesProvider =
   return p.listSites();
 });
 
-Future<AnalyticsProvider> _providerFor(Ref ref, Site site) =>
+Future<AnalyticsProvider> analyticsProviderFor(Ref ref, Site site) =>
     ref.read(providerRegistryProvider).forAccount(site.accountId);
 
 /// Plafonne la concurrence des requêtes analytics (chargement incrémental).
@@ -250,7 +252,7 @@ final siteDataStartProvider =
   // Une résolution par session : la date de naissance d'un site ne bouge pas.
   ref.keepAlive();
   final gate = ref.watch(fetchGateProvider);
-  final p = await _providerFor(ref, site);
+  final p = await analyticsProviderFor(ref, site);
   final range = await gate.run(() => p.dataRange(site)).catchError((_) => null);
   if (range == null) return null;
   ref
@@ -304,9 +306,9 @@ final allTimeStartProvider = Provider<DateTime?>((ref) {
 
 /// Visiteurs en direct d'un site (indépendant de la période sélectionnée).
 final siteLiveProvider = FutureProvider.autoDispose.family<int, Site>((ref, site) async {
-  cacheFor(ref, _cacheTtl);
+  cacheFor(ref, kStatsCacheTtl);
   final gate = ref.watch(fetchGateProvider);
-  final p = await _providerFor(ref, site);
+  final p = await analyticsProviderFor(ref, site);
   return gate.run(() => p.active(site)).catchError((_) => 0);
 });
 
@@ -317,7 +319,7 @@ final siteStatsProvider =
   cacheSession(ref);
   final (site, w) = key;
   final gate = ref.watch(fetchGateProvider);
-  final p = await _providerFor(ref, site);
+  final p = await analyticsProviderFor(ref, site);
   // Série de la période précédente équivalente quand la fenêtre permet une
   // prévision profilée (aujourd'hui / ce mois-ci / cette année). Best-effort :
   // un échec ne bloque pas les stats (la prévision retombe sur le rythme moyen).
@@ -358,7 +360,7 @@ final siteCompareSeriesProvider = FutureProvider.autoDispose
   final prevW = previousPeriodWindow(w);
   if (prevW == null) return null;
   final gate = ref.watch(fetchGateProvider);
-  final p = await _providerFor(ref, site);
+  final p = await analyticsProviderFor(ref, site);
   return gate
       .run(() => p.series(site, prevW))
       .catchError((_) => <SeriesPoint>[]);
@@ -425,10 +427,10 @@ const kMetricFetchLimit = 30;
 /// de requêtes.
 final siteMetricProvider = FutureProvider.autoDispose
     .family<List<MetricRow>, (Site, DateWindow, MetricType)>((ref, key) async {
-  cacheFor(ref, _cacheTtl);
+  cacheFor(ref, kStatsCacheTtl);
   final (site, w, type) = key;
   final gate = ref.watch(fetchGateProvider);
-  final p = await _providerFor(ref, site);
+  final p = await analyticsProviderFor(ref, site);
   final rows =
       await gate.run(() => p.metric(site, w, type, limit: kMetricFetchLimit));
   ref.read(statsCacheProvider).writeMetric(site, w, type, rows);
@@ -438,9 +440,9 @@ final siteMetricProvider = FutureProvider.autoDispose
 /// Pages consultées dans les dernières minutes (indépendant de la période).
 final siteLivePagesProvider =
     FutureProvider.autoDispose.family<List<LivePage>, Site>((ref, site) async {
-  cacheFor(ref, _cacheTtl);
+  cacheFor(ref, kStatsCacheTtl);
   final gate = ref.watch(fetchGateProvider);
-  final p = await _providerFor(ref, site);
+  final p = await analyticsProviderFor(ref, site);
   return gate.run(() => p.livePages(site)).catchError((_) => <LivePage>[]);
 });
 
@@ -450,7 +452,7 @@ final eventsProvider =
   cacheSession(ref);
   final (site, w) = key;
   final gate = ref.watch(fetchGateProvider);
-  final p = await _providerFor(ref, site);
+  final p = await analyticsProviderFor(ref, site);
   return gate.run(() async {
     final series = await p.eventSeries(site, w);
     final total = series.fold<int>(0, (a, b) => a + b.total);
@@ -476,7 +478,7 @@ final siteHasEventsProvider =
     FutureProvider.autoDispose.family<bool, Site>((ref, site) async {
   cacheFor(ref, const Duration(minutes: 10));
   final gate = ref.watch(fetchGateProvider);
-  final p = await _providerFor(ref, site);
+  final p = await analyticsProviderFor(ref, site);
   final w = Period.d30.window();
   final rows = await gate
       .run(() => p.metric(site, w, MetricType.events, limit: 1))
