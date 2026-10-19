@@ -166,7 +166,7 @@ sealed class Indicator {
           steps: (j['steps'] as List)
               .map((e) => EventQuery.fromJson(e as Map<String, dynamic>))
               .toList(),
-          windowDays: (j['window'] as int?) ?? 1,
+          windowMinutes: (j['window'] as int?) ?? 60,
         );
       case 'breakdown':
         return BreakdownIndicator(
@@ -253,8 +253,10 @@ class RatioIndicator extends Indicator {
   int get hashCode => Object.hash(kind, id, name, numerator, denominator);
 }
 
-/// Entonnoir : parcours ordonné d'événements. [windowDays] = délai laissé à un
-/// visiteur pour enchaîner les étapes.
+/// Entonnoir : parcours ordonné d'événements. [windowMinutes] = délai laissé à un
+/// visiteur entre une étape et la suivante. ⚠️ En minutes, pas en jours : la
+/// doc d'Umami dit « jours », son SQL fait `interval <window> minute`. 60 = le
+/// défaut de son propre formulaire.
 class FunnelIndicator extends Indicator {
   // Pas const : `steps.length` n'est pas évaluable à la compilation.
   // ignore: prefer_const_constructors_in_immutables
@@ -262,12 +264,12 @@ class FunnelIndicator extends Indicator {
     required super.id,
     required super.name,
     required this.steps,
-    this.windowDays = 1,
+    this.windowMinutes = 60,
   }) : assert(steps.length >= 2 && steps.length <= 8,
             'Un entonnoir compte de 2 à 8 étapes');
 
   final List<EventQuery> steps;
-  final int windowDays;
+  final int windowMinutes;
 
   @override
   IndicatorKind get kind => IndicatorKind.funnel;
@@ -275,19 +277,19 @@ class FunnelIndicator extends Indicator {
   FunnelIndicator copyWith({
     String? name,
     List<EventQuery>? steps,
-    int? windowDays,
+    int? windowMinutes,
   }) =>
       FunnelIndicator(
         id: id,
         name: name ?? this.name,
         steps: steps ?? this.steps,
-        windowDays: windowDays ?? this.windowDays,
+        windowMinutes: windowMinutes ?? this.windowMinutes,
       );
 
   @override
   Map<String, dynamic> toJson() => _base({
         'steps': steps.map((s) => s.toJson()).toList(),
-        'window': windowDays,
+        'window': windowMinutes,
       });
 
   @override
@@ -296,11 +298,11 @@ class FunnelIndicator extends Indicator {
       other.id == id &&
       other.name == name &&
       listEquals(other.steps, steps) &&
-      other.windowDays == windowDays;
+      other.windowMinutes == windowMinutes;
 
   @override
   int get hashCode =>
-      Object.hash(kind, id, name, Object.hashAll(steps), windowDays);
+      Object.hash(kind, id, name, Object.hashAll(steps), windowMinutes);
 }
 
 /// Répartition des valeurs d'une propriété d'événement.

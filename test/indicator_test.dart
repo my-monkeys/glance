@@ -30,7 +30,7 @@ void main() {
         id: 'c',
         name: 'Parcours',
         steps: const [EventQuery('vue'), q],
-        windowDays: 7),
+        windowMinutes: 7),
     const BreakdownIndicator(
         id: 'd', name: 'Niveaux', event: 'partie', property: 'niveau'),
   ];

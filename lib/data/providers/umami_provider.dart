@@ -319,7 +319,7 @@ class UmamiProvider extends AnalyticsProvider {
       'parameters': {
         'startDate': w.start.toUtc().toIso8601String(),
         'endDate': w.end.toUtc().toIso8601String(),
-        'window': f.windowDays,
+        'window': f.windowMinutes,
         'steps': [
           for (final s in f.steps)
             {
