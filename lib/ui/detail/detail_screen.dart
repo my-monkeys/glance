@@ -365,6 +365,10 @@ class _DetailBody extends ConsumerWidget {
                 pageviewsTotal: s.pageviews,
                 forecast: forecast,
                 compareSeries: compareSeries,
+                compareOn: compare,
+                onToggleCompare: previousPeriodWindow(window) == null
+                    ? null
+                    : ref.read(periodProvider.notifier).toggleCompare,
                 hidden: hidden,
                 style: ref.watch(settingsProvider.select((s) => s.chartStyle)),
                 onToggle: (k) =>

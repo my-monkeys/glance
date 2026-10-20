@@ -58,16 +58,15 @@ void main() {
         _dy(tester, periods));
   });
 
-  testWidgets('large : la comparaison s\'annonce dans le bouton, sans nouvelle ligne',
+  testWidgets('la comparaison ne touche plus au bouton ni à la barre',
       (tester) async {
     final container = await _pump(tester, _wide);
     final before = tester.getSize(find.byType(PeriodControls)).height;
     container.read(periodProvider.notifier).toggleCompare();
     await tester.pumpAndSettle();
-    expect(find.byIcon(Icons.compare_arrows_rounded), findsOneWidget);
-    expect(find.byTooltip('Comparé à la période précédente'), findsOneWidget);
+    expect(find.byIcon(Icons.compare_arrows_rounded), findsNothing);
+    expect(find.text('vs période précédente'), findsNothing);
     expect(tester.getSize(find.byType(PeriodControls)).height, before);
-    expect(_dy(tester, button), _dy(tester, periods));
   });
 
   testWidgets('téléphone : le bouton reste sur une seconde ligne', (tester) async {

@@ -89,7 +89,7 @@ class ChartModel {
     // La comparaison se superpose par position de bucket, pas par date : ses
     // dates réelles sont celles de la période d'avant.
     final cmp = compareSeries ?? const <SeriesPoint>[];
-    final showCompare = cmp.isNotEmpty && !hidden.contains(kCompareKey);
+    final showCompare = cmp.isNotEmpty;
 
     final visitors = [for (final e in series) e.visitors];
     final views = [for (final e in series) e.pageviews];
@@ -165,7 +165,6 @@ class ChartModel {
   static const kVisitorsKey = 'visitors';
   static const kPageviewsKey = 'pageviews';
   static const kForecastKey = 'forecast';
-  static const kCompareKey = 'compare';
 
   final List<ChartSeries> drawn;
   final List<SeriesPoint> series;

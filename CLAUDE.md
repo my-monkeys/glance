@@ -128,32 +128,38 @@ l'appelant montre son squelette sans rien déclencher.
 
 `PeriodControls` (`ui/widgets/period_controls.dart`), sous le titre de chaque
 écran : les périodes sur toute la largeur, puis un bouton **« Affichage »** qui
-ouvre une feuille — comparaison, découpage, courbe ou barres — et, sur
-l'accueil, la bascule liste/grille à droite.
+ouvre une feuille — découpage, courbe ou barres — et, sur l'accueil, la bascule
+liste/grille à droite.
 
 Les réglages tenaient auparavant dans des boutons sans libellé posés **à droite
-des périodes**, qu'ils recouvraient : deux flèches ne disent pas « comparer à la
-période précédente », et les premières périodes n'étaient plus atteignables sans
-faire défiler. Dans une feuille, chaque réglage porte son nom et une phrase.
+des périodes**, qu'ils recouvraient, et les premières périodes n'étaient plus
+atteignables sans faire défiler. Dans une feuille, chaque réglage porte son nom.
 
 **Une ligne ou deux, selon la place.** Un `LayoutBuilder` (jamais `MediaQuery.size`)
 mesure les périodes sur leur contenu réel (`GlanceChip.widthOf`, `TextPainter`) et
-y ajoute le bouton, son indice de comparaison et la bascule : si le tout tient
-sans défilement, tout est sur **une seule ligne** (périodes à gauche en `Expanded`,
-bouton et bascule à droite) ; sinon les contrôles passent sur la seconde ligne
-(téléphone). Trois paliers, dans l'ordre : bouton avec son libellé ; bouton
-**réduit à l'icône**, avec « Affichage » dans l'infobulle (le panneau central du
-bureau, vers 860 px, rate le libellé de quelques pixels) ; deux lignes. Dans le
-cas d'une ligne, la comparaison s'annonce **dans le bouton**, par une icône à
-largeur fixe et une infobulle. Sa largeur est comptée dans le pire cas, pour
-qu'allumer la comparaison ne fasse jamais basculer la barre. Les tests rendent en Ahem
-(glyphes carrés) : les périodes y font ~980 px au lieu de ~450, d'où une « grande »
-largeur de test plus grande qu'un vrai bureau.
+y ajoute le bouton et la bascule : si le tout tient sans défilement, tout est sur
+**une seule ligne** (périodes à gauche en `Expanded`, bouton et bascule à droite) ;
+sinon les contrôles passent sur la seconde ligne (téléphone). Trois paliers, dans
+l'ordre : bouton avec son libellé ; bouton **réduit à l'icône**, avec « Affichage »
+dans l'infobulle (le panneau central du bureau, vers 860 px, rate le libellé de
+quelques pixels) ; deux lignes. Les tests rendent en Ahem (glyphes carrés) : les
+périodes y font ~980 px au lieu de ~450, d'où une « grande » largeur de test plus
+grande qu'un vrai bureau.
 
-⚠️ Quand la comparaison est active, l'indication vit **sur la ligne du bouton**,
-pas sur une ligne à elle : une ligne qui apparaît et disparaît ferait sauter tout
-l'écran. Et c'est un `Expanded`, pas un `Flexible` suivi d'un `Spacer` — les deux
-se disputeraient la place et le texte se ferait tronquer alors qu'il y en a.
+### La comparaison vit dans la légende
+
+« Période précédente » est un élément de la légende du grand graphique (accueil,
+détail, bureau), **décoché par défaut**, à côté des courbes qu'il compare : un
+interrupteur rangé dans une feuille ne disait pas ce qu'il allait ajouter au
+graphique, et son état obligeait à une annonce sur le bouton « Affichage ».
+
+⚠️ **Une seule source de vérité : `PeriodState.compare`** (non persisté, faux au
+lancement). C'est lui qui déclenche le chargement de la période précédente
+(`siteCompareSeriesProvider`) ; la clé `compare` n'existe plus dans
+`settings.hiddenSeries`, sans quoi deux états « visible » pourraient diverger.
+`GlanceChart` reçoit `compareOn` + `onToggleCompare`, et cet élément disparaît
+quand `previousPeriodWindow(window) == null` (« Tout », période personnalisée trop
+large) : `onToggleCompare` vaut alors `null`.
 
 ### Découpage du graphique (heure / jour / mois)
 

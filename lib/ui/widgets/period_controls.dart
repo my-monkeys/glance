@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/predict.dart';
 import '../../data/models/period.dart';
 import '../../state/period_state.dart';
 import '../../state/settings.dart';
@@ -9,17 +8,16 @@ import '../../theme/motion.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
 import 'chip.dart';
-import 'common.dart';
 
 /// Barre de contrôles sous le titre : les périodes, et un bouton « Affichage »
 /// qui ouvre le reste.
 ///
-/// Les réglages du graphique — comparaison, découpage, courbe ou barres —
-/// tenaient auparavant dans des boutons sans libellé posés à droite des
-/// périodes, qu'ils recouvraient. Ils n'étaient ni lisibles (deux flèches ne
-/// disent pas « comparer à la période précédente ») ni atteignables sans
-/// faire défiler. Regroupés dans une feuille, ils ont la place de porter leur
-/// nom et une phrase d'explication.
+/// Les réglages du graphique — découpage, courbe ou barres — tenaient
+/// auparavant dans des boutons sans libellé posés à droite des périodes, qu'ils
+/// recouvraient. Ils n'étaient ni lisibles ni atteignables sans faire défiler.
+/// Regroupés dans une feuille, ils ont la place de porter leur nom. La
+/// comparaison n'y est plus : elle se coche dans la légende du graphique, à
+/// côté des courbes qu'elle compare.
 ///
 /// Quand la largeur disponible loge toutes les périodes ET les contrôles sans
 /// défilement (bureau), tout tient sur une seule ligne ; sinon les contrôles
@@ -50,7 +48,6 @@ class PeriodControls extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final compare = ref.watch(periodProvider.select((s) => s.compare));
     final current = ref.watch(periodProvider.select((s) => s.period));
 
     final chips = ChipRow(
@@ -71,8 +68,7 @@ class PeriodControls extends ConsumerWidget {
 
     // Mesuré sur le contenu réel (libellés, police, échelle de texte), pas sur
     // un seuil de fenêtre : le panneau central du bureau est plus étroit que
-    // l'écran. On compte le pire cas du bouton, indice de comparaison inclus,
-    // pour que l'allumer ne fasse jamais défiler les périodes.
+    // l'écran.
     return LayoutBuilder(
       builder: (context, constraints) {
         final chipsWidth = Period.values.fold<double>(
@@ -92,8 +88,6 @@ class PeriodControls extends ConsumerWidget {
         final compact = room < _DisplayButton.widthOf(context, compact: false);
 
         final button = _DisplayButton(
-          on: compare,
-          hint: fitsOneRow && compare,
           compact: fitsOneRow && compact,
           onTap: () => _openSheet(context),
         );
@@ -126,21 +120,7 @@ class PeriodControls extends ConsumerWidget {
               child: Row(
                 children: [
                   button,
-                  // Un réglage qui change la lecture du graphique s'annonce,
-                  // sinon la courbe grise de la période précédente apparaît
-                  // sans explication. Sur la même ligne que le bouton : une
-                  // ligne qui apparaît et disparaît ferait sauter tout l'écran.
-                  // `Expanded` et non `Flexible` + `Spacer` : les deux se
-                  // disputeraient la place restante et le texte se ferait
-                  // tronquer alors qu'il y en a.
-                  Expanded(
-                    child: compare
-                        ? const Padding(
-                            padding: EdgeInsets.only(left: 10),
-                            child: _CompareHint(),
-                          )
-                        : const SizedBox.shrink(),
-                  ),
+                  const Spacer(),
                   if (toggle != null) ...[
                     const SizedBox(width: _viewSegmentsGap),
                     toggle,
@@ -166,57 +146,19 @@ class PeriodControls extends ConsumerWidget {
   }
 }
 
-/// Annonce de la comparaison, sur la ligne du bouton « Affichage ».
-class _CompareHint extends StatelessWidget {
-  const _CompareHint();
-
-  @override
-  Widget build(BuildContext context) {
-    final p = context.glance;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(Icons.compare_arrows_rounded, size: 13, color: p.accent),
-        const SizedBox(width: 5),
-        Flexible(
-          child: Text(
-            'vs période précédente',
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: GT.body(11.5, color: p.accent),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// Bouton « Affichage », allumé quand un réglage change la lecture du graphe.
-/// Avec [hint], il porte lui-même l'annonce de la comparaison (une seule
-/// ligne : pas de place à côté de lui) — une icône à largeur fixe, pour que
-/// l'allumer ne fasse jamais basculer la barre sur deux lignes. [compact] :
-/// icône seule, le libellé passe dans l'infobulle.
+/// Bouton « Affichage ». [compact] : icône seule, le libellé passe dans
+/// l'infobulle.
 class _DisplayButton extends StatelessWidget {
-  const _DisplayButton({
-    required this.on,
-    required this.onTap,
-    this.hint = false,
-    this.compact = false,
-  });
-  final bool on;
-  final bool hint;
+  const _DisplayButton({required this.onTap, this.compact = false});
   final bool compact;
   final VoidCallback onTap;
 
   static const String _label = 'Affichage';
-  static const String _hintTooltip = 'Comparé à la période précédente';
   static const double _hPad = 10;
   static const double _iconWidth = 15;
   static const double _labelGap = 6;
-  static const double _hintExtra = 6 + 13;
 
-  static TextStyle _style(bool on) =>
-      GT.mono(11, weight: on ? 600 : 400);
+  static TextStyle _style() => GT.mono(11);
 
   static double _textWidth(BuildContext context, String text, TextStyle style) {
     final tp = TextPainter(
@@ -228,17 +170,15 @@ class _DisplayButton extends StatelessWidget {
     return tp.width;
   }
 
-  /// Largeur sur une ligne, au pire cas (icône de comparaison comprise).
   static double widthOf(BuildContext context, {required bool compact}) =>
       2 * _hPad +
       _iconWidth +
-      (compact ? 0 : _labelGap + _textWidth(context, _label, _style(true))) +
-      _hintExtra;
+      (compact ? 0 : _labelGap + _textWidth(context, _label, _style()));
 
   @override
   Widget build(BuildContext context) {
     final p = context.glance;
-    final ink = on ? p.accentInk : p.fg2;
+    final ink = p.fg2;
     final button = GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -248,7 +188,7 @@ class _DisplayButton extends StatelessWidget {
         height: 32,
         padding: const EdgeInsets.symmetric(horizontal: _hPad),
         decoration: BoxDecoration(
-          color: on ? p.accent : p.chip,
+          color: p.chip,
           borderRadius: BorderRadius.circular(9),
         ),
         child: Row(
@@ -257,26 +197,18 @@ class _DisplayButton extends StatelessWidget {
             Icon(Icons.tune_rounded, size: _iconWidth, color: ink),
             if (!compact) ...[
               const SizedBox(width: _labelGap),
-              Text(_label,
-                  style: GT.mono(11, weight: on ? 600 : 400, color: ink)),
-            ],
-            if (hint) ...[
-              const SizedBox(width: 6),
-              Icon(Icons.compare_arrows_rounded, size: 13, color: ink),
+              Text(_label, style: GT.mono(11, color: ink)),
             ],
           ],
         ),
       ),
     );
-    if (!compact && !hint) return button;
-    return Tooltip(
-      message: [if (compact) _label, if (hint) _hintTooltip].join(' · '),
-      child: button,
-    );
+    if (!compact) return button;
+    return Tooltip(message: _label, child: button);
   }
 }
 
-/// Comparaison, découpage et style de graphique.
+/// Découpage et style de graphique.
 class _DisplaySheet extends ConsumerWidget {
   const _DisplaySheet();
 
@@ -285,11 +217,7 @@ class _DisplaySheet extends ConsumerWidget {
     final p = context.glance;
     final window = ref.watch(windowProvider);
     final units = window == null ? const <TimeUnit>[] : allowedUnits(window);
-    final compare = ref.watch(periodProvider.select((s) => s.compare));
     final style = ref.watch(settingsProvider.select((s) => s.chartStyle));
-    // Une période sans « avant » comparable (« Tout », une période
-    // personnalisée trop large) n'offre pas la bascule.
-    final canCompare = window != null && previousPeriodWindow(window) != null;
 
     return SafeArea(
       child: Padding(
@@ -300,31 +228,6 @@ class _DisplaySheet extends ConsumerWidget {
           children: [
             Text('Affichage', style: GT.display(22, color: p.fg)),
             const SizedBox(height: 18),
-            if (canCompare) ...[
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Comparer', style: GT.body(15, color: p.fg)),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Superpose la période précédente',
-                          style: GT.body(12.5, color: p.fg3),
-                        ),
-                      ],
-                    ),
-                  ),
-                  GlanceToggle(
-                    value: compare,
-                    onTap: () =>
-                        ref.read(periodProvider.notifier).toggleCompare(),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 18),
-            ],
             if (units.length > 1) ...[
               Text('Découpage', style: GT.body(15, color: p.fg)),
               const SizedBox(height: 10),

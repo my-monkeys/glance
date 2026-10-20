@@ -735,6 +735,10 @@ class _OverviewState extends ConsumerState<_Overview> {
                       daily: data.totalDaily,
                     ),
                     compareSeries: data.totalCompareSeries,
+                    compareOn: periodState.compare,
+                    onToggleCompare: previousPeriodWindow(window) == null
+                        ? null
+                        : ref.read(periodProvider.notifier).toggleCompare,
                     hidden: hidden,
                     style: ref
                         .watch(settingsProvider.select((s) => s.chartStyle)),

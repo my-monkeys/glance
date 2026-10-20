@@ -480,6 +480,7 @@ class _TotalCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final p = context.glance;
+    final compare = ref.watch(periodProvider.select((s) => s.compare));
     final hidden = ref.watch(settingsProvider.select((s) => s.hiddenSeries));
     // Rogne le préfixe vide sur une fenêtre large (« Tout ») : sans effet
     // ailleurs. La prévision (bucket courant) en bénéficie aussi — la moyenne
@@ -534,6 +535,10 @@ class _TotalCard extends ConsumerWidget {
             pageviewsTotal: data.totalPageviews,
             forecast: forecast,
             compareSeries: data.totalCompareSeries,
+            compareOn: compare,
+            onToggleCompare: previousPeriodWindow(window) == null
+                ? null
+                : ref.read(periodProvider.notifier).toggleCompare,
             hidden: hidden,
             style: ref.watch(settingsProvider.select((s) => s.chartStyle)),
             onToggle: (k) => ref.read(settingsProvider.notifier).toggleSeries(k),
