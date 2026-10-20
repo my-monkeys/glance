@@ -93,6 +93,14 @@ final siteHasMetricsSourceProvider = Provider.family<bool, Site>(
   ),
 );
 
+/// Une réponse claire de la source (jeton refusé, non configurée…) ne se
+/// rattrape pas en réessayant : l'erreur doit apparaître tout de suite, pas
+/// après les relances par défaut de Riverpod.
+Duration? retryUnlessMetricsError(int count, Object error) =>
+    error is MetricsApiException
+        ? null
+        : ProviderContainer.defaultRetry(count, error);
+
 /// Fabrique du client, substituable dans les tests (et sert à « Tester » une
 /// source qui n'est pas encore enregistrée).
 final metricsApiFactoryProvider =
@@ -113,9 +121,12 @@ Future<MetricsApi> metricsApiFor(Ref ref, Site site) async {
 
 /// Catalogue d'indicateurs d'un site. Même cache que les aides de l'éditeur.
 final metricsCatalogueProvider =
-    FutureProvider.autoDispose.family<List<MetricDef>, Site>((ref, site) async {
-  cacheFor(ref, const Duration(minutes: 10));
-  final gate = ref.watch(fetchGateProvider);
-  final api = await metricsApiFor(ref, site);
-  return gate.run(api.catalogue);
-});
+    FutureProvider.autoDispose.family<List<MetricDef>, Site>(
+  retry: retryUnlessMetricsError,
+  (ref, site) async {
+    cacheFor(ref, const Duration(minutes: 10));
+    final gate = ref.watch(fetchGateProvider);
+    final api = await metricsApiFor(ref, site);
+    return gate.run(api.catalogue);
+  },
+);

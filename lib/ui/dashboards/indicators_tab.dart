@@ -10,6 +10,7 @@ import '../../theme/type.dart';
 import '../widgets/field.dart';
 import 'editor/indicator_editor.dart';
 import 'indicator_card.dart';
+import 'metrics_source_screen.dart';
 
 /// Contenu de l'onglet Tableaux : les indicateurs du site, en une ou deux
 /// colonnes selon la place.
@@ -23,7 +24,10 @@ class IndicatorsTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final indicators = ref.watch(siteIndicatorsProvider(site));
     void create() => openIndicatorEditor(context, site);
-    if (indicators.isEmpty) return _EmptyState(onCreate: create);
+    void openSource() => openMetricsSource(context, site);
+    if (indicators.isEmpty) {
+      return _EmptyState(onCreate: create, onSource: openSource);
+    }
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -37,6 +41,8 @@ class IndicatorsTab extends ConsumerWidget {
             leading: Icon(Icons.add_rounded, size: 18, color: context.glance.fg),
             onTap: create,
           ),
+          const SizedBox(height: 14),
+          _SourceLink(onTap: openSource),
         ],
       ),
     );
@@ -105,8 +111,9 @@ class _CardsGrid extends StatelessWidget {
 }
 
 class _EmptyState extends StatelessWidget {
-  const _EmptyState({required this.onCreate});
+  const _EmptyState({required this.onCreate, required this.onSource});
   final VoidCallback onCreate;
+  final VoidCallback onSource;
 
   @override
   Widget build(BuildContext context) {
@@ -129,7 +136,36 @@ class _EmptyState extends StatelessWidget {
             constraints: const BoxConstraints(maxWidth: 280),
             child: GlanceButton(label: 'Créer un tableau', onTap: onCreate),
           ),
+          const SizedBox(height: 16),
+          _SourceLink(onTap: onSource),
         ],
+      ),
+    );
+  }
+}
+
+/// Action secondaire : brancher l'API d'agrégats du site.
+class _SourceLink extends StatelessWidget {
+  const _SourceLink({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.glance;
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.hub_outlined, size: 16, color: p.fg2),
+            const SizedBox(width: 8),
+            Text('Source de métriques',
+                style: GT.body(13, weight: 600, color: p.fg2)),
+          ],
+        ),
       ),
     );
   }

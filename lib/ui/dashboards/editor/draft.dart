@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../../../data/models/indicator.dart';
+import '../../../data/models/metrics_source.dart';
 import '../labels.dart';
 
 /// Opérateurs que l'API d'entonnoir d'Umami accepte : elle ne sait pas
@@ -39,6 +40,9 @@ class IndicatorDraft {
     this.breakdownEvent = '',
     this.breakdownProperty = '',
     this.gapsWhenEmpty = false,
+    this.metricId = '',
+    this.metricLabel = '',
+    this.metricUnit = MetricUnit.count,
   });
 
   final IndicatorKind kind;
@@ -52,6 +56,11 @@ class IndicatorDraft {
   final String breakdownEvent;
   final String breakdownProperty;
   final bool gapsWhenEmpty;
+
+  /// Métrique de la source du site ; libellé et unité viennent du catalogue.
+  final String metricId;
+  final String metricLabel;
+  final MetricUnit metricUnit;
 
   factory IndicatorDraft.fromIndicator(Indicator i) {
     return switch (i) {
@@ -76,6 +85,13 @@ class IndicatorDraft {
           breakdownEvent: i.event,
           breakdownProperty: i.property,
         ),
+      ExternalIndicator() => IndicatorDraft(
+          kind: i.kind,
+          name: i.name,
+          metricId: i.metricId,
+          metricLabel: i.label,
+          metricUnit: i.unit,
+        ),
     };
   }
 
@@ -89,6 +105,9 @@ class IndicatorDraft {
     String? breakdownEvent,
     String? breakdownProperty,
     bool? gapsWhenEmpty,
+    String? metricId,
+    String? metricLabel,
+    MetricUnit? metricUnit,
   }) =>
       IndicatorDraft(
         kind: kind ?? this.kind,
@@ -100,6 +119,9 @@ class IndicatorDraft {
         breakdownEvent: breakdownEvent ?? this.breakdownEvent,
         breakdownProperty: breakdownProperty ?? this.breakdownProperty,
         gapsWhenEmpty: gapsWhenEmpty ?? this.gapsWhenEmpty,
+        metricId: metricId ?? this.metricId,
+        metricLabel: metricLabel ?? this.metricLabel,
+        metricUnit: metricUnit ?? this.metricUnit,
       );
 
   /// Change de genre en reportant ce qui a un sens de l'un à l'autre : la
@@ -113,9 +135,11 @@ class IndicatorDraft {
       IndicatorKind.counter || IndicatorKind.ratio => query,
       IndicatorKind.funnel => steps.first,
       IndicatorKind.breakdown => EventQuery(breakdownEvent),
+      IndicatorKind.external => const EventQuery(''),
     };
     if (carried.event.isEmpty) return copyWith(kind: next);
     return switch (next) {
+      IndicatorKind.external => copyWith(kind: next),
       IndicatorKind.counter || IndicatorKind.ratio => copyWith(
           kind: next,
           query: query.event.isEmpty ? carried : query,
@@ -141,6 +165,7 @@ class IndicatorDraft {
       IndicatorKind.ratio => [_label(query), _label(denominator)],
       IndicatorKind.funnel => [steps.first.event, steps.last.event],
       IndicatorKind.breakdown => [breakdownEvent, breakdownProperty],
+      IndicatorKind.external => [metricLabel],
     }.where((s) => s.isNotEmpty).toList();
     if (parts.isEmpty) return _fallbackName;
     if (parts.length == 1) return parts.single;
@@ -173,6 +198,8 @@ class IndicatorDraft {
         if (breakdownEvent.isEmpty) return 'Choisissez un événement';
         if (breakdownProperty.isEmpty) return 'Choisissez une propriété';
         return null;
+      case IndicatorKind.external:
+        return metricId.isEmpty ? 'Choisissez une métrique' : null;
     }
   }
 
@@ -238,6 +265,13 @@ class IndicatorDraft {
           name: label,
           event: breakdownEvent,
           property: breakdownProperty,
+        ),
+      IndicatorKind.external => ExternalIndicator(
+          id: id,
+          name: label,
+          metricId: metricId,
+          label: metricLabel,
+          unit: metricUnit,
         ),
     };
   }

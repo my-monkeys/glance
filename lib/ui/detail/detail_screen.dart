@@ -10,6 +10,7 @@ import '../../data/providers/analytics_provider.dart';
 import '../../data/models/period.dart';
 import '../../state/home_data.dart';
 import '../../state/indicators.dart';
+import '../../state/metrics_sources.dart';
 import '../../state/metric_sections.dart';
 import '../../state/period_state.dart';
 import '../../state/providers.dart';
@@ -158,8 +159,11 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
           .map((a) => a.kind)
           .firstOrNull,
     ));
-    final showIndicators =
-        hasEvents && kind != null && supportedIndicatorsFor(kind).isNotEmpty;
+    // Une source de métriques ouvre l'onglet même sans événements : ses
+    // indicateurs ne passent pas par le fournisseur d'analytics.
+    final hasSource = ref.watch(siteHasMetricsSourceProvider(widget.site));
+    final showIndicators = hasSource ||
+        (hasEvents && kind != null && supportedIndicatorsFor(kind).isNotEmpty);
     // Onglet courant devenu indisponible (site sans événements, compte
     // changé) → retour à la vue d'ensemble.
     final tab = switch (_tab) {

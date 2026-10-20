@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 
+import 'metrics_source.dart';
 import 'workspace.dart';
 
 /// Type d'une propriété d'événement. Le code est celui de `dataType` côté Umami
@@ -120,7 +121,7 @@ class EventQuery {
   int get hashCode => Object.hash(event, Object.hashAll(filters));
 }
 
-enum IndicatorKind { counter, ratio, funnel, breakdown }
+enum IndicatorKind { counter, ratio, funnel, breakdown, external }
 
 /// Un indicateur personnalisé d'un site. L'égalité porte sur TOUS les champs
 /// (id compris) : un indicateur sert de clé de `family` Riverpod, donc le
@@ -175,6 +176,14 @@ sealed class Indicator {
           name: name,
           event: j['event'] as String,
           property: j['property'] as String,
+        );
+      case 'external':
+        return ExternalIndicator(
+          id: id,
+          name: name,
+          metricId: j['metric'] as String,
+          label: j['label'] as String,
+          unit: MetricUnit.fromApi(j['unit'] as String?),
         );
     }
     return null;
@@ -353,6 +362,42 @@ class BreakdownIndicator extends Indicator {
 
   @override
   int get hashCode => Object.hash(kind, id, name, event, property);
+}
+
+/// Un indicateur calculé par le site lui-même, via sa source de métriques.
+/// [label] et [unit] sont copiés du catalogue à la création : la carte peut
+/// ainsi se dessiner avant que le catalogue n'ait répondu.
+class ExternalIndicator extends Indicator {
+  const ExternalIndicator({
+    required super.id,
+    required super.name,
+    required this.metricId,
+    required this.label,
+    required this.unit,
+  });
+
+  final String metricId;
+  final String label;
+  final MetricUnit unit;
+
+  @override
+  IndicatorKind get kind => IndicatorKind.external;
+
+  @override
+  Map<String, dynamic> toJson() =>
+      _base({'metric': metricId, 'label': label, 'unit': unit.api});
+
+  @override
+  bool operator ==(Object other) =>
+      other is ExternalIndicator &&
+      other.id == id &&
+      other.name == name &&
+      other.metricId == metricId &&
+      other.label == label &&
+      other.unit == unit;
+
+  @override
+  int get hashCode => Object.hash(kind, id, name, metricId, label, unit);
 }
 
 /// Les indicateurs d'un site, dans l'ordre choisi par l'utilisateur.

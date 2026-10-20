@@ -7,6 +7,7 @@ import '../../../data/models/indicator.dart';
 import '../../../data/models/models.dart';
 import '../../../data/providers/analytics_provider.dart';
 import '../../../state/indicators.dart';
+import '../../../state/metrics_sources.dart';
 import '../../../state/period_state.dart';
 import '../../../state/providers.dart';
 import '../../../theme/palette.dart';
@@ -21,6 +22,7 @@ import 'confirm_button.dart';
 import 'draft.dart';
 import 'funnel_steps.dart';
 import 'kind_picker.dart';
+import 'metric_picker.dart';
 import 'pickers.dart';
 import 'query_editor.dart';
 
@@ -72,6 +74,11 @@ class _IndicatorEditorState extends ConsumerState<IndicatorEditor> {
     _draft = widget.initial == null
         ? const IndicatorDraft()
         : IndicatorDraft.fromIndicator(widget.initial!);
+    if (_isNew) {
+      // Sur un site qui n'a que sa source, « Compteur » n'est pas offert.
+      final kinds = _kinds(watch: false);
+      if (!kinds.contains(_draft.kind)) _draft = _draft.copyWith(kind: kinds.first);
+    }
     _name = TextEditingController(text: _draft.name);
     _window = TextEditingController(text: _draft.windowText);
     _preview = _previewOf(_draft);
@@ -132,13 +139,17 @@ class _IndicatorEditorState extends ConsumerState<IndicatorEditor> {
   static double _footerHeight(BuildContext context) =>
       kFooterButton + kFooterReason + 20 + MediaQuery.of(context).padding.bottom;
 
-  List<IndicatorKind> _kinds() {
-    final accounts = ref.watch(accountsProvider);
+  /// [watch] faux hors du build (initState).
+  List<IndicatorKind> _kinds({bool watch = true}) {
+    final accounts = watch ? ref.watch(accountsProvider) : ref.read(accountsProvider);
     final account = accounts.firstWhere((a) => a.id == widget.site.accountId);
     final supported = supportedIndicatorsFor(account.kind);
+    // Disponible selon la source du site, pas selon le fournisseur d'analytics.
+    final sourceProvider = siteHasMetricsSourceProvider(widget.site);
+    final hasSource = watch ? ref.watch(sourceProvider) : ref.read(sourceProvider);
     return [
       for (final k in IndicatorKind.values)
-        if (supported.contains(k)) k,
+        if (k == IndicatorKind.external ? hasSource : supported.contains(k)) k,
     ];
   }
 
@@ -280,6 +291,7 @@ class _IndicatorEditorState extends ConsumerState<IndicatorEditor> {
           onWindow: (t) => _update(_draft.copyWith(windowText: t)),
         ),
       IndicatorKind.breakdown => _breakdownForm(site),
+      IndicatorKind.external => _metricForm(site),
     };
   }
 
@@ -310,6 +322,21 @@ class _IndicatorEditorState extends ConsumerState<IndicatorEditor> {
       ),
     );
   }
+
+  Widget _metricForm(Site site) => PickerField(
+        label: 'Métrique',
+        placeholder: 'Choisir une métrique',
+        value: _draft.metricLabel,
+        onTap: () async {
+          final d = await pickMetric(context, site);
+          if (d == null) return;
+          _update(_draft.copyWith(
+            metricId: d.id,
+            metricLabel: d.libelle,
+            metricUnit: d.unite,
+          ));
+        },
+      );
 
   Widget _breakdownForm(Site site) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
