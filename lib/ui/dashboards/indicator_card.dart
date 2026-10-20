@@ -14,6 +14,7 @@ import '../widgets/common.dart';
 import '../widgets/motion.dart';
 import 'funnel_bars.dart';
 import 'indicator_chart.dart';
+import 'indicator_menu.dart';
 import 'labels.dart';
 
 /// Lignes d'une répartition : au-delà, la carte deviendrait une liste.
@@ -73,6 +74,17 @@ class IndicatorCard extends ConsumerWidget {
               ),
               const SizedBox(width: 10),
               SectionLabel(_kindLabels[indicator.kind]!, color: p.fg3),
+              if (menu)
+                GestureDetector(
+                  onTap: () => showIndicatorMenu(context, ref, site, indicator),
+                  behavior: HitTestBehavior.opaque,
+                  // Zone de tap élargie : l'icône seule fait 18 px.
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8),
+                    child: Icon(Icons.more_horiz_rounded,
+                        size: 20, color: p.fg2, semanticLabel: 'Options du tableau'),
+                  ),
+                ),
             ],
           ),
           const SizedBox(height: 10),
