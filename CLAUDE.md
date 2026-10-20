@@ -141,9 +141,12 @@ mesure les périodes sur leur contenu réel (`GlanceChip.widthOf`, `TextPainter`
 y ajoute le bouton, son indice de comparaison et la bascule : si le tout tient
 sans défilement, tout est sur **une seule ligne** (périodes à gauche en `Expanded`,
 bouton et bascule à droite) ; sinon les contrôles passent sur la seconde ligne
-(téléphone). Dans le cas d'une ligne, l'indice de comparaison est **dans le
-bouton** (« vs préc. »), et sa largeur est comptée dans le pire cas pour qu'allumer
-la comparaison ne fasse jamais défiler les périodes. Les tests rendent en Ahem
+(téléphone). Trois paliers, dans l'ordre : bouton avec son libellé ; bouton
+**réduit à l'icône**, avec « Affichage » dans l'infobulle (le panneau central du
+bureau, vers 860 px, rate le libellé de quelques pixels) ; deux lignes. Dans le
+cas d'une ligne, la comparaison s'annonce **dans le bouton**, par une icône à
+largeur fixe et une infobulle. Sa largeur est comptée dans le pire cas, pour
+qu'allumer la comparaison ne fasse jamais basculer la barre. Les tests rendent en Ahem
 (glyphes carrés) : les périodes y font ~980 px au lieu de ~450, d'où une « grande »
 largeur de test plus grande qu'un vrai bureau.
 

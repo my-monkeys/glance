@@ -78,14 +78,23 @@ class PeriodControls extends ConsumerWidget {
         final chipsWidth = Period.values.fold<double>(
                 0, (w, per) => w + GlanceChip.widthOf(context, per.label)) +
             _chipGap * (Period.values.length - 1);
-        final trailing = _DisplayButton.widthOf(context, withHint: true) +
+        final room = constraints.maxWidth -
+            _padding.horizontal -
+            chipsWidth -
+            _groupGap -
             (toggle == null ? 0 : _viewSegmentsGap + _viewSegmentsWidth);
-        final fitsOneRow =chipsWidth + _groupGap + trailing <=
-            constraints.maxWidth - _padding.horizontal;
+        // Trois paliers : libellé complet, puis icône seule (le panneau
+        // central du bureau rate souvent le libellé de quelques pixels), puis
+        // deux lignes. Le libellé tient d'abord : c'est lui qui dit ce que
+        // fait le bouton, l'infobulle ne le remplace que faute de place.
+        final fitsOneRow =
+            room >= _DisplayButton.widthOf(context, compact: true);
+        final compact = room < _DisplayButton.widthOf(context, compact: false);
 
         final button = _DisplayButton(
           on: compare,
           hint: fitsOneRow && compare,
+          compact: fitsOneRow && compact,
           onTap: () => _openSheet(context),
         );
 
@@ -184,17 +193,27 @@ class _CompareHint extends StatelessWidget {
 
 /// Bouton « Affichage », allumé quand un réglage change la lecture du graphe.
 /// Avec [hint], il porte lui-même l'annonce de la comparaison (une seule
-/// ligne : pas de place à côté de lui).
+/// ligne : pas de place à côté de lui) — une icône à largeur fixe, pour que
+/// l'allumer ne fasse jamais basculer la barre sur deux lignes. [compact] :
+/// icône seule, le libellé passe dans l'infobulle.
 class _DisplayButton extends StatelessWidget {
-  const _DisplayButton({required this.on, required this.onTap, this.hint = false});
+  const _DisplayButton({
+    required this.on,
+    required this.onTap,
+    this.hint = false,
+    this.compact = false,
+  });
   final bool on;
   final bool hint;
+  final bool compact;
   final VoidCallback onTap;
 
-  static const String _hintLabel = 'vs préc.';
+  static const String _label = 'Affichage';
+  static const String _hintTooltip = 'Comparé à la période précédente';
   static const double _hPad = 10;
-  static const double _iconWidth = 15 + 6;
-  static const double _hintExtra = 8 + 13 + 4;
+  static const double _iconWidth = 15;
+  static const double _labelGap = 6;
+  static const double _hintExtra = 6 + 13;
 
   static TextStyle _style(bool on) =>
       GT.mono(11, weight: on ? 600 : 400);
@@ -209,20 +228,18 @@ class _DisplayButton extends StatelessWidget {
     return tp.width;
   }
 
-  /// Largeur du bouton ; [withHint] = pire cas, indice de comparaison inclus.
-  static double widthOf(BuildContext context, {required bool withHint}) {
-    final style = _style(true);
-    return 2 * _hPad +
-        _iconWidth +
-        _textWidth(context, 'Affichage', style) +
-        (withHint ? _hintExtra + _textWidth(context, _hintLabel, style) : 0);
-  }
+  /// Largeur sur une ligne, au pire cas (icône de comparaison comprise).
+  static double widthOf(BuildContext context, {required bool compact}) =>
+      2 * _hPad +
+      _iconWidth +
+      (compact ? 0 : _labelGap + _textWidth(context, _label, _style(true))) +
+      _hintExtra;
 
   @override
   Widget build(BuildContext context) {
     final p = context.glance;
     final ink = on ? p.accentInk : p.fg2;
-    return GestureDetector(
+    final button = GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
@@ -237,19 +254,24 @@ class _DisplayButton extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.tune_rounded, size: 15, color: ink),
-            const SizedBox(width: 6),
-            Text('Affichage',
-                style: GT.mono(11, weight: on ? 600 : 400, color: ink)),
+            Icon(Icons.tune_rounded, size: _iconWidth, color: ink),
+            if (!compact) ...[
+              const SizedBox(width: _labelGap),
+              Text(_label,
+                  style: GT.mono(11, weight: on ? 600 : 400, color: ink)),
+            ],
             if (hint) ...[
-              const SizedBox(width: 8),
+              const SizedBox(width: 6),
               Icon(Icons.compare_arrows_rounded, size: 13, color: ink),
-              const SizedBox(width: 4),
-              Text(_hintLabel, style: GT.mono(11, weight: 600, color: ink)),
             ],
           ],
         ),
       ),
+    );
+    if (!compact && !hint) return button;
+    return Tooltip(
+      message: [if (compact) _label, if (hint) _hintTooltip].join(' · '),
+      child: button,
     );
   }
 }

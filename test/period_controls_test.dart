@@ -64,7 +64,8 @@ void main() {
     final before = tester.getSize(find.byType(PeriodControls)).height;
     container.read(periodProvider.notifier).toggleCompare();
     await tester.pumpAndSettle();
-    expect(find.text('vs préc.'), findsOneWidget);
+    expect(find.byIcon(Icons.compare_arrows_rounded), findsOneWidget);
+    expect(find.byTooltip('Comparé à la période précédente'), findsOneWidget);
     expect(tester.getSize(find.byType(PeriodControls)).height, before);
     expect(_dy(tester, button), _dy(tester, periods));
   });
