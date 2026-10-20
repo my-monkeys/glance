@@ -162,6 +162,54 @@ void main() {
     });
   });
 
+  group('retrait de la source', () {
+    const ext = ExternalIndicator(
+        id: 'e1', name: 'A', metricId: 'm', label: 'A', unit: MetricUnit.count);
+    const ext2 = ExternalIndicator(
+        id: 'e2', name: 'B', metricId: 'm', label: 'B', unit: MetricUnit.count);
+    const counter = CounterIndicator(
+        id: 'c1', name: 'C', query: EventQuery('partie'));
+
+    testWidgets('emporte les cartes « Métrique » et l\'annonce', (tester) async {
+      final c = await _pump(
+        tester,
+        (_) => const MetricsSourceScreen(site: _site),
+        withSource: true,
+      );
+      for (final i in [ext, counter, ext2]) {
+        await c.read(indicatorsProvider.notifier).add(_site, i);
+      }
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Retirer la source'));
+      await tester.pumpAndSettle();
+      expect(find.text('Retirer la source et 2 tableaux'), findsOneWidget);
+      await tester.tap(find.text('Retirer la source et 2 tableaux'));
+      await tester.pumpAndSettle();
+
+      expect(c.read(siteIndicatorsProvider(_site)), [counter]);
+      expect(c.read(siteHasMetricsSourceProvider(_site)), isFalse);
+      expect(
+          await c
+              .read(metricsSourcesProvider.notifier)
+              .tokenFor(const SiteRef('a', 's')),
+          isNull);
+      await tester.pump(const Duration(seconds: 4));
+    });
+
+    testWidgets('sans carte : simple confirmation', (tester) async {
+      await _pump(
+        tester,
+        (_) => const MetricsSourceScreen(site: _site),
+        withSource: true,
+      );
+      await tester.tap(find.text('Retirer la source'));
+      await tester.pumpAndSettle();
+      expect(find.text('Retirer la source'), findsOneWidget);
+      expect(find.textContaining('tableau'), findsNothing);
+    });
+  });
+
   group('éditeur', () {
     Widget editor(BuildContext c) => TextButton(
           onPressed: () => openIndicatorEditor(c, _site),

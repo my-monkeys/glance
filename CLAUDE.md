@@ -350,9 +350,9 @@ dans le code.
   `indicators`). Le jeton voyage dans le blob chiffré de bout en bout, comme les
   identifiants des comptes. Fusion par site (l'entrante gagne), une suppression
   ne se propage pas, et le **QR de transfert ne l'emporte pas**.
-- ⚠️ Retirer une source laisse les tableaux « Métrique » existants en place : ils
-  affichent « Jeton refusé » jusqu'à ce qu'on les supprime ou qu'on rebranche la
-  source.
+- **Retirer une source supprime aussi ses cartes « Métrique »** : sans elle elles
+  afficheraient « Jeton refusé » pour toujours. La confirmation et le toast
+  annoncent le nombre de tableaux emportés.
 - ⚠️ Le serveur refuse plus de 400 jours : `metricsRangeFor` ramène `de` à
   `a − 399 jours` (« Tout », période perso). Les buckets d'avant la borne restent
   vides : trou pour un %, 0 pour un nombre.

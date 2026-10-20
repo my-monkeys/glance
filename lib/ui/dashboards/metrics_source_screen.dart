@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../data/models/indicator.dart';
 import '../../data/models/models.dart';
+import '../../state/indicators.dart';
 import '../../state/metrics_sources.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
@@ -95,10 +97,30 @@ class _MetricsSourceScreenState extends ConsumerState<MetricsSourceScreen> {
     Navigator.of(context).pop();
   }
 
+  List<ExternalIndicator> get _cards => ref
+      .read(siteIndicatorsProvider(widget.site))
+      .whereType<ExternalIndicator>()
+      .toList();
+
+  static String _tableaux(int n) => n == 1 ? '1 tableau' : '$n tableaux';
+
+  /// Les cartes « Métrique » partent avec leur source : sans elle, elles
+  /// afficheraient « Jeton refusé » pour toujours.
   Future<void> _remove() async {
+    final cards = _cards;
+    final indicators = ref.read(indicatorsProvider.notifier);
+    for (final c in cards) {
+      await indicators.remove(widget.site, c.id);
+    }
     await ref.read(metricsSourcesProvider.notifier).remove(widget.site);
     if (!mounted) return;
-    showGlanceToast(context, 'Source retirée', kind: ToastKind.info);
+    showGlanceToast(
+      context,
+      cards.isEmpty
+          ? 'Source retirée'
+          : 'Source retirée, ${_tableaux(cards.length)} supprimé${cards.length == 1 ? '' : 's'}',
+      kind: ToastKind.info,
+    );
     Navigator.of(context).pop();
   }
 
@@ -107,6 +129,9 @@ class _MetricsSourceScreenState extends ConsumerState<MetricsSourceScreen> {
     final p = context.glance;
     final bottom = MediaQuery.of(context).padding.bottom;
     final result = _result;
+    final cards = ref.watch(siteIndicatorsProvider(widget.site))
+        .whereType<ExternalIndicator>()
+        .length;
     return Scaffold(
       body: SafeArea(
         bottom: false,
@@ -175,7 +200,9 @@ class _MetricsSourceScreenState extends ConsumerState<MetricsSourceScreen> {
                     const SizedBox(height: 28),
                     ConfirmButton(
                       label: 'Retirer la source',
-                      confirmLabel: 'Confirmer le retrait',
+                      confirmLabel: cards == 0
+                          ? 'Retirer la source'
+                          : 'Retirer la source et ${_tableaux(cards)}',
                       onConfirmed: _remove,
                     ),
                   ],
