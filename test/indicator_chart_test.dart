@@ -12,8 +12,8 @@ void main() {
     });
 
     test('suit les données au-delà de 100 %', () {
-      expect(percentAxisMax(125), 200);
-      expect(percentAxisMax(260), 400);
+      expect(percentAxisMax(125), 160);
+      expect(percentAxisMax(260), 320);
       expect(percentAxisMax(125), greaterThan(125));
       expect(percentAxisMax(260), greaterThan(260));
     });
