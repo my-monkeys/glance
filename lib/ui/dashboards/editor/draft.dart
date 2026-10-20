@@ -19,7 +19,7 @@ const int kFunnelMinWindow = 1;
 const int kFunnelMaxWindow = 1440;
 const int kFunnelDefaultWindow = 60;
 
-const String _fallbackName = 'Nouveau tableau';
+const String _fallbackName = 'Sans titre';
 
 /// Un indicateur en cours d'édition. Tous les champs de tous les genres
 /// coexistent : changer de genre ne perd rien, et revenir en arrière retrouve

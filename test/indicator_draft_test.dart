@@ -123,7 +123,7 @@ void main() {
     });
 
     test('un nom par genre', () {
-      expect(const IndicatorDraft().suggestedName(), 'Nouveau tableau');
+      expect(const IndicatorDraft().suggestedName(), 'Sans titre');
       expect(
         const IndicatorDraft(
           kind: IndicatorKind.ratio,

@@ -35,11 +35,15 @@ class IndicatorCard extends ConsumerWidget {
     required this.site,
     required this.window,
     required this.indicator,
+    this.menu = true,
   });
 
   final Site site;
   final DateWindow window;
   final Indicator indicator;
+
+  /// Faux pour l'aperçu de l'éditeur, qui n'est pas encore un tableau.
+  final bool menu;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
