@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:glance/data/models/account.dart';
+import 'package:glance/data/models/indicator.dart';
 import 'package:glance/data/models/workspace.dart';
 import 'package:glance/data/transfer/config_transfer.dart';
 
@@ -104,6 +105,30 @@ void main() {
       expect(data.length, lessThan(ConfigTransfer.maxChars));
       // Repère : on veut rester bien en dessous, pour un QR scannable d'écran.
       expect(data.length, lessThan(900));
+    });
+
+    test('les indicateurs ne voyagent pas par QR : ni décodés, ni comptés en taille',
+        () async {
+      final avec = TransferPayload(
+        accounts: payload().accounts,
+        credentials: payload().credentials,
+        workspaces: payload().workspaces,
+        indicators: [
+          SiteIndicators(const SiteRef('a1', 's1'), [
+            const CounterIndicator(id: 'c', name: 'Parties', query: EventQuery('x')),
+          ]),
+        ],
+      );
+      final a = await ConfigTransfer.encode(avec, '4242');
+      final b = await ConfigTransfer.encode(payload(), '4242');
+      final back = await ConfigTransfer.decode(a, '4242');
+
+      expect(back.indicators, isEmpty);
+      expect(back.accounts.single.id, 'a1');
+      // Le sel et le nonce sont aléatoires mais de taille fixe ; le gzip du
+      // clair est identique donc la longueur l'est aussi (± la péremption,
+      // de même largeur).
+      expect(a.length, b.length);
     });
 
     test('sélection explicite de 78 sites → refus net plutôt qu\'un QR illisible',
