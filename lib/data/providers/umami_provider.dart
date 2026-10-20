@@ -272,9 +272,6 @@ class UmamiProvider extends AnalyticsProvider {
   // --- indicateurs -----------------------------------------------------------
 
   @override
-  Set<IndicatorKind> get supportedIndicators => IndicatorKind.values.toSet();
-
-  @override
   Future<List<SeriesPoint>> eventCountSeries(
     Site site,
     DateWindow w,

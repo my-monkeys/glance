@@ -49,10 +49,6 @@ abstract class AnalyticsProvider {
   /// Une série temporelle par nom d'événement (triées par total décroissant).
   Future<List<EventSeries>> eventSeries(Site site, DateWindow w);
 
-  /// Genres d'indicateurs que le fournisseur sait calculer (vide = onglet
-  /// Tableaux indisponible pour ce compte).
-  Set<IndicatorKind> get supportedIndicators => const {};
-
   /// Nombre d'occurrences de [q] par bucket, porté par [SeriesPoint.visitors]
   /// (pageviews à 0) — même convention que [eventSeries]. Série continue : un
   /// ratio aligne deux séries par index.
@@ -102,6 +98,20 @@ abstract class AnalyticsProvider {
     }
   }
 }
+
+/// Genres d'indicateurs que le fournisseur sait calculer (vide = onglet
+/// Tableaux indisponible). Fonction libre plutôt que méthode d'instance : la
+/// visibilité de l'onglet se décide de façon synchrone au premier build, sans
+/// attendre la construction asynchrone du fournisseur.
+Set<IndicatorKind> supportedIndicatorsFor(ProviderKind kind) => switch (kind) {
+      ProviderKind.umami => IndicatorKind.values.toSet(),
+      ProviderKind.plausible => const {
+          IndicatorKind.counter,
+          IndicatorKind.ratio,
+          IndicatorKind.breakdown,
+        },
+      ProviderKind.fathom => const {},
+    };
 
 /// Champs d'identifiants demandés à l'écran d'ajout, par fournisseur.
 List<CredentialField> credentialFieldsFor(ProviderKind kind) {

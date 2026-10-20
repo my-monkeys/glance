@@ -415,13 +415,6 @@ class PlausibleProvider extends AnalyticsProvider {
 
   // --- indicateurs -----------------------------------------------------------
 
-  @override
-  Set<IndicatorKind> get supportedIndicators => const {
-        IndicatorKind.counter,
-        IndicatorKind.ratio,
-        IndicatorKind.breakdown,
-      };
-
   /// Les propriétés Plausible sont des textes : pas de comparaison numérique.
   static List<dynamic> _queryFilters(EventQuery q) {
     List<dynamic> one(EventFilter f) {
