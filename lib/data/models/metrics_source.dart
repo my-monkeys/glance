@@ -106,3 +106,27 @@ class MetricPoint {
     );
   }
 }
+
+/// Une source avec son jeton, pour la synchro chiffrée de bout en bout (le
+/// jeton n'existe en clair nulle part ailleurs que dans le secure storage).
+@immutable
+class SyncedMetricsSource {
+  const SyncedMetricsSource(this.source, this.token);
+
+  final MetricsSource source;
+  final String token;
+
+  Map<String, dynamic> toJson() => {...source.toJson(), 'token': token};
+
+  factory SyncedMetricsSource.fromJson(Map<String, dynamic> j) =>
+      SyncedMetricsSource(MetricsSource.fromJson(j), j['token'] as String);
+
+  @override
+  bool operator ==(Object other) =>
+      other is SyncedMetricsSource &&
+      other.source == source &&
+      other.token == token;
+
+  @override
+  int get hashCode => Object.hash(source, token);
+}
