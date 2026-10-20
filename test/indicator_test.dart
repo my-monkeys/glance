@@ -26,6 +26,12 @@ void main() {
     const CounterIndicator(id: 'a', name: 'Parties', query: q),
     const RatioIndicator(
         id: 'b', name: 'Complétion', numerator: q, denominator: EventQuery('debut')),
+    const RatioIndicator(
+        id: 'g',
+        name: 'Complétion à trous',
+        numerator: q,
+        denominator: EventQuery('debut'),
+        gapsWhenEmpty: true),
     FunnelIndicator(
         id: 'c',
         name: 'Parcours',
@@ -41,6 +47,15 @@ void main() {
       expect(back, i, reason: i.kind.name);
       expect(back.hashCode, i.hashCode);
     }
+  });
+
+  test('gaps : écrit seulement quand vrai, absent = faux', () {
+    const base = RatioIndicator(
+        id: 'r', name: 'T', numerator: q, denominator: EventQuery('debut'));
+    expect(base.toJson().containsKey('gaps'), isFalse);
+    expect(base.copyWith(gapsWhenEmpty: true).toJson()['gaps'], isTrue);
+    final legacy = Indicator.fromJson(base.toJson()) as RatioIndicator;
+    expect(legacy.gapsWhenEmpty, isFalse);
   });
 
   test('kind inconnu : null, et écarté par SiteIndicators', () {

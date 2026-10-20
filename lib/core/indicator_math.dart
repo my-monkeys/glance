@@ -2,8 +2,10 @@ import '../data/models/indicator_result.dart';
 import '../data/models/models.dart';
 
 /// Rapport [num] / [den], bucket par bucket. Les deux séries viennent de la
-/// même fenêtre : on les aligne par index.
-RatioData ratioOf(List<SeriesPoint> num, List<SeriesPoint> den) {
+/// même fenêtre : on les aligne par index. Un bucket au dénominateur nul vaut
+/// 0 %, ou null (un trou) avec [gapsWhenEmpty]. Le taux global n'en dépend pas.
+RatioData ratioOf(List<SeriesPoint> num, List<SeriesPoint> den,
+    {bool gapsWhenEmpty = false}) {
   assert(num.length == den.length, 'Séries issues de fenêtres différentes');
   var numTotal = 0.0;
   var denTotal = 0.0;
@@ -12,7 +14,8 @@ RatioData ratioOf(List<SeriesPoint> num, List<SeriesPoint> den) {
     numTotal += num[i].visitors;
     denTotal += den[i].visitors;
     final d = den[i].visitors;
-    points.add(RatioPoint(num[i].t, d == 0 ? null : num[i].visitors / d));
+    final value = d == 0 ? (gapsWhenEmpty ? null : 0.0) : num[i].visitors / d;
+    points.add(RatioPoint(num[i].t, value));
   }
   // Ratio des sommes, jamais moyenne des ratios par bucket : un jour à 3 parties
   // pèserait autant qu'un jour à 300 et fausserait le taux global.

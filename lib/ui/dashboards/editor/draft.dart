@@ -38,6 +38,7 @@ class IndicatorDraft {
     this.windowText = '$kFunnelDefaultWindow',
     this.breakdownEvent = '',
     this.breakdownProperty = '',
+    this.gapsWhenEmpty = false,
   });
 
   final IndicatorKind kind;
@@ -50,6 +51,7 @@ class IndicatorDraft {
   final String windowText;
   final String breakdownEvent;
   final String breakdownProperty;
+  final bool gapsWhenEmpty;
 
   factory IndicatorDraft.fromIndicator(Indicator i) {
     return switch (i) {
@@ -60,6 +62,7 @@ class IndicatorDraft {
           name: i.name,
           query: i.numerator,
           denominator: i.denominator,
+          gapsWhenEmpty: i.gapsWhenEmpty,
         ),
       FunnelIndicator() => IndicatorDraft(
           kind: i.kind,
@@ -85,6 +88,7 @@ class IndicatorDraft {
     String? windowText,
     String? breakdownEvent,
     String? breakdownProperty,
+    bool? gapsWhenEmpty,
   }) =>
       IndicatorDraft(
         kind: kind ?? this.kind,
@@ -95,6 +99,7 @@ class IndicatorDraft {
         windowText: windowText ?? this.windowText,
         breakdownEvent: breakdownEvent ?? this.breakdownEvent,
         breakdownProperty: breakdownProperty ?? this.breakdownProperty,
+        gapsWhenEmpty: gapsWhenEmpty ?? this.gapsWhenEmpty,
       );
 
   /// Change de genre en reportant ce qui a un sens de l'un à l'autre : la
@@ -220,6 +225,7 @@ class IndicatorDraft {
           name: label,
           numerator: query,
           denominator: denominator,
+          gapsWhenEmpty: gapsWhenEmpty,
         ),
       IndicatorKind.funnel => FunnelIndicator(
           id: id,

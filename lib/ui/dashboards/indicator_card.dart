@@ -156,8 +156,8 @@ class _CardBody extends StatelessWidget {
                 sub: '${fmtInt(d.numeratorTotal)} / ${fmtInt(d.denominatorTotal)}',
                 detail: '${queryLabel(numerator)} ÷ ${queryLabel(denominator)}',
                 child: IndicatorChart(
-                  // Un bucket sans dénominateur reste un trou : 0 % affirmerait
-                  // un échec mesuré là où il ne s'est rien passé.
+                  // Les trous (dénominateur nul) viennent de `ratioOf`, selon le
+                  // choix de l'indicateur.
                   points: [
                     for (final r in d.points)
                       IndicatorPoint(r.t, r.value == null ? null : r.value! * 100),

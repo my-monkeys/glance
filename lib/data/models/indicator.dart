@@ -158,6 +158,7 @@ sealed class Indicator {
           name: name,
           numerator: EventQuery.fromJson(j['num'] as Map<String, dynamic>),
           denominator: EventQuery.fromJson(j['den'] as Map<String, dynamic>),
+          gapsWhenEmpty: (j['gaps'] as bool?) ?? false,
         );
       case 'funnel':
         return FunnelIndicator(
@@ -217,10 +218,14 @@ class RatioIndicator extends Indicator {
     required super.name,
     required this.numerator,
     required this.denominator,
+    this.gapsWhenEmpty = false,
   });
 
   final EventQuery numerator;
   final EventQuery denominator;
+
+  /// Un bucket sans dénominateur : trou dans la courbe si vrai, 0 % sinon.
+  final bool gapsWhenEmpty;
 
   @override
   IndicatorKind get kind => IndicatorKind.ratio;
@@ -229,17 +234,22 @@ class RatioIndicator extends Indicator {
     String? name,
     EventQuery? numerator,
     EventQuery? denominator,
+    bool? gapsWhenEmpty,
   }) =>
       RatioIndicator(
         id: id,
         name: name ?? this.name,
         numerator: numerator ?? this.numerator,
         denominator: denominator ?? this.denominator,
+        gapsWhenEmpty: gapsWhenEmpty ?? this.gapsWhenEmpty,
       );
 
   @override
-  Map<String, dynamic> toJson() =>
-      _base({'num': numerator.toJson(), 'den': denominator.toJson()});
+  Map<String, dynamic> toJson() => _base({
+        'num': numerator.toJson(),
+        'den': denominator.toJson(),
+        if (gapsWhenEmpty) 'gaps': true,
+      });
 
   @override
   bool operator ==(Object other) =>
@@ -247,10 +257,12 @@ class RatioIndicator extends Indicator {
       other.id == id &&
       other.name == name &&
       other.numerator == numerator &&
-      other.denominator == denominator;
+      other.denominator == denominator &&
+      other.gapsWhenEmpty == gapsWhenEmpty;
 
   @override
-  int get hashCode => Object.hash(kind, id, name, numerator, denominator);
+  int get hashCode =>
+      Object.hash(kind, id, name, numerator, denominator, gapsWhenEmpty);
 }
 
 /// Entonnoir : parcours ordonné d'événements. [windowMinutes] = délai laissé à un

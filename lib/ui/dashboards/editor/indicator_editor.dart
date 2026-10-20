@@ -268,6 +268,8 @@ class _IndicatorEditorState extends ConsumerState<IndicatorEditor> {
               query: _draft.denominator,
               onChanged: (q) => _update(_draft.copyWith(denominator: q)),
             ),
+            const SizedBox(height: 18),
+            _gapsRow(),
           ],
         ),
       IndicatorKind.funnel => FunnelStepsEditor(
@@ -279,6 +281,34 @@ class _IndicatorEditorState extends ConsumerState<IndicatorEditor> {
         ),
       IndicatorKind.breakdown => _breakdownForm(site),
     };
+  }
+
+  Widget _gapsRow() {
+    final p = context.glance;
+    return GestureDetector(
+      onTap: () => _update(
+          _draft.copyWith(gapsWhenEmpty: !_draft.gapsWhenEmpty)),
+      behavior: HitTestBehavior.opaque,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          GlanceCheck(on: _draft.gapsWhenEmpty),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Laisser un trou quand rien ne s\'est passé',
+                    style: GT.body(14, color: p.fg)),
+                const SizedBox(height: 2),
+                Text('Sinon, ces jours-là comptent pour 0 %.',
+                    style: GT.body(12.5, color: p.fg3)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _breakdownForm(Site site) => Column(

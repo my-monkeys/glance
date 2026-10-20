@@ -248,8 +248,11 @@ attendre d'instance. Couverture par fournisseur :
   `eq neq c dnc`, pas de comparaison numérique. L'entonnoir relie les étapes **par
   session**, pas par partie.
 - **Taux global = somme(A) / somme(B)**, jamais la moyenne des taux par bucket.
-  Un bucket au dénominateur nul est un **trou** dans la courbe, pas un 0 % : rien
-  ne s'est passé, ce n'est pas un échec mesuré.
+  Un bucket au dénominateur nul compte pour **0 %** par défaut : les trous
+  déroutaient. L'option `gapsWhenEmpty` (case « Laisser un trou quand rien ne
+  s'est passé », clé JSON `gaps`) les rend : rien ne s'est passé, ce n'est pas un
+  échec mesuré, et un 0 % l'affirmerait. `ratioOf` reste pur et prend le choix en
+  paramètre ; le taux global n'en dépend pas.
 - **Répartition** : % = part du **total des événements** de la répartition.
   C'est l'inverse de la règle du détail (part de `summary.visitors`) : ici les
   lignes partitionnent un même événement, leur somme est donc le bon dénominateur.

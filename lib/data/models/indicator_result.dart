@@ -38,7 +38,7 @@ class RatioPoint {
   const RatioPoint(this.t, this.value);
   final DateTime t;
 
-  /// Null quand le dénominateur est nul : un trou, pas un 0 %.
+  /// Null quand le dénominateur est nul et que l'indicateur veut un trou.
   final double? value;
 }
 

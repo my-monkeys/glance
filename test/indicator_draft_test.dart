@@ -20,6 +20,13 @@ void main() {
         numerator: EventQuery('fin', [_issue]),
         denominator: EventQuery('debut'),
       ),
+      const RatioIndicator(
+        id: 'g',
+        name: 'Complétion à trous',
+        numerator: EventQuery('fin'),
+        denominator: EventQuery('debut'),
+        gapsWhenEmpty: true,
+      ),
       FunnelIndicator(
         id: 'f',
         name: 'Parcours',

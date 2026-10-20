@@ -117,9 +117,9 @@ final indicatorDataProvider = FutureProvider.autoDispose
       final points = await count(query);
       final total = points.fold<double>(0, (a, b) => a + b.visitors);
       return CounterData(points, total.round());
-    case RatioIndicator(:final numerator, :final denominator):
+    case RatioIndicator(:final numerator, :final denominator, :final gapsWhenEmpty):
       final (num, den) = await (count(numerator), count(denominator)).wait;
-      return ratioOf(num, den);
+      return ratioOf(num, den, gapsWhenEmpty: gapsWhenEmpty);
     case FunnelIndicator():
       return FunnelData(await gate.run(() => p.funnel(site, w, indicator)));
     case BreakdownIndicator(:final event, :final property):
