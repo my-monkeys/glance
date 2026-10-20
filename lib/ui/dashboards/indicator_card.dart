@@ -37,6 +37,7 @@ class IndicatorCard extends ConsumerWidget {
     required this.window,
     required this.indicator,
     this.menu = true,
+    this.title,
   });
 
   final Site site;
@@ -45,6 +46,10 @@ class IndicatorCard extends ConsumerWidget {
 
   /// Faux pour l'aperçu de l'éditeur, qui n'est pas encore un tableau.
   final bool menu;
+
+  /// En-tête à afficher à la place du nom : l'aperçu y met le nom en cours de
+  /// saisie sans que celui-ci entre dans la clé du provider.
+  final String? title;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -66,7 +71,7 @@ class IndicatorCard extends ConsumerWidget {
             children: [
               Expanded(
                 child: Text(
-                  indicator.name,
+                  title ?? indicator.name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: GT.body(14.5, weight: 600, color: p.fg),

@@ -29,6 +29,11 @@ import 'query_editor.dart';
 /// déclencherait une par lettre.
 const Duration kPreviewDebounce = Duration(milliseconds: 600);
 
+const double kFooterButton = 52;
+
+/// Ligne de raison de validation (13 pt, une à deux lignes) et son espacement.
+const double kFooterReason = 44;
+
 /// Id de l'aperçu : fixe, pour que seul le contenu de l'indicateur change la
 /// clé de `indicatorDataProvider` (et jamais l'id tiré à chaque frappe).
 const String _previewId = 'apercu';
@@ -121,6 +126,12 @@ class _IndicatorEditorState extends ConsumerState<IndicatorEditor> {
     Navigator.of(context).pop();
   }
 
+  /// Hauteur du pied fixe : bouton, raison de validation, marges et zone sûre.
+  /// Le bas de la liste doit au moins la valoir, sinon le dernier bouton
+  /// (« Supprimer ») reste sous le pied une fois tout défilé.
+  static double _footerHeight(BuildContext context) =>
+      kFooterButton + kFooterReason + 20 + MediaQuery.of(context).padding.bottom;
+
   List<IndicatorKind> _kinds() {
     final accounts = ref.watch(accountsProvider);
     final account = accounts.firstWhere((a) => a.id == widget.site.accountId);
@@ -164,7 +175,7 @@ class _IndicatorEditorState extends ConsumerState<IndicatorEditor> {
             Expanded(
               child: ListView(
                 physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                padding: EdgeInsets.fromLTRB(20, 0, 20, _footerHeight(context) + 24),
                 children: [
                   GlanceField(
                     label: 'Nom',
@@ -173,7 +184,7 @@ class _IndicatorEditorState extends ConsumerState<IndicatorEditor> {
                     onChanged: (v) => _update(_draft.copyWith(name: v)),
                   ),
                   const SizedBox(height: 22),
-                  const _Heading('Genre'),
+                  const _Heading('Type'),
                   KindPicker(
                     kinds: _kinds(),
                     selected: _draft.kind,
@@ -188,7 +199,15 @@ class _IndicatorEditorState extends ConsumerState<IndicatorEditor> {
                   ),
                   const SizedBox(height: 24),
                   const _Heading('Aperçu'),
-                  _PreviewCard(site: widget.site, indicator: _preview),
+                  _PreviewCard(
+                    site: widget.site,
+                    indicator: _preview,
+                    // Le nom n'entre pas dans la clé de l'aperçu (cf.
+                    // _previewOf) : il ne s'affiche qu'en en-tête.
+                    title: _draft.name.trim().isEmpty
+                        ? _draft.suggestedName()
+                        : _draft.name.trim(),
+                  ),
                   if (!_isNew) ...[
                     const SizedBox(height: 28),
                     ConfirmButton(
@@ -304,10 +323,15 @@ class _Heading extends StatelessWidget {
 
 /// L'indicateur tel qu'il apparaîtra dans l'onglet, sur la période affichée.
 class _PreviewCard extends ConsumerWidget {
-  const _PreviewCard({required this.site, required this.indicator});
+  const _PreviewCard({
+    required this.site,
+    required this.indicator,
+    required this.title,
+  });
 
   final Site site;
   final Indicator? indicator;
+  final String title;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -323,6 +347,7 @@ class _PreviewCard extends ConsumerWidget {
       site: site,
       window: window,
       indicator: i,
+      title: title,
       menu: false,
     );
   }

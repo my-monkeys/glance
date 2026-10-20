@@ -198,6 +198,43 @@ void main() {
     await tester.pump(const Duration(seconds: 4));
   });
 
+  testWidgets('tout en bas, « Supprimer » n\'est pas masqué par le pied',
+      (tester) async {
+    const old = CounterIndicator(
+        id: 'c1', name: 'Parties', query: EventQuery('partie_demarree'));
+    await _pump(tester, initial: old);
+
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -5000));
+    await tester.pumpAndSettle();
+
+    final del = tester.getRect(find.text('Supprimer ce tableau'));
+    final footer = tester.getRect(find.byType(GlanceButton).last);
+    expect(del.bottom, lessThanOrEqualTo(footer.top));
+
+    // Le tap au centre atteint la suppression, pas le pied.
+    await tester.tapAt(del.center);
+    await tester.pumpAndSettle();
+    expect(find.text('Confirmer la suppression'), findsOneWidget);
+    expect(_stored(), hasLength(1));
+  });
+
+  testWidgets('l\'aperçu porte le nom saisi, sans relancer de requête',
+      (tester) async {
+    const old = CounterIndicator(
+        id: 'c1', name: 'Parties', query: EventQuery('partie_demarree'));
+    await _pump(tester, initial: old);
+
+    await tester.enterText(find.byType(TextField).first, 'Mon nom');
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(find.byType(IndicatorCard), 200,
+        scrollable: find.byType(Scrollable).first);
+    expect(
+      find.descendant(
+          of: find.byType(IndicatorCard), matching: find.text('Mon nom')),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('« Créer » reste inactif tant que le brouillon est invalide',
       (tester) async {
     await _pump(tester);
