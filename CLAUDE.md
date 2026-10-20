@@ -248,7 +248,8 @@ Côté code :
 - **Logique pure, testée** : `IndicatorDraft` (validation, nom proposé) et `core/indicator_math.dart` (ratio).
 
 L'onglet s'affiche si le site a des événements **et** si
-`supportedIndicatorsFor(kind)` n'est pas vide. Cette fonction est synchrone, à
+`supportedIndicatorsFor(kind)` n'est pas vide, **ou** si le site a une source de
+métriques (cf. plus bas). Cette fonction est synchrone, à
 côté de `credentialFieldsFor` : la visibilité se décide au premier build, sans
 attendre d'instance. Couverture par fournisseur :
 - **Umami** : les 4 types.
@@ -292,10 +293,68 @@ attendre d'instance. Couverture par fournisseur :
   sous-estime d'un tiers à la moitié. Sa session est un hash IP + navigateur, à
   sel mensuel. Comparé à la base de geography le 2026-10-19 : J1 = 7,7 % contre
   11,4 %. Et il ne voit pas les joueurs déjà installés. Une rétention juste
-  viendra d'une API d'agrégats côté site, décision reportée.
+  viendra d'une API d'agrégats côté site : voir « Source de métriques » plus bas.
 - **Amorçage de développement** : `--dart-define=SEED_INDICATORS=geography
   --dart-define=SEED_INDICATORS_SITE=<id>` pose 4 indicateurs d'exemple (inerte
   sans ces defines).
+
+### Source de métriques (API d'agrégats)
+
+Un site peut exposer ses propres indicateurs, calculés sur sa base (rétention,
+comptes…). Glance les affiche comme un 5ᵉ genre de tableau, « Métrique du site »
+(`ExternalIndicator`). Le contrat est **générique** : rien de propre à un site
+dans le code.
+- **Contrat** (v1), `Authorization: Bearer <jeton>` :
+  - `GET {base}catalogue` → `{version, indicateurs:[{id, libelle, description, unite, granularites}]}`.
+  - `GET {base}series?ids=a,b&de=&a=&granularite=jour|semaine|mois&tz=` →
+    `{version, series:[{id, points:[{t, valeur, numerateur, denominateur}]}]}`.
+  - `unite` = `pourcentage` (0..100) ou `nombre`. `de`/`a` : dates locales
+    inclusives, 400 jours max ; `t` = début du bucket ; un point par bucket, vides
+    compris ; le premier peut commencer avant `de`.
+  - Statuts : 404 source non configurée, 401 jeton absent ou faux, 400
+    `{error:{code}}`. Toute `version` ≠ 1 est refusée (« Version d'API non prise
+    en charge »). Le serveur met en cache 5 min.
+- ⚠️ **`valeur: null` = non mesurable** (cohorte pas terminée, ou dénominateur < 5 :
+  seuil de confidentialité du serveur). C'est un **trou**, jamais un 0 — quelle
+  que soit l'option « trous » des taux — et ses effectifs ne comptent pas dans
+  le taux global. Pour un `nombre`, null vaut 0 (un compteur n'est pas
+  « non mesurable »). Taux global = Σnumérateur / Σdénominateur, masqué si
+  Σdénominateur < 5 (`core/external_metrics.dart`, testé).
+- **Heures → jours** : l'API n'a pas d'heures. Une fenêtre horaire demande
+  `granularite=jour` et la carte affiche un point par jour (`externalUnitOf`).
+  `a` = le jour qui contient `w.end - 1 ms` (`end` est exclusif : pile à minuit,
+  c'est la veille ; `metricsRangeFor`, testé). `semaine` n'est jamais demandée :
+  Glance n'a pas de granularité hebdomadaire.
+- **Stockage** : URL dans les prefs (`glance.metricsSources`), **jeton dans le
+  secure storage** (`glance.metricsToken.<compte>.<site>`), jamais en prefs.
+  `MetricsSourcesNotifier.remove` supprime aussi le jeton. L'URL s'accepte avec
+  ou sans slash final, avec ou sans `https://`.
+- **Client** : `data/providers/metrics_api.dart`, exceptions typées
+  (`MetricsNotConfigured`, `MetricsBadToken`, `MetricsBadRequest`,
+  `MetricsUnsupportedVersion`) dont le `message` s'affiche tel quel sur la carte.
+  `indicatorDataProvider` ne relance pas ces erreurs (`retryUnlessMetricsError`) :
+  sinon la carte resterait en squelette pendant la trentaine de secondes de relances
+  par défaut de Riverpod. Un User-Agent de navigateur est posé (Cloudflare : 403 / 1010).
+- **Carte** : libellé et unité sont **copiés du catalogue à la création** pour que
+  l'en-tête se dessine avant la réponse du catalogue. En-tête « Métrique », corps
+  comme un Taux (`numérateur / dénominateur`) ou un Compteur.
+- **Pourquoi `external` n'est pas dans `supportedIndicatorsFor`** : la
+  disponibilité dépend de la source du **site**, pas du fournisseur d'analytics du
+  **compte**. Le sélecteur de genre (`IndicatorEditor._kinds`) et la visibilité de
+  l'onglet (`siteHasMetricsSourceProvider`) la décident séparément.
+- **Interface** : lien « Source de métriques » en bas de l'onglet (et dans l'état
+  vide) → `ui/dashboards/metrics_source_screen.dart` (URL, jeton, « Tester » qui
+  appelle `catalogue`, « Enregistrer », « Retirer la source »).
+- **Synchro** : clé `metricSources` **facultative** du paquet `glance-sync`
+  (`{site, url, token}`), `SyncCrypto.version` reste à 1 (même raison que
+  `indicators`). Le jeton voyage dans le blob chiffré de bout en bout, comme les
+  identifiants des comptes. Fusion par site (l'entrante gagne), une suppression
+  ne se propage pas, et le **QR de transfert ne l'emporte pas**.
+- ⚠️ Retirer une source laisse les tableaux « Métrique » existants en place : ils
+  affichent « Jeton refusé » jusqu'à ce qu'on les supprime ou qu'on rebranche la
+  source.
+- ⚠️ Une fenêtre de plus de 400 jours (« Tout », période perso) est refusée par le
+  serveur (400) : la carte l'affiche, rien n'est tronqué en silence.
 
 ## API par fournisseur
 
