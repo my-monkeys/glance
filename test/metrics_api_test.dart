@@ -15,7 +15,7 @@ class FakeAdapter implements HttpClientAdapter {
   RequestOptions? last;
 
   @override
-  Future<ResponseBody> fetch(RequestOptions options, Stream<Uint8List>? body,
+  Future<ResponseBody> fetch(RequestOptions options, Stream<Uint8List>? requestStream,
       Future<void>? cancel) async {
     last = options;
     return ResponseBody.fromString(
