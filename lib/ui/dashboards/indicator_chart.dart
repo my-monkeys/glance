@@ -17,6 +17,14 @@ class IndicatorPoint {
   final double? value;
 }
 
+/// Sommet de l'axe d'un taux. Plafonné à 100 tant que les données n'y arrivent
+/// pas : « 200 % » en haut d'un graphe dont le maximum réel est 87 écraserait
+/// la courbe pour rien. Mais un taux peut dépasser 100 (des fins un jour donné
+/// pour des débuts de la veille) : plafonner alors ferait sortir la courbe du
+/// cadre, donc l'échelle suit les données.
+double percentAxisMax(double rawMax) =>
+    rawMax <= 100 ? math.min(100.0, chartNiceMax(rawMax)) : chartNiceMax(rawMax);
+
 /// Courbe unique et compacte d'un indicateur : même habillage que
 /// `EventsChart` (grille, axes mono, tooltip sombre), en une seule série avec
 /// l'aire dégradée de la courbe des visiteurs.
@@ -43,10 +51,7 @@ class IndicatorChart extends StatelessWidget {
     final p = context.glance;
     final len = points.length;
     final rawMax = points.fold<double>(0, (m, e) => math.max(m, e.value ?? 0));
-    // Un taux plafonne à 100 : au-delà de l'échelle, « 200 % » en haut d'un
-    // graphe dont le maximum réel est 87 écraserait la courbe pour rien.
-    final niceMax = chartNiceMax(rawMax);
-    final maxY = percent ? math.min(100.0, niceMax) : niceMax;
+    final maxY = percent ? percentAxisMax(rawMax) : chartNiceMax(rawMax);
     final yInterval = maxY / 4;
     final labelStep = math.max(1, (len / 6).ceil());
 
@@ -73,6 +78,9 @@ class IndicatorChart extends StatelessWidget {
                 FlLine(color: p.line, strokeWidth: 1),
           ),
           borderData: FlBorderData(show: false),
+          // Filet de sécurité : une valeur hors échelle ne doit jamais baver
+          // sur le texte au-dessus du graphe.
+          clipData: const FlClipData.all(),
           titlesData: FlTitlesData(
             topTitles:
                 const AxisTitles(sideTitles: SideTitles(showTitles: false)),
