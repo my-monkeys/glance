@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_timezone/flutter_timezone.dart';
 
 import '../../core/countries.dart';
 import '../../core/entities.dart';
+import '../../core/timezone.dart';
 import '../models/indicator.dart';
 import '../models/indicator_result.dart';
 import '../models/models.dart';
@@ -28,7 +28,6 @@ class UmamiProvider extends AnalyticsProvider {
   late final Dio _dio;
   String? _token;
   bool _isAdmin = false;
-  String? _tz;
 
   /// Ajoute https:// si absent et retire tout chemin/slash final.
   static String normalizeBase(String raw) {
@@ -40,15 +39,7 @@ class UmamiProvider extends AnalyticsProvider {
     return '${u.scheme}://${u.host}${u.hasPort ? ':${u.port}' : ''}';
   }
 
-  Future<String> _timezone() async {
-    if (_tz != null) return _tz!;
-    try {
-      _tz = (await FlutterTimezone.getLocalTimezone()).identifier;
-    } catch (_) {
-      _tz = 'UTC';
-    }
-    return _tz!;
-  }
+  Future<String> _timezone() => deviceTimezone();
 
   Future<void> _login() async {
     final r = await _dio.post(
