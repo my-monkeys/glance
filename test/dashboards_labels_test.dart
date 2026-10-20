@@ -14,7 +14,7 @@ void main() {
 
   test('un filtre', () {
     final q = EventQuery('partie_terminee', [_f('issue', FilterOp.eq, 'complet')]);
-    expect(queryLabel(q), 'partie_terminee · issue est complet');
+    expect(queryLabel(q), 'partie_terminee · issue = complet');
   });
 
   test('plusieurs filtres, opérateurs lisibles', () {
@@ -22,6 +22,6 @@ void main() {
       _f('part', FilterOp.gte, '50', PropertyType.number),
       _f('jeu', FilterOp.neq, 'flags'),
     ];
-    expect(filtersSummary(fs), "part ≥ 50, jeu n'est pas flags");
+    expect(filtersSummary(fs), "part ≥ 50, jeu ≠ flags");
   });
 }

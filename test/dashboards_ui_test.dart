@@ -42,6 +42,9 @@ Future<void> _pumpCard(
   await tester.pumpAndSettle();
 }
 
+/// Le grand chiffre remplace U+202F par une espace insécable ordinaire.
+String _big(String s) => s.replaceAll('\u202f', '\u00a0');
+
 void main() {
   setUpAll(() => initializeDateFormatting('fr_FR'));
 
@@ -53,7 +56,7 @@ void main() {
         for (var i = 0; i < 4; i++) SeriesPoint(_days[i], i * 10.0, 0),
       ], 1234),
     );
-    expect(find.text(fmtInt(1234)), findsOneWidget);
+    expect(find.text(_big(fmtInt(1234))), findsOneWidget);
     expect(find.text('Parties'), findsOneWidget);
     expect(find.text('COMPTEUR'), findsOneWidget);
     expect(tester.takeException(), isNull);
@@ -80,7 +83,7 @@ void main() {
         denominatorTotal: 8,
       ),
     );
-    expect(find.text(fmtPct(62.5)), findsOneWidget);
+    expect(find.text(_big(fmtPct(62.5))), findsOneWidget);
     expect(find.text('5 / 8'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -124,8 +127,9 @@ void main() {
         ),
       ]),
     );
-    expect(find.text(fmtPct(73)), findsOneWidget);
-    expect(find.text('partie_jalon · part est 25'), findsOneWidget);
+    expect(find.text(_big(fmtPct(73))), findsOneWidget);
+    expect(find.text('partie_jalon'), findsOneWidget);
+    expect(find.text('part = 25'), findsOneWidget);
     expect(find.text('−${fmtPct(27, decimals: 0)}'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });

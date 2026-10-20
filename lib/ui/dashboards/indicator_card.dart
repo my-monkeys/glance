@@ -197,7 +197,10 @@ class _Stat extends StatelessWidget {
         FittedBox(
           fit: BoxFit.scaleDown,
           alignment: Alignment.centerLeft,
-          child: Text(big, style: GT.stat(40, color: p.fg)),
+          // Fredoka n'a pas l'espace fine insécable (U+202F) que `intl` met
+          // entre les milliers : le groupe disparaissait (« 1994 »).
+          child: Text(big.replaceAll('\u202f', '\u00a0'),
+              style: GT.stat(40, color: p.fg)),
         ),
         const SizedBox(height: 4),
         Text(

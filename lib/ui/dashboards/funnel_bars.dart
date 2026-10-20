@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../core/format.dart';
-import '../../data/models/indicator.dart';
 import '../../data/models/indicator_result.dart';
 import '../../theme/motion.dart';
 import '../../theme/palette.dart';
@@ -53,13 +52,20 @@ class _StepRow extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Le résumé des filtres passe à la ligne plutôt que d'être coupé :
+              // c'est lui (25 / 50 / 75) qui distingue des étapes du même
+              // événement.
               Expanded(
-                child: Text(
-                  queryLabel(EventQuery(step.event, step.filters)),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: GT.mono(12, color: p.fg),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(step.event, style: GT.mono(12, color: p.fg)),
+                    if (step.filters.isNotEmpty)
+                      Text(filtersSummary(step.filters),
+                          style: GT.mono(10.5, color: p.fg3)),
+                  ],
                 ),
               ),
               const SizedBox(width: 10),

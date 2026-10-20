@@ -76,12 +76,19 @@ class IndicatorChart extends StatelessWidget {
           titlesData: FlTitlesData(
             topTitles:
                 const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            rightTitles:
-                const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            // Marge à droite : le dernier libellé de l'axe X est centré sur le
+            // bord du tracé et sa moitié sortirait du cadre.
+            rightTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 12,
+                getTitlesWidget: (_, _) => const SizedBox.shrink(),
+              ),
+            ),
             leftTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
-                reservedSize: 36,
+                reservedSize: 42,
                 interval: yInterval,
                 getTitlesWidget: (value, meta) {
                   if (value < yInterval / 2 && value != 0) {
@@ -90,7 +97,7 @@ class IndicatorChart extends StatelessWidget {
                   return Padding(
                     padding: const EdgeInsets.only(right: 6),
                     child: Text(
-                      percent ? '${value.round()}%' : fmtCount(value),
+                      percent ? '${value.round()}\u00a0%' : fmtCount(value),
                       style: GT.mono(9.5, color: p.fg3),
                       textAlign: TextAlign.right,
                     ),

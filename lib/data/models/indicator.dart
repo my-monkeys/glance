@@ -22,8 +22,8 @@ enum PropertyType {
 
 /// Opérateur d'un filtre de propriété. [api] est la forme attendue par Umami.
 enum FilterOp {
-  eq('eq', 'est'),
-  neq('neq', "n'est pas"),
+  eq('eq', '='),
+  neq('neq', '≠'),
   contains('c', 'contient'),
   notContains('dnc', 'ne contient pas'),
   gt('gt', '>'),
