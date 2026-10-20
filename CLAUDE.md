@@ -136,6 +136,17 @@ des périodes**, qu'ils recouvraient : deux flèches ne disent pas « comparer �
 période précédente », et les premières périodes n'étaient plus atteignables sans
 faire défiler. Dans une feuille, chaque réglage porte son nom et une phrase.
 
+**Une ligne ou deux, selon la place.** Un `LayoutBuilder` (jamais `MediaQuery.size`)
+mesure les périodes sur leur contenu réel (`GlanceChip.widthOf`, `TextPainter`) et
+y ajoute le bouton, son indice de comparaison et la bascule : si le tout tient
+sans défilement, tout est sur **une seule ligne** (périodes à gauche en `Expanded`,
+bouton et bascule à droite) ; sinon les contrôles passent sur la seconde ligne
+(téléphone). Dans le cas d'une ligne, l'indice de comparaison est **dans le
+bouton** (« vs préc. »), et sa largeur est comptée dans le pire cas pour qu'allumer
+la comparaison ne fasse jamais défiler les périodes. Les tests rendent en Ahem
+(glyphes carrés) : les périodes y font ~980 px au lieu de ~450, d'où une « grande »
+largeur de test plus grande qu'un vrai bureau.
+
 ⚠️ Quand la comparaison est active, l'indication vit **sur la ligne du bouton**,
 pas sur une ligne à elle : une ligne qui apparaît et disparaît ferait sauter tout
 l'écran. Et c'est un `Expanded`, pas un `Flexible` suivi d'un `Spacer` — les deux

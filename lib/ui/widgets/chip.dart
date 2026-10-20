@@ -17,6 +17,23 @@ class GlanceChip extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
 
+  static const double _hPad = 12;
+
+  static TextStyle _style(bool selected, {Color? color}) =>
+      GT.mono(12, weight: selected ? 600 : 400, color: color);
+
+  /// Largeur d'un chip, mesurée avec le style sélectionné (le plus large) : la
+  /// barre de périodes s'en sert pour savoir si elle tient sur une ligne.
+  static double widthOf(BuildContext context, String label) {
+    final tp = TextPainter(
+      text: TextSpan(text: label, style: _style(true)),
+      textDirection: TextDirection.ltr,
+      textScaler: MediaQuery.textScalerOf(context),
+      maxLines: 1,
+    )..layout();
+    return tp.width + 2 * _hPad;
+  }
+
   @override
   Widget build(BuildContext context) {
     final p = context.glance;
@@ -26,18 +43,14 @@ class GlanceChip extends StatelessWidget {
       child: AnimatedContainer(
         duration: kMotionFast,
         curve: kCurveOut,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        padding: const EdgeInsets.symmetric(horizontal: _hPad, vertical: 7),
         decoration: BoxDecoration(
           color: selected ? p.accent : p.chip,
           borderRadius: BorderRadius.circular(9),
         ),
         child: Text(
           label,
-          style: GT.mono(
-            12,
-            weight: selected ? 600 : 400,
-            color: selected ? p.accentInk : p.fg2,
-          ),
+          style: _style(selected, color: selected ? p.accentInk : p.fg2),
         ),
       ),
     );

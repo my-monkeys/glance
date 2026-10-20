@@ -11,8 +11,8 @@ import '../../theme/type.dart';
 import 'chip.dart';
 import 'common.dart';
 
-/// Barre de contrôles sous le titre : les périodes sur toute la largeur, et un
-/// bouton « Affichage » qui ouvre le reste.
+/// Barre de contrôles sous le titre : les périodes, et un bouton « Affichage »
+/// qui ouvre le reste.
 ///
 /// Les réglages du graphique — comparaison, découpage, courbe ou barres —
 /// tenaient auparavant dans des boutons sans libellé posés à droite des
@@ -20,6 +20,10 @@ import 'common.dart';
 /// disent pas « comparer à la période précédente ») ni atteignables sans
 /// faire défiler. Regroupés dans une feuille, ils ont la place de porter leur
 /// nom et une phrase d'explication.
+///
+/// Quand la largeur disponible loge toutes les périodes ET les contrôles sans
+/// défilement (bureau), tout tient sur une seule ligne ; sinon les contrôles
+/// passent sur une seconde ligne (téléphone).
 class PeriodControls extends ConsumerWidget {
   const PeriodControls({
     super.key,
@@ -35,76 +39,109 @@ class PeriodControls extends ConsumerWidget {
   final HomeViewMode? viewMode;
   final ValueChanged<HomeViewMode>? onViewMode;
 
+  static const double _chipGap = 6;
+  static const double _groupGap = 12;
+  static const EdgeInsets _padding = EdgeInsets.fromLTRB(20, 0, 16, 0);
+
+  /// Largeur du segmenté liste/grille : 2 icônes de 15 px, 8 px de marge de
+  /// chaque côté, 2 px de cadre.
+  static const double _viewSegmentsWidth = 2 * (15 + 16) + 4;
+  static const double _viewSegmentsGap = 8;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final p = context.glance;
     final compare = ref.watch(periodProvider.select((s) => s.compare));
     final current = ref.watch(periodProvider.select((s) => s.period));
 
-    return Column(
+    final chips = ChipRow(
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-          child: ChipRow(
-            children: [
-              for (final per in Period.values)
-                GlanceChip(
-                  label: per.label,
-                  selected: current == per,
-                  onTap: () => per == Period.custom
-                      ? onPickCustom()
-                      : ref.read(periodProvider.notifier).set(per),
-                ),
-            ],
+        for (final per in Period.values)
+          GlanceChip(
+            label: per.label,
+            selected: current == per,
+            onTap: () => per == Period.custom
+                ? onPickCustom()
+                : ref.read(periodProvider.notifier).set(per),
           ),
-        ),
-        const SizedBox(height: 10),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 16, 0),
-          child: Row(
-            children: [
-              _DisplayButton(
-                on: compare,
-                onTap: () => _openSheet(context),
-              ),
-              // Un réglage qui change la lecture du graphique s'annonce, sinon
-              // la courbe grise de la période précédente apparaît sans
-              // explication. Sur la même ligne que le bouton : une ligne qui
-              // apparaît et disparaît ferait sauter tout l'écran.
-              // `Expanded` et non `Flexible` + `Spacer` : les deux se
-              // disputeraient la place restante et le texte se ferait tronquer
-              // alors qu'il y en a.
-              Expanded(
-                child: compare
-                    ? Padding(
-                        padding: const EdgeInsets.only(left: 10),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.compare_arrows_rounded,
-                                size: 13, color: p.accent),
-                            const SizedBox(width: 5),
-                            Flexible(
-                              child: Text(
-                                'vs période précédente',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: GT.body(11.5, color: p.accent),
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    : const SizedBox.shrink(),
-              ),
-              if (viewMode != null) ...[
-                const SizedBox(width: 8),
-                _ViewSegments(mode: viewMode!, onChanged: onViewMode!),
-              ],
-            ],
-          ),
-        ),
       ],
+    );
+    final toggle = viewMode == null
+        ? null
+        : _ViewSegments(mode: viewMode!, onChanged: onViewMode!);
+
+    // Mesuré sur le contenu réel (libellés, police, échelle de texte), pas sur
+    // un seuil de fenêtre : le panneau central du bureau est plus étroit que
+    // l'écran. On compte le pire cas du bouton, indice de comparaison inclus,
+    // pour que l'allumer ne fasse jamais défiler les périodes.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final chipsWidth = Period.values.fold<double>(
+                0, (w, per) => w + GlanceChip.widthOf(context, per.label)) +
+            _chipGap * (Period.values.length - 1);
+        final trailing = _DisplayButton.widthOf(context, withHint: true) +
+            (toggle == null ? 0 : _viewSegmentsGap + _viewSegmentsWidth);
+        final fitsOneRow =chipsWidth + _groupGap + trailing <=
+            constraints.maxWidth - _padding.horizontal;
+
+        final button = _DisplayButton(
+          on: compare,
+          hint: fitsOneRow && compare,
+          onTap: () => _openSheet(context),
+        );
+
+        if (fitsOneRow) {
+          return Padding(
+            padding: _padding,
+            child: Row(
+              children: [
+                Expanded(child: chips),
+                const SizedBox(width: _groupGap),
+                button,
+                if (toggle != null) ...[
+                  const SizedBox(width: _viewSegmentsGap),
+                  toggle,
+                ],
+              ],
+            ),
+          );
+        }
+        return Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+              child: chips,
+            ),
+            const SizedBox(height: 10),
+            Padding(
+              padding: _padding,
+              child: Row(
+                children: [
+                  button,
+                  // Un réglage qui change la lecture du graphique s'annonce,
+                  // sinon la courbe grise de la période précédente apparaît
+                  // sans explication. Sur la même ligne que le bouton : une
+                  // ligne qui apparaît et disparaît ferait sauter tout l'écran.
+                  // `Expanded` et non `Flexible` + `Spacer` : les deux se
+                  // disputeraient la place restante et le texte se ferait
+                  // tronquer alors qu'il y en a.
+                  Expanded(
+                    child: compare
+                        ? const Padding(
+                            padding: EdgeInsets.only(left: 10),
+                            child: _CompareHint(),
+                          )
+                        : const SizedBox.shrink(),
+                  ),
+                  if (toggle != null) ...[
+                    const SizedBox(width: _viewSegmentsGap),
+                    toggle,
+                  ],
+                ],
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -120,15 +157,71 @@ class PeriodControls extends ConsumerWidget {
   }
 }
 
-/// Bouton « Affichage », allumé quand un réglage change la lecture du graphe.
-class _DisplayButton extends StatelessWidget {
-  const _DisplayButton({required this.on, required this.onTap});
-  final bool on;
-  final VoidCallback onTap;
+/// Annonce de la comparaison, sur la ligne du bouton « Affichage ».
+class _CompareHint extends StatelessWidget {
+  const _CompareHint();
 
   @override
   Widget build(BuildContext context) {
     final p = context.glance;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.compare_arrows_rounded, size: 13, color: p.accent),
+        const SizedBox(width: 5),
+        Flexible(
+          child: Text(
+            'vs période précédente',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GT.body(11.5, color: p.accent),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Bouton « Affichage », allumé quand un réglage change la lecture du graphe.
+/// Avec [hint], il porte lui-même l'annonce de la comparaison (une seule
+/// ligne : pas de place à côté de lui).
+class _DisplayButton extends StatelessWidget {
+  const _DisplayButton({required this.on, required this.onTap, this.hint = false});
+  final bool on;
+  final bool hint;
+  final VoidCallback onTap;
+
+  static const String _hintLabel = 'vs préc.';
+  static const double _hPad = 10;
+  static const double _iconWidth = 15 + 6;
+  static const double _hintExtra = 8 + 13 + 4;
+
+  static TextStyle _style(bool on) =>
+      GT.mono(11, weight: on ? 600 : 400);
+
+  static double _textWidth(BuildContext context, String text, TextStyle style) {
+    final tp = TextPainter(
+      text: TextSpan(text: text, style: style),
+      textDirection: TextDirection.ltr,
+      textScaler: MediaQuery.textScalerOf(context),
+      maxLines: 1,
+    )..layout();
+    return tp.width;
+  }
+
+  /// Largeur du bouton ; [withHint] = pire cas, indice de comparaison inclus.
+  static double widthOf(BuildContext context, {required bool withHint}) {
+    final style = _style(true);
+    return 2 * _hPad +
+        _iconWidth +
+        _textWidth(context, 'Affichage', style) +
+        (withHint ? _hintExtra + _textWidth(context, _hintLabel, style) : 0);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.glance;
+    final ink = on ? p.accentInk : p.fg2;
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -136,7 +229,7 @@ class _DisplayButton extends StatelessWidget {
         duration: kMotionFast,
         curve: kCurveOut,
         height: 32,
-        padding: const EdgeInsets.symmetric(horizontal: 10),
+        padding: const EdgeInsets.symmetric(horizontal: _hPad),
         decoration: BoxDecoration(
           color: on ? p.accent : p.chip,
           borderRadius: BorderRadius.circular(9),
@@ -144,20 +237,16 @@ class _DisplayButton extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.tune_rounded,
-              size: 15,
-              color: on ? p.accentInk : p.fg2,
-            ),
+            Icon(Icons.tune_rounded, size: 15, color: ink),
             const SizedBox(width: 6),
-            Text(
-              'Affichage',
-              style: GT.mono(
-                11,
-                weight: on ? 600 : 400,
-                color: on ? p.accentInk : p.fg2,
-              ),
-            ),
+            Text('Affichage',
+                style: GT.mono(11, weight: on ? 600 : 400, color: ink)),
+            if (hint) ...[
+              const SizedBox(width: 8),
+              Icon(Icons.compare_arrows_rounded, size: 13, color: ink),
+              const SizedBox(width: 4),
+              Text(_hintLabel, style: GT.mono(11, weight: 600, color: ink)),
+            ],
           ],
         ),
       ),
