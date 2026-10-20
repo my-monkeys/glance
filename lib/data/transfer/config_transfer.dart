@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 
 import '../models/account.dart';
 import '../models/indicator.dart';
+import '../models/metrics_source.dart';
 import '../models/workspace.dart';
 
 /// Ce qu'un transfert emporte : les comptes **avec leurs identifiants**, et les
@@ -18,6 +19,7 @@ class TransferPayload {
     required this.credentials,
     required this.workspaces,
     this.indicators = const [],
+    this.metricSources = const [],
   });
 
   final List<Account> accounts;
@@ -29,6 +31,10 @@ class TransferPayload {
 
   /// Porté par la synchro cloud uniquement : [ConfigTransfer] l'ignore.
   final List<SiteIndicators> indicators;
+
+  /// Sources de métriques **avec leur jeton**. Synchro cloud uniquement, comme
+  /// [indicators] : [ConfigTransfer] l'ignore.
+  final List<SyncedMetricsSource> metricSources;
 }
 
 /// Le QR a expiré (ou l'horloge est trop décalée).
@@ -95,8 +101,9 @@ class ConfigTransfer {
           {...a.toJson(), 'creds': payload.credentials[a.id] ?? const {}},
       ],
       'workspaces': [for (final w in payload.workspaces) w.toJson()],
-      // Pas d'`indicators` : un QR a une capacité dure (cf. [maxChars]) et
-      // quelques entonnoirs feraient déborder une config ordinaire.
+      // Ni `indicators` ni `metricSources` : un QR a une capacité dure (cf.
+      // [maxChars]) et quelques entonnoirs feraient déborder une config
+      // ordinaire. Les jetons des sources n'ont pas à s'afficher dans un QR.
     });
 
     final salt = SecretKeyData.random(length: 16).bytes;

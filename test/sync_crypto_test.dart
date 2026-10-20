@@ -5,6 +5,7 @@ import 'package:cryptography/cryptography.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:glance/data/models/account.dart';
 import 'package:glance/data/models/indicator.dart';
+import 'package:glance/data/models/metrics_source.dart';
 import 'package:glance/data/models/workspace.dart';
 import 'package:glance/data/sync/sync_crypto.dart';
 import 'package:glance/data/transfer/config_transfer.dart';
@@ -96,6 +97,31 @@ void main() {
       expect(back.indicators.single.indicators, indicators.single.indicators);
     });
 
+    test('aller-retour : sources de métriques, jeton compris', () async {
+      const sources = [
+        SyncedMetricsSource(
+          MetricsSource(
+            site: SiteRef('a1', 's1'),
+            baseUrl: 'https://geodaily.eu/api/interne/metriques/',
+          ),
+          'jeton-secret',
+        ),
+      ];
+      final blob = await SyncCrypto.encrypt(
+        const TransferPayload(
+          accounts: [],
+          credentials: {},
+          workspaces: [],
+          metricSources: sources,
+        ),
+        'pw',
+      );
+      final back = await SyncCrypto.decrypt(blob, 'pw');
+
+      expect(back.metricSources, sources);
+      expect(SyncCrypto.version, 1);
+    });
+
     test('blob d\'une app antérieure (sans `indicators`) → déchiffré, liste vide',
         () async {
       // Chemin d'écriture d'avant les tableaux, reproduit à la main.
@@ -116,6 +142,7 @@ void main() {
 
       final back = await SyncCrypto.decrypt(blob, 'pw');
       expect(back.indicators, isEmpty);
+      expect(back.metricSources, isEmpty);
       expect(SyncCrypto.version, 1);
     });
 
