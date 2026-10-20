@@ -192,7 +192,7 @@ class _CurveBody extends StatelessWidget {
     LineChartBarData barOf(ChartSeries s) {
       final spots = [
         for (var i = 0; i < s.values.length; i++)
-          FlSpot((s.offset + i).toDouble(), s.values[i]),
+          FlSpot((s.offset + i).toDouble(), m.toPlot(s, s.values[i])),
       ];
       final isForecast = s.role == ChartSeriesRole.forecast;
       final isCompare = s.role == ChartSeriesRole.compare;
@@ -320,7 +320,8 @@ class _BarsBody extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final available = constraints.maxWidth - kChartLeftAxisWidth;
+        final available = constraints.maxWidth -
+            kChartAxisWidth * (m.hasRightAxis ? 2 : 1);
         final rods = m.drawn
             .where((s) => s.role != ChartSeriesRole.compare)
             .toList(growable: false);
@@ -382,7 +383,7 @@ class _BarsBody extends StatelessWidget {
                           when !(s.role == ChartSeriesRole.forecast &&
                               m.isForecastBridge(x)))
                         BarChartRodData(
-                          toY: v,
+                          toY: m.toPlot(s, v),
                           width: rodWidth,
                           color: s.role == ChartSeriesRole.forecast
                               ? s.color.withValues(alpha: rodWidth >= 4 ? 0.16 : 0.6)

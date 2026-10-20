@@ -55,6 +55,7 @@ class ChartModel {
     required this.series,
     required this.unit,
     required this.maxY,
+    required this.rightMaxY,
     required this.yInterval,
     required this.xCount,
     required this.labelStep,
@@ -94,13 +95,18 @@ class ChartModel {
     final views = [for (final e in series) e.pageviews];
 
     // L'échelle ne tient compte que du visible : masquer une courbe rescale.
+    // Quand les deux courbes sont là, les pages vues (souvent plusieurs fois les
+    // visiteurs) ont leur propre échelle, à droite : sur un axe commun elles
+    // écrasent la courbe verte.
+    final dual = showVisitors && showViews;
     final rawMax = [
       if (showVisitors) ...visitors,
-      if (showViews) ...views,
+      if (showViews && !dual) ...views,
       if (showFc) ...fcPoints.map((e) => e.visitors),
       if (showCompare) ...cmp.map((e) => e.visitors),
     ].fold<double>(0, math.max);
     final maxY = chartNiceMax(rawMax);
+    final rightMaxY = dual ? chartNiceMax(views.fold<double>(0, math.max)) : null;
 
     final xCount = [
       series.length,
@@ -146,6 +152,7 @@ class ChartModel {
       series: series,
       unit: unit,
       maxY: maxY,
+      rightMaxY: rightMaxY,
       yInterval: maxY / 4,
       xCount: xCount,
       labelStep: math.max(1, (xCount / 6).ceil()),
@@ -163,7 +170,11 @@ class ChartModel {
   final List<ChartSeries> drawn;
   final List<SeriesPoint> series;
   final TimeUnit unit;
+  /// Échelle de l'axe de gauche (visiteurs, ou la seule série visible).
   final double maxY;
+
+  /// Échelle des pages vues quand elles ont leur axe à droite, sinon `null`.
+  final double? rightMaxY;
   final double yInterval;
   final int xCount;
   final int labelStep;
@@ -172,6 +183,22 @@ class ChartModel {
   final double lastObsX;
   final int fcStart;
   final bool hasForecast;
+
+  bool get hasRightAxis => rightMaxY != null;
+
+  /// fl_chart n'a qu'un axe Y par graphique : les pages vues sont ramenées dans
+  /// l'espace de gauche (v × maxY / rightMaxY) pour être tracées, et seuls les
+  /// libellés de l'axe de droite et [fromPlot] rendent la vraie valeur. Les
+  /// tooltips lisent toujours les valeurs réelles de la série.
+  double toPlot(ChartSeries s, double v) =>
+      s.role == ChartSeriesRole.pageviews && rightMaxY != null
+          ? v * maxY / rightMaxY!
+          : v;
+
+  double fromPlot(ChartSeries s, double v) =>
+      s.role == ChartSeriesRole.pageviews && rightMaxY != null
+          ? v * rightMaxY! / maxY
+          : v;
 
   double get lastX => (xCount - 1).toDouble();
 
@@ -197,15 +224,35 @@ class ChartModel {
   }
 }
 
-/// Axes communs aux deux moteurs : l'échelle Y arrondie à gauche, ~6 repères de
-/// temps en bas, ceux de la partie projetée dans la couleur de la prévision.
+/// Axes communs aux deux moteurs : l'échelle Y arrondie à gauche (et celle des
+/// pages vues à droite quand elles ont la leur), ~6 repères de temps en bas, ceux de la partie projetée dans la couleur de la prévision.
 FlTitlesData buildChartTitles(ChartModel m, GlancePalette p) => FlTitlesData(
       topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-      rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+      // Les couleurs des deux axes ne servent qu'à les distinguer, et seulement
+      // quand il y en a deux.
+      rightTitles: m.hasRightAxis
+          ? AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: kChartAxisWidth,
+                interval: m.yInterval,
+                getTitlesWidget: (value, meta) {
+                  if (value < m.yInterval / 2) return const SizedBox.shrink();
+                  return Padding(
+                    padding: const EdgeInsets.only(left: 6),
+                    child: Text(
+                      fmtCount(value * m.rightMaxY! / m.maxY),
+                      style: GT.mono(9.5, color: p.fg2),
+                    ),
+                  );
+                },
+              ),
+            )
+          : const AxisTitles(sideTitles: SideTitles(showTitles: false)),
       leftTitles: AxisTitles(
         sideTitles: SideTitles(
           showTitles: true,
-          reservedSize: kChartLeftAxisWidth,
+          reservedSize: kChartAxisWidth,
           interval: m.yInterval,
           getTitlesWidget: (value, meta) {
             if (value < m.yInterval / 2 && value != 0) {
@@ -215,7 +262,7 @@ FlTitlesData buildChartTitles(ChartModel m, GlancePalette p) => FlTitlesData(
               padding: const EdgeInsets.only(right: 6),
               child: Text(
                 fmtCount(value),
-                style: GT.mono(9.5, color: p.fg3),
+                style: GT.mono(9.5, color: m.hasRightAxis ? p.accent : p.fg3),
                 textAlign: TextAlign.right,
               ),
             );
@@ -247,8 +294,8 @@ FlTitlesData buildChartTitles(ChartModel m, GlancePalette p) => FlTitlesData(
       ),
     );
 
-/// Largeur réservée aux libellés de l'axe des valeurs.
-const double kChartLeftAxisWidth = 36;
+/// Largeur réservée aux libellés d'un axe des valeurs (gauche ou droite).
+const double kChartAxisWidth = 36;
 
 FlGridData buildChartGrid(ChartModel m, GlancePalette p) => FlGridData(
       show: true,
