@@ -152,6 +152,21 @@ void main() {
       expect(r, (de: '2026-10-20', a: '2026-10-20', granularite: 'jour'));
     });
 
+    test('plus de 400 jours : `de` est ramené à `a` − 399 jours', () {
+      final r = metricsRangeFor(DateWindow(
+          DateTime(2024, 1, 1), DateTime(2026, 10, 21), TimeUnit.month));
+      expect(r.a, '2026-10-20');
+      expect(r.de, '2025-09-16');
+      // 400 jours inclusifs, pas un de plus.
+      expect(DateTime.parse(r.a).difference(DateTime.parse(r.de)).inDays, 399);
+    });
+
+    test('exactement 400 jours : inchangé', () {
+      final r = metricsRangeFor(DateWindow(
+          DateTime(2025, 9, 16), DateTime(2026, 10, 21), TimeUnit.day));
+      expect(r.de, '2025-09-16');
+    });
+
     test('fenêtre horaire qui se termine pile à minuit → la veille', () {
       final r = metricsRangeFor(DateWindow(
           DateTime(2026, 10, 19, 12), DateTime(2026, 10, 20), TimeUnit.hour));

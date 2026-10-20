@@ -353,8 +353,9 @@ dans le code.
 - ⚠️ Retirer une source laisse les tableaux « Métrique » existants en place : ils
   affichent « Jeton refusé » jusqu'à ce qu'on les supprime ou qu'on rebranche la
   source.
-- ⚠️ Une fenêtre de plus de 400 jours (« Tout », période perso) est refusée par le
-  serveur (400) : la carte l'affiche, rien n'est tronqué en silence.
+- ⚠️ Le serveur refuse plus de 400 jours : `metricsRangeFor` ramène `de` à
+  `a − 399 jours` (« Tout », période perso). Les buckets d'avant la borne restent
+  vides : trou pour un %, 0 pour un nombre.
 
 ## API par fournisseur
 

@@ -46,6 +46,9 @@ class MetricsUnexpectedResponse extends MetricsApiException {
   const MetricsUnexpectedResponse() : super('Réponse inattendue du serveur');
 }
 
+/// Plage maximale d'une requête `series`, en jours (limite du serveur).
+const kMetricsMaxDays = 400;
+
 /// Paramètres de temps d'une requête `series`.
 typedef MetricsRange = ({String de, String a, String granularite});
 
@@ -55,8 +58,13 @@ typedef MetricsRange = ({String de, String a, String granularite});
 /// n'affiche alors qu'un point par jour.
 MetricsRange metricsRangeFor(DateWindow w) {
   final last = w.end.subtract(const Duration(milliseconds: 1));
-  final de = DateTime(w.start.year, w.start.month, w.start.day);
+  final start = DateTime(w.start.year, w.start.month, w.start.day);
   final fin = DateTime(last.year, last.month, last.day);
+  // Le serveur refuse plus de 400 jours (400) : « Tout » ou une période perso
+  // longue est ramenée aux 400 derniers. Les buckets d'avant restent vides côté
+  // carte (trou pour un %, 0 pour un nombre), comme ceux que l'API omet.
+  final earliest = DateTime(fin.year, fin.month, fin.day - (kMetricsMaxDays - 1));
+  final de = start.isBefore(earliest) ? earliest : start;
   return (
     de: _date(de),
     a: _date(fin.isBefore(de) ? de : fin),
