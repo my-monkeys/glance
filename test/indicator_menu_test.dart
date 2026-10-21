@@ -40,7 +40,8 @@ Future<void> _pump(WidgetTester tester, List<Indicator> initial) async {
     accountsProvider.overrideWith(_Accounts.new),
     windowProvider.overrideWithValue(_window),
     eventNamesProvider.overrideWith((ref, site) async => ['e1']),
-    indicatorDataProvider.overrideWith((ref, key) => const CounterData([], 0)),
+    // Des valeurs : une carte sans donnée serait masquée par l'onglet.
+    indicatorDataProvider.overrideWith((ref, key) => const CounterData([], 5)),
   ];
   await tester.pumpWidget(ProviderScope(
     overrides: overrides,

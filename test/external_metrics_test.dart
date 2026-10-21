@@ -102,46 +102,144 @@ void main() {
     });
   });
 
-  group('décalage par délai de mesure', () {
+  group('placement à la date de mesure', () {
+    // Aujourd'hui = 21/10 ; « 7 jours » = 15 → 21 oct., fin exclusive 22.
     final now = DateTime(2026, 10, 21, 14);
-    // « 7 jours » : 7 jours pleins, fin = début du jour suivant.
     final sept = DateWindow(DateTime(2026, 10, 15), DateTime(2026, 10, 22), TimeUnit.day);
 
-    test('J7 sur 7 jours → cohortes du 07 au 13, même durée', () {
-      final v = externalViewOf(sept, 7, now);
-      expect(v.window.start, DateTime(2026, 10, 7));
-      expect(v.window.end, DateTime(2026, 10, 14));
-      expect(v.window.unit, TimeUnit.day);
-      expect(v.cohorts, CohortSpan(DateTime(2026, 10, 7), DateTime(2026, 10, 13)));
+    test('J7 : la cohorte du 8 est placée au 15, la fenêtre reste l\'axe', () {
+      final d = externalDataOf(
+        MetricUnit.percent,
+        sept,
+        [_p(8, 20, 10, 50), _p(9, 40, 20, 50), _p(13, 10, 5, 50)],
+        delayDays: 7,
+        now: now,
+      ) as RatioData;
+
+      expect(d.points.map((p) => p.t), [
+        for (var i = 15; i <= 21; i++) DateTime(2026, 10, i),
+      ]);
+      expect(d.points[0].value, closeTo(0.2, 1e-9));
+      expect(d.points[0].cohort, DateTime(2026, 10, 8));
+      expect(d.points[1].cohort, DateTime(2026, 10, 9));
+      expect(d.points[5].value, closeTo(0.1, 1e-9)); // cohorte 13 → le 20
+      expect(d.cohorts, CohortSpan(DateTime(2026, 10, 8), DateTime(2026, 10, 13)));
     });
 
-    test('J1 : dernière cohorte = hier − 1', () {
-      final v = externalViewOf(sept, 1, now);
-      expect(v.window.end, DateTime(2026, 10, 20));
-      expect(v.cohorts!.last, DateTime(2026, 10, 19));
+    test('le jour de mesure pas terminé reste null, même si le serveur répond',
+        () {
+      // Cohorte du 14 mesurée le 21 = aujourd'hui.
+      final d = externalDataOf(
+        MetricUnit.percent,
+        sept,
+        [_p(8, 20, 10, 50), _p(14, 30, 15, 50)],
+        delayDays: 7,
+        now: now,
+      ) as RatioData;
+
+      expect(d.points.last.t, DateTime(2026, 10, 21));
+      expect(d.points.last.value, isNull);
+      expect(d.points.where((p) => p.value != null), hasLength(1));
+      expect(d.denominatorTotal, 50); // la mesure inachevée ne pèse pas
+      expect(d.cohorts!.last, DateTime(2026, 10, 8));
     });
 
-    test('délai 0 : fenêtre inchangée, pas de mention', () {
-      final v = externalViewOf(sept, 0, now);
-      expect(v.window.start, sept.start);
-      expect(v.window.end, sept.end);
-      expect(v.cohorts, isNull);
+    test('« Aujourd\'hui », J1 : une seule cohorte, pas encore mesurable', () {
+      final today = DateWindow(DateTime(2026, 10, 21), DateTime(2026, 10, 21, 15), TimeUnit.hour);
+      final d = externalDataOf(
+        MetricUnit.percent,
+        today,
+        [_p(20, 30, 15, 50)],
+        delayDays: 1,
+        now: now,
+      ) as RatioData;
+
+      expect(d.points, hasLength(1));
+      expect(d.points.single.value, isNull);
+      expect(d.pending, isTrue);
+      expect(d.cohorts, isNull);
     });
 
-    test('fenêtre déjà entièrement mesurable : pas décalée', () {
-      final past = DateWindow(DateTime(2026, 8, 1), DateTime(2026, 9, 1), TimeUnit.day);
-      final v = externalViewOf(past, 30, now);
-      expect(v.window.start, past.start);
-      expect(v.window.end, past.end);
-      expect(v.cohorts, isNull);
+    test('« Aujourd\'hui », J1, réponse réelle du serveur (null, dénominateur 0) : en attente', () {
+      final today = DateWindow(DateTime(2026, 10, 21), DateTime(2026, 10, 21, 15), TimeUnit.hour);
+      final d = externalDataOf(
+        MetricUnit.percent,
+        today,
+        [_p(20, null, 0, 0)],
+        delayDays: 1,
+        now: now,
+      ) as RatioData;
+
+      expect(d.pending, isTrue);
+      expect(d.overall, isNull);
     });
 
-    test('fenêtre horaire → une seule cohorte, la dernière mesurable', () {
-      final h = DateWindow(DateTime(2026, 10, 21), DateTime(2026, 10, 21, 15), TimeUnit.hour);
-      final v = externalViewOf(h, 7, now);
-      expect(v.window.start, DateTime(2026, 10, 13));
-      expect(v.window.end, DateTime(2026, 10, 14));
-      expect(v.cohorts, CohortSpan(DateTime(2026, 10, 13), DateTime(2026, 10, 13)));
+    test('sans délai, une fenêtre vide reste « aucune donnée »', () {
+      final d = externalDataOf(
+        MetricUnit.percent,
+        _w,
+        const [],
+        now: now,
+      ) as RatioData;
+
+      expect(d.pending, isFalse);
+    });
+
+    test('« Hier », J1 : une seule cohorte mesurée', () {
+      final yesterday =
+          DateWindow(DateTime(2026, 10, 20), DateTime(2026, 10, 21), TimeUnit.day);
+      final d = externalDataOf(
+        MetricUnit.percent,
+        yesterday,
+        [_p(19, 30, 15, 50)],
+        delayDays: 1,
+        now: now,
+      ) as RatioData;
+
+      expect(d.points, hasLength(1));
+      expect(d.points.single.cohort, DateTime(2026, 10, 19));
+      expect(d.cohorts, CohortSpan(DateTime(2026, 10, 19), DateTime(2026, 10, 19)));
+    });
+
+    test('en mois : décalage de d jours puis bucket du mois, sans cohorte jour',
+        () {
+      final w = DateWindow(DateTime(2026, 8, 1), DateTime(2026, 11, 1), TimeUnit.month);
+      final d = externalDataOf(
+        MetricUnit.percent,
+        w,
+        [
+          MetricPoint(t: DateTime(2026, 7, 1), valeur: 5, numerateur: 5, denominateur: 100),
+          MetricPoint(t: DateTime(2026, 8, 1), valeur: 20, numerateur: 20, denominateur: 100),
+          MetricPoint(t: DateTime(2026, 9, 1), valeur: 30, numerateur: 30, denominateur: 100),
+        ],
+        delayDays: 7,
+        now: now,
+      ) as RatioData;
+
+      expect(d.points.map((p) => p.t), [
+        DateTime(2026, 8, 1),
+        DateTime(2026, 9, 1),
+        DateTime(2026, 10, 1),
+      ]);
+      // Le 1er juillet + 7 j reste en juillet : hors fenêtre, écarté.
+      expect(d.points.map((p) => p.value), [closeTo(0.2, 1e-9), closeTo(0.3, 1e-9), isNull]);
+      expect(d.points.every((p) => p.cohort == null), isTrue);
+      expect(d.cohorts!.first, DateTime(2026, 8, 1));
+      expect(d.cohorts!.last, DateTime(2026, 9, 30));
+    });
+
+    test('délai 0 : rien n\'est déplacé ni masqué, pas de cohortes', () {
+      final d = externalDataOf(MetricUnit.percent, _w, [_p(7, 20, 10, 50)],
+          now: now) as RatioData;
+      expect(d.points[2].value, closeTo(0.2, 1e-9));
+      expect(d.cohorts, isNull);
+    });
+
+    test('un nombre à délai est placé de la même façon', () {
+      final d = externalDataOf(MetricUnit.count, sept, [_p(8, 12, 12, 1)],
+          delayDays: 7, now: now) as CounterData;
+      expect(d.points.first.t, DateTime(2026, 10, 15));
+      expect(d.points.first.visitors, 12);
     });
   });
 

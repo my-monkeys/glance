@@ -35,8 +35,11 @@ class FunnelStepResult {
 
 @immutable
 class RatioPoint {
-  const RatioPoint(this.t, this.value);
+  const RatioPoint(this.t, this.value, {this.cohort});
   final DateTime t;
+
+  /// Jour de la cohorte mesurée à [t], pour une métrique à délai.
+  final DateTime? cohort;
 
   /// Null quand le dénominateur est nul et que l'indicateur veut un trou.
   final double? value;
@@ -48,8 +51,8 @@ sealed class IndicatorData {
   const IndicatorData();
 }
 
-/// Jours de cohortes réellement affichés quand la fenêtre d'une métrique de
-/// site a été décalée (bornes incluses).
+/// Première et dernière cohortes mesurées d'une métrique à délai (bornes
+/// incluses).
 @immutable
 class CohortSpan {
   const CohortSpan(this.first, this.last);
@@ -65,12 +68,15 @@ class CohortSpan {
 }
 
 class CounterData extends IndicatorData {
-  const CounterData(this.points, this.total, {this.cohorts});
+  const CounterData(this.points, this.total, {this.cohorts, this.member});
   final List<SeriesPoint> points;
   final int total;
 
-  /// Non null quand la fenêtre a été décalée (métrique de site).
+  /// Non null pour une métrique à délai ayant au moins une mesure.
   final CohortSpan? cohorts;
+
+  /// Membre retenu d'une famille (« J7 »), null pour une métrique seule.
+  final String? member;
 }
 
 class RatioData extends IndicatorData {
@@ -80,7 +86,9 @@ class RatioData extends IndicatorData {
     required this.numeratorTotal,
     required this.denominatorTotal,
     this.cohorts,
+    this.member,
     this.pending = false,
+    this.delayDays = 0,
   });
 
   final List<RatioPoint> points;
@@ -88,12 +96,19 @@ class RatioData extends IndicatorData {
   final int numeratorTotal;
   final int denominatorTotal;
 
-  /// Non null quand la fenêtre a été décalée (métrique de site).
+  /// Non null pour une métrique à délai ayant au moins une mesure.
   final CohortSpan? cohorts;
+
+  /// Membre retenu d'une famille (« J7 »), null pour une métrique seule.
+  final String? member;
 
   /// Aucun point mesurable, alors que des gens y comptent : les cohortes ne
   /// sont pas terminées. À distinguer de « rien ne s'est passé ».
   final bool pending;
+
+  /// Recul nécessaire avant la mesure (J7 → 7), pour dire à l'attente combien
+  /// de temps elle dure. 0 hors métrique à délai.
+  final int delayDays;
 }
 
 class FunnelData extends IndicatorData {

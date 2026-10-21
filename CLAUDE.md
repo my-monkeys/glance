@@ -278,6 +278,8 @@ attendre d'instance. Couverture par fournisseur :
 - **Répartition** : % = part du **total des événements** de la répartition.
   C'est l'inverse de la règle du détail (part de `summary.visitors`) : ici les
   lignes partitionnent un même événement, leur somme est donc le bon dénominateur.
+- **Cartes sans données masquées** : voir « Source de métriques » plus bas
+  (`hasDisplayableData`, ligne « N tableaux sans données · Afficher »).
 - **Éditeur** : les suggestions (événements, propriétés, valeurs) portent sur
   30 jours fixes. Sinon, un événement rare n'en proposerait aucune sur
   « Aujourd'hui ». L'aperçu attend 600 ms après la dernière frappe, et le nom
@@ -352,22 +354,69 @@ dans le code.
   ne se propage pas, et le **QR de transfert ne l'emporte pas**.
 - **Délai de mesure (`delai_jours`)** : champ facultatif du catalogue (J1 → 1,
   J7 → 7, J30 → 30 ; absent ou 0 pour un `nombre`). La cohorte du jour J n'est
-  mesurable qu'une fois J + délai terminé : la dernière est
-  `aujourd'hui − délai − 1`. Une période courte (« 7 jours ») ne contient sinon
-  **aucune** cohorte mesurable. `externalViewOf` (pure, testée) décale donc la
-  fenêtre en `[fin − durée, fin)`, `fin` = début du jour `aujourd'hui − délai`,
-  durée et granularité conservées ; une fenêtre déjà entièrement mesurable n'est
-  pas touchée, une fenêtre horaire devient une seule cohorte. La carte montre
-  « Cohortes du 7 au 13 oct. » sous le grand chiffre.
+  mesurable qu'une fois J + délai terminé : sa valeur est **mesurée** à la date
+  J + délai. Chaque point est donc **placé à sa date de mesure** : la carte
+  demande les cohortes de `[début − d, fin − d]` (`metricsRangeFor(delayDays:)`) et
+  `externalDataOf` range chaque point à `t + d`. L'axe reste **celui de la
+  période choisie**, comme sur toutes les autres cartes (un décalage de fenêtre
+  donnait un axe sans rapport avec la période, et une seule cohorte sur
+  « Aujourd'hui »). Sur « 7 jours » (15 → 21 oct.), J7 montre les cohortes du 8 au
+  14 oct. aux dates du 15 au 21.
+  - Un point dont le jour de mesure n'est pas terminé (aujourd'hui) reste un trou,
+    quoi que réponde le serveur ; ses effectifs ne comptent pas dans le total.
+    Donc « Aujourd'hui » en J1 n'a rien de mesurable : « Pas encore mesurable sur
+    cette période » (`RatioData.pending`, dénominateurs > 0 mais aucun point
+    mesurable), pas « Aucune donnée ».
+  - **En mois** : on demande des mois au serveur, on décale chaque bucket de `d`
+    jours puis on le rattache au mois (`truncateBucket`). On ne regroupe pas des
+    cohortes journalières côté client : le serveur agrège le mois entier, alors
+    que chaque jour isolé tombe souvent sous le seuil de confidentialité. Limite :
+    à partir de J28, deux mois voisins peuvent retomber dans le même bucket.
+  - **Libellés** : « Mesurée sur les cohortes du 8 au 14 oct. » (ou « …sur la
+    cohorte du 19 oct. »), bornes = première et dernière cohortes **mesurées** de
+    la carte. Infobulle : « 20 oct. · cohorte du 13 oct. · 15,4 % » (en jours).
   - Le délai est lu **à l'exécution** dans le catalogue (`metricsCatalogueProvider`,
     en cache), pas figé dans l'`ExternalIndicator` : les cartes existantes en
     profitent et le serveur reste la source de vérité. Catalogue en échec (ou
-    vieux serveur) → pas de décalage, et le catalogue n'est pas relancé (une
-    relance garderait les cartes en squelette).
-  - ⚠️ Le décalage dépend de `DateTime.now()` et se calcule **dans** le provider :
-    la clé de `indicatorDataProvider` ne change pas (cf. « Chargement infini »).
-  - Tous les points `null` alors que des dénominateurs > 0 : « Pas encore
-    mesurable sur cette période » (`RatioData.pending`), pas « Aucune donnée ».
+    vieux serveur) → délai 0, et le catalogue n'est pas relancé (une relance
+    garderait les cartes en squelette).
+  - ⚠️ `now` se lit **dans** le provider : la clé de `indicatorDataProvider` ne
+    change pas (cf. « Chargement infini »).
+- **Familles** : le catalogue peut porter, par indicateur, `famille` et
+  `libelle_famille` (facultatifs). Les membres d'une famille ne diffèrent que par
+  leur `delai_jours` (J1, J7, J30). `metricFamiliesOf` les regroupe (membres triés
+  par délai) ; l'éditeur propose d'abord les familles, puis les métriques sans
+  famille. Un `ExternalIndicator` vise une métrique (`metric`) **ou** une famille
+  (`family`) ; le membre est choisi **au calcul** : le plus grand délai qui tient
+  **quatre fois** dans la fenêtre (`kFamilyWindowRatio`, `windowDays` arrondie
+  au-dessus : « Aujourd'hui », « 24 h », « 7 jours » → J1, « 30 j » → J7,
+  « 12 m » → J30), sinon le plus court (`chooseFamilyMember`, pure, testée).
+  Pourquoi : une carte J7 sur « Aujourd'hui » n'a rien de mesurable, d'où six
+  cartes vides ; une seule carte suit la période. ⚠️ Pas « le plus grand délai
+  qui tient une fois » : sur « 30 j », J30 ne mesurait que des cohortes de 30 à
+  60 jours (avant le lancement de geography, toutes à 0), donc une courbe plate.
+  Une courbe plate n'est d'ailleurs jamais tracée (toutes valeurs égales → le
+  chiffre seul). La carte porte le nom de la famille et la ligne
+  « J7 · s'ajuste à la période ».
+  - ⚠️ En JSON, une famille écrit **aussi** `metric` (= son membre de plus long
+    délai), `label` et `unit` : `Indicator.fromJson` d'une app antérieure lit
+    `metric` sans condition et planterait sinon. Elle affiche alors cette
+    métrique réelle.
+- **Onglet : les cartes sans données sont masquées** (tous types, pas l'aperçu de
+  l'éditeur). `hasDisplayableData` (pure, `core/indicator_math.dart`) : taux sans
+  dénominateur mesuré, compteur à 0 partout, entonnoir sans première étape,
+  répartition vide. L'onglet lit les mêmes providers que les cartes (même clé,
+  donc aucune requête de plus). Chargement → squelette ; **erreur → carte
+  affichée** (il faut pouvoir la corriger). Une ligne « 3 tableaux sans données
+  sur cette période · Afficher » les rend, jusqu'au prochain changement de
+  période (leur menu ⋯ disparaît avec elles) ; tout masqué → « Aucun tableau n'a
+  de données sur cette période ».
+- **Cartes lisibles (tous les types)** : un graphique à moins de 2 points non nuls
+  n'est pas dessiné (la carte garde son chiffre et ses lignes) ; sans point
+  mesurable, seul le message ; un compteur à 0 partout affiche « 0 » et « Aucun
+  événement sur la période », sans courbe plate. La ligne de contexte (requête,
+  libellé) est omise quand elle répète le titre : toujours pour une métrique de
+  site, sinon si elle ne diffère que par les séparateurs (` ÷ `/` / `, ` · `/` par `).
 - **Retirer une source supprime aussi ses cartes « Métrique »** : sans elle elles
   afficheraient « Jeton refusé » pour toujours. La confirmation et le toast
   annoncent le nombre de tableaux emportés.

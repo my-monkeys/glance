@@ -184,6 +184,7 @@ sealed class Indicator {
           metricId: j['metric'] as String,
           label: j['label'] as String,
           unit: MetricUnit.fromApi(j['unit'] as String?),
+          familyId: j['family'] as String?,
         );
     }
     return null;
@@ -374,18 +375,30 @@ class ExternalIndicator extends Indicator {
     required this.metricId,
     required this.label,
     required this.unit,
+    this.familyId,
   });
 
+  /// La métrique visée. Pour une famille ([familyId]), c'est le membre de plus
+  /// long délai : une app antérieure aux familles exige cette clé `metric` (elle
+  /// la lit sans condition) et affiche alors une métrique réelle.
   final String metricId;
   final String label;
   final MetricUnit unit;
+
+  /// Famille visée : le membre est choisi au calcul selon la période.
+  final String? familyId;
 
   @override
   IndicatorKind get kind => IndicatorKind.external;
 
   @override
   Map<String, dynamic> toJson() =>
-      _base({'metric': metricId, 'label': label, 'unit': unit.api});
+      _base({
+        'metric': metricId,
+        if (familyId != null) 'family': familyId,
+        'label': label,
+        'unit': unit.api,
+      });
 
   @override
   bool operator ==(Object other) =>
@@ -394,10 +407,12 @@ class ExternalIndicator extends Indicator {
       other.name == name &&
       other.metricId == metricId &&
       other.label == label &&
-      other.unit == unit;
+      other.unit == unit &&
+      other.familyId == familyId;
 
   @override
-  int get hashCode => Object.hash(kind, id, name, metricId, label, unit);
+  int get hashCode =>
+      Object.hash(kind, id, name, metricId, label, unit, familyId);
 }
 
 /// Les indicateurs d'un site, dans l'ordre choisi par l'utilisateur.

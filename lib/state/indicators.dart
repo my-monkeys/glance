@@ -7,6 +7,7 @@ import '../core/timezone.dart';
 import '../data/models/dimension.dart';
 import '../data/models/indicator.dart';
 import '../data/models/indicator_result.dart';
+import '../data/models/metrics_source.dart';
 import '../data/models/models.dart';
 import '../data/models/period.dart';
 import '../data/models/workspace.dart';
@@ -134,27 +135,51 @@ final indicatorDataProvider = FutureProvider.autoDispose
         final p = await analyticsProviderFor(ref, site);
         final rows = await gate.run(() => p.propertyValues(site, w, event, property));
         return BreakdownData(rows, rows.fold<int>(0, (a, r) => a + r.value));
-      case ExternalIndicator(:final metricId, :final unit):
-        final api = await metricsApiFor(ref, site);
-        final tz = await deviceTimezone();
-        // Le délai vient du catalogue (déjà en cache), pas de l'indicateur : le
-        // serveur reste la source de vérité. Sans catalogue, pas de décalage.
-        final delay = await ref
-            .read(metricsCatalogueProvider(site).future)
-            .then((defs) => defs
-                .where((d) => d.id == metricId)
-                .map((d) => d.delaiJours)
-                .firstOrNull ?? 0)
-            .catchError((_) => 0);
-        final view = externalViewOf(w, delay, DateTime.now());
-        final range = metricsRangeFor(view.window);
-        final series =
-            await gate.run(() => api.series(ids: [metricId], range: range, tz: tz));
-        return externalDataOf(unit, view.window, series[metricId] ?? const [],
-            cohorts: view.cohorts);
+      case ExternalIndicator():
+        return _externalData(ref, site, w, indicator);
     }
   },
 );
+
+/// Données d'une métrique de site : le catalogue (en cache) donne le délai, et
+/// pour une famille le membre qui convient à la période.
+Future<IndicatorData> _externalData(
+  Ref ref,
+  Site site,
+  DateWindow w,
+  ExternalIndicator indicator,
+) async {
+  final api = await metricsApiFor(ref, site);
+  final tz = await deviceTimezone();
+  // Le serveur reste la source de vérité du délai et des familles. Catalogue en
+  // échec : la métrique de repli, sans délai.
+  final defs = await ref
+      .read(metricsCatalogueProvider(site).future)
+      .catchError((_) => const <MetricDef>[]);
+  final family = indicator.familyId;
+  final members = family == null
+      ? const <MetricDef>[]
+      : defs.where((d) => d.famille == family).toList();
+  final def = members.isNotEmpty
+      ? chooseFamilyMember(members, windowDays(w))
+      : defs.where((d) => d.id == indicator.metricId).firstOrNull;
+  final id = def?.id ?? indicator.metricId;
+  final delay = def?.delaiJours ?? 0;
+  final range = metricsRangeFor(w, delayDays: delay);
+  final gate = ref.read(fetchGateProvider);
+  final series =
+      await gate.run(() => api.series(ids: [id], range: range, tz: tz));
+  // ⚠️ `now` est lu ici, jamais dans une clé de `family` (cf. « Chargement
+  // infini »).
+  return externalDataOf(
+    indicator.unit,
+    w,
+    series[id] ?? const [],
+    delayDays: delay,
+    now: DateTime.now(),
+    member: members.isNotEmpty ? 'J$delay' : null,
+  );
+}
 
 // Aides de l'éditeur. ⚠️ Troisième exception à « tout écran lit
 // `windowProvider` » (avec `siteHasEventsProvider` et le test de connexion) :

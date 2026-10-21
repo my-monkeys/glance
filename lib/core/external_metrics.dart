@@ -21,86 +21,116 @@ DateWindow externalWindowOf(DateWindow w) {
   return DateWindow(w.start, advanceBucket(last, unit), unit);
 }
 
-/// Fenêtre d'une métrique de site telle qu'elle sera réellement demandée.
-class ExternalView {
-  const ExternalView(this.window, this.cohorts);
-  final DateWindow window;
+/// Durée d'une fenêtre en jours, arrondie au-dessus : « Aujourd'hui » et
+/// « 24 h » valent 1, « 7 jours » 7. Sert à choisir le membre d'une famille.
+int windowDays(DateWindow w) =>
+    (w.end.difference(w.start).inMinutes / (24 * 60)).ceil().clamp(1, 1 << 20);
 
-  /// Non null si la fenêtre a été décalée vers des cohortes mesurables.
-  final CohortSpan? cohorts;
-}
+/// Un point de l'API rangé dans le bucket de sa date de MESURE.
+class _Placed {
+  const _Placed(this.point, this.done);
+  final MetricPoint point;
 
-/// Décale la fenêtre quand la métrique a un délai de mesure ([delayDays] > 0,
-/// J7 → 7) : la cohorte du jour J n'est mesurable qu'une fois J + délai
-/// terminé, donc la dernière est `aujourd'hui − délai − 1`. Une période courte
-/// (« 7 jours ») ne contient sinon aucune cohorte mesurable. La durée et la
-/// granularité sont conservées ; une fenêtre déjà mesurable n'est pas touchée.
-///
-/// Pure : [now] est un paramètre. ⚠️ Ne jamais mettre la fenêtre décalée dans
-/// une clé de `family` — elle dépend de `now()` (cf. « Chargement infini »).
-ExternalView externalViewOf(DateWindow w, int delayDays, DateTime now) {
-  final ext = externalWindowOf(w);
-  if (delayDays <= 0) return ExternalView(ext, null);
-  final end = DateTime(now.year, now.month, now.day - delayDays);
-  if (!ext.end.isAfter(end)) return ExternalView(ext, null);
-  // Une fenêtre horaire (aujourd'hui, 24 h) se lit comme une seule cohorte.
-  final days = w.unit == TimeUnit.hour
-      ? 1
-      : (ext.end.difference(ext.start).inHours / 24).round();
-  final start = DateTime(end.year, end.month, end.day - days);
-  final shifted = externalWindowOf(DateWindow(start, end, w.unit));
-  return ExternalView(
-    shifted,
-    CohortSpan(start, DateTime(end.year, end.month, end.day - 1)),
-  );
+  /// Faux tant que le jour de mesure n'est pas terminé : le point est alors un
+  /// trou, quoi que dise le serveur.
+  final bool done;
+
+  double? get valeur => done ? point.valeur : null;
 }
 
 /// Points de l'API → résultat de carte, un point par bucket de la fenêtre.
-/// Les buckets que l'API ne renvoie pas, ou renvoie hors fenêtre (le premier
-/// peut commencer avant `de`), sont écartés ou comblés.
+///
+/// Une métrique à délai ([delayDays] > 0, J7 → 7) est **mesurée** J + délai
+/// jours après la cohorte J : chaque point est placé à cette date, pour que
+/// l'axe reste celui de la période choisie, comme pour toutes les autres
+/// cartes. Un point dont le jour de mesure n'est pas terminé (aujourd'hui, en
+/// général) reste un trou. En mois, on décale de la même façon puis on rattache
+/// au bucket du mois (`truncateBucket`) ; on ne regroupe PAS des cohortes
+/// journalières côté client : le serveur agrège le mois entier, alors que
+/// chaque jour isolé tombe souvent sous son seuil de confidentialité.
+///
+/// Les buckets que l'API ne renvoie pas, ou renvoie hors fenêtre, sont écartés
+/// ou comblés. [now] est injectable pour les tests.
 IndicatorData externalDataOf(
   MetricUnit unit,
   DateWindow window,
   List<MetricPoint> points, {
-  CohortSpan? cohorts,
+  int delayDays = 0,
+  DateTime? now,
+  String? member,
 }) {
   final w = externalWindowOf(window);
-  final byBucket = {for (final p in points) truncateBucket(p.t, w.unit): p};
+  final t0 = now ?? DateTime.now();
+  final today = DateTime(t0.year, t0.month, t0.day);
+  final byBucket = <DateTime, _Placed>{};
+  for (final p in points) {
+    final measured = DateTime(p.t.year, p.t.month, p.t.day + delayDays);
+    byBucket[truncateBucket(measured, w.unit)] =
+        _Placed(p, delayDays == 0 || measured.isBefore(today));
+  }
   final buckets = bucketsOf(w);
+
+  // Première et dernière cohortes réellement mesurées dans la fenêtre.
+  DateTime? first;
+  DateTime? last;
+  void seen(DateTime? t) {
+    if (t == null || delayDays == 0) return;
+    final end = w.unit == TimeUnit.month ? DateTime(t.year, t.month + 1, 0) : t;
+    if (first == null || t.isBefore(first!)) first = t;
+    if (last == null || end.isAfter(last!)) last = end;
+  }
+
+  CohortSpan? span() => first == null ? null : CohortSpan(first!, last!);
 
   if (unit == MetricUnit.count) {
     // Un compteur n'est jamais « non mesurable » : un null serait un 0.
     final series = [
-      for (final t in buckets)
-        SeriesPoint(t, byBucket[t]?.valeur ?? 0, 0),
+      for (final t in buckets) SeriesPoint(t, byBucket[t]?.valeur ?? 0, 0),
     ];
+    for (final t in buckets) {
+      if (byBucket[t]?.valeur != null) seen(byBucket[t]!.point.t);
+    }
     final total = series.fold<double>(0, (a, s) => a + s.visitors);
-    return CounterData(series, total.round(), cohorts: cohorts);
+    return CounterData(series, total.round(), cohorts: span(), member: member);
   }
 
   var num = 0;
   var den = 0;
   var anyDen = 0;
+  // Un jour de mesure pas encore terminé dans la fenêtre (« Aujourd'hui »
+  // en J1) : la carte est en attente, pas vide. On ne peut pas s'en remettre
+  // aux effectifs : le serveur rend une cohorte non mesurable avec un
+  // dénominateur à 0.
+  var unfinished = false;
   final ratio = <RatioPoint>[];
   for (final t in buckets) {
     final p = byBucket[t];
     final v = p?.valeur;
-    anyDen += p?.denominateur ?? 0;
+    anyDen += p?.point.denominateur ?? 0;
+    if (delayDays > 0 && !t.isBefore(today)) unfinished = true;
     // Un bucket non mesurable reste un trou, quelle que soit l'option de trous
     // des taux : c'est une mesure refusée, pas un jour sans événement. Ses
     // effectifs ne comptent pas non plus dans le total.
     if (v != null) {
-      num += p!.numerateur;
-      den += p.denominateur;
+      num += p!.point.numerateur;
+      den += p.point.denominateur;
+      seen(p.point.t);
     }
-    ratio.add(RatioPoint(t, v == null ? null : v / 100));
+    // Le jour de cohorte n'a de sens à l'infobulle qu'en jours : un bucket de
+    // mois en regroupe trente.
+    final cohort = v != null && delayDays > 0 && w.unit == TimeUnit.day
+        ? p!.point.t
+        : null;
+    ratio.add(RatioPoint(t, v == null ? null : v / 100, cohort: cohort));
   }
   return RatioData(
     points: ratio,
     overall: den < kMinRatioDenominator ? null : num / den,
     numeratorTotal: num,
     denominatorTotal: den,
-    cohorts: cohorts,
-    pending: den == 0 && anyDen > 0,
+    cohorts: span(),
+    member: member,
+    pending: den == 0 && (anyDen > 0 || unfinished),
+    delayDays: delayDays,
   );
 }

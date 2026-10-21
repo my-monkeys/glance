@@ -113,6 +113,7 @@ class IndicatorCard extends ConsumerWidget {
                             )
                           : _CardSkeleton(kind: indicator.kind))
                       : _CardBody(
+                          name: title ?? indicator.name,
                           indicator: indicator,
                           data: data,
                           window: window,
@@ -129,11 +130,15 @@ class IndicatorCard extends ConsumerWidget {
 
 class _CardBody extends StatelessWidget {
   const _CardBody({
+    required this.name,
     required this.indicator,
     required this.data,
     required this.window,
   });
 
+  /// Titre affiché de la carte : une ligne de contexte qui le répète est
+  /// omise.
+  final String name;
   final Indicator indicator;
   final IndicatorData data;
   final DateWindow window;
@@ -141,39 +146,19 @@ class _CardBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return switch ((indicator, data)) {
-      (CounterIndicator(:final query), CounterData d) => _isEmpty(d)
-          ? const _NoData()
-          : _Stat(
-              big: fmtInt(d.total),
-              sub: queryLabel(query),
-              child: IndicatorChart(
-                points: [for (final s in d.points) IndicatorPoint(s.t, s.visitors)],
-                unit: window.unit,
-              ),
-            ),
+      (CounterIndicator(:final query), CounterData d) =>
+        _counterStat(d, sub: _unlessName(queryLabel(query)), unit: window.unit),
       (RatioIndicator(:final numerator, :final denominator), RatioData d) =>
         _ratioStat(
           d,
-          '${queryLabel(numerator)} ÷ ${queryLabel(denominator)}',
-          window.unit,
+          detail: _unlessName('${queryLabel(numerator)} ÷ ${queryLabel(denominator)}'),
+          unit: window.unit,
         ),
-      (ExternalIndicator(:final label), RatioData d) => _ratioStat(
-          d,
-          label,
-          externalUnitOf(window.unit),
-          pendingMessage: d.pending,
-        ),
-      (ExternalIndicator(:final label), CounterData d) => _isEmpty(d)
-          ? const _NoData()
-          : _Stat(
-              big: fmtInt(d.total),
-              sub: label,
-              note: _cohortsNote(d.cohorts),
-              child: IndicatorChart(
-                points: [for (final s in d.points) IndicatorPoint(s.t, s.visitors)],
-                unit: externalUnitOf(window.unit),
-              ),
-            ),
+      // Le libellé de la métrique EST le titre : pas de ligne de contexte.
+      (ExternalIndicator(), RatioData d) =>
+        _ratioStat(d, unit: externalUnitOf(window.unit)),
+      (ExternalIndicator(), CounterData d) =>
+        _counterStat(d, unit: externalUnitOf(window.unit)),
       (FunnelIndicator(), FunnelData d) => d.steps.isEmpty || d.steps.first.visitors == 0
           ? const _NoData()
           : _Stat(
@@ -187,7 +172,7 @@ class _CardBody extends StatelessWidget {
             ? const _NoData()
             : _Stat(
                 big: fmtInt(d.total),
-                sub: '$event · $property',
+                sub: _unlessName('$event · $property'),
                 child: MetricBars(
                   rows: [
                     for (final r in d.rows.take(kBreakdownRows))
@@ -205,58 +190,108 @@ class _CardBody extends StatelessWidget {
     };
   }
 
+  /// Le nom par défaut d'une carte reprend sa requête (« a / b » pour « a ÷ b »,
+  /// « e par p » pour « e · p ») : on compare sans les séparateurs.
+  String? _unlessName(String line) {
+    String norm(String t) => t.replaceAll(RegExp(r'\s*[÷/·]\s*| par '), ' ');
+    return norm(line) == norm(name) ? null : line;
+  }
+
+  Widget _counterStat(
+    CounterData d, {
+    String? sub,
+    required TimeUnit unit,
+  }) {
+    if (d.total == 0 && d.points.every((s) => s.visitors == 0)) {
+      return const _Stat(big: '0', sub: 'Aucun événement sur la période');
+    }
+    return _Stat(
+      big: fmtInt(d.total),
+      sub: sub,
+      notes: _notes(d.cohorts, d.member),
+      child: _plots([for (final s in d.points) s.visitors])
+          ? IndicatorChart(
+              points: [for (final s in d.points) IndicatorPoint(s.t, s.visitors)],
+              unit: unit,
+            )
+          : null,
+    );
+  }
+
+  static String _pendingMessage(int delayDays) => switch (delayDays) {
+        0 => 'Pas encore mesurable sur cette période',
+        1 => 'Pas encore mesurable : il faut 1 jour de recul',
+        _ => 'Pas encore mesurable : il faut $delayDays jours de recul',
+      };
+
   // Les trous (dénominateur nul, ou non mesurable pour une métrique de site)
   // viennent des points du résultat, pas d'ici.
-  static Widget _ratioStat(
-    RatioData d,
-    String detail,
-    TimeUnit unit, {
-    bool pendingMessage = false,
-  }) =>
+  Widget _ratioStat(RatioData d, {String? detail, required TimeUnit unit}) =>
       d.denominatorTotal == 0
           ? _NoData(
-              pendingMessage
-                  ? 'Pas encore mesurable sur cette période'
+              d.pending
+                  ? _pendingMessage(d.delayDays)
                   : 'Aucune donnée sur la période',
             )
           : _Stat(
-              note: _cohortsNote(d.cohorts),
+              notes: _notes(d.cohorts, d.member),
               big: d.overall == null ? '—' : fmtPct(d.overall! * 100),
               sub: '${fmtInt(d.numeratorTotal)} / ${fmtInt(d.denominatorTotal)}',
               detail: detail,
-              child: IndicatorChart(
-                points: [
-                  for (final r in d.points)
-                    IndicatorPoint(r.t, r.value == null ? null : r.value! * 100),
-                ],
-                unit: unit,
-                percent: true,
-              ),
+              child: _plots([for (final r in d.points) r.value])
+                  ? IndicatorChart(
+                      points: [
+                        for (final r in d.points)
+                          IndicatorPoint(
+                            r.t,
+                            r.value == null ? null : r.value! * 100,
+                            cohort: r.cohort,
+                          ),
+                      ],
+                      unit: unit,
+                      percent: true,
+                    )
+                  : null,
             );
 
-  static String? _cohortsNote(CohortSpan? c) =>
-      c == null ? null : 'Cohortes ${fmtDayRange(c.first, c.last)}';
+  /// Une courbe d'un seul point (ou aucun) ne dit rien de plus que le grand
+  /// chiffre : on ne la dessine pas.
+  /// Une courbe n'apprend quelque chose qu'avec au moins deux points qui
+  /// diffèrent : une ligne plate (tout à 0 %, par exemple) ne dit rien que le
+  /// grand chiffre ne dise déjà.
+  static bool _plots(Iterable<double?> values) {
+    final seen = values.whereType<double>().toList();
+    return seen.length >= 2 && seen.any((v) => v != seen.first);
+  }
 
-  static bool _isEmpty(CounterData d) =>
-      d.total == 0 && d.points.every((s) => s.visitors == 0);
+  /// Cohortes mesurées, puis le membre retenu d'une famille.
+  static List<String> _notes(CohortSpan? c, String? member) => [
+        if (c != null)
+          c.first == c.last
+              ? 'Mesurée sur la cohorte du ${fmtDay(c.first)}'
+              : 'Mesurée sur les cohortes ${fmtDayRange(c.first, c.last)}',
+        if (member != null) '$member · s\'ajuste à la période',
+      ];
 }
 
 /// Grand chiffre, ligne de contexte, puis le détail de l'indicateur.
 class _Stat extends StatelessWidget {
   const _Stat({
     required this.big,
-    required this.sub,
-    required this.child,
+    this.sub,
+    this.child,
     this.detail,
-    this.note,
+    this.notes = const [],
   });
   final String big;
 
-  /// Mention discrète sous le grand chiffre (fenêtre décalée).
-  final String? note;
-  final String sub;
+  /// Mentions discrètes sous la ligne de contexte (cohortes, membre retenu).
+  final List<String> notes;
+  final String? sub;
   final String? detail;
-  final Widget child;
+
+  /// Absent : la carte ne montre que son chiffre.
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
@@ -272,17 +307,19 @@ class _Stat extends StatelessWidget {
           child: Text(big.replaceAll('\u202f', '\u00a0'),
               style: GT.stat(40, color: p.fg)),
         ),
-        const SizedBox(height: 4),
-        Text(
-          sub,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: GT.mono(11.5, color: p.fg2),
-        ),
-        if (note != null)
+        if (sub != null) ...[
+          const SizedBox(height: 4),
+          Text(
+            sub!,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GT.mono(11.5, color: p.fg2),
+          ),
+        ],
+        for (final n in notes)
           Padding(
             padding: const EdgeInsets.only(top: 2),
-            child: Text(note!, style: GT.mono(10.5, color: p.fg3)),
+            child: Text(n, style: GT.mono(10.5, color: p.fg3)),
           ),
         if (detail != null)
           Padding(
@@ -294,8 +331,10 @@ class _Stat extends StatelessWidget {
               style: GT.mono(10.5, color: p.fg3),
             ),
           ),
-        const SizedBox(height: 14),
-        child,
+        if (child != null) ...[
+          const SizedBox(height: 14),
+          child!,
+        ],
       ],
     );
   }
