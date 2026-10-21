@@ -6,8 +6,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/format.dart';
 import '../../core/predict.dart';
 import '../../data/models/models.dart';
+import '../../data/providers/analytics_provider.dart';
 import '../../data/models/period.dart';
 import '../../state/home_data.dart';
+import '../../state/indicators.dart';
 import '../../state/metric_sections.dart';
 import '../../state/period_state.dart';
 import '../../state/providers.dart';
@@ -15,6 +17,7 @@ import '../../state/settings.dart';
 import '../../theme/motion.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
+import '../dashboards/indicators_tab.dart';
 import '../widgets/common.dart';
 import '../widgets/day_nav.dart';
 import '../widgets/events_chart.dart';
@@ -36,7 +39,7 @@ class DetailScreen extends ConsumerStatefulWidget {
   ConsumerState<DetailScreen> createState() => _DetailScreenState();
 }
 
-enum _DetailTab { overview, events }
+enum _DetailTab { overview, events, indicators }
 
 class _DetailScreenState extends ConsumerState<DetailScreen> {
   _DetailTab _tab = _DetailTab.overview;
@@ -78,6 +81,12 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
     ref.invalidate(siteLivePagesProvider(widget.site));
     if (_tab == _DetailTab.events) {
       ref.invalidate(eventsProvider((widget.site, w)));
+      return;
+    }
+    if (_tab == _DetailTab.indicators) {
+      for (final ind in ref.read(siteIndicatorsProvider(widget.site))) {
+        ref.invalidate(indicatorDataProvider((widget.site, w, ind)));
+      }
       return;
     }
     for (final dim in ref.read(metricSectionsProvider).values) {
@@ -140,6 +149,24 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
     final hasEvents = ref.watch(siteHasEventsProvider(widget.site)).value ??
         ref.watch(siteHasEventsCachedProvider(widget.site)) ??
         true;
+    // Les tableaux se construisent sur des événements, et le fournisseur doit
+    // savoir les calculer. Décidé sur le genre du compte, synchrone : pas
+    // d'onglet qui apparaît après coup.
+    final kind = ref.watch(accountsProvider.select(
+      (all) => all
+          .where((a) => a.id == widget.site.accountId)
+          .map((a) => a.kind)
+          .firstOrNull,
+    ));
+    final showIndicators =
+        hasEvents && kind != null && supportedIndicatorsFor(kind).isNotEmpty;
+    // Onglet courant devenu indisponible (site sans événements, compte
+    // changé) → retour à la vue d'ensemble.
+    final tab = switch (_tab) {
+      _DetailTab.events when hasEvents => _DetailTab.events,
+      _DetailTab.indicators when showIndicators => _DetailTab.indicators,
+      _ => _DetailTab.overview,
+    };
 
     return Scaffold(
       body: Stack(
@@ -222,7 +249,8 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
                     child: _SegTabs(
-                      current: _tab,
+                      current: tab,
+                      showIndicators: showIndicators,
                       onChanged: (t) => setState(() => _tab = t),
                     ),
                   ),
@@ -233,12 +261,16 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                     // La fenêtre fait partie de la clé : l'onglet Événements
                     // garde sinon les courbes décochées d'une autre période,
                     // dont les noms peuvent ne plus exister.
-                    key: ValueKey(_tab == _DetailTab.events && hasEvents
-                        ? ('events', window)
+                    key: ValueKey(tab != _DetailTab.overview
+                        ? (tab, window)
                         : window == null || stats == null
                             ? (async.hasError ? 'error' : 'loading')
                             : 'stats'),
-                    child: _tab == _DetailTab.events && hasEvents
+                    child: tab == _DetailTab.indicators
+                        ? (window == null
+                            ? const _Loading()
+                            : IndicatorsTab(site: widget.site, window: window))
+                        : tab == _DetailTab.events
                         ? (window == null
                             ? const _Loading()
                             : _EventsTab(site: widget.site, window: window))
@@ -333,6 +365,10 @@ class _DetailBody extends ConsumerWidget {
                 pageviewsTotal: s.pageviews,
                 forecast: forecast,
                 compareSeries: compareSeries,
+                compareOn: compare,
+                onToggleCompare: previousPeriodWindow(window) == null
+                    ? null
+                    : ref.read(periodProvider.notifier).toggleCompare,
                 hidden: hidden,
                 style: ref.watch(settingsProvider.select((s) => s.chartStyle)),
                 onToggle: (k) =>
@@ -483,10 +519,15 @@ class _Kpi extends StatelessWidget {
   }
 }
 
-/// Segmenté à 2 onglets (Vue d'ensemble / Événements).
+/// Segmenté à 2 ou 3 onglets (Vue d'ensemble / Événements / Tableaux).
 class _SegTabs extends StatelessWidget {
-  const _SegTabs({required this.current, required this.onChanged});
+  const _SegTabs({
+    required this.current,
+    required this.showIndicators,
+    required this.onChanged,
+  });
   final _DetailTab current;
+  final bool showIndicators;
   final ValueChanged<_DetailTab> onChanged;
 
   @override
@@ -508,10 +549,18 @@ class _SegTabs extends StatelessWidget {
               borderRadius: BorderRadius.circular(9),
               boxShadow: on ? p.shadow : null,
             ),
-            child: Text(
-              label,
-              style: GT.body(14, weight: on ? 600 : 400,
-                  color: on ? p.fg : p.fg2),
+            // À trois segments, « Vue d'ensemble » frôle les ~91 pt d'un
+            // iPhone SE : 13 pt, et `scaleDown` plutôt qu'une coupure si
+            // l'échelle de texte du système l'élargit encore.
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                label,
+                maxLines: 1,
+                softWrap: false,
+                style: GT.body(showIndicators ? 13 : 14, weight: on ? 600 : 400,
+                    color: on ? p.fg : p.fg2),
+              ),
             ),
           ),
         ),
@@ -528,6 +577,7 @@ class _SegTabs extends StatelessWidget {
         children: [
           seg(_DetailTab.overview, "Vue d'ensemble"),
           seg(_DetailTab.events, 'Événements'),
+          if (showIndicators) seg(_DetailTab.indicators, 'Tableaux'),
         ],
       ),
     );

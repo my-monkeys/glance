@@ -5,6 +5,7 @@ import '../data/sync/purchases_service.dart';
 import '../data/sync/sync_api.dart';
 import '../data/sync/sync_crypto.dart';
 import '../data/transfer/config_transfer.dart' show TransferPayload;
+import 'indicators.dart';
 import 'providers.dart';
 import 'workspaces.dart';
 
@@ -321,12 +322,16 @@ class SyncController extends Notifier<SyncState> {
       accounts: accounts,
       credentials: creds,
       workspaces: ref.read(workspacesProvider),
+      indicators: ref.read(indicatorsProvider),
     );
   }
 
   Future<void> _apply(TransferPayload p) async {
     await ref.read(accountsProvider.notifier).import(p.accounts, p.credentials);
     await ref.read(workspacesProvider.notifier).upsertAll(p.workspaces);
+    // Fusion par id, l'entrant gagne ; comme les groupes, une suppression ne
+    // se propage pas.
+    await ref.read(indicatorsProvider.notifier).upsertAll(p.indicators);
   }
 }
 

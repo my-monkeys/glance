@@ -4,6 +4,7 @@ import 'dart:io' show gzip;
 import 'package:cryptography/cryptography.dart';
 
 import '../models/account.dart';
+import '../models/indicator.dart';
 import '../models/workspace.dart';
 import '../transfer/config_transfer.dart' show TransferPayload;
 
@@ -40,6 +41,10 @@ class SyncCrypto {
           {...a.toJson(), 'creds': payload.credentials[a.id] ?? const {}},
       ],
       'workspaces': [for (final w in payload.workspaces) w.toJson()],
+      // Clé ajoutée SANS passer `version` à 2 : `decrypt` d'une app plus
+      // ancienne répond « mauvais mot de passe » sur une version inconnue,
+      // alors qu'elle ignore simplement une clé en plus.
+      'indicators': [for (final s in payload.indicators) s.toJson()],
     });
 
     final salt = SecretKeyData.random(length: 16).bytes;
@@ -83,6 +88,12 @@ class SyncCrypto {
       workspaces: [
         for (final raw in (j['workspaces'] as List).cast<Map<String, dynamic>>())
           Workspace.fromJson(raw),
+      ],
+      // Absente d'un blob poussé par une app antérieure aux tableaux.
+      indicators: [
+        for (final raw
+            in ((j['indicators'] as List?) ?? const []).cast<Map<String, dynamic>>())
+          SiteIndicators.fromJson(raw),
       ],
     );
   }

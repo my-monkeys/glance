@@ -5,6 +5,7 @@ import 'package:cryptography/cryptography.dart';
 import 'package:flutter/foundation.dart';
 
 import '../models/account.dart';
+import '../models/indicator.dart';
 import '../models/workspace.dart';
 
 /// Ce qu'un transfert emporte : les comptes **avec leurs identifiants**, et les
@@ -16,6 +17,7 @@ class TransferPayload {
     required this.accounts,
     required this.credentials,
     required this.workspaces,
+    this.indicators = const [],
   });
 
   final List<Account> accounts;
@@ -24,6 +26,9 @@ class TransferPayload {
   final Map<String, Map<String, String>> credentials;
 
   final List<Workspace> workspaces;
+
+  /// Porté par la synchro cloud uniquement : [ConfigTransfer] l'ignore.
+  final List<SiteIndicators> indicators;
 }
 
 /// Le QR a expiré (ou l'horloge est trop décalée).
@@ -90,6 +95,8 @@ class ConfigTransfer {
           {...a.toJson(), 'creds': payload.credentials[a.id] ?? const {}},
       ],
       'workspaces': [for (final w in payload.workspaces) w.toJson()],
+      // Pas d'`indicators` : un QR a une capacité dure (cf. [maxChars]) et
+      // quelques entonnoirs feraient déborder une config ordinaire.
     });
 
     final salt = SecretKeyData.random(length: 16).bytes;
@@ -147,6 +154,7 @@ class ConfigTransfer {
         for (final raw in (j['workspaces'] as List).cast<Map<String, dynamic>>())
           Workspace.fromJson(raw),
       ],
+      indicators: const [],
     );
   }
 }

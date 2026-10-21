@@ -16,6 +16,8 @@ class GlanceField extends StatelessWidget {
     this.url = false,
     this.mono = false,
     this.autofocus = false,
+    this.keyboardType,
+    this.onChanged,
     this.onSubmitted,
   });
 
@@ -26,6 +28,10 @@ class GlanceField extends StatelessWidget {
   final bool url;
   final bool mono;
   final bool autofocus;
+
+  /// Clavier à imposer (numérique…) ; par défaut texte, ou URL si [url].
+  final TextInputType? keyboardType;
+  final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
 
   @override
@@ -51,8 +57,10 @@ class GlanceField extends StatelessWidget {
             autofocus: autofocus,
             autocorrect: false,
             enableSuggestions: false,
-            keyboardType: url ? TextInputType.url : TextInputType.text,
+            keyboardType:
+                keyboardType ?? (url ? TextInputType.url : TextInputType.text),
             textInputAction: TextInputAction.next,
+            onChanged: onChanged,
             onSubmitted: onSubmitted,
             cursorColor: p.accent,
             style: mono

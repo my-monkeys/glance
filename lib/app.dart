@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'data/models/account.dart';
+import 'data/models/indicator.dart';
 import 'data/models/workspace.dart';
+import 'state/indicators.dart';
 import 'state/period_state.dart';
 import 'state/providers.dart';
 import 'state/settings.dart';
@@ -72,6 +74,7 @@ class _SyncBridgeState extends ConsumerState<_SyncBridge> {
     // Un changement de config locale → push (debouncé).
     ref.listen<List<Account>>(accountsProvider, (_, _) => _schedulePush());
     ref.listen<List<Workspace>>(workspacesProvider, (_, _) => _schedulePush());
+    ref.listen<List<SiteIndicators>>(indicatorsProvider, (_, _) => _schedulePush());
     return widget.child;
   }
 }

@@ -20,14 +20,14 @@ lib/
     providers/ AnalyticsProvider (interface) + UmamiProvider, PlausibleProvider, FathomProvider (stub) + factory
     repository/AccountsRepository (comptes en prefs, creds en secure storage)
   state/       providers Riverpod (accounts, sites, home, métriques, icônes), period_state (+ windowProvider),
-               settings, home_data, metric_sections
+               settings, home_data, metric_sections, indicators (tableaux)
   theme/       palette (ThemeExtension light+dark), type, theme, motion (tokens durées/curves)
-  ui/          onboarding-vide (home), home, detail (+ metric_sections), direct, add (+ site_picker),
-               settings, widgets/
+  ui/          onboarding-vide (home), home, detail (+ metric_sections), dashboards (+ editor),
+               direct, add (+ site_picker), settings, widgets/
   dev/         seed.dart (amorçage --dart-define, inerte sans defines)
 ```
 
-**Règle d'or** : la couche UI ne parle qu'à l'interface `AnalyticsProvider`. Ajouter un fournisseur = une classe qui l'implémente + une entrée dans `buildProvider` + les `credentialFieldsFor`. Rien d'autre à toucher.
+**Règle d'or** : la couche UI ne parle qu'à l'interface `AnalyticsProvider`. Ajouter un fournisseur = une classe qui l'implémente + une entrée dans `buildProvider` + les `credentialFieldsFor` (+ `supportedIndicatorsFor` s'il sait calculer des tableaux). Rien d'autre à toucher.
 
 ## Flux produit
 
@@ -114,8 +114,9 @@ reload en boucle.
 
 ⚠️ **Tous les écrans et toutes les minuteries lisent `windowProvider`**, jamais
 `PeriodState.resolve()` (volontairement renommé pour que le compilateur signale les
-oublis). Deux exceptions commentées : `siteHasEventsProvider` (30 j fixes,
-indépendants de la période) et le test de connexion d'`add_source_screen`. Un écran
+oublis). Trois exceptions commentées : `siteHasEventsProvider` (30 j fixes,
+indépendants de la période), le test de connexion d'`add_source_screen`, et les
+suggestions de l'éditeur de tableaux (`state/indicators.dart`, 30 j fixes). Un écran
 qui résoudrait la fenêtre lui-même ferait fetcher une seconde grappe complète, et
 son `invalidate` viserait une clé que plus personne n'écoute — le graphe cesserait
 de se rafraîchir **sans aucune erreur**.
@@ -127,18 +128,38 @@ l'appelant montre son squelette sans rien déclencher.
 
 `PeriodControls` (`ui/widgets/period_controls.dart`), sous le titre de chaque
 écran : les périodes sur toute la largeur, puis un bouton **« Affichage »** qui
-ouvre une feuille — comparaison, découpage, courbe ou barres — et, sur
-l'accueil, la bascule liste/grille à droite.
+ouvre une feuille — découpage, courbe ou barres — et, sur l'accueil, la bascule
+liste/grille à droite.
 
 Les réglages tenaient auparavant dans des boutons sans libellé posés **à droite
-des périodes**, qu'ils recouvraient : deux flèches ne disent pas « comparer à la
-période précédente », et les premières périodes n'étaient plus atteignables sans
-faire défiler. Dans une feuille, chaque réglage porte son nom et une phrase.
+des périodes**, qu'ils recouvraient, et les premières périodes n'étaient plus
+atteignables sans faire défiler. Dans une feuille, chaque réglage porte son nom.
 
-⚠️ Quand la comparaison est active, l'indication vit **sur la ligne du bouton**,
-pas sur une ligne à elle : une ligne qui apparaît et disparaît ferait sauter tout
-l'écran. Et c'est un `Expanded`, pas un `Flexible` suivi d'un `Spacer` — les deux
-se disputeraient la place et le texte se ferait tronquer alors qu'il y en a.
+**Une ligne ou deux, selon la place.** Un `LayoutBuilder` (jamais `MediaQuery.size`)
+mesure les périodes sur leur contenu réel (`GlanceChip.widthOf`, `TextPainter`) et
+y ajoute le bouton et la bascule : si le tout tient sans défilement, tout est sur
+**une seule ligne** (périodes à gauche en `Expanded`, bouton et bascule à droite) ;
+sinon les contrôles passent sur la seconde ligne (téléphone). Trois paliers, dans
+l'ordre : bouton avec son libellé ; bouton **réduit à l'icône**, avec « Affichage »
+dans l'infobulle (le panneau central du bureau, vers 860 px, rate le libellé de
+quelques pixels) ; deux lignes. Les tests rendent en Ahem (glyphes carrés) : les
+périodes y font ~980 px au lieu de ~450, d'où une « grande » largeur de test plus
+grande qu'un vrai bureau.
+
+### La comparaison vit dans la légende
+
+« Période précédente » est un élément de la légende du grand graphique (accueil,
+détail, bureau), **décoché par défaut**, à côté des courbes qu'il compare : un
+interrupteur rangé dans une feuille ne disait pas ce qu'il allait ajouter au
+graphique, et son état obligeait à une annonce sur le bouton « Affichage ».
+
+⚠️ **Une seule source de vérité : `PeriodState.compare`** (non persisté, faux au
+lancement). C'est lui qui déclenche le chargement de la période précédente
+(`siteCompareSeriesProvider`) ; la clé `compare` n'existe plus dans
+`settings.hiddenSeries`, sans quoi deux états « visible » pourraient diverger.
+`GlanceChart` reçoit `compareOn` + `onToggleCompare`, et cet élément disparaît
+quand `previousPeriodWindow(window) == null` (« Tout », période personnalisée trop
+large) : `onToggleCompare` vaut alors `null`.
 
 ### Découpage du graphique (heure / jour / mois)
 
@@ -191,6 +212,7 @@ aberrant (mesuré avant correction : une prévision à ×65 sur l'écran du jour
 ## Graphiques (point clé de la demande)
 
 - `ui/widgets/chart_model.dart` : `ChartModel` décide une fois pour toutes des séries visibles, de l'échelle, de l'axe des temps — la courbe et les barres partagent exactement les mêmes décisions. Le réglage « Courbe / Barres » (Réglages → Apparence) choisit le moteur. En barres, la comparaison passe **derrière** la barre courante (`backDrawRodData`) et la prévision devient un remplissage bordé de pointillés (une barre ne se trace pas en trait discontinu) ; sous 2 px de large, le rendu **revient à la courbe**. `EventsChart` reste en lignes : 8 séries groupées y donneraient des barres d'un pixel.
+- **Deux axes quand les deux courbes sont visibles** : visiteurs à gauche, pages vues à droite (`ChartModel.rightMaxY`, `chartNiceMax` propre à chaque série). Les pages vues font souvent plusieurs fois les visiteurs et, sur un axe commun, écrasaient la courbe verte. fl_chart n'a qu'un axe Y : les pages vues sont tracées à `v × maxY / rightMaxY` (`toPlot`), mais les **tooltips lisent toujours les valeurs réelles**. Une seule des deux visible → un seul axe à gauche, sans gouttière à droite. `chartNiceMax` donne des entiers multiples de 4 dès 1 (quatre graduations aux libellés distincts) par paliers 1 · 1,2 · 1,6 · 2 · 2,4 · 3,2 · 4 · 4,8 · 6 · 8.
 - `ui/widgets/glance_chart.dart` (fl_chart) : courbe **lissée** (`isCurved`, `curveSmoothness`, cap/join round), **aire dégradée**, **échelle Y arrondie**, labels X selon la granularité, tooltip tactile. Deux courbes — **Visiteurs** (vert, aire) + **Pages vues** (gris) — avec légende cliquable (masquer/afficher) sur home/détail. (Les *visites* ne sont volontairement PAS tracées : par heure elles sont égales aux visiteurs — cf. gotcha `sessions ≠ visites` — donc redondantes ; elles restent en carte KPI du détail.) Remplace la barre de la maquette. Sparkline compacte des cartes = `ui/widgets/sparkline.dart`.
 - `ui/widgets/events_chart.dart` : **multi-lignes, une couleur par événement** (palette `kEventPalette`), échelle Y partagée, tooltip listant chaque événement. Onglet Événements du détail : légende = puces cliquables (cocher/décocher les courbes ; au-delà de 6 events les moins fréquents sont masqués par défaut), barres de répartition colorées assorties.
 - Helpers partagés dans `ui/widgets/chart_util.dart` (`chartNiceMax`, `chartTooltipDate`).
@@ -210,6 +232,71 @@ Les gros graphes (home/détail/desktop) prolongent la courbe visiteurs d'une **p
 
 Reprise mobile de la vue « referrals » du dashboard monkey : les referrers de chaque site sont croisés avec les domaines de TOUS les sites suivis (`core/internal_traffic.dart`, testé) → visiteurs que vos sites s'envoient entre eux. `state/internal_traffic.dart` : `siteReferrersProvider` (metric sources limit 50, cache session) + `internalTrafficProvider` (composition au fil de l'eau, pattern homeTotals). UI : carte compacte sur l'accueil (masquée si zéro flux) → écran `ui/network/internal_screen.dart` (KPI, qui envoie/reçoit, flux) ; badge « INTERNE » sur les sources du détail (self exclu). **Fenêtre courante seulement** — pas de séries journalières (N×30 appels, trop pour mobile).
 
+## Tableaux (indicateurs construits sur les événements)
+
+3ᵉ onglet du détail d'un site, à côté de « Vue d'ensemble » et « Événements ».
+L'utilisateur y compose ses propres indicateurs à partir des événements du site.
+Il en existe quatre types (`data/models/indicator.dart`) :
+- **Compteur** : un événement filtré.
+- **Taux** : deux compteurs divisés.
+- **Entonnoir** : 2 à 8 étapes.
+- **Répartition** : les valeurs d'une propriété.
+
+Côté code :
+- **Données** : `state/indicators.dart`.
+- **Interface** : `ui/dashboards/`, et l'éditeur libre dans `ui/dashboards/editor/`.
+- **Logique pure, testée** : `IndicatorDraft` (validation, nom proposé) et `core/indicator_math.dart` (ratio).
+
+L'onglet s'affiche si le site a des événements **et** si
+`supportedIndicatorsFor(kind)` n'est pas vide. Cette fonction est synchrone, à
+côté de `credentialFieldsFor` : la visibilité se décide au premier build, sans
+attendre d'instance. Couverture par fournisseur :
+- **Umami** : les 4 types.
+- **Plausible** : compteur, taux et répartition (sa Stats API n'a pas d'entonnoir).
+- **Fathom** : aucun.
+
+- ⚠️ **Tout passe par `/events/series`, jamais `/stats?event=`** : `/stats` ne
+  compte que les pages vues et rend **0** pour un événement.
+- **Filtres par propriété** : paramètres `epf0`, `epf1`… (combinés en ET), de la
+  forme `<type>.<op>.<nom encodé>.<valeur>`. Le type est obligatoire : 1 texte,
+  2 nombre, 3 booléen (ex. `epf0=1.eq.issue.complet`, `epf0=2.gte.reussite.80`).
+  C'est pour ça qu'un `EventFilter` stocke le type de sa propriété. Le nom est
+  encodé et ses `.` échappés (`umamiEventFilterParams`, testé).
+- ⚠️ **`window` d'un entonnoir = des MINUTES entre deux étapes**, pas des jours
+  comme le dit la doc d'Umami : son SQL fait `interval <window> minute`. Le défaut
+  est 60, comme le formulaire d'Umami. Mesuré sur geography : 52 % de parties
+  complètes avec 1 minute, 71,6 % avec 60. Les filtres d'étape n'acceptent que
+  `eq neq c dnc`, pas de comparaison numérique. L'entonnoir relie les étapes **par
+  session**, pas par partie.
+- **Taux global = somme(A) / somme(B)**, jamais la moyenne des taux par bucket.
+  Un bucket au dénominateur nul compte pour **0 %** par défaut : les trous
+  déroutaient. L'option `gapsWhenEmpty` (case « Laisser un trou quand rien ne
+  s'est passé », clé JSON `gaps`) les rend : rien ne s'est passé, ce n'est pas un
+  échec mesuré, et un 0 % l'affirmerait. `ratioOf` reste pur et prend le choix en
+  paramètre ; le taux global n'en dépend pas.
+- **Répartition** : % = part du **total des événements** de la répartition.
+  C'est l'inverse de la règle du détail (part de `summary.visitors`) : ici les
+  lignes partitionnent un même événement, leur somme est donc le bon dénominateur.
+- **Éditeur** : les suggestions (événements, propriétés, valeurs) portent sur
+  30 jours fixes. Sinon, un événement rare n'en proposerait aucune sur
+  « Aujourd'hui ». L'aperçu attend 600 ms après la dernière frappe, et le nom
+  saisi ne fait **pas** partie de la clé du provider : renommer ne relance pas de
+  requête.
+- **Synchro** : clé `indicators` **facultative** dans le paquet `glance-sync`.
+  ⚠️ `SyncCrypto.version` reste à 1 : une app plus ancienne lit une version
+  inconnue comme un mauvais mot de passe, alors qu'elle ignore une clé en plus.
+  La fusion se fait par id, comme pour les groupes, et **une suppression ne se
+  propage pas**. Le **QR de transfert n'emporte pas les tableaux** : sa taille est
+  plafonnée.
+- **Pas de rétention** : le rapport `retention` d'Umami fonctionne, mais
+  sous-estime d'un tiers à la moitié. Sa session est un hash IP + navigateur, à
+  sel mensuel. Comparé à la base de geography le 2026-10-19 : J1 = 7,7 % contre
+  11,4 %. Et il ne voit pas les joueurs déjà installés. Une rétention juste
+  viendra d'une API d'agrégats côté site, décision reportée.
+- **Amorçage de développement** : `--dart-define=SEED_INDICATORS=geography
+  --dart-define=SEED_INDICATORS_SITE=<id>` pose 4 indicateurs d'exemple (inerte
+  sans ces defines).
+
 ## API par fournisseur
 
 ### Umami (self-hosted, **v3** — vérifié sur `uuu.my-monkey.fr`)
@@ -221,6 +308,14 @@ Reprise mobile de la vue « referrals » du dashboard monkey : les referrers de 
 - `/api/websites/:id/active` → `{visitors:N}`.
 - `/api/websites/:id/metrics?type=` — 17 dimensions vérifiées sur l'instance : `path` (⚠️ pas `url` en v3), `entry`, `exit`, `title`, `referrer`, `channel`, `query`, `browser`, `os`, `device`, `screen`, `country`, `region`, `city`, `language`, `event`, `tag`. ⚠️ `region` et `city` répondent 200 mais **vides** sur `uuu.my-monkey.fr` : l'instance n'a pas de base GeoLite City (0 ligne sur 33 637 sessions). Le paramètre `metric=views|visitors` n'existe pas : les valeurs sont toujours des **visiteurs uniques**.
 - `unit=` de `/pageviews` accepte `hour|day|month|year` — **pas `week`**.
+- **Tableaux** (vérifié sur l'instance 3.3.0, le 2026-10-20) :
+  - `/events/series?event=&epfN=` → `[{x: nom, t, y}]`.
+  - `/event-data/properties?event=` → `[{eventName, propertyName, dataType, total}]`.
+  - `/event-data/values?event=&propertyName=` → `[{value, total}]`.
+  - `POST /api/reports/funnel` → par étape, `{visitors, previous, dropped, dropoff, remaining}`.
+- ⚠️ Cloudflare devant l'instance renvoie **403 / 1010** à un client sans
+  User-Agent de navigateur ou de curl (urllib Python, par exemple). Ça compte pour
+  les scripts de sonde, pas pour l'app.
 
 ### Plausible (Stats API v2, implémenté d'après la doc — à valider sur instance)
 - `POST /api/v2/query` Bearer, `{site_id, metrics, date_range, dimensions:['time:day'|'event:page'|…], timezone}`.
@@ -242,6 +337,16 @@ flutter run -d <udid> \
 ```
 
 - Piloter le simulateur : **idb** (`idb ui tap/text/swipe --udid …`), coordonnées en **points logiques** (= pixels du screenshot / 3 sur @3x). Screenshots via `xcrun simctl io <udid> screenshot`.
+- ⚠️ **Xcode 27 casse idb.** `SimulatorKit.framework` est passé de
+  `Contents/Developer/Library/PrivateFrameworks` à `Contents/SharedFrameworks`, et
+  `idb ui tap` échoue même avec `DEVELOPER_DIR`. Pour vérifier un écran sans clic :
+  - une modification temporaire non commitée qui ouvre l'écran au lancement ;
+  - `flutter run` avec l'entrée standard sur un fifo : `mkfifo f; (tail -f /dev/null > f &); flutter run … < f` ;
+  - `echo r > f` pour recharger, `echo R > f` pour redémarrer, `echo q > f` pour quitter.
+
+  Les parcours (taper, saisir) passent par des tests de widgets. Même cause pour
+  le build : `flutter build ios --simulator` échoue (bug `lipo` ci-dessous), alors
+  que `flutter run -d <udid>`, qui ne compile qu'une architecture, passe.
 - iOS deployment target **15.0** (pbxproj ; le `post_install` du Podfile qui le forçait n'existe plus).
 - **Plugins via Swift Package Manager.** **iOS n'a plus CocoaPods du tout** (2026-08-16 : `pod deintegrate`, `Podfile`/`Podfile.lock`/`Pods/` supprimés, `#include?` retirés des xcconfig, référence Pods sortie du workspace) — tous ses plugins sont des Swift Packages. **macOS garde un pod** : `auto_updater_macos` (Sparkle) ne supporte pas SPM, d'où un `pod install` encore joué et un `Podfile.lock` réduit à ces deux-là. Ne pas remettre `flutter config --no-enable-swift-package-manager` : les deux pbxproj référencent `FlutterGeneratedPluginSwiftPackage`. Versions RevenueCat figées par les `Package.resolved`, commités des deux côtés.
 - ⚠️ **Les cibles widget n'héritent d'aucun xcconfig** (le projet n'en fournit pas) : leur `baseConfigurationReference` pointe explicitement le xcconfig généré par Flutter, sans quoi `$(FLUTTER_BUILD_NUMBER)` / `$(FLUTTER_BUILD_NAME)` sont vides et la version de l'extension doit être écrite en dur — c'est ainsi qu'elle avait dérivé (widgets en 1.6.1, builds 11 et 3, pendant que l'app était en 1.8.0+14). Vérifier après une release : `PlistBuddy -c "Print :CFBundleVersion"` sur l'app **et** sur le `.appex`.

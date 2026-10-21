@@ -4,31 +4,35 @@ import 'package:intl/intl.dart';
 
 import '../../data/models/period.dart';
 
-/// Arrondit un maximum vers une valeur « ronde » avec un peu de marge, pour une
+/// Paliers d'une décade, en dixièmes de la puissance de 10 : 1 · 1,2 · 1,6 · 2 ·
+/// 2,4 · 3,2 · 4 · 4,8 · 6 · 8. Plus fin que {1, 2, 4, 5, 8}, dont le saut 2 → 4
+/// laissait la courbe à moitié de la hauteur (pic de 185 sur un axe à 400).
+const _kNiceSteps = [10, 12, 16, 20, 24, 32, 40, 48, 60, 80];
+
+/// Arrondit un maximum vers une valeur « ronde » avec 15 % de marge, pour une
 /// échelle Y lisible. Partagé par les graphiques.
+///
+/// À partir de 1, le résultat est un entier multiple de 4 : l'axe a quatre
+/// intervalles et des comptes sont entiers, donc deux libellés arrondis ne
+/// peuvent pas se confondre (avec 2,5 l'intervalle vaut 0,625 × 10^k et l'on
+/// lisait « 3 » deux fois). Sous 10 cela ne laisse que 4, 8 et 12 ; dès 10 les
+/// paliers se suivent d'au plus 33 %, donc au plus ~34 % de vide au-dessus de
+/// la marge.
 double chartNiceMax(double m) {
   if (m <= 0) return 10;
   final v = m * 1.15;
-  final mag = math.pow(10, (math.log(v) / math.ln10).floor()).toDouble();
-  final norm = v / mag;
-  // Uniquement des multiples que quatre graduations divisent proprement : avec
-  // 2,5 l'intervalle vaut 0,625 × 10^k et deux libellés arrondis finissent
-  // identiques (« 3 » et « 3 »).
-  double nice;
-  if (norm <= 1) {
-    nice = 1;
-  } else if (norm <= 2) {
-    nice = 2;
-  } else if (norm <= 4) {
-    nice = 4;
-  } else if (norm <= 5) {
-    nice = 5;
-  } else if (norm <= 8) {
-    nice = 8;
-  } else {
-    nice = 10;
+  final integral = m >= 1;
+  final decade = (math.log(v) / math.ln10).floor();
+  for (final exp in [decade, decade + 1]) {
+    final unit = math.pow(10, exp).toDouble();
+    for (final step in _kNiceSteps) {
+      final c = step * unit / 10;
+      if (c < v) continue;
+      if (integral && c % 4 != 0) continue;
+      return c;
+    }
   }
-  return nice * mag;
+  return math.pow(10, decade + 2).toDouble();
 }
 
 /// Date d'entête de tooltip selon la granularité.

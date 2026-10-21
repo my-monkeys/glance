@@ -25,6 +25,8 @@ class GlanceChart extends StatelessWidget {
     this.visitorsTotal,
     this.forecast,
     this.compareSeries,
+    this.compareOn = false,
+    this.onToggleCompare,
     this.hidden = const {},
     this.onToggle,
     this.style = ChartStyle.curve,
@@ -33,7 +35,6 @@ class GlanceChart extends StatelessWidget {
   static const kVisitors = ChartModel.kVisitorsKey;
   static const kPageviews = ChartModel.kPageviewsKey;
   static const kForecast = ChartModel.kForecastKey;
-  static const kCompare = ChartModel.kCompareKey;
 
   final List<SeriesPoint> series;
   final TimeUnit unit;
@@ -50,12 +51,22 @@ class GlanceChart extends StatelessWidget {
   /// courbe visiteurs jusqu'à la fin de la période calendaire.
   final Forecast? forecast;
 
-  /// Courbe de la période précédente équivalente (bascule « Comparer »),
-  /// superposée sur les mêmes positions de bucket que [series].
+  /// Courbe de la période précédente équivalente, superposée sur les mêmes
+  /// positions de bucket que [series]. Vide tant que [compareOn] est faux.
   final List<SeriesPoint>? compareSeries;
 
-  /// Séries masquées (clés [kVisitors]/[kPageviews]/[kForecast]/[kCompare]) et
-  /// bascule via la légende.
+  /// La comparaison vit dans `periodProvider` et non dans [hidden] : c'est elle
+  /// qui déclenche le chargement de la période précédente, un second état
+  /// « visible » pourrait diverger de celui qui commande le fetch.
+  final bool compareOn;
+
+  /// Bascule de la comparaison ; `null` quand la fenêtre n'a pas d'« avant »
+  /// comparable (« Tout », période personnalisée trop large) : l'élément de
+  /// légende disparaît alors.
+  final VoidCallback? onToggleCompare;
+
+  /// Séries masquées (clés [kVisitors]/[kPageviews]/[kForecast]) et bascule via
+  /// la légende.
   final Set<String> hidden;
   final void Function(String key)? onToggle;
 
@@ -91,7 +102,6 @@ class GlanceChart extends StatelessWidget {
     final projected = (forecast != null && visitorsTotal != null)
         ? forecast!.projectedTotal(visitorsTotal!)
         : null;
-    final hasCompare = (compareSeries ?? const []).isNotEmpty;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -126,12 +136,12 @@ class GlanceChart extends StatelessWidget {
                   on: !hidden.contains(kForecast),
                   onTap: onToggle == null ? null : () => onToggle!(kForecast),
                 ),
-              if (hasCompare)
+              if (onToggleCompare != null)
                 _LegendItem(
                   color: p.fg3,
                   label: 'Période précédente',
-                  on: !hidden.contains(kCompare),
-                  onTap: onToggle == null ? null : () => onToggle!(kCompare),
+                  on: compareOn,
+                  onTap: onToggleCompare,
                 ),
             ],
           ),
@@ -192,7 +202,7 @@ class _CurveBody extends StatelessWidget {
     LineChartBarData barOf(ChartSeries s) {
       final spots = [
         for (var i = 0; i < s.values.length; i++)
-          FlSpot((s.offset + i).toDouble(), s.values[i]),
+          FlSpot((s.offset + i).toDouble(), m.toPlot(s, s.values[i])),
       ];
       final isForecast = s.role == ChartSeriesRole.forecast;
       final isCompare = s.role == ChartSeriesRole.compare;
@@ -320,7 +330,8 @@ class _BarsBody extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final available = constraints.maxWidth - kChartLeftAxisWidth;
+        final available = constraints.maxWidth -
+            kChartAxisWidth * (m.hasRightAxis ? 2 : 1);
         final rods = m.drawn
             .where((s) => s.role != ChartSeriesRole.compare)
             .toList(growable: false);
@@ -382,7 +393,7 @@ class _BarsBody extends StatelessWidget {
                           when !(s.role == ChartSeriesRole.forecast &&
                               m.isForecastBridge(x)))
                         BarChartRodData(
-                          toY: v,
+                          toY: m.toPlot(s, v),
                           width: rodWidth,
                           color: s.role == ChartSeriesRole.forecast
                               ? s.color.withValues(alpha: rodWidth >= 4 ? 0.16 : 0.6)
