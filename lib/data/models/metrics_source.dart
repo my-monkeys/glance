@@ -60,6 +60,7 @@ class MetricDef {
     required this.description,
     required this.unite,
     required this.granularites,
+    this.delaiJours = 0,
   });
 
   final String id;
@@ -68,6 +69,10 @@ class MetricDef {
   final MetricUnit unite;
   final List<String> granularites;
 
+  /// Jours qu'il faut attendre après un jour J pour que sa cohorte soit
+  /// mesurable (J7 → 7). 0 pour un nombre, ou si le serveur ne le dit pas.
+  final int delaiJours;
+
   factory MetricDef.fromJson(Map<String, dynamic> j) => MetricDef(
         id: j['id'] as String,
         libelle: j['libelle'] as String,
@@ -75,6 +80,7 @@ class MetricDef {
         unite: MetricUnit.fromApi(j['unite'] as String?),
         granularites:
             ((j['granularites'] as List?) ?? const []).cast<String>().toList(),
+        delaiJours: (j['delai_jours'] as num?)?.round() ?? 0,
       );
 }
 

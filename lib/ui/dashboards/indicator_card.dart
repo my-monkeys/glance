@@ -157,13 +157,18 @@ class _CardBody extends StatelessWidget {
           '${queryLabel(numerator)} ÷ ${queryLabel(denominator)}',
           window.unit,
         ),
-      (ExternalIndicator(:final label), RatioData d) =>
-        _ratioStat(d, label, externalUnitOf(window.unit)),
+      (ExternalIndicator(:final label), RatioData d) => _ratioStat(
+          d,
+          label,
+          externalUnitOf(window.unit),
+          pendingMessage: d.pending,
+        ),
       (ExternalIndicator(:final label), CounterData d) => _isEmpty(d)
           ? const _NoData()
           : _Stat(
               big: fmtInt(d.total),
               sub: label,
+              note: _cohortsNote(d.cohorts),
               child: IndicatorChart(
                 points: [for (final s in d.points) IndicatorPoint(s.t, s.visitors)],
                 unit: externalUnitOf(window.unit),
@@ -202,10 +207,20 @@ class _CardBody extends StatelessWidget {
 
   // Les trous (dénominateur nul, ou non mesurable pour une métrique de site)
   // viennent des points du résultat, pas d'ici.
-  static Widget _ratioStat(RatioData d, String detail, TimeUnit unit) =>
+  static Widget _ratioStat(
+    RatioData d,
+    String detail,
+    TimeUnit unit, {
+    bool pendingMessage = false,
+  }) =>
       d.denominatorTotal == 0
-          ? const _NoData()
+          ? _NoData(
+              pendingMessage
+                  ? 'Pas encore mesurable sur cette période'
+                  : 'Aucune donnée sur la période',
+            )
           : _Stat(
+              note: _cohortsNote(d.cohorts),
               big: d.overall == null ? '—' : fmtPct(d.overall! * 100),
               sub: '${fmtInt(d.numeratorTotal)} / ${fmtInt(d.denominatorTotal)}',
               detail: detail,
@@ -219,14 +234,26 @@ class _CardBody extends StatelessWidget {
               ),
             );
 
+  static String? _cohortsNote(CohortSpan? c) =>
+      c == null ? null : 'Cohortes ${fmtDayRange(c.first, c.last)}';
+
   static bool _isEmpty(CounterData d) =>
       d.total == 0 && d.points.every((s) => s.visitors == 0);
 }
 
 /// Grand chiffre, ligne de contexte, puis le détail de l'indicateur.
 class _Stat extends StatelessWidget {
-  const _Stat({required this.big, required this.sub, required this.child, this.detail});
+  const _Stat({
+    required this.big,
+    required this.sub,
+    required this.child,
+    this.detail,
+    this.note,
+  });
   final String big;
+
+  /// Mention discrète sous le grand chiffre (fenêtre décalée).
+  final String? note;
   final String sub;
   final String? detail;
   final Widget child;
@@ -252,6 +279,11 @@ class _Stat extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
           style: GT.mono(11.5, color: p.fg2),
         ),
+        if (note != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Text(note!, style: GT.mono(10.5, color: p.fg3)),
+          ),
         if (detail != null)
           Padding(
             padding: const EdgeInsets.only(top: 2),
@@ -270,13 +302,14 @@ class _Stat extends StatelessWidget {
 }
 
 class _NoData extends StatelessWidget {
-  const _NoData();
+  const _NoData([this.message = 'Aucune donnée sur la période']);
+  final String message;
 
   @override
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.symmetric(vertical: 14),
         child: Text(
-          'Aucune donnée sur la période',
+          message,
           style: GT.body(13, color: context.glance.fg3),
         ),
       );

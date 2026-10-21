@@ -137,10 +137,21 @@ final indicatorDataProvider = FutureProvider.autoDispose
       case ExternalIndicator(:final metricId, :final unit):
         final api = await metricsApiFor(ref, site);
         final tz = await deviceTimezone();
-        final range = metricsRangeFor(w);
+        // Le délai vient du catalogue (déjà en cache), pas de l'indicateur : le
+        // serveur reste la source de vérité. Sans catalogue, pas de décalage.
+        final delay = await ref
+            .read(metricsCatalogueProvider(site).future)
+            .then((defs) => defs
+                .where((d) => d.id == metricId)
+                .map((d) => d.delaiJours)
+                .firstOrNull ?? 0)
+            .catchError((_) => 0);
+        final view = externalViewOf(w, delay, DateTime.now());
+        final range = metricsRangeFor(view.window);
         final series =
             await gate.run(() => api.series(ids: [metricId], range: range, tz: tz));
-        return externalDataOf(unit, w, series[metricId] ?? const []);
+        return externalDataOf(unit, view.window, series[metricId] ?? const [],
+            cohorts: view.cohorts);
     }
   },
 );

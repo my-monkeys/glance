@@ -18,6 +18,7 @@ import 'package:glance/state/period_state.dart';
 import 'package:glance/state/providers.dart';
 import 'package:glance/theme/theme.dart';
 import 'package:glance/ui/dashboards/editor/indicator_editor.dart';
+import 'package:glance/ui/dashboards/indicator_card.dart';
 import 'package:glance/ui/dashboards/metrics_source_screen.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -44,16 +45,17 @@ const _defs = [
 
 /// Client sans réseau : catalogue et séries fixes, ou une erreur.
 class FakeMetricsApi extends MetricsApi {
-  FakeMetricsApi({this.error, this.points = const []})
+  FakeMetricsApi({this.error, this.points = const [], this.defs = _defs})
       : super(baseUrl: 'https://x.eu/', token: 't', dio: Dio());
   final MetricsApiException? error;
   final List<MetricPoint> points;
+  final List<MetricDef> defs;
   MetricsRange? lastRange;
 
   @override
   Future<List<MetricDef>> catalogue() async {
     if (error != null) throw error!;
-    return _defs;
+    return defs;
   }
 
   @override
@@ -252,6 +254,62 @@ void main() {
     });
   });
 
+  group('carte « Métrique »', () {
+    const ind = ExternalIndicator(
+        id: 'e', name: 'J7', metricId: 'j7', label: 'Rétention J7', unit: MetricUnit.percent);
+
+    Future<void> card(WidgetTester tester, RatioData data) async {
+      tester.view.physicalSize = const Size(500, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      SharedPreferences.setMockInitialValues({});
+      await tester.pumpWidget(ProviderScope(
+        overrides: [
+          sharedPrefsProvider.overrideWithValue(await SharedPreferences.getInstance()),
+          indicatorDataProvider.overrideWith((ref, key) => data),
+        ],
+        child: MaterialApp(
+          theme: glanceTheme(Brightness.light),
+          home: Scaffold(
+            body: IndicatorCard(
+                site: _site, window: _window, indicator: ind, menu: false),
+          ),
+        ),
+      ));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('fenêtre décalée : mention des cohortes sous le chiffre',
+        (tester) async {
+      await card(
+        tester,
+        RatioData(
+          points: [RatioPoint(DateTime(2026, 10, 7), 0.25)],
+          overall: 0.25,
+          numeratorTotal: 10,
+          denominatorTotal: 40,
+          cohorts: CohortSpan(DateTime(2026, 10, 7), DateTime(2026, 10, 13)),
+        ),
+      );
+      expect(find.text('Cohortes du 7 au 13 oct.'), findsOneWidget);
+    });
+
+    testWidgets('cohortes en cours : « Pas encore mesurable »', (tester) async {
+      await card(
+        tester,
+        RatioData(
+          points: [RatioPoint(DateTime(2026, 10, 7), null)],
+          overall: null,
+          numeratorTotal: 0,
+          denominatorTotal: 0,
+          pending: true,
+        ),
+      );
+      expect(find.text('Pas encore mesurable sur cette période'), findsOneWidget);
+      expect(find.text('Aucune donnée sur la période'), findsNothing);
+    });
+  });
+
   group('indicatorDataProvider', () {
     const indicator = ExternalIndicator(
       id: 'e',
@@ -288,6 +346,34 @@ void main() {
       expect(d.overall, closeTo(0.2, 1e-9));
       expect(d.points.map((p) => p.value), [closeTo(0.2, 1e-9), null, null]);
       expect(api.lastRange, (de: '2026-07-01', a: '2026-07-03', granularite: 'jour'));
+    });
+
+    test('le délai du catalogue décale la plage demandée', () async {
+      const defs = [
+        MetricDef(
+          id: 'retention_j1_nouveaux',
+          libelle: 'J7',
+          description: '',
+          unite: MetricUnit.percent,
+          granularites: ['jour'],
+          delaiJours: 7,
+        ),
+      ];
+      final api = FakeMetricsApi(defs: defs);
+      final c = await container(api);
+      final w = DateWindow(DateTime.now().subtract(const Duration(days: 7)),
+          DateTime.now().add(const Duration(days: 1)), TimeUnit.day);
+      final sub = c.listen(indicatorDataProvider((_site, w, indicator)), (_, _) {});
+      final d = await c.read(indicatorDataProvider((_site, w, indicator)).future)
+          as RatioData;
+      sub.close();
+
+      expect(d.cohorts, isNotNull);
+      final t = DateTime.now();
+      final lastCohort = DateTime(t.year, t.month, t.day - 8);
+      expect(d.cohorts!.last, lastCohort);
+      expect(api.lastRange!.a,
+          '${lastCohort.year}-${lastCohort.month.toString().padLeft(2, '0')}-${lastCohort.day.toString().padLeft(2, '0')}');
     });
 
     test('l\'erreur typée de l\'API remonte telle quelle', () async {

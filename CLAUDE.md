@@ -350,6 +350,24 @@ dans le code.
   `indicators`). Le jeton voyage dans le blob chiffré de bout en bout, comme les
   identifiants des comptes. Fusion par site (l'entrante gagne), une suppression
   ne se propage pas, et le **QR de transfert ne l'emporte pas**.
+- **Délai de mesure (`delai_jours`)** : champ facultatif du catalogue (J1 → 1,
+  J7 → 7, J30 → 30 ; absent ou 0 pour un `nombre`). La cohorte du jour J n'est
+  mesurable qu'une fois J + délai terminé : la dernière est
+  `aujourd'hui − délai − 1`. Une période courte (« 7 jours ») ne contient sinon
+  **aucune** cohorte mesurable. `externalViewOf` (pure, testée) décale donc la
+  fenêtre en `[fin − durée, fin)`, `fin` = début du jour `aujourd'hui − délai`,
+  durée et granularité conservées ; une fenêtre déjà entièrement mesurable n'est
+  pas touchée, une fenêtre horaire devient une seule cohorte. La carte montre
+  « Cohortes du 7 au 13 oct. » sous le grand chiffre.
+  - Le délai est lu **à l'exécution** dans le catalogue (`metricsCatalogueProvider`,
+    en cache), pas figé dans l'`ExternalIndicator` : les cartes existantes en
+    profitent et le serveur reste la source de vérité. Catalogue en échec (ou
+    vieux serveur) → pas de décalage, et le catalogue n'est pas relancé (une
+    relance garderait les cartes en squelette).
+  - ⚠️ Le décalage dépend de `DateTime.now()` et se calcule **dans** le provider :
+    la clé de `indicatorDataProvider` ne change pas (cf. « Chargement infini »).
+  - Tous les points `null` alors que des dénominateurs > 0 : « Pas encore
+    mesurable sur cette période » (`RatioData.pending`), pas « Aucune donnée ».
 - **Retirer une source supprime aussi ses cartes « Métrique »** : sans elle elles
   afficheraient « Jeton refusé » pour toujours. La confirmation et le toast
   annoncent le nombre de tableaux emportés.

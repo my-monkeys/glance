@@ -43,6 +43,7 @@ const _catalogue = {
       'description': 'Part des nouveaux joueurs revenus le lendemain.',
       'unite': 'pourcentage',
       'granularites': ['jour', 'semaine', 'mois'],
+      'delai_jours': 1,
     },
     {
       'id': 'comptes',
@@ -65,6 +66,8 @@ void main() {
       expect(defs.first.unite, MetricUnit.percent);
       expect(defs.first.granularites, ['jour', 'semaine', 'mois']);
       expect(defs.last.unite, MetricUnit.count);
+      expect(defs.first.delaiJours, 1);
+      expect(defs.last.delaiJours, 0); // champ absent
       expect(fake.last!.uri.toString(), 'https://x.eu/api/m/catalogue');
       expect(fake.last!.headers['authorization'], 'Bearer tok');
       expect(fake.last!.headers['user-agent'], contains('Mozilla'));

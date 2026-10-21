@@ -122,7 +122,9 @@ Future<MetricsApi> metricsApiFor(Ref ref, Site site) async {
 /// Catalogue d'indicateurs d'un site. Même cache que les aides de l'éditeur.
 final metricsCatalogueProvider =
     FutureProvider.autoDispose.family<List<MetricDef>, Site>(
-  retry: retryUnlessMetricsError,
+  // Pas de relance : les cartes attendent ce catalogue pour leur délai, une
+  // relance de 30 s les garderait en squelette.
+  retry: (_, _) => null,
   (ref, site) async {
     cacheFor(ref, const Duration(minutes: 10));
     final gate = ref.watch(fetchGateProvider);

@@ -101,4 +101,61 @@ void main() {
       expect(d.total, 7);
     });
   });
+
+  group('décalage par délai de mesure', () {
+    final now = DateTime(2026, 10, 21, 14);
+    // « 7 jours » : 7 jours pleins, fin = début du jour suivant.
+    final sept = DateWindow(DateTime(2026, 10, 15), DateTime(2026, 10, 22), TimeUnit.day);
+
+    test('J7 sur 7 jours → cohortes du 07 au 13, même durée', () {
+      final v = externalViewOf(sept, 7, now);
+      expect(v.window.start, DateTime(2026, 10, 7));
+      expect(v.window.end, DateTime(2026, 10, 14));
+      expect(v.window.unit, TimeUnit.day);
+      expect(v.cohorts, CohortSpan(DateTime(2026, 10, 7), DateTime(2026, 10, 13)));
+    });
+
+    test('J1 : dernière cohorte = hier − 1', () {
+      final v = externalViewOf(sept, 1, now);
+      expect(v.window.end, DateTime(2026, 10, 20));
+      expect(v.cohorts!.last, DateTime(2026, 10, 19));
+    });
+
+    test('délai 0 : fenêtre inchangée, pas de mention', () {
+      final v = externalViewOf(sept, 0, now);
+      expect(v.window.start, sept.start);
+      expect(v.window.end, sept.end);
+      expect(v.cohorts, isNull);
+    });
+
+    test('fenêtre déjà entièrement mesurable : pas décalée', () {
+      final past = DateWindow(DateTime(2026, 8, 1), DateTime(2026, 9, 1), TimeUnit.day);
+      final v = externalViewOf(past, 30, now);
+      expect(v.window.start, past.start);
+      expect(v.window.end, past.end);
+      expect(v.cohorts, isNull);
+    });
+
+    test('fenêtre horaire → une seule cohorte, la dernière mesurable', () {
+      final h = DateWindow(DateTime(2026, 10, 21), DateTime(2026, 10, 21, 15), TimeUnit.hour);
+      final v = externalViewOf(h, 7, now);
+      expect(v.window.start, DateTime(2026, 10, 13));
+      expect(v.window.end, DateTime(2026, 10, 14));
+      expect(v.cohorts, CohortSpan(DateTime(2026, 10, 13), DateTime(2026, 10, 13)));
+    });
+  });
+
+  group('pas encore mesurable', () {
+    test('tous les points null mais des gens comptés → pending', () {
+      final d = externalDataOf(MetricUnit.percent, _w, [_p(5, null, 3, 40)])
+          as RatioData;
+      expect(d.pending, isTrue);
+      expect(d.denominatorTotal, 0);
+    });
+
+    test('aucun point du tout → pas pending', () {
+      final d = externalDataOf(MetricUnit.percent, _w, const []) as RatioData;
+      expect(d.pending, isFalse);
+    });
+  });
 }
