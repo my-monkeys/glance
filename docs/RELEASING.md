@@ -77,6 +77,17 @@ spctl -a -vvv -t install Glance-1.0.0.dmg      # → accepted, source=Notarized 
 shasum -a 256 Glance-1.0.0.dmg
 gh release create v1.0.0 Glance-1.0.0.dmg --repo my-monkeys/glance --title "Glance 1.0.0"
 # then bump version + sha256 in my-monkeys/homebrew-tap → Casks/glance.rb
+
+# 6. Sparkle appcast (served from main: pushing it ships the update to every Mac)
+# ⚠️ Sign with the `glance` keychain account. The default account (`ed25519`)
+# holds ANOTHER app's key: its signature is rejected by every installed Glance
+# (checked on 1.11.0 — `generate_keys -p` ≠ SUPublicEDKey).
+BIN=<Sparkle>/bin   # sign_update / generate_keys from any Sparkle 2 checkout
+$BIN/generate_keys --account glance -p   # must equal SUPublicEDKey in macos/Runner/Info.plist
+$BIN/sign_update --account glance Glance-1.0.0.dmg          # → edSignature + length
+$BIN/sign_update --account glance --verify Glance-1.0.0.dmg <edSignature>
+# Add an <item> at the top of appcast.xml (sparkle:version = build number),
+# update the DMG links in store/site/{,en/}index.html, commit, push.
 ```
 
 Verify the whole chain: `brew install --cask my-monkeys/tap/glance`.
