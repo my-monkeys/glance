@@ -40,14 +40,15 @@ String fmtDuration(Duration d) {
 /// Formatte une date d'axe selon la granularité. Le switch est exhaustif à
 /// dessein : un repli silencieux sur « jour » ferait afficher un axe faux au
 /// lieu de faire échouer la compilation.
+/// « 13 oct. »
+String fmtDay(DateTime t) => DateFormat('d MMM', 'fr_FR').format(t);
+
 /// « du 7 au 13 oct. » ou « du 28 sept. au 4 oct. ».
 String fmtDayRange(DateTime a, DateTime b) {
-  final day = DateFormat('d', 'fr_FR');
-  final dayMonth = DateFormat('d MMM', 'fr_FR');
   final from = a.month == b.month && a.year == b.year
-      ? day.format(a)
-      : dayMonth.format(a);
-  return 'du $from au ${dayMonth.format(b)}';
+      ? DateFormat('d', 'fr_FR').format(a)
+      : fmtDay(a);
+  return 'du $from au ${fmtDay(b)}';
 }
 
 String fmtAxis(DateTime t, TimeUnit unit) => switch (unit) {

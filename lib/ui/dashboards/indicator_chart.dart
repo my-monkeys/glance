@@ -12,8 +12,11 @@ import '../widgets/chart_util.dart';
 
 /// Un point de la courbe ; [value] null = trou dans la mesure.
 class IndicatorPoint {
-  const IndicatorPoint(this.t, this.value);
+  const IndicatorPoint(this.t, this.value, {this.cohort});
   final DateTime t;
+
+  /// Jour de la cohorte mesurée à [t] (métrique à délai), nommé à l'infobulle.
+  final DateTime? cohort;
   final double? value;
 }
 
@@ -43,6 +46,12 @@ class IndicatorChart extends StatelessWidget {
   /// Valeurs en % (0..100) : axe et tooltip suffixés.
   final bool percent;
   final double height;
+
+  /// « mar. 20 oct.\n », ou « 20 oct. · cohorte du 13 oct. · » en une ligne
+  /// pour une métrique à délai.
+  String _tooltipHead(IndicatorPoint pt) => pt.cohort == null
+      ? '${chartTooltipDate(pt.t, unit)}\n'
+      : '${fmtDay(pt.t)} · cohorte du ${fmtDay(pt.cohort!)} · ';
 
   String _fmt(double v) => percent ? fmtPct(v) : fmtInt(v);
 
@@ -142,7 +151,7 @@ class IndicatorChart extends StatelessWidget {
               getTooltipItems: (touched) => [
                 for (final s in touched)
                   LineTooltipItem(
-                    '${chartTooltipDate(points[s.x.round().clamp(0, len - 1)].t, unit)}\n',
+                    _tooltipHead(points[s.x.round().clamp(0, len - 1)]),
                     GT.mono(10, color: p.fg3),
                     children: [
                       TextSpan(

@@ -170,6 +170,14 @@ void main() {
       expect(r.de, '2025-09-16');
     });
 
+    test('délai : on demande les cohortes de [début − d, fin − d]', () {
+      final r = metricsRangeFor(
+        DateWindow(DateTime(2026, 10, 15), DateTime(2026, 10, 22), TimeUnit.day),
+        delayDays: 7,
+      );
+      expect(r, (de: '2026-10-08', a: '2026-10-14', granularite: 'jour'));
+    });
+
     test('fenêtre horaire qui se termine pile à minuit → la veille', () {
       final r = metricsRangeFor(DateWindow(
           DateTime(2026, 10, 19, 12), DateTime(2026, 10, 20), TimeUnit.hour));

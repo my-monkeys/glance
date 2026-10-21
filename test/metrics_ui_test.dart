@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:glance/core/format.dart';
 import 'package:glance/data/models/account.dart';
 import 'package:glance/data/models/indicator.dart';
 import 'package:glance/data/models/indicator_result.dart';
@@ -19,6 +20,7 @@ import 'package:glance/state/providers.dart';
 import 'package:glance/theme/theme.dart';
 import 'package:glance/ui/dashboards/editor/indicator_editor.dart';
 import 'package:glance/ui/dashboards/indicator_card.dart';
+import 'package:glance/ui/dashboards/indicator_chart.dart';
 import 'package:glance/ui/dashboards/metrics_source_screen.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -254,11 +256,15 @@ void main() {
     });
   });
 
-  group('carte « Métrique »', () {
+  group('cartes : libellés et graphique', () {
     const ind = ExternalIndicator(
         id: 'e', name: 'J7', metricId: 'j7', label: 'Rétention J7', unit: MetricUnit.percent);
 
-    Future<void> card(WidgetTester tester, RatioData data) async {
+    Future<void> card(
+      WidgetTester tester,
+      IndicatorData data, {
+      Indicator indicator = ind,
+    }) async {
       tester.view.physicalSize = const Size(500, 900);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
@@ -272,29 +278,56 @@ void main() {
           theme: glanceTheme(Brightness.light),
           home: Scaffold(
             body: IndicatorCard(
-                site: _site, window: _window, indicator: ind, menu: false),
+                site: _site, window: _window, indicator: indicator, menu: false),
           ),
         ),
       ));
       await tester.pumpAndSettle();
     }
 
-    testWidgets('fenêtre décalée : mention des cohortes sous le chiffre',
-        (tester) async {
-      await card(
-        tester,
-        RatioData(
-          points: [RatioPoint(DateTime(2026, 10, 7), 0.25)],
+    RatioData ratio(List<double?> values, {CohortSpan? cohorts}) => RatioData(
+          points: [
+            for (var i = 0; i < values.length; i++)
+              RatioPoint(DateTime(2026, 10, 15 + i), values[i]),
+          ],
           overall: 0.25,
           numeratorTotal: 10,
           denominatorTotal: 40,
-          cohorts: CohortSpan(DateTime(2026, 10, 7), DateTime(2026, 10, 13)),
-        ),
+          cohorts: cohorts,
+        );
+
+    testWidgets('plusieurs cohortes : libellé pluriel, graphique, pas de ligne '
+        'qui répète le titre', (tester) async {
+      await card(
+        tester,
+        ratio([0.2, 0.3, null],
+            cohorts: CohortSpan(DateTime(2026, 10, 8), DateTime(2026, 10, 14))),
       );
-      expect(find.text('Cohortes du 7 au 13 oct.'), findsOneWidget);
+      expect(find.text('Mesurée sur les cohortes du 8 au 14 oct.'), findsOneWidget);
+      expect(find.byType(IndicatorChart), findsOneWidget);
+      expect(find.text('Rétention J7'), findsNothing);
+      expect(find.text('10 / 40'), findsOneWidget);
     });
 
-    testWidgets('cohortes en cours : « Pas encore mesurable »', (tester) async {
+    testWidgets('une seule cohorte : libellé singulier', (tester) async {
+      await card(
+        tester,
+        ratio([0.2],
+            cohorts: CohortSpan(DateTime(2026, 10, 19), DateTime(2026, 10, 19))),
+      );
+      expect(find.text('Mesurée sur la cohorte du 19 oct.'), findsOneWidget);
+    });
+
+    testWidgets('moins de 2 points non nuls : le chiffre, sans graphique',
+        (tester) async {
+      await card(tester, ratio([null, 0.25, null]));
+      expect(find.byType(IndicatorChart), findsNothing);
+      expect(find.text(fmtPct(25).replaceAll('\u202f', '\u00a0')), findsOneWidget);
+      expect(find.text('10 / 40'), findsOneWidget);
+    });
+
+    testWidgets('cohortes en cours : « Pas encore mesurable », sans graphique',
+        (tester) async {
       await card(
         tester,
         RatioData(
@@ -307,6 +340,40 @@ void main() {
       );
       expect(find.text('Pas encore mesurable sur cette période'), findsOneWidget);
       expect(find.text('Aucune donnée sur la période'), findsNothing);
+      expect(find.byType(IndicatorChart), findsNothing);
+    });
+
+    testWidgets('compteur tout à zéro : 0 et « Aucun événement », sans courbe',
+        (tester) async {
+      await card(
+        tester,
+        CounterData([
+          for (var i = 0; i < 3; i++) SeriesPoint(DateTime(2026, 7, 1 + i), 0, 0),
+        ], 0),
+        indicator: const CounterIndicator(
+            id: 'c', name: 'Parties', query: EventQuery('partie')),
+      );
+      expect(find.text('0'), findsOneWidget);
+      expect(find.text('Aucun événement sur la période'), findsOneWidget);
+      expect(find.byType(IndicatorChart), findsNothing);
+    });
+
+    testWidgets('ligne de requête : omise si elle répète le nom, sinon affichée',
+        (tester) async {
+      final data = CounterData([
+        for (var i = 0; i < 3; i++) SeriesPoint(DateTime(2026, 7, 1 + i), 4, 0),
+      ], 12);
+      await card(tester, data,
+          indicator: const CounterIndicator(
+              id: 'c', name: 'partie', query: EventQuery('partie')));
+      expect(find.text('partie'), findsOneWidget); // le titre seul
+      expect(find.byType(IndicatorChart), findsOneWidget);
+
+      await card(tester, data,
+          indicator: const CounterIndicator(
+              id: 'c', name: 'Parties jouées', query: EventQuery('partie')));
+      expect(find.text('partie'), findsOneWidget); // la ligne de requête
+      expect(find.text('Parties jouées'), findsOneWidget);
     });
   });
 
@@ -348,7 +415,8 @@ void main() {
       expect(api.lastRange, (de: '2026-07-01', a: '2026-07-03', granularite: 'jour'));
     });
 
-    test('le délai du catalogue décale la plage demandée', () async {
+    test('le délai du catalogue : cohortes demandées −d, points à leur date de mesure',
+        () async {
       const defs = [
         MetricDef(
           id: 'retention_j1_nouveaux',
@@ -361,19 +429,22 @@ void main() {
       ];
       final api = FakeMetricsApi(defs: defs);
       final c = await container(api);
-      final w = DateWindow(DateTime.now().subtract(const Duration(days: 7)),
-          DateTime.now().add(const Duration(days: 1)), TimeUnit.day);
+      final t = DateTime.now();
+      final today = DateTime(t.year, t.month, t.day);
+      final w = DateWindow(DateTime(t.year, t.month, t.day - 6),
+          DateTime(t.year, t.month, t.day + 1), TimeUnit.day);
       final sub = c.listen(indicatorDataProvider((_site, w, indicator)), (_, _) {});
       final d = await c.read(indicatorDataProvider((_site, w, indicator)).future)
           as RatioData;
       sub.close();
 
-      expect(d.cohorts, isNotNull);
-      final t = DateTime.now();
-      final lastCohort = DateTime(t.year, t.month, t.day - 8);
-      expect(d.cohorts!.last, lastCohort);
-      expect(api.lastRange!.a,
-          '${lastCohort.year}-${lastCohort.month.toString().padLeft(2, '0')}-${lastCohort.day.toString().padLeft(2, '0')}');
+      String iso(DateTime x) =>
+          '${x.year}-${x.month.toString().padLeft(2, '0')}-${x.day.toString().padLeft(2, '0')}';
+      expect(api.lastRange!.de, iso(DateTime(today.year, today.month, today.day - 13)));
+      expect(api.lastRange!.a, iso(DateTime(today.year, today.month, today.day - 7)));
+      // L'axe reste celui de la période choisie.
+      expect(d.points.first.t, DateTime(today.year, today.month, today.day - 6));
+      expect(d.points.last.t, today);
     });
 
     test('l\'erreur typée de l\'API remonte telle quelle', () async {

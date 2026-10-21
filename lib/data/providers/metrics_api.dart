@@ -56,10 +56,15 @@ typedef MetricsRange = ({String de, String a, String granularite});
 /// instant de la fenêtre (`end` est exclusif : pile minuit, c'est la veille).
 /// L'API n'a pas d'heures : une fenêtre horaire demande des jours, et la carte
 /// n'affiche alors qu'un point par jour.
-MetricsRange metricsRangeFor(DateWindow w) {
+///
+/// [delayDays] : une métrique à délai est mesurée J + délai jours après sa
+/// cohorte J, donc on demande les cohortes de `[début − délai, fin − délai]`
+/// pour que leurs mesures tombent dans la fenêtre.
+MetricsRange metricsRangeFor(DateWindow w, {int delayDays = 0}) {
   final last = w.end.subtract(const Duration(milliseconds: 1));
-  final start = DateTime(w.start.year, w.start.month, w.start.day);
-  final fin = DateTime(last.year, last.month, last.day);
+  final start =
+      DateTime(w.start.year, w.start.month, w.start.day - delayDays);
+  final fin = DateTime(last.year, last.month, last.day - delayDays);
   // Le serveur refuse plus de 400 jours (400) : « Tout » ou une période perso
   // longue est ramenée aux 400 derniers. Les buckets d'avant restent vides côté
   // carte (trou pour un %, 0 pour un nombre), comme ceux que l'API omet.

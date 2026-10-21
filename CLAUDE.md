@@ -352,22 +352,40 @@ dans le code.
   ne se propage pas, et le **QR de transfert ne l'emporte pas**.
 - **Délai de mesure (`delai_jours`)** : champ facultatif du catalogue (J1 → 1,
   J7 → 7, J30 → 30 ; absent ou 0 pour un `nombre`). La cohorte du jour J n'est
-  mesurable qu'une fois J + délai terminé : la dernière est
-  `aujourd'hui − délai − 1`. Une période courte (« 7 jours ») ne contient sinon
-  **aucune** cohorte mesurable. `externalViewOf` (pure, testée) décale donc la
-  fenêtre en `[fin − durée, fin)`, `fin` = début du jour `aujourd'hui − délai`,
-  durée et granularité conservées ; une fenêtre déjà entièrement mesurable n'est
-  pas touchée, une fenêtre horaire devient une seule cohorte. La carte montre
-  « Cohortes du 7 au 13 oct. » sous le grand chiffre.
+  mesurable qu'une fois J + délai terminé : sa valeur est **mesurée** à la date
+  J + délai. Chaque point est donc **placé à sa date de mesure** : la carte
+  demande les cohortes de `[début − d, fin − d]` (`metricsRangeFor(delayDays:)`) et
+  `externalDataOf` range chaque point à `t + d`. L'axe reste **celui de la
+  période choisie**, comme sur toutes les autres cartes (un décalage de fenêtre
+  donnait un axe sans rapport avec la période, et une seule cohorte sur
+  « Aujourd'hui »). Sur « 7 jours » (15 → 21 oct.), J7 montre les cohortes du 8 au
+  14 oct. aux dates du 15 au 21.
+  - Un point dont le jour de mesure n'est pas terminé (aujourd'hui) reste un trou,
+    quoi que réponde le serveur ; ses effectifs ne comptent pas dans le total.
+    Donc « Aujourd'hui » en J1 n'a rien de mesurable : « Pas encore mesurable sur
+    cette période » (`RatioData.pending`, dénominateurs > 0 mais aucun point
+    mesurable), pas « Aucune donnée ».
+  - **En mois** : on demande des mois au serveur, on décale chaque bucket de `d`
+    jours puis on le rattache au mois (`truncateBucket`). On ne regroupe pas des
+    cohortes journalières côté client : le serveur agrège le mois entier, alors
+    que chaque jour isolé tombe souvent sous le seuil de confidentialité. Limite :
+    à partir de J28, deux mois voisins peuvent retomber dans le même bucket.
+  - **Libellés** : « Mesurée sur les cohortes du 8 au 14 oct. » (ou « …sur la
+    cohorte du 19 oct. »), bornes = première et dernière cohortes **mesurées** de
+    la carte. Infobulle : « 20 oct. · cohorte du 13 oct. · 15,4 % » (en jours).
   - Le délai est lu **à l'exécution** dans le catalogue (`metricsCatalogueProvider`,
     en cache), pas figé dans l'`ExternalIndicator` : les cartes existantes en
     profitent et le serveur reste la source de vérité. Catalogue en échec (ou
-    vieux serveur) → pas de décalage, et le catalogue n'est pas relancé (une
-    relance garderait les cartes en squelette).
-  - ⚠️ Le décalage dépend de `DateTime.now()` et se calcule **dans** le provider :
-    la clé de `indicatorDataProvider` ne change pas (cf. « Chargement infini »).
-  - Tous les points `null` alors que des dénominateurs > 0 : « Pas encore
-    mesurable sur cette période » (`RatioData.pending`), pas « Aucune donnée ».
+    vieux serveur) → délai 0, et le catalogue n'est pas relancé (une relance
+    garderait les cartes en squelette).
+  - ⚠️ `now` se lit **dans** le provider : la clé de `indicatorDataProvider` ne
+    change pas (cf. « Chargement infini »).
+- **Cartes lisibles (tous les types)** : un graphique à moins de 2 points non nuls
+  n'est pas dessiné (la carte garde son chiffre et ses lignes) ; sans point
+  mesurable, seul le message ; un compteur à 0 partout affiche « 0 » et « Aucun
+  événement sur la période », sans courbe plate. La ligne de contexte (requête,
+  libellé) est omise quand elle répète le titre : toujours pour une métrique de
+  site, sinon si elle ne diffère que par les séparateurs (` ÷ `/` / `, ` · `/` par `).
 - **Retirer une source supprime aussi ses cartes « Métrique »** : sans elle elles
   afficheraient « Jeton refusé » pour toujours. La confirmation et le toast
   annoncent le nombre de tableaux emportés.

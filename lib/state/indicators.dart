@@ -138,7 +138,9 @@ final indicatorDataProvider = FutureProvider.autoDispose
         final api = await metricsApiFor(ref, site);
         final tz = await deviceTimezone();
         // Le délai vient du catalogue (déjà en cache), pas de l'indicateur : le
-        // serveur reste la source de vérité. Sans catalogue, pas de décalage.
+        // serveur reste la source de vérité. Sans catalogue, pas de délai.
+        // ⚠️ `now` est lu ici, jamais dans une clé de `family` (cf. « Chargement
+        // infini »).
         final delay = await ref
             .read(metricsCatalogueProvider(site).future)
             .then((defs) => defs
@@ -146,12 +148,11 @@ final indicatorDataProvider = FutureProvider.autoDispose
                 .map((d) => d.delaiJours)
                 .firstOrNull ?? 0)
             .catchError((_) => 0);
-        final view = externalViewOf(w, delay, DateTime.now());
-        final range = metricsRangeFor(view.window);
+        final range = metricsRangeFor(w, delayDays: delay);
         final series =
             await gate.run(() => api.series(ids: [metricId], range: range, tz: tz));
-        return externalDataOf(unit, view.window, series[metricId] ?? const [],
-            cohorts: view.cohorts);
+        return externalDataOf(unit, w, series[metricId] ?? const [],
+            delayDays: delay, now: DateTime.now());
     }
   },
 );
