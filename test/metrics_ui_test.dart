@@ -309,6 +309,40 @@ void main() {
       expect(find.text('10 / 40'), findsOneWidget);
     });
 
+    group('données publiées jusqu\'au', () {
+      const installs = ExternalIndicator(
+          id: 'i', name: 'Installations iOS', metricId: 'installations_ios',
+          label: 'Installations iOS', unit: MetricUnit.count);
+      final u = Unpublished(until: DateTime(2026, 10, 16), from: DateTime(2026, 10, 17));
+      CounterData counter(List<double> v) => CounterData(
+            [
+              for (var i = 0; i < v.length; i++)
+                SeriesPoint(DateTime(2026, 10, 15 + i), v[i], 0),
+            ],
+            v.take(2).fold<double>(0, (a, b) => a + b).round(),
+            unpublished: u,
+          );
+
+      testWidgets('mention sous le chiffre, courbe tracée', (tester) async {
+        await card(tester, counter([3, 8, 0, 0]), indicator: installs);
+        expect(find.text('Données jusqu\'au 16 oct.'), findsOneWidget);
+        expect(find.text('11'), findsOneWidget);
+        expect(find.byType(IndicatorChart), findsOneWidget);
+      });
+
+      testWidgets('rien de publié sur la période : message', (tester) async {
+        final all = CounterData(
+          [SeriesPoint(DateTime(2026, 10, 17), 0, 0)],
+          0,
+          unpublished: u,
+        );
+        await card(tester, all, indicator: installs);
+        expect(find.text('Pas encore publiées : données jusqu\'au 16 oct.'),
+            findsOneWidget);
+        expect(find.text('Aucun événement sur la période'), findsNothing);
+      });
+    });
+
     testWidgets('une seule cohorte : libellé singulier', (tester) async {
       await card(
         tester,

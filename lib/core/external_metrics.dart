@@ -51,6 +51,10 @@ class _Placed {
 ///
 /// Les buckets que l'API ne renvoie pas, ou renvoie hors fenêtre, sont écartés
 /// ou comblés. [now] est injectable pour les tests.
+///
+/// [dataUntil] (`donnees_jusqu_au` du catalogue) : dernier jour publié par la
+/// source. Les buckets d'après sont des trous, même pour un nombre (un jour pas
+/// encore publié n'est pas un jour à 0), et ne comptent pas dans les totaux.
 IndicatorData externalDataOf(
   MetricUnit unit,
   DateWindow window,
@@ -58,8 +62,16 @@ IndicatorData externalDataOf(
   int delayDays = 0,
   DateTime? now,
   String? member,
+  DateTime? dataUntil,
 }) {
   final w = externalWindowOf(window);
+  // Le dernier jour publié porte sur la date de la série ; son point est placé
+  // à sa date de mesure, comme les autres.
+  final lastPlaced = dataUntil == null
+      ? null
+      : DateTime(dataUntil.year, dataUntil.month, dataUntil.day + delayDays);
+  bool published(DateTime bucket) =>
+      lastPlaced == null || !bucket.isAfter(lastPlaced);
   final t0 = now ?? DateTime.now();
   final today = DateTime(t0.year, t0.month, t0.day);
   final byBucket = <DateTime, _Placed>{};
@@ -69,6 +81,10 @@ IndicatorData externalDataOf(
         _Placed(p, delayDays == 0 || measured.isBefore(today));
   }
   final buckets = bucketsOf(w);
+  final firstGap = buckets.where((t) => !published(t)).firstOrNull;
+  final unpublished = firstGap == null
+      ? null
+      : Unpublished(until: dataUntil!, from: firstGap);
 
   // Première et dernière cohortes réellement mesurées dans la fenêtre.
   DateTime? first;
@@ -84,14 +100,16 @@ IndicatorData externalDataOf(
 
   if (unit == MetricUnit.count) {
     // Un compteur n'est jamais « non mesurable » : un null serait un 0.
+    double? value(DateTime t) => published(t) ? byBucket[t]?.valeur : null;
     final series = [
-      for (final t in buckets) SeriesPoint(t, byBucket[t]?.valeur ?? 0, 0),
+      for (final t in buckets) SeriesPoint(t, value(t) ?? 0, 0),
     ];
     for (final t in buckets) {
-      if (byBucket[t]?.valeur != null) seen(byBucket[t]!.point.t);
+      if (value(t) != null) seen(byBucket[t]!.point.t);
     }
     final total = series.fold<double>(0, (a, s) => a + s.visitors);
-    return CounterData(series, total.round(), cohorts: span(), member: member);
+    return CounterData(series, total.round(),
+        cohorts: span(), member: member, unpublished: unpublished);
   }
 
   var num = 0;
@@ -104,7 +122,7 @@ IndicatorData externalDataOf(
   var unfinished = false;
   final ratio = <RatioPoint>[];
   for (final t in buckets) {
-    final p = byBucket[t];
+    final p = published(t) ? byBucket[t] : null;
     final v = p?.valeur;
     anyDen += p?.point.denominateur ?? 0;
     if (delayDays > 0 && !t.isBefore(today)) unfinished = true;
@@ -132,5 +150,6 @@ IndicatorData externalDataOf(
     member: member,
     pending: den == 0 && (anyDen > 0 || unfinished),
     delayDays: delayDays,
+    unpublished: unpublished,
   );
 }

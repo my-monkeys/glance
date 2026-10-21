@@ -434,6 +434,16 @@ dans le code.
 - **Retirer une source supprime aussi ses cartes « Métrique »** : sans elle elles
   afficheraient « Jeton refusé » pour toujours. La confirmation et le toast
   annoncent le nombre de tableaux emportés.
+- **Données en retard (`donnees_jusqu_au`)** : champ facultatif du catalogue,
+  « AAAA-MM-JJ », dernier jour publié par la source (stores : J-1 pour l'App
+  Store, 3 à 7 jours pour Play). Les buckets d'après sont des **trous, même pour
+  un `nombre`** (un jour pas publié n'est pas un jour à 0), hors des totaux ;
+  la carte note « Données jusqu'au 18 oct. », et une fenêtre entièrement après
+  la date dit « Pas encore publiées : … » (`Unpublished`, `externalDataOf`,
+  testé). La date porte sur `t` de la série : avec un délai, la borne se place
+  à `date + délai`, comme les points. Ne pas passer par `delai_jours`, qui
+  décale les points comme des cohortes. Convenu avec la session de l'appli
+  GeoDaily (ticket n° 5).
 - ⚠️ Le serveur refuse plus de 400 jours : `metricsRangeFor` ramène `de` à
   `a − 399 jours` (« Tout », période perso). Les buckets d'avant la borne restent
   vides : trou pour un %, 0 pour un nombre.

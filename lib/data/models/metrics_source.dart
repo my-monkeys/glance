@@ -63,6 +63,7 @@ class MetricDef {
     this.delaiJours = 0,
     this.famille,
     this.libelleFamille,
+    this.donneesJusquAu,
   });
 
   final String id;
@@ -80,6 +81,11 @@ class MetricDef {
   final String? famille;
   final String? libelleFamille;
 
+  /// Dernier jour publié par la source (`donnees_jusqu_au`, « AAAA-MM-JJ »),
+  /// pour des données qui arrivent en retard (stores : J-1 à J-7). Les jours
+  /// suivants sont des trous, pas des zéros. Null = tout est à jour.
+  final DateTime? donneesJusquAu;
+
   factory MetricDef.fromJson(Map<String, dynamic> j) => MetricDef(
         id: j['id'] as String,
         libelle: j['libelle'] as String,
@@ -90,7 +96,15 @@ class MetricDef {
         delaiJours: (j['delai_jours'] as num?)?.round() ?? 0,
         famille: j['famille'] as String?,
         libelleFamille: j['libelle_famille'] as String?,
+        donneesJusquAu: _localDay(j['donnees_jusqu_au']),
       );
+
+  /// « 2026-10-18 » → minuit local ; tout autre format est ignoré.
+  static DateTime? _localDay(Object? v) {
+    final m = RegExp(r'^(\d{4})-(\d{2})-(\d{2})$').firstMatch('${v ?? ''}');
+    if (m == null) return null;
+    return DateTime(int.parse(m[1]!), int.parse(m[2]!), int.parse(m[3]!));
+  }
 }
 
 /// Les indicateurs d'une famille, du plus court délai au plus long.
