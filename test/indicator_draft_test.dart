@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:glance/data/models/indicator.dart';
+import 'package:glance/data/models/metrics_source.dart';
 import 'package:glance/ui/dashboards/editor/draft.dart';
 
 const _issue = EventFilter(
@@ -35,12 +36,48 @@ void main() {
       ),
       const BreakdownIndicator(
           id: 'b', name: 'Par jeu', event: 'partie', property: 'jeu'),
+      const ExternalIndicator(
+        id: 'x',
+        name: 'Comptes',
+        metricId: 'comptes',
+        label: 'Comptes',
+        unit: MetricUnit.count,
+      ),
     ];
     for (final i in all) {
       test(i.kind.name, () {
         expect(IndicatorDraft.fromIndicator(i).toIndicator(i.id), i);
       });
     }
+  });
+
+  group('métrique du site', () {
+    const d = IndicatorDraft(kind: IndicatorKind.external);
+
+    test('sans métrique : refusé', () {
+      expect(d.validationError(), 'Choisissez une métrique');
+      expect(d.toIndicator('x'), isNull);
+    });
+
+    test('le nom proposé est le libellé du catalogue', () {
+      final chosen = d.copyWith(
+        metricId: 'r1',
+        metricLabel: 'Rétention J1',
+        metricUnit: MetricUnit.percent,
+      );
+      expect(chosen.validationError(), isNull);
+      expect(chosen.suggestedName(), 'Rétention J1');
+      final i = chosen.toIndicator('i') as ExternalIndicator;
+      expect(i.unit, MetricUnit.percent);
+    });
+
+    test('changer de genre ne reporte rien depuis ni vers une métrique', () {
+      final from = const IndicatorDraft(query: EventQuery('partie'))
+          .withKind(IndicatorKind.external);
+      expect(from.metricId, isEmpty);
+      final to = d.copyWith(metricId: 'r').withKind(IndicatorKind.counter);
+      expect(to.query.event, isEmpty);
+    });
   });
 
   group('validationError', () {

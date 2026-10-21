@@ -19,7 +19,9 @@ const _kNiceSteps = [10, 12, 16, 20, 24, 32, 40, 48, 60, 80];
 /// paliers se suivent d'au plus 33 %, donc au plus ~34 % de vide au-dessus de
 /// la marge.
 double chartNiceMax(double m) {
-  if (m <= 0) return 10;
+  // Série toute à zéro : 8 et non 10, dont le quart (2,5) s'arrondirait en
+  // « 3 % » et « 8 % » sur les graduations.
+  if (m <= 0) return 8;
   final v = m * 1.15;
   final integral = m >= 1;
   final decade = (math.log(v) / math.ln10).floor();

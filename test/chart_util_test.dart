@@ -4,7 +4,7 @@ import 'package:glance/ui/widgets/chart_util.dart';
 void main() {
   group('chartNiceMax', () {
     test('valeurs de référence', () {
-      expect(chartNiceMax(0), 10);
+      expect(chartNiceMax(0), 8);
       expect(chartNiceMax(185), 240);
       expect(chartNiceMax(9), 12);
       expect(chartNiceMax(1000), 1200);

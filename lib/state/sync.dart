@@ -6,6 +6,7 @@ import '../data/sync/sync_api.dart';
 import '../data/sync/sync_crypto.dart';
 import '../data/transfer/config_transfer.dart' show TransferPayload;
 import 'indicators.dart';
+import 'metrics_sources.dart';
 import 'providers.dart';
 import 'workspaces.dart';
 
@@ -323,6 +324,7 @@ class SyncController extends Notifier<SyncState> {
       credentials: creds,
       workspaces: ref.read(workspacesProvider),
       indicators: ref.read(indicatorsProvider),
+      metricSources: await ref.read(metricsSourcesProvider.notifier).withTokens(),
     );
   }
 
@@ -332,6 +334,8 @@ class SyncController extends Notifier<SyncState> {
     // Fusion par id, l'entrant gagne ; comme les groupes, une suppression ne
     // se propage pas.
     await ref.read(indicatorsProvider.notifier).upsertAll(p.indicators);
+    // Par site, l'entrante gagne ; jeton écrit avec elle.
+    await ref.read(metricsSourcesProvider.notifier).upsertAll(p.metricSources);
   }
 }
 

@@ -1,13 +1,17 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../core/external_metrics.dart';
 import '../core/indicator_math.dart';
+import '../core/timezone.dart';
 import '../data/models/dimension.dart';
 import '../data/models/indicator.dart';
 import '../data/models/indicator_result.dart';
 import '../data/models/models.dart';
 import '../data/models/period.dart';
 import '../data/models/workspace.dart';
+import '../data/providers/metrics_api.dart';
+import 'metrics_sources.dart';
 import 'providers.dart';
 
 /// Indicateurs personnalisés, par site (persistés en clair : des noms
@@ -103,30 +107,54 @@ final siteIndicatorsProvider = Provider.family<List<Indicator>, Site>(
 /// Résultat d'un indicateur sur une fenêtre. L'indicateur fait partie de la
 /// clé (égalité par valeur) : le modifier relance le calcul.
 final indicatorDataProvider = FutureProvider.autoDispose
-    .family<IndicatorData, (Site, DateWindow, Indicator)>((ref, key) async {
-  cacheFor(ref, kStatsCacheTtl);
-  final (site, w, indicator) = key;
-  final gate = ref.watch(fetchGateProvider);
-  final p = await analyticsProviderFor(ref, site);
+    .family<IndicatorData, (Site, DateWindow, Indicator)>(
+  retry: retryUnlessMetricsError,
+  (ref, key) async {
+    cacheFor(ref, kStatsCacheTtl);
+    final (site, w, indicator) = key;
+    final gate = ref.watch(fetchGateProvider);
 
-  Future<List<SeriesPoint>> count(EventQuery q) =>
-      gate.run(() => p.eventCountSeries(site, w, q));
+    Future<List<SeriesPoint>> count(EventQuery q) async {
+      final p = await analyticsProviderFor(ref, site);
+      return gate.run(() => p.eventCountSeries(site, w, q));
+    }
 
-  switch (indicator) {
-    case CounterIndicator(:final query):
-      final points = await count(query);
-      final total = points.fold<double>(0, (a, b) => a + b.visitors);
-      return CounterData(points, total.round());
-    case RatioIndicator(:final numerator, :final denominator, :final gapsWhenEmpty):
-      final (num, den) = await (count(numerator), count(denominator)).wait;
-      return ratioOf(num, den, gapsWhenEmpty: gapsWhenEmpty);
-    case FunnelIndicator():
-      return FunnelData(await gate.run(() => p.funnel(site, w, indicator)));
-    case BreakdownIndicator(:final event, :final property):
-      final rows = await gate.run(() => p.propertyValues(site, w, event, property));
-      return BreakdownData(rows, rows.fold<int>(0, (a, r) => a + r.value));
-  }
-});
+    switch (indicator) {
+      case CounterIndicator(:final query):
+        final points = await count(query);
+        final total = points.fold<double>(0, (a, b) => a + b.visitors);
+        return CounterData(points, total.round());
+      case RatioIndicator(:final numerator, :final denominator, :final gapsWhenEmpty):
+        final (num, den) = await (count(numerator), count(denominator)).wait;
+        return ratioOf(num, den, gapsWhenEmpty: gapsWhenEmpty);
+      case FunnelIndicator():
+        final p = await analyticsProviderFor(ref, site);
+        return FunnelData(await gate.run(() => p.funnel(site, w, indicator)));
+      case BreakdownIndicator(:final event, :final property):
+        final p = await analyticsProviderFor(ref, site);
+        final rows = await gate.run(() => p.propertyValues(site, w, event, property));
+        return BreakdownData(rows, rows.fold<int>(0, (a, r) => a + r.value));
+      case ExternalIndicator(:final metricId, :final unit):
+        final api = await metricsApiFor(ref, site);
+        final tz = await deviceTimezone();
+        // Le délai vient du catalogue (déjà en cache), pas de l'indicateur : le
+        // serveur reste la source de vérité. Sans catalogue, pas de décalage.
+        final delay = await ref
+            .read(metricsCatalogueProvider(site).future)
+            .then((defs) => defs
+                .where((d) => d.id == metricId)
+                .map((d) => d.delaiJours)
+                .firstOrNull ?? 0)
+            .catchError((_) => 0);
+        final view = externalViewOf(w, delay, DateTime.now());
+        final range = metricsRangeFor(view.window);
+        final series =
+            await gate.run(() => api.series(ids: [metricId], range: range, tz: tz));
+        return externalDataOf(unit, view.window, series[metricId] ?? const [],
+            cohorts: view.cohorts);
+    }
+  },
+);
 
 // Aides de l'éditeur. ⚠️ Troisième exception à « tout écran lit
 // `windowProvider` » (avec `siteHasEventsProvider` et le test de connexion) :

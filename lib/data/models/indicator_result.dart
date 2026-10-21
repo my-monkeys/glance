@@ -48,10 +48,29 @@ sealed class IndicatorData {
   const IndicatorData();
 }
 
+/// Jours de cohortes réellement affichés quand la fenêtre d'une métrique de
+/// site a été décalée (bornes incluses).
+@immutable
+class CohortSpan {
+  const CohortSpan(this.first, this.last);
+  final DateTime first;
+  final DateTime last;
+
+  @override
+  bool operator ==(Object other) =>
+      other is CohortSpan && other.first == first && other.last == last;
+
+  @override
+  int get hashCode => Object.hash(first, last);
+}
+
 class CounterData extends IndicatorData {
-  const CounterData(this.points, this.total);
+  const CounterData(this.points, this.total, {this.cohorts});
   final List<SeriesPoint> points;
   final int total;
+
+  /// Non null quand la fenêtre a été décalée (métrique de site).
+  final CohortSpan? cohorts;
 }
 
 class RatioData extends IndicatorData {
@@ -60,12 +79,21 @@ class RatioData extends IndicatorData {
     required this.overall,
     required this.numeratorTotal,
     required this.denominatorTotal,
+    this.cohorts,
+    this.pending = false,
   });
 
   final List<RatioPoint> points;
   final double? overall;
   final int numeratorTotal;
   final int denominatorTotal;
+
+  /// Non null quand la fenêtre a été décalée (métrique de site).
+  final CohortSpan? cohorts;
+
+  /// Aucun point mesurable, alors que des gens y comptent : les cohortes ne
+  /// sont pas terminées. À distinguer de « rien ne s'est passé ».
+  final bool pending;
 }
 
 class FunnelData extends IndicatorData {

@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:glance/data/models/indicator.dart';
+import 'package:glance/data/models/metrics_source.dart';
 import 'package:glance/data/models/workspace.dart';
 
 void main() {
@@ -39,6 +40,12 @@ void main() {
         windowMinutes: 7),
     const BreakdownIndicator(
         id: 'd', name: 'Niveaux', event: 'partie', property: 'niveau'),
+    const ExternalIndicator(
+        id: 'e',
+        name: 'Rétention J1',
+        metricId: 'retention_j1_nouveaux',
+        label: 'Rétention J1 · nouveaux joueurs',
+        unit: MetricUnit.percent),
   ];
 
   test('aller-retour JSON de chaque genre', () {
@@ -67,6 +74,14 @@ void main() {
       'indicators': [all.first.toJson(), unknown],
     });
     expect(si.indicators, [all.first]);
+  });
+
+  test('external : clés JSON et unité', () {
+    final json = all.last.toJson();
+    expect(json['kind'], 'external');
+    expect(json['metric'], 'retention_j1_nouveaux');
+    expect(json['label'], 'Rétention J1 · nouveaux joueurs');
+    expect(json['unit'], 'pourcentage');
   });
 
   test('liste encodée puis décodée', () {

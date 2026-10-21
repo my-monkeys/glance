@@ -10,6 +10,7 @@ const kindNames = {
   IndicatorKind.ratio: 'Taux',
   IndicatorKind.funnel: 'Entonnoir',
   IndicatorKind.breakdown: 'Répartition',
+  IndicatorKind.external: 'Métrique du site',
 };
 
 const _kindHints = {
@@ -17,6 +18,7 @@ const _kindHints = {
   IndicatorKind.ratio: 'Un événement rapporté à un autre',
   IndicatorKind.funnel: 'Le parcours étape par étape',
   IndicatorKind.breakdown: 'Les valeurs d\'une propriété',
+  IndicatorKind.external: 'Un indicateur fourni par votre API',
 };
 
 /// Les genres en grille de deux colonnes : empilés, ils remplissaient l'écran

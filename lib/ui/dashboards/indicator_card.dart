@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/external_metrics.dart';
 import '../../core/format.dart';
 import '../../data/models/indicator.dart';
 import '../../data/models/indicator_result.dart';
@@ -25,6 +26,7 @@ const _kindLabels = {
   IndicatorKind.ratio: 'Taux',
   IndicatorKind.funnel: 'Entonnoir',
   IndicatorKind.breakdown: 'Répartition',
+  IndicatorKind.external: 'Métrique',
 };
 
 /// Une carte = un indicateur = une clé de `indicatorDataProvider` : chaque
@@ -105,6 +107,7 @@ class IndicatorCard extends ConsumerWidget {
                   child: data == null
                       ? (async.hasError
                           ? _CardError(
+                              message: metricsErrorMessage(async.error!),
                               onRetry: () =>
                                   ref.invalidate(indicatorDataProvider(key)),
                             )
@@ -149,23 +152,28 @@ class _CardBody extends StatelessWidget {
               ),
             ),
       (RatioIndicator(:final numerator, :final denominator), RatioData d) =>
-        d.denominatorTotal == 0
-            ? const _NoData()
-            : _Stat(
-                big: d.overall == null ? '—' : fmtPct(d.overall! * 100),
-                sub: '${fmtInt(d.numeratorTotal)} / ${fmtInt(d.denominatorTotal)}',
-                detail: '${queryLabel(numerator)} ÷ ${queryLabel(denominator)}',
-                child: IndicatorChart(
-                  // Les trous (dénominateur nul) viennent de `ratioOf`, selon le
-                  // choix de l'indicateur.
-                  points: [
-                    for (final r in d.points)
-                      IndicatorPoint(r.t, r.value == null ? null : r.value! * 100),
-                  ],
-                  unit: window.unit,
-                  percent: true,
-                ),
+        _ratioStat(
+          d,
+          '${queryLabel(numerator)} ÷ ${queryLabel(denominator)}',
+          window.unit,
+        ),
+      (ExternalIndicator(:final label), RatioData d) => _ratioStat(
+          d,
+          label,
+          externalUnitOf(window.unit),
+          pendingMessage: d.pending,
+        ),
+      (ExternalIndicator(:final label), CounterData d) => _isEmpty(d)
+          ? const _NoData()
+          : _Stat(
+              big: fmtInt(d.total),
+              sub: label,
+              note: _cohortsNote(d.cohorts),
+              child: IndicatorChart(
+                points: [for (final s in d.points) IndicatorPoint(s.t, s.visitors)],
+                unit: externalUnitOf(window.unit),
               ),
+            ),
       (FunnelIndicator(), FunnelData d) => d.steps.isEmpty || d.steps.first.visitors == 0
           ? const _NoData()
           : _Stat(
@@ -197,14 +205,55 @@ class _CardBody extends StatelessWidget {
     };
   }
 
+  // Les trous (dénominateur nul, ou non mesurable pour une métrique de site)
+  // viennent des points du résultat, pas d'ici.
+  static Widget _ratioStat(
+    RatioData d,
+    String detail,
+    TimeUnit unit, {
+    bool pendingMessage = false,
+  }) =>
+      d.denominatorTotal == 0
+          ? _NoData(
+              pendingMessage
+                  ? 'Pas encore mesurable sur cette période'
+                  : 'Aucune donnée sur la période',
+            )
+          : _Stat(
+              note: _cohortsNote(d.cohorts),
+              big: d.overall == null ? '—' : fmtPct(d.overall! * 100),
+              sub: '${fmtInt(d.numeratorTotal)} / ${fmtInt(d.denominatorTotal)}',
+              detail: detail,
+              child: IndicatorChart(
+                points: [
+                  for (final r in d.points)
+                    IndicatorPoint(r.t, r.value == null ? null : r.value! * 100),
+                ],
+                unit: unit,
+                percent: true,
+              ),
+            );
+
+  static String? _cohortsNote(CohortSpan? c) =>
+      c == null ? null : 'Cohortes ${fmtDayRange(c.first, c.last)}';
+
   static bool _isEmpty(CounterData d) =>
       d.total == 0 && d.points.every((s) => s.visitors == 0);
 }
 
 /// Grand chiffre, ligne de contexte, puis le détail de l'indicateur.
 class _Stat extends StatelessWidget {
-  const _Stat({required this.big, required this.sub, required this.child, this.detail});
+  const _Stat({
+    required this.big,
+    required this.sub,
+    required this.child,
+    this.detail,
+    this.note,
+  });
   final String big;
+
+  /// Mention discrète sous le grand chiffre (fenêtre décalée).
+  final String? note;
   final String sub;
   final String? detail;
   final Widget child;
@@ -230,6 +279,11 @@ class _Stat extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
           style: GT.mono(11.5, color: p.fg2),
         ),
+        if (note != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Text(note!, style: GT.mono(10.5, color: p.fg3)),
+          ),
         if (detail != null)
           Padding(
             padding: const EdgeInsets.only(top: 2),
@@ -248,13 +302,14 @@ class _Stat extends StatelessWidget {
 }
 
 class _NoData extends StatelessWidget {
-  const _NoData();
+  const _NoData([this.message = 'Aucune donnée sur la période']);
+  final String message;
 
   @override
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.symmetric(vertical: 14),
         child: Text(
-          'Aucune donnée sur la période',
+          message,
           style: GT.body(13, color: context.glance.fg3),
         ),
       );
@@ -272,7 +327,9 @@ class _CardSkeleton extends StatelessWidget {
           height: h,
           decoration: BoxDecoration(color: c, borderRadius: BorderRadius.circular(r)),
         );
-    final timeSeries = kind == IndicatorKind.counter || kind == IndicatorKind.ratio;
+    final timeSeries = kind == IndicatorKind.counter ||
+        kind == IndicatorKind.ratio ||
+        kind == IndicatorKind.external;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -310,7 +367,8 @@ class _CardSkeleton extends StatelessWidget {
 }
 
 class _CardError extends StatelessWidget {
-  const _CardError({required this.onRetry});
+  const _CardError({required this.message, required this.onRetry});
+  final String message;
   final VoidCallback onRetry;
 
   @override
@@ -320,7 +378,7 @@ class _CardError extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 22),
       child: Column(
         children: [
-          Text('Chargement impossible.', style: GT.body(13, color: p.fg2)),
+          Text(message, textAlign: TextAlign.center, style: GT.body(13, color: p.fg2)),
           const SizedBox(height: 8),
           GestureDetector(
             onTap: onRetry,

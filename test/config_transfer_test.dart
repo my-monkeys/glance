@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:glance/data/models/account.dart';
 import 'package:glance/data/models/indicator.dart';
+import 'package:glance/data/models/metrics_source.dart';
 import 'package:glance/data/models/workspace.dart';
 import 'package:glance/data/transfer/config_transfer.dart';
 
@@ -107,7 +108,7 @@ void main() {
       expect(data.length, lessThan(900));
     });
 
-    test('les indicateurs ne voyagent pas par QR : ni décodés, ni comptés en taille',
+    test('ni tableaux ni sources (jetons) ne voyagent par QR : ni décodés, ni comptés',
         () async {
       final avec = TransferPayload(
         accounts: payload().accounts,
@@ -118,12 +119,19 @@ void main() {
             const CounterIndicator(id: 'c', name: 'Parties', query: EventQuery('x')),
           ]),
         ],
+        metricSources: const [
+          SyncedMetricsSource(
+            MetricsSource(site: SiteRef('a1', 's1'), baseUrl: 'https://x.eu/'),
+            'jeton',
+          ),
+        ],
       );
       final a = await ConfigTransfer.encode(avec, '4242');
       final b = await ConfigTransfer.encode(payload(), '4242');
       final back = await ConfigTransfer.decode(a, '4242');
 
       expect(back.indicators, isEmpty);
+      expect(back.metricSources, isEmpty);
       expect(back.accounts.single.id, 'a1');
       // Le sel et le nonce sont aléatoires mais de taille fixe ; le gzip du
       // clair est identique donc la longueur l'est aussi (± la péremption,

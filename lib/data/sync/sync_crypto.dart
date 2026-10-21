@@ -5,6 +5,7 @@ import 'package:cryptography/cryptography.dart';
 
 import '../models/account.dart';
 import '../models/indicator.dart';
+import '../models/metrics_source.dart';
 import '../models/workspace.dart';
 import '../transfer/config_transfer.dart' show TransferPayload;
 
@@ -17,7 +18,7 @@ import '../transfer/config_transfer.dart' show TransferPayload;
 ///   blob illisible (chiffrement de bout en bout, cf. `glance-sync`).
 ///
 /// Format v1, base64 : `salt(16) | nonce(12) | ciphertext | mac(16)`. Le clair
-/// est du JSON gzippé (comptes + identifiants + groupes).
+/// est du JSON gzippé (comptes + identifiants + groupes + tableaux + sources de métriques).
 class SyncCrypto {
   static const version = 1;
 
@@ -45,6 +46,9 @@ class SyncCrypto {
       // ancienne répond « mauvais mot de passe » sur une version inconnue,
       // alors qu'elle ignore simplement une clé en plus.
       'indicators': [for (final s in payload.indicators) s.toJson()],
+      // Idem : facultative, `version` reste à 1. Porte les jetons en clair
+      // DANS le blob chiffré, comme les identifiants des comptes.
+      'metricSources': [for (final s in payload.metricSources) s.toJson()],
     });
 
     final salt = SecretKeyData.random(length: 16).bytes;
@@ -94,6 +98,12 @@ class SyncCrypto {
         for (final raw
             in ((j['indicators'] as List?) ?? const []).cast<Map<String, dynamic>>())
           SiteIndicators.fromJson(raw),
+      ],
+      // Absente d'un blob poussé par une app antérieure aux sources.
+      metricSources: [
+        for (final raw
+            in ((j['metricSources'] as List?) ?? const []).cast<Map<String, dynamic>>())
+          SyncedMetricsSource.fromJson(raw),
       ],
     );
   }
