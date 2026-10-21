@@ -218,13 +218,19 @@ class _CardBody extends StatelessWidget {
     );
   }
 
+  static String _pendingMessage(int delayDays) => switch (delayDays) {
+        0 => 'Pas encore mesurable sur cette période',
+        1 => 'Pas encore mesurable : il faut 1 jour de recul',
+        _ => 'Pas encore mesurable : il faut $delayDays jours de recul',
+      };
+
   // Les trous (dénominateur nul, ou non mesurable pour une métrique de site)
   // viennent des points du résultat, pas d'ici.
   Widget _ratioStat(RatioData d, {String? detail, required TimeUnit unit}) =>
       d.denominatorTotal == 0
           ? _NoData(
               d.pending
-                  ? 'Pas encore mesurable sur cette période'
+                  ? _pendingMessage(d.delayDays)
                   : 'Aucune donnée sur la période',
             )
           : _Stat(

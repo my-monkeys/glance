@@ -160,6 +160,31 @@ void main() {
       expect(d.cohorts, isNull);
     });
 
+    test('« Aujourd\'hui », J1, réponse réelle du serveur (null, dénominateur 0) : en attente', () {
+      final today = DateWindow(DateTime(2026, 10, 21), DateTime(2026, 10, 21, 15), TimeUnit.hour);
+      final d = externalDataOf(
+        MetricUnit.percent,
+        today,
+        [_p(20, null, 0, 0)],
+        delayDays: 1,
+        now: now,
+      ) as RatioData;
+
+      expect(d.pending, isTrue);
+      expect(d.overall, isNull);
+    });
+
+    test('sans délai, une fenêtre vide reste « aucune donnée »', () {
+      final d = externalDataOf(
+        MetricUnit.percent,
+        _w,
+        const [],
+        now: now,
+      ) as RatioData;
+
+      expect(d.pending, isFalse);
+    });
+
     test('« Hier », J1 : une seule cohorte mesurée', () {
       final yesterday =
           DateWindow(DateTime(2026, 10, 20), DateTime(2026, 10, 21), TimeUnit.day);

@@ -326,6 +326,23 @@ void main() {
       expect(find.text('10 / 40'), findsOneWidget);
     });
 
+    testWidgets('cohortes en cours avec délai : le recul nécessaire est dit',
+        (tester) async {
+      await card(
+        tester,
+        RatioData(
+          points: [RatioPoint(DateTime(2026, 10, 21), null)],
+          overall: null,
+          numeratorTotal: 0,
+          denominatorTotal: 0,
+          pending: true,
+          delayDays: 7,
+        ),
+      );
+      expect(find.text('Pas encore mesurable : il faut 7 jours de recul'),
+          findsOneWidget);
+    });
+
     testWidgets('cohortes en cours : « Pas encore mesurable », sans graphique',
         (tester) async {
       await card(

@@ -91,11 +91,17 @@ IndicatorData externalDataOf(
   var num = 0;
   var den = 0;
   var anyDen = 0;
+  // Un jour de mesure pas encore terminé dans la fenêtre (« Aujourd'hui »
+  // en J1) : la carte est en attente, pas vide. On ne peut pas s'en remettre
+  // aux effectifs : le serveur rend une cohorte non mesurable avec un
+  // dénominateur à 0.
+  var unfinished = false;
   final ratio = <RatioPoint>[];
   for (final t in buckets) {
     final p = byBucket[t];
     final v = p?.valeur;
     anyDen += p?.point.denominateur ?? 0;
+    if (delayDays > 0 && !t.isBefore(today)) unfinished = true;
     // Un bucket non mesurable reste un trou, quelle que soit l'option de trous
     // des taux : c'est une mesure refusée, pas un jour sans événement. Ses
     // effectifs ne comptent pas non plus dans le total.
@@ -117,6 +123,7 @@ IndicatorData externalDataOf(
     numeratorTotal: num,
     denominatorTotal: den,
     cohorts: span(),
-    pending: den == 0 && anyDen > 0,
+    pending: den == 0 && (anyDen > 0 || unfinished),
+    delayDays: delayDays,
   );
 }

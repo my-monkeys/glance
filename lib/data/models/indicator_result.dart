@@ -84,6 +84,7 @@ class RatioData extends IndicatorData {
     required this.denominatorTotal,
     this.cohorts,
     this.pending = false,
+    this.delayDays = 0,
   });
 
   final List<RatioPoint> points;
@@ -97,6 +98,10 @@ class RatioData extends IndicatorData {
   /// Aucun point mesurable, alors que des gens y comptent : les cohortes ne
   /// sont pas terminées. À distinguer de « rien ne s'est passé ».
   final bool pending;
+
+  /// Recul nécessaire avant la mesure (J7 → 7), pour dire à l'attente combien
+  /// de temps elle dure. 0 hors métrique à délai.
+  final int delayDays;
 }
 
 class FunnelData extends IndicatorData {
