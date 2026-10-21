@@ -443,7 +443,11 @@ dans le code.
   testé). La date porte sur `t` de la série : avec un délai, la borne se place
   à `date + délai`, comme les points. Ne pas passer par `delai_jours`, qui
   décale les points comme des cohortes. Convenu avec la session de l'appli
-  GeoDaily (ticket n° 5).
+  GeoDaily (ticket n° 5). Côté serveur, le bucket mois qui **contient** la date
+  rend sa somme partielle dans `valeur` (comme le mois en cours des visiteurs) ;
+  seul un bucket qui commence après vaut null. Premiers indicateurs :
+  `installations_ios`, `mises_a_jour_ios` (rapport de ventes App Store, jour du
+  Pacifique, 0 un jour sans vente).
 - ⚠️ Le serveur refuse plus de 400 jours : `metricsRangeFor` ramène `de` à
   `a − 399 jours` (« Tout », période perso). Les buckets d'avant la borne restent
   vides : trou pour un %, 0 pour un nombre.
