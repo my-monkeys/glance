@@ -135,6 +135,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               if (window != null) ref.invalidate(siteStatsProvider((s, window)));
             }
             ref.invalidate(siteLiveProvider);
+            // Tirer pour rafraîchir fait aussi apparaître un site créé depuis le
+            // lancement (pas la minuterie : une liste par compte à chaque tick).
+            ref.invalidate(sitesProvider);
             await ref.read(sitesProvider.future);
           },
           child: ListView(

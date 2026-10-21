@@ -38,6 +38,20 @@ lib/
 
 La sélection de sites est éditable après coup : Réglages → tap sur le compte → « Choisir les sites ».
 
+**Nouveaux sites** : l'écran de choix sépare les sites cochés aujourd'hui de la case
+« Afficher les nouveaux sites ». Cochée, la sélection s'enregistre comme une
+**exclusion** (`Account.sites == null` + `excludedSites`) : un site créé plus tard n'y
+figure pas, il s'affiche donc seul. Décochée, c'est une liste explicite (`sites`).
+- ⚠️ L'ancien écran passait en liste explicite dès qu'on touchait un site, et ce suivi
+  se perdait en silence (vécu : 87 sites sur 87 en liste, le 88ᵉ invisible). Une liste
+  qui couvre tous les sites se rouvre donc avec la case cochée.
+- `excludedSites` est une clé JSON **facultative** : une app plus ancienne l'ignore et
+  affiche tout, ce qui est le repli sans danger (même raison que `indicators` en synchro).
+- La liste des sites (`sitesProvider`, `accountSitesProvider`) est en cache depuis le
+  lancement : tirer pour rafraîchir l'accueil la recharge, et l'écran de choix la
+  recharge à l'ouverture. La minuterie, elle, n'y touche pas (une liste par compte à
+  chaque tick).
+
 ## Chargement des données (incrémental)
 
 **Un provider par site**, pas un gros lot. Chaque carte s'affiche/s'actualise dès que SA donnée arrive :

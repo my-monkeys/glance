@@ -342,7 +342,7 @@ class SettingsScreen extends ConsumerWidget {
             const SizedBox(height: 16),
             Text(a.title, style: GT.body(16, weight: 600, color: ctx.glance.fg)),
             Text(
-              '${a.kind.displayName} · ${a.sites == null ? 'tous les sites' : a.sites!.isEmpty ? 'aucun site' : '${a.sites!.length} site${a.sites!.length > 1 ? 's' : ''}'}',
+              '${a.kind.displayName} · ${_selectionLabel(a)}',
               style: GT.body(13, color: ctx.glance.fg2),
             ),
             const SizedBox(height: 8),
@@ -401,8 +401,20 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
+  static String _selectionLabel(Account a) {
+    String n(int c) => '$c site${c > 1 ? 's' : ''}';
+    final sites = a.sites;
+    if (sites == null) {
+      final x = a.excludedSites.length;
+      return x == 0 ? 'tous les sites' : 'tous sauf ${n(x)}';
+    }
+    return sites.isEmpty ? 'aucun site' : n(sites.length);
+  }
+
   Future<void> _editSites(BuildContext context, WidgetRef ref, Account a) async {
-    final sites = await ref.read(accountSitesProvider(a.id).future);
+    // Rechargée : la liste en cache date du lancement et ne montrerait pas un
+    // site créé depuis.
+    final sites = await ref.refresh(accountSitesProvider(a.id).future);
     if (!context.mounted) return;
     final choice = await showGlanceModal<SiteChoice?>(
       context,
@@ -410,11 +422,13 @@ class SettingsScreen extends ConsumerWidget {
         providerName: a.kind.displayName,
         sites: sites,
         initialSelection: a.sites,
+        initialExcluded: a.excludedSites,
       ),
     );
     if (choice == null) return; // annulé
-    // null = tous ; [] = aucun (masqué) ; [ids] = sélection explicite.
-    await ref.read(accountsProvider.notifier).updateSites(a.id, choice.sites);
+    await ref
+        .read(accountsProvider.notifier)
+        .updateSites(a.id, choice.sites, excluded: choice.excluded);
     if (context.mounted) showGlanceToast(context, 'Sélection enregistrée');
   }
 

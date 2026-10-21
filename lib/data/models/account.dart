@@ -55,6 +55,7 @@ class Account {
     required this.baseUrl,
     this.label,
     this.sites,
+    this.excludedSites = const [],
   });
 
   final String id;
@@ -62,10 +63,18 @@ class Account {
   final String baseUrl;
   final String? label;
 
-  /// Ids des sites à afficher. `null` = tous les sites du compte.
+  /// Ids des sites à afficher. `null` = tous les sites du compte, y compris
+  /// ceux créés plus tard, sauf [excludedSites].
   final List<String>? sites;
 
-  bool includesSite(String id) => sites == null || sites!.contains(id);
+  /// Sites écartés quand [sites] vaut `null`. Une exclusion plutôt qu'une
+  /// liste : un site créé après coup n'y figure pas, il s'affiche donc seul.
+  final List<String> excludedSites;
+
+  bool get followsNewSites => sites == null;
+
+  bool includesSite(String id) =>
+      sites == null ? !excludedSites.contains(id) : sites!.contains(id);
 
   String get title => (label != null && label!.trim().isNotEmpty)
       ? label!.trim()
@@ -77,14 +86,28 @@ class Account {
     return u.host;
   }
 
-  Account copyWith({String? label, List<String>? sites, bool allSites = false}) =>
-      Account(
-        id: id,
-        kind: kind,
-        baseUrl: baseUrl,
-        label: label ?? this.label,
-        sites: allSites ? null : (sites ?? this.sites),
-      );
+  /// [allSites] passe en « tous les sites, sauf [excluded] » ; [sites] en
+  /// sélection explicite. Sans l'un ni l'autre, la sélection est conservée.
+  Account copyWith({
+    String? label,
+    List<String>? sites,
+    bool allSites = false,
+    List<String> excluded = const [],
+  }) {
+    final explicit = !allSites && (sites != null || this.sites != null);
+    return Account(
+      id: id,
+      kind: kind,
+      baseUrl: baseUrl,
+      label: label ?? this.label,
+      sites: allSites ? null : (sites ?? this.sites),
+      excludedSites: allSites
+          ? excluded
+          : explicit
+              ? const []
+              : excludedSites,
+    );
+  }
 
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -92,6 +115,8 @@ class Account {
     'baseUrl': baseUrl,
     'label': label,
     'sites': sites,
+    // Clé facultative : une app plus ancienne l'ignore et suit tous les sites.
+    if (excludedSites.isNotEmpty) 'excludedSites': excludedSites,
   };
 
   factory Account.fromJson(Map<String, dynamic> j) => Account(
@@ -100,6 +125,9 @@ class Account {
     baseUrl: j['baseUrl'] as String,
     label: j['label'] as String?,
     sites: (j['sites'] as List?)?.map((e) => e.toString()).toList(),
+    excludedSites: [
+      for (final e in (j['excludedSites'] as List?) ?? const []) e.toString(),
+    ],
   );
 
   static String encodeList(List<Account> l) =>
