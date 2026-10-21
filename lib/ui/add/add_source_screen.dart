@@ -178,6 +178,7 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
           providerName: _kind.displayName,
           sites: sites,
           initialSelection: widget.editing?.sites,
+          initialExcluded: widget.editing?.excludedSites ?? const [],
         ),
         fullscreenDialog: false,
       );
@@ -186,12 +187,16 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
         setState(() => _busy = false);
         return;
       }
-      // null = tous les sites ; [] = aucun (masqué) ; [ids] = sélection explicite.
       final chosen = choice.sites;
       // add() remplace par id → sert aussi à la mise à jour d'un compte existant.
-      await ref
-          .read(accountsProvider.notifier)
-          .add(account.copyWith(sites: chosen, allSites: chosen == null), creds);
+      await ref.read(accountsProvider.notifier).add(
+            account.copyWith(
+              sites: chosen,
+              allSites: chosen == null,
+              excluded: choice.excluded,
+            ),
+            creds,
+          );
       if (mounted) {
         showGlanceToast(
             context, _isEditing ? 'Source modifiée' : 'Source ajoutée');

@@ -163,9 +163,18 @@ class AccountsNotifier extends Notifier<List<Account>> {
     state = _repo.loadAccounts();
   }
 
-  Future<void> updateSites(String accountId, List<String>? sites) async {
+  /// [sites] `null` = tous les sites, sauf [excluded], futurs compris.
+  Future<void> updateSites(
+    String accountId,
+    List<String>? sites, {
+    List<String> excluded = const [],
+  }) async {
     final account = state.firstWhere((a) => a.id == accountId);
-    await _repo.updateAccount(account.copyWith(sites: sites, allSites: sites == null));
+    await _repo.updateAccount(account.copyWith(
+      sites: sites,
+      allSites: sites == null,
+      excluded: excluded,
+    ));
     state = _repo.loadAccounts();
   }
 
