@@ -68,12 +68,15 @@ class CohortSpan {
 }
 
 class CounterData extends IndicatorData {
-  const CounterData(this.points, this.total, {this.cohorts});
+  const CounterData(this.points, this.total, {this.cohorts, this.member});
   final List<SeriesPoint> points;
   final int total;
 
   /// Non null pour une métrique à délai ayant au moins une mesure.
   final CohortSpan? cohorts;
+
+  /// Membre retenu d'une famille (« J7 »), null pour une métrique seule.
+  final String? member;
 }
 
 class RatioData extends IndicatorData {
@@ -83,6 +86,7 @@ class RatioData extends IndicatorData {
     required this.numeratorTotal,
     required this.denominatorTotal,
     this.cohorts,
+    this.member,
     this.pending = false,
     this.delayDays = 0,
   });
@@ -94,6 +98,9 @@ class RatioData extends IndicatorData {
 
   /// Non null pour une métrique à délai ayant au moins une mesure.
   final CohortSpan? cohorts;
+
+  /// Membre retenu d'une famille (« J7 »), null pour une métrique seule.
+  final String? member;
 
   /// Aucun point mesurable, alors que des gens y comptent : les cohortes ne
   /// sont pas terminées. À distinguer de « rien ne s'est passé ».

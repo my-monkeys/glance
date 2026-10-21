@@ -61,6 +61,8 @@ class MetricDef {
     required this.unite,
     required this.granularites,
     this.delaiJours = 0,
+    this.famille,
+    this.libelleFamille,
   });
 
   final String id;
@@ -73,6 +75,11 @@ class MetricDef {
   /// mesurable (J7 → 7). 0 pour un nombre, ou si le serveur ne le dit pas.
   final int delaiJours;
 
+  /// Famille d'indicateurs qui ne diffèrent que par leur délai (J1, J7, J30) ;
+  /// null pour une métrique seule.
+  final String? famille;
+  final String? libelleFamille;
+
   factory MetricDef.fromJson(Map<String, dynamic> j) => MetricDef(
         id: j['id'] as String,
         libelle: j['libelle'] as String,
@@ -81,7 +88,49 @@ class MetricDef {
         granularites:
             ((j['granularites'] as List?) ?? const []).cast<String>().toList(),
         delaiJours: (j['delai_jours'] as num?)?.round() ?? 0,
+        famille: j['famille'] as String?,
+        libelleFamille: j['libelle_famille'] as String?,
       );
+}
+
+/// Les indicateurs d'une famille, du plus court délai au plus long.
+@immutable
+class MetricFamily {
+  const MetricFamily(this.id, this.libelle, this.membres);
+  final String id;
+  final String libelle;
+  final List<MetricDef> membres;
+
+  MetricUnit get unite => membres.first.unite;
+}
+
+/// Regroupe le catalogue en familles, dans l'ordre où elles apparaissent.
+/// Les métriques sans `famille` n'y figurent pas.
+List<MetricFamily> metricFamiliesOf(List<MetricDef> defs) {
+  final byId = <String, List<MetricDef>>{};
+  for (final d in defs) {
+    if (d.famille != null) (byId[d.famille!] ??= []).add(d);
+  }
+  return [
+    for (final e in byId.entries)
+      MetricFamily(
+        e.key,
+        e.value.map((d) => d.libelleFamille).whereType<String>().firstOrNull ??
+            e.key,
+        [...e.value]..sort((a, b) => a.delaiJours.compareTo(b.delaiJours)),
+      ),
+  ];
+}
+
+/// Le membre d'une famille qui convient à une fenêtre de [windowDays] jours :
+/// le plus grand délai qui y tient (une cohorte J7 n'est mesurée que sur une
+/// fenêtre d'au moins 7 jours), sinon le plus court. [membres] est non vide.
+MetricDef chooseFamilyMember(List<MetricDef> membres, int windowDays) {
+  final sorted = [...membres]..sort((a, b) => a.delaiJours.compareTo(b.delaiJours));
+  return sorted.lastWhere(
+    (m) => m.delaiJours <= windowDays,
+    orElse: () => sorted.first,
+  );
 }
 
 /// Un bucket d'une série. [valeur] null = **non mesurable** (cohorte pas

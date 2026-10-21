@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/indicator_math.dart';
 import '../../data/models/indicator.dart';
 import '../../data/models/models.dart';
 import '../../data/models/period.dart';
@@ -13,15 +14,33 @@ import 'indicator_card.dart';
 import 'metrics_source_screen.dart';
 
 /// Contenu de l'onglet Tableaux : les indicateurs du site, en une ou deux
-/// colonnes selon la place.
-class IndicatorsTab extends ConsumerWidget {
+/// colonnes selon la place. Une carte chargée sans valeur à montrer est
+/// masquée (elle ne dit rien) ; une ligne en bas permet de la retrouver.
+class IndicatorsTab extends ConsumerStatefulWidget {
   const IndicatorsTab({super.key, required this.site, required this.window});
 
   final Site site;
   final DateWindow window;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<IndicatorsTab> createState() => _IndicatorsTabState();
+}
+
+class _IndicatorsTabState extends ConsumerState<IndicatorsTab> {
+  /// Les cartes vides ont été demandées : valable jusqu'au prochain changement
+  /// de période.
+  bool _revealed = false;
+
+  @override
+  void didUpdateWidget(IndicatorsTab old) {
+    super.didUpdateWidget(old);
+    if (old.window != widget.window) _revealed = false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final site = widget.site;
+    final window = widget.window;
     final indicators = ref.watch(siteIndicatorsProvider(site));
     void create() => openIndicatorEditor(context, site);
     void openSource() => openMetricsSource(context, site);
@@ -29,12 +48,32 @@ class IndicatorsTab extends ConsumerWidget {
       return _EmptyState(onCreate: create, onSource: openSource);
     }
 
+    // Même clé que celle de chaque carte : aucune requête de plus. Une erreur
+    // ou un chargement en cours ne masque rien.
+    final empty = {
+      for (final i in indicators)
+        if (ref.watch(indicatorDataProvider((site, window, i))).value
+            case final data? when !hasDisplayableData(data))
+          i.id,
+    };
+    final shown = _revealed
+        ? indicators
+        : [for (final i in indicators) if (!empty.contains(i.id)) i];
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _CardsGrid(site: site, window: window, indicators: indicators),
+          if (shown.isEmpty)
+            const _AllHidden()
+          else
+            _CardsGrid(site: site, window: window, indicators: shown),
+          if (!_revealed && empty.isNotEmpty)
+            _HiddenLink(
+              count: empty.length,
+              onTap: () => setState(() => _revealed = true),
+            ),
           const SizedBox(height: 18),
           GlanceButtonOutline(
             label: 'Nouveau tableau',
@@ -44,6 +83,53 @@ class IndicatorsTab extends ConsumerWidget {
           const SizedBox(height: 14),
           _SourceLink(onTap: openSource),
         ],
+      ),
+    );
+  }
+}
+
+class _AllHidden extends StatelessWidget {
+  const _AllHidden();
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 30),
+        child: Text(
+          'Aucun tableau n\'a de données sur cette période',
+          textAlign: TextAlign.center,
+          style: GT.body(14, color: context.glance.fg2),
+        ),
+      );
+}
+
+/// « 3 tableaux sans données sur cette période · Afficher ».
+class _HiddenLink extends StatelessWidget {
+  const _HiddenLink({required this.count, required this.onTap});
+  final int count;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.glance;
+    final what = count == 1 ? '1 tableau sans données' : '$count tableaux sans données';
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
+        padding: const EdgeInsets.only(top: 14),
+        child: Text.rich(
+          TextSpan(
+            style: GT.body(12.5, color: p.fg3),
+            children: [
+              TextSpan(text: '$what sur cette période · '),
+              TextSpan(
+                text: 'Afficher',
+                style: GT.body(12.5, weight: 600, color: p.accent),
+              ),
+            ],
+          ),
+          textAlign: TextAlign.center,
+        ),
       ),
     );
   }

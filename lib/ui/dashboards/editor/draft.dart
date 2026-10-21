@@ -43,6 +43,7 @@ class IndicatorDraft {
     this.metricId = '',
     this.metricLabel = '',
     this.metricUnit = MetricUnit.count,
+    this.metricFamily = '',
   });
 
   final IndicatorKind kind;
@@ -61,6 +62,10 @@ class IndicatorDraft {
   final String metricId;
   final String metricLabel;
   final MetricUnit metricUnit;
+
+  /// Vide = une métrique seule ; sinon la famille, dont [metricId] est le
+  /// membre de repli.
+  final String metricFamily;
 
   factory IndicatorDraft.fromIndicator(Indicator i) {
     return switch (i) {
@@ -91,6 +96,7 @@ class IndicatorDraft {
           metricId: i.metricId,
           metricLabel: i.label,
           metricUnit: i.unit,
+          metricFamily: i.familyId ?? '',
         ),
     };
   }
@@ -108,6 +114,7 @@ class IndicatorDraft {
     String? metricId,
     String? metricLabel,
     MetricUnit? metricUnit,
+    String? metricFamily,
   }) =>
       IndicatorDraft(
         kind: kind ?? this.kind,
@@ -122,6 +129,7 @@ class IndicatorDraft {
         metricId: metricId ?? this.metricId,
         metricLabel: metricLabel ?? this.metricLabel,
         metricUnit: metricUnit ?? this.metricUnit,
+        metricFamily: metricFamily ?? this.metricFamily,
       );
 
   /// Change de genre en reportant ce qui a un sens de l'un à l'autre : la
@@ -272,6 +280,7 @@ class IndicatorDraft {
           metricId: metricId,
           label: metricLabel,
           unit: metricUnit,
+          familyId: metricFamily.isEmpty ? null : metricFamily,
         ),
     };
   }

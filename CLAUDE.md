@@ -278,6 +278,8 @@ attendre d'instance. Couverture par fournisseur :
 - **Répartition** : % = part du **total des événements** de la répartition.
   C'est l'inverse de la règle du détail (part de `summary.visitors`) : ici les
   lignes partitionnent un même événement, leur somme est donc le bon dénominateur.
+- **Cartes sans données masquées** : voir « Source de métriques » plus bas
+  (`hasDisplayableData`, ligne « N tableaux sans données · Afficher »).
 - **Éditeur** : les suggestions (événements, propriétés, valeurs) portent sur
   30 jours fixes. Sinon, un événement rare n'en proposerait aucune sur
   « Aujourd'hui ». L'aperçu attend 600 ms après la dernière frappe, et le nom
@@ -380,6 +382,31 @@ dans le code.
     garderait les cartes en squelette).
   - ⚠️ `now` se lit **dans** le provider : la clé de `indicatorDataProvider` ne
     change pas (cf. « Chargement infini »).
+- **Familles** : le catalogue peut porter, par indicateur, `famille` et
+  `libelle_famille` (facultatifs). Les membres d'une famille ne diffèrent que par
+  leur `delai_jours` (J1, J7, J30). `metricFamiliesOf` les regroupe (membres triés
+  par délai) ; l'éditeur propose d'abord les familles, puis les métriques sans
+  famille. Un `ExternalIndicator` vise une métrique (`metric`) **ou** une famille
+  (`family`) ; le membre est choisi **au calcul** : le plus grand délai ≤ durée de
+  la fenêtre en jours (`windowDays`, arrondie au-dessus : « Aujourd'hui » et
+  « 24 h » → J1, « 7 jours » → J7, « Ce mois-ci » le 21 → J7, « 12 m » → J30),
+  sinon le plus court (`chooseFamilyMember`, pure, testée). Pourquoi : une carte
+  J7 sur « Aujourd'hui » n'a rien de mesurable, d'où six cartes vides ; une seule
+  carte suit la période. La carte porte le nom de la famille et la ligne
+  « J7 · s'ajuste à la période ».
+  - ⚠️ En JSON, une famille écrit **aussi** `metric` (= son membre de plus long
+    délai), `label` et `unit` : `Indicator.fromJson` d'une app antérieure lit
+    `metric` sans condition et planterait sinon. Elle affiche alors cette
+    métrique réelle.
+- **Onglet : les cartes sans données sont masquées** (tous types, pas l'aperçu de
+  l'éditeur). `hasDisplayableData` (pure, `core/indicator_math.dart`) : taux sans
+  dénominateur mesuré, compteur à 0 partout, entonnoir sans première étape,
+  répartition vide. L'onglet lit les mêmes providers que les cartes (même clé,
+  donc aucune requête de plus). Chargement → squelette ; **erreur → carte
+  affichée** (il faut pouvoir la corriger). Une ligne « 3 tableaux sans données
+  sur cette période · Afficher » les rend, jusqu'au prochain changement de
+  période (leur menu ⋯ disparaît avec elles) ; tout masqué → « Aucun tableau n'a
+  de données sur cette période ».
 - **Cartes lisibles (tous les types)** : un graphique à moins de 2 points non nuls
   n'est pas dessiné (la carte garde son chiffre et ses lignes) ; sans point
   mesurable, seul le message ; un compteur à 0 partout affiche « 0 » et « Aucun

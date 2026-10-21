@@ -1,6 +1,15 @@
 import '../data/models/indicator_result.dart';
 import '../data/models/models.dart';
 
+/// Une carte sans valeur à montrer (rien mesuré, compteur à 0 partout,
+/// répartition vide) : l'onglet Tableaux la masque.
+bool hasDisplayableData(IndicatorData d) => switch (d) {
+      CounterData() => d.total != 0 || d.points.any((s) => s.visitors != 0),
+      RatioData() => d.denominatorTotal > 0,
+      FunnelData() => d.steps.isNotEmpty && d.steps.first.visitors > 0,
+      BreakdownData() => d.rows.isNotEmpty,
+    };
+
 /// Rapport [num] / [den], bucket par bucket. Les deux séries viennent de la
 /// même fenêtre : on les aligne par index. Un bucket au dénominateur nul vaut
 /// 0 %, ou null (un trou) avec [gapsWhenEmpty]. Le taux global n'en dépend pas.

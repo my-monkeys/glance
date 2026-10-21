@@ -9,9 +9,19 @@ import '../../../theme/type.dart';
 import '../labels.dart';
 import 'pickers.dart';
 
-/// Choisit un indicateur parmi le catalogue de la source du site.
-Future<MetricDef?> pickMetric(BuildContext context, Site site) =>
-    showGlanceSheet<MetricDef>(context, (_) => _MetricSheet(site: site));
+/// Le choix de l'utilisateur : une famille (le membre suit la période) ou une
+/// métrique seule.
+class MetricChoice {
+  const MetricChoice.family(MetricFamily this.family) : def = null;
+  const MetricChoice.single(MetricDef this.def) : family = null;
+  final MetricFamily? family;
+  final MetricDef? def;
+}
+
+/// Choisit dans le catalogue de la source du site : d'abord les familles, puis
+/// les métriques seules.
+Future<MetricChoice?> pickMetric(BuildContext context, Site site) =>
+    showGlanceSheet<MetricChoice>(context, (_) => _MetricSheet(site: site));
 
 class _MetricSheet extends ConsumerWidget {
   const _MetricSheet({required this.site});
@@ -51,10 +61,19 @@ class _MetricSheet extends ConsumerWidget {
                         shrinkWrap: true,
                         physics: const BouncingScrollPhysics(),
                         children: [
-                          for (final d in defs)
-                            _MetricRow(
-                              def: d,
-                              onTap: () => Navigator.of(context).pop(d),
+                          for (final f in metricFamiliesOf(defs))
+                            _ChoiceRow(
+                              title: f.libelle,
+                              detail: 's\'ajuste à la période',
+                              onTap: () => Navigator.of(context)
+                                  .pop(MetricChoice.family(f)),
+                            ),
+                          for (final d in defs.where((d) => d.famille == null))
+                            _ChoiceRow(
+                              title: d.libelle,
+                              detail: d.description,
+                              onTap: () => Navigator.of(context)
+                                  .pop(MetricChoice.single(d)),
                             ),
                         ],
                       ),
@@ -67,9 +86,10 @@ class _MetricSheet extends ConsumerWidget {
   }
 }
 
-class _MetricRow extends StatelessWidget {
-  const _MetricRow({required this.def, required this.onTap});
-  final MetricDef def;
+class _ChoiceRow extends StatelessWidget {
+  const _ChoiceRow({required this.title, required this.detail, required this.onTap});
+  final String title;
+  final String detail;
   final VoidCallback onTap;
 
   @override
@@ -83,10 +103,10 @@ class _MetricRow extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(def.libelle, style: GT.body(14.5, weight: 600, color: p.fg)),
-            if (def.description.isNotEmpty) ...[
+            Text(title, style: GT.body(14.5, weight: 600, color: p.fg)),
+            if (detail.isNotEmpty) ...[
               const SizedBox(height: 2),
-              Text(def.description, style: GT.body(12.5, color: p.fg3)),
+              Text(detail, style: GT.body(12.5, color: p.fg3)),
             ],
           ],
         ),

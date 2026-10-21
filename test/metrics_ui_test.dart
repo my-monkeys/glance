@@ -464,6 +464,44 @@ void main() {
       expect(d.points.last.t, today);
     });
 
+    test('famille : le membre suit la durée de la fenêtre', () async {
+      MetricDef m(String id, int d) => MetricDef(
+            id: id,
+            libelle: id,
+            description: '',
+            unite: MetricUnit.percent,
+            granularites: const ['jour'],
+            delaiJours: d,
+            famille: 'ret',
+            libelleFamille: 'Rétention',
+          );
+      final api = FakeMetricsApi(defs: [m('j1', 1), m('j7', 7), m('j30', 30)]);
+      final c = await container(api);
+      const family = ExternalIndicator(
+        id: 'f',
+        name: 'Rétention',
+        metricId: 'j30',
+        label: 'Rétention',
+        unit: MetricUnit.percent,
+        familyId: 'ret',
+      );
+      final t = DateTime.now();
+      Future<RatioData> read(DateWindow w) async {
+        final sub = c.listen(indicatorDataProvider((_site, w, family)), (_, _) {});
+        final d = await c.read(indicatorDataProvider((_site, w, family)).future)
+            as RatioData;
+        sub.close();
+        return d;
+      }
+
+      final day = DateWindow(DateTime(t.year, t.month, t.day),
+          DateTime(t.year, t.month, t.day + 1), TimeUnit.day);
+      final week = DateWindow(DateTime(t.year, t.month, t.day - 6),
+          DateTime(t.year, t.month, t.day + 1), TimeUnit.day);
+      expect((await read(day)).member, 'J1');
+      expect((await read(week)).member, 'J7');
+    });
+
     test('l\'erreur typée de l\'API remonte telle quelle', () async {
       final c = await container(
           FakeMetricsApi(error: const MetricsNotConfigured()));

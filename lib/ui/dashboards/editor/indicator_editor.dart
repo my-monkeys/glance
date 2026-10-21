@@ -328,12 +328,17 @@ class _IndicatorEditorState extends ConsumerState<IndicatorEditor> {
         placeholder: 'Choisir une métrique',
         value: _draft.metricLabel,
         onTap: () async {
-          final d = await pickMetric(context, site);
-          if (d == null) return;
+          final choice = await pickMetric(context, site);
+          if (choice == null) return;
+          final f = choice.family;
+          // Une famille garde son membre de plus long délai en repli : c'est la
+          // clé `metric` que lisent les versions sans familles.
+          final d = choice.def ?? f!.membres.last;
           _update(_draft.copyWith(
             metricId: d.id,
-            metricLabel: d.libelle,
+            metricLabel: f?.libelle ?? d.libelle,
             metricUnit: d.unite,
+            metricFamily: f?.id ?? '',
           ));
         },
       );

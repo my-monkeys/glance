@@ -21,6 +21,11 @@ DateWindow externalWindowOf(DateWindow w) {
   return DateWindow(w.start, advanceBucket(last, unit), unit);
 }
 
+/// Durée d'une fenêtre en jours, arrondie au-dessus : « Aujourd'hui » et
+/// « 24 h » valent 1, « 7 jours » 7. Sert à choisir le membre d'une famille.
+int windowDays(DateWindow w) =>
+    (w.end.difference(w.start).inMinutes / (24 * 60)).ceil().clamp(1, 1 << 20);
+
 /// Un point de l'API rangé dans le bucket de sa date de MESURE.
 class _Placed {
   const _Placed(this.point, this.done);
@@ -52,6 +57,7 @@ IndicatorData externalDataOf(
   List<MetricPoint> points, {
   int delayDays = 0,
   DateTime? now,
+  String? member,
 }) {
   final w = externalWindowOf(window);
   final t0 = now ?? DateTime.now();
@@ -85,7 +91,7 @@ IndicatorData externalDataOf(
       if (byBucket[t]?.valeur != null) seen(byBucket[t]!.point.t);
     }
     final total = series.fold<double>(0, (a, s) => a + s.visitors);
-    return CounterData(series, total.round(), cohorts: span());
+    return CounterData(series, total.round(), cohorts: span(), member: member);
   }
 
   var num = 0;
@@ -123,6 +129,7 @@ IndicatorData externalDataOf(
     numeratorTotal: num,
     denominatorTotal: den,
     cohorts: span(),
+    member: member,
     pending: den == 0 && (anyDen > 0 || unfinished),
     delayDays: delayDays,
   );

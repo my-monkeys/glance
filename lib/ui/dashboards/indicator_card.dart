@@ -208,7 +208,7 @@ class _CardBody extends StatelessWidget {
     return _Stat(
       big: fmtInt(d.total),
       sub: sub,
-      note: _cohortsNote(d.cohorts),
+      notes: _notes(d.cohorts, d.member),
       child: _plots([for (final s in d.points) s.visitors])
           ? IndicatorChart(
               points: [for (final s in d.points) IndicatorPoint(s.t, s.visitors)],
@@ -234,7 +234,7 @@ class _CardBody extends StatelessWidget {
                   : 'Aucune donnée sur la période',
             )
           : _Stat(
-              note: _cohortsNote(d.cohorts),
+              notes: _notes(d.cohorts, d.member),
               big: d.overall == null ? '—' : fmtPct(d.overall! * 100),
               sub: '${fmtInt(d.numeratorTotal)} / ${fmtInt(d.denominatorTotal)}',
               detail: detail,
@@ -259,12 +259,14 @@ class _CardBody extends StatelessWidget {
   static bool _plots(Iterable<double?> values) =>
       values.where((v) => v != null).length >= 2;
 
-  static String? _cohortsNote(CohortSpan? c) {
-    if (c == null) return null;
-    return c.first == c.last
-        ? 'Mesurée sur la cohorte du ${fmtDay(c.first)}'
-        : 'Mesurée sur les cohortes ${fmtDayRange(c.first, c.last)}';
-  }
+  /// Cohortes mesurées, puis le membre retenu d'une famille.
+  static List<String> _notes(CohortSpan? c, String? member) => [
+        if (c != null)
+          c.first == c.last
+              ? 'Mesurée sur la cohorte du ${fmtDay(c.first)}'
+              : 'Mesurée sur les cohortes ${fmtDayRange(c.first, c.last)}',
+        if (member != null) '$member · s\'ajuste à la période',
+      ];
 }
 
 /// Grand chiffre, ligne de contexte, puis le détail de l'indicateur.
@@ -274,12 +276,12 @@ class _Stat extends StatelessWidget {
     this.sub,
     this.child,
     this.detail,
-    this.note,
+    this.notes = const [],
   });
   final String big;
 
-  /// Mention discrète sous la ligne de contexte (cohortes d'une métrique).
-  final String? note;
+  /// Mentions discrètes sous la ligne de contexte (cohortes, membre retenu).
+  final List<String> notes;
   final String? sub;
   final String? detail;
 
@@ -309,10 +311,10 @@ class _Stat extends StatelessWidget {
             style: GT.mono(11.5, color: p.fg2),
           ),
         ],
-        if (note != null)
+        for (final n in notes)
           Padding(
             padding: const EdgeInsets.only(top: 2),
-            child: Text(note!, style: GT.mono(10.5, color: p.fg3)),
+            child: Text(n, style: GT.mono(10.5, color: p.fg3)),
           ),
         if (detail != null)
           Padding(
