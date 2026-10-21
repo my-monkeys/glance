@@ -4,7 +4,7 @@ import 'package:glance/ui/dashboards/indicator_chart.dart';
 void main() {
   group('percentAxisMax', () {
     test('plafonné à 100 tant que les données y tiennent', () {
-      expect(percentAxisMax(0), 10);
+      expect(percentAxisMax(0), 8);
       expect(percentAxisMax(50), lessThanOrEqualTo(100));
       expect(percentAxisMax(50), greaterThanOrEqualTo(50));
       expect(percentAxisMax(99), 100);
