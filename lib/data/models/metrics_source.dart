@@ -122,13 +122,23 @@ List<MetricFamily> metricFamiliesOf(List<MetricDef> defs) {
   ];
 }
 
+/// Une période doit couvrir au moins [kFamilyWindowRatio] fois le délai du
+/// membre retenu.
+const kFamilyWindowRatio = 4;
+
 /// Le membre d'une famille qui convient à une fenêtre de [windowDays] jours :
-/// le plus grand délai qui y tient (une cohorte J7 n'est mesurée que sur une
-/// fenêtre d'au moins 7 jours), sinon le plus court. [membres] est non vide.
+/// le plus grand délai qui y tient [kFamilyWindowRatio] fois, sinon le plus
+/// court. [membres] est non vide.
+///
+/// Pas « le plus grand délai qui tient une fois » : sur « 30 j », J30 ne
+/// mesurait que des cohortes vieilles de 30 à 60 jours (avant le lancement
+/// de geography, toutes à 0) et la courbe était plate. Quatre fois le délai
+/// garantit des cohortes assez récentes pour dessiner une tendance : J1 sur
+/// « 7 jours », J7 sur « 30 j », J30 sur « 12 m ».
 MetricDef chooseFamilyMember(List<MetricDef> membres, int windowDays) {
   final sorted = [...membres]..sort((a, b) => a.delaiJours.compareTo(b.delaiJours));
   return sorted.lastWhere(
-    (m) => m.delaiJours <= windowDays,
+    (m) => m.delaiJours * kFamilyWindowRatio <= windowDays,
     orElse: () => sorted.first,
   );
 }

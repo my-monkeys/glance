@@ -387,12 +387,16 @@ dans le code.
   leur `delai_jours` (J1, J7, J30). `metricFamiliesOf` les regroupe (membres triés
   par délai) ; l'éditeur propose d'abord les familles, puis les métriques sans
   famille. Un `ExternalIndicator` vise une métrique (`metric`) **ou** une famille
-  (`family`) ; le membre est choisi **au calcul** : le plus grand délai ≤ durée de
-  la fenêtre en jours (`windowDays`, arrondie au-dessus : « Aujourd'hui » et
-  « 24 h » → J1, « 7 jours » → J7, « Ce mois-ci » le 21 → J7, « 12 m » → J30),
-  sinon le plus court (`chooseFamilyMember`, pure, testée). Pourquoi : une carte
-  J7 sur « Aujourd'hui » n'a rien de mesurable, d'où six cartes vides ; une seule
-  carte suit la période. La carte porte le nom de la famille et la ligne
+  (`family`) ; le membre est choisi **au calcul** : le plus grand délai qui tient
+  **quatre fois** dans la fenêtre (`kFamilyWindowRatio`, `windowDays` arrondie
+  au-dessus : « Aujourd'hui », « 24 h », « 7 jours » → J1, « 30 j » → J7,
+  « 12 m » → J30), sinon le plus court (`chooseFamilyMember`, pure, testée).
+  Pourquoi : une carte J7 sur « Aujourd'hui » n'a rien de mesurable, d'où six
+  cartes vides ; une seule carte suit la période. ⚠️ Pas « le plus grand délai
+  qui tient une fois » : sur « 30 j », J30 ne mesurait que des cohortes de 30 à
+  60 jours (avant le lancement de geography, toutes à 0), donc une courbe plate.
+  Une courbe plate n'est d'ailleurs jamais tracée (toutes valeurs égales → le
+  chiffre seul). La carte porte le nom de la famille et la ligne
   « J7 · s'ajuste à la période ».
   - ⚠️ En JSON, une famille écrit **aussi** `metric` (= son membre de plus long
     délai), `label` et `unit` : `Indicator.fromJson` d'une app antérieure lit

@@ -70,11 +70,14 @@ void main() {
     final membres = metricFamiliesOf(_catalogue).single.membres;
     String pick(int days) => chooseFamilyMember(membres, days).id;
 
-    test('le plus grand délai qui tient dans la durée', () {
-      expect(pick(1), 'j1'); // Aujourd'hui, 24 h
-      expect(pick(7), 'j7'); // 7 jours
-      expect(pick(21), 'j7'); // ce mois-ci le 21
-      expect(pick(30), 'j30');
+    test('le plus grand délai qui tient quatre fois dans la durée', () {
+      expect(pick(1), 'j1'); // Aujourd'hui, 24 h : rien ne tient, le plus court
+      expect(pick(7), 'j1'); // 7 jours
+      expect(pick(21), 'j1'); // ce mois-ci le 21
+      expect(pick(28), 'j7');
+      expect(pick(30), 'j7'); // 30 j : J30 n'y aurait que de vieilles cohortes
+      expect(pick(119), 'j7');
+      expect(pick(120), 'j30');
       expect(pick(365), 'j30'); // 12 m
     });
 

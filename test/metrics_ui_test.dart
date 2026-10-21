@@ -378,7 +378,7 @@ void main() {
     testWidgets('ligne de requête : omise si elle répète le nom, sinon affichée',
         (tester) async {
       final data = CounterData([
-        for (var i = 0; i < 3; i++) SeriesPoint(DateTime(2026, 7, 1 + i), 4, 0),
+        for (var i = 0; i < 3; i++) SeriesPoint(DateTime(2026, 7, 1 + i), 3.0 + i, 0),
       ], 12);
       await card(tester, data,
           indicator: const CounterIndicator(
@@ -496,7 +496,7 @@ void main() {
 
       final day = DateWindow(DateTime(t.year, t.month, t.day),
           DateTime(t.year, t.month, t.day + 1), TimeUnit.day);
-      final week = DateWindow(DateTime(t.year, t.month, t.day - 6),
+      final week = DateWindow(DateTime(t.year, t.month, t.day - 29),
           DateTime(t.year, t.month, t.day + 1), TimeUnit.day);
       expect((await read(day)).member, 'J1');
       expect((await read(week)).member, 'J7');

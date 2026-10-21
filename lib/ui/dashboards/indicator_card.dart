@@ -256,8 +256,13 @@ class _CardBody extends StatelessWidget {
 
   /// Une courbe d'un seul point (ou aucun) ne dit rien de plus que le grand
   /// chiffre : on ne la dessine pas.
-  static bool _plots(Iterable<double?> values) =>
-      values.where((v) => v != null).length >= 2;
+  /// Une courbe n'apprend quelque chose qu'avec au moins deux points qui
+  /// diffèrent : une ligne plate (tout à 0 %, par exemple) ne dit rien que le
+  /// grand chiffre ne dise déjà.
+  static bool _plots(Iterable<double?> values) {
+    final seen = values.whereType<double>().toList();
+    return seen.length >= 2 && seen.any((v) => v != seen.first);
+  }
 
   /// Cohortes mesurées, puis le membre retenu d'une famille.
   static List<String> _notes(CohortSpan? c, String? member) => [
