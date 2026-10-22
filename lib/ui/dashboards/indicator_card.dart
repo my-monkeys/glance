@@ -202,21 +202,35 @@ class _CardBody extends StatelessWidget {
     String? sub,
     required TimeUnit unit,
   }) {
+    final gaps = d.unpublished;
+    if (gaps != null && d.points.every((s) => gaps.covers(s.t))) {
+      return _NoData(_unpublishedMessage(gaps));
+    }
     if (d.total == 0 && d.points.every((s) => s.visitors == 0)) {
       return const _Stat(big: '0', sub: 'Aucun événement sur la période');
     }
+    final values = [
+      for (final s in d.points)
+        gaps != null && gaps.covers(s.t) ? null : s.visitors,
+    ];
     return _Stat(
       big: fmtInt(d.total),
       sub: sub,
-      notes: _notes(d.cohorts, d.member),
-      child: _plots([for (final s in d.points) s.visitors])
+      notes: _notes(d.cohorts, d.member, gaps),
+      child: _plots(values)
           ? IndicatorChart(
-              points: [for (final s in d.points) IndicatorPoint(s.t, s.visitors)],
+              points: [
+                for (var i = 0; i < d.points.length; i++)
+                  IndicatorPoint(d.points[i].t, values[i]),
+              ],
               unit: unit,
             )
           : null,
     );
   }
+
+  static String _unpublishedMessage(Unpublished u) =>
+      'Pas encore publiées : données jusqu\'au ${fmtDay(u.until)}';
 
   static String _pendingMessage(int delayDays) => switch (delayDays) {
         0 => 'Pas encore mesurable sur cette période',
@@ -231,10 +245,12 @@ class _CardBody extends StatelessWidget {
           ? _NoData(
               d.pending
                   ? _pendingMessage(d.delayDays)
-                  : 'Aucune donnée sur la période',
+                  : d.unpublished != null
+                      ? _unpublishedMessage(d.unpublished!)
+                      : 'Aucune donnée sur la période',
             )
           : _Stat(
-              notes: _notes(d.cohorts, d.member),
+              notes: _notes(d.cohorts, d.member, d.unpublished),
               big: d.overall == null ? '—' : fmtPct(d.overall! * 100),
               sub: '${fmtInt(d.numeratorTotal)} / ${fmtInt(d.denominatorTotal)}',
               detail: detail,
@@ -264,13 +280,15 @@ class _CardBody extends StatelessWidget {
     return seen.length >= 2 && seen.any((v) => v != seen.first);
   }
 
-  /// Cohortes mesurées, puis le membre retenu d'une famille.
-  static List<String> _notes(CohortSpan? c, String? member) => [
+  /// Cohortes mesurées, le membre retenu d'une famille, puis la fin des
+  /// données publiées.
+  static List<String> _notes(CohortSpan? c, String? member, Unpublished? u) => [
         if (c != null)
           c.first == c.last
               ? 'Mesurée sur la cohorte du ${fmtDay(c.first)}'
               : 'Mesurée sur les cohortes ${fmtDayRange(c.first, c.last)}',
         if (member != null) '$member · s\'ajuste à la période',
+        if (u != null) 'Données jusqu\'au ${fmtDay(u.until)}',
       ];
 }
 

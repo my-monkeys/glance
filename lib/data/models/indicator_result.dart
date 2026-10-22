@@ -67,8 +67,24 @@ class CohortSpan {
   int get hashCode => Object.hash(first, last);
 }
 
+/// Fin des données publiées d'une métrique de site en retard.
+@immutable
+class Unpublished {
+  const Unpublished({required this.until, required this.from});
+
+  /// Dernier jour publié, tel que le dit la source.
+  final DateTime until;
+
+  /// Premier bucket de la fenêtre qui n'est pas encore publié : lui et les
+  /// suivants sont des trous.
+  final DateTime from;
+
+  bool covers(DateTime t) => !t.isBefore(from);
+}
+
 class CounterData extends IndicatorData {
-  const CounterData(this.points, this.total, {this.cohorts, this.member});
+  const CounterData(this.points, this.total,
+      {this.cohorts, this.member, this.unpublished});
   final List<SeriesPoint> points;
   final int total;
 
@@ -77,6 +93,10 @@ class CounterData extends IndicatorData {
 
   /// Membre retenu d'une famille (« J7 »), null pour une métrique seule.
   final String? member;
+
+  /// Non null quand la fenêtre dépasse les données publiées : les points
+  /// couverts valent 0 dans [points] mais se dessinent en trou.
+  final Unpublished? unpublished;
 }
 
 class RatioData extends IndicatorData {
@@ -89,6 +109,7 @@ class RatioData extends IndicatorData {
     this.member,
     this.pending = false,
     this.delayDays = 0,
+    this.unpublished,
   });
 
   final List<RatioPoint> points;
@@ -109,6 +130,9 @@ class RatioData extends IndicatorData {
   /// Recul nécessaire avant la mesure (J7 → 7), pour dire à l'attente combien
   /// de temps elle dure. 0 hors métrique à délai.
   final int delayDays;
+
+  /// Non null quand la fenêtre dépasse les données publiées (trous à la fin).
+  final Unpublished? unpublished;
 }
 
 class FunnelData extends IndicatorData {

@@ -178,6 +178,7 @@ Future<IndicatorData> _externalData(
     delayDays: delay,
     now: DateTime.now(),
     member: members.isNotEmpty ? 'J$delay' : null,
+    dataUntil: def?.donneesJusquAu,
   );
 }
 

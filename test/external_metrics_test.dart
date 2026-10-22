@@ -256,4 +256,64 @@ void main() {
       expect(d.pending, isFalse);
     });
   });
+
+  group('données publiées jusqu\'au', () {
+    // 5 → 7 oct. ; la source a publié jusqu'au 5.
+    final until = DateTime(2026, 10, 5);
+
+    test('nombre : les jours d\'après sont signalés, hors du total', () {
+      final d = externalDataOf(
+        MetricUnit.count,
+        _w,
+        [_p(5, 12, 12, 1), _p(6, 3, 3, 1), _p(7, null, 0, 0)],
+        dataUntil: until,
+      ) as CounterData;
+      expect(d.total, 12); // le 6 n'est pas publié : sa valeur est ignorée
+      expect(d.unpublished!.until, until);
+      expect(d.unpublished!.from, DateTime(2026, 10, 6));
+      expect(d.points.map((p) => d.unpublished!.covers(p.t)), [false, true, true]);
+    });
+
+    test('taux : trous après la date, effectifs exclus', () {
+      final d = externalDataOf(
+        MetricUnit.percent,
+        _w,
+        [_p(5, 20, 10, 50), _p(6, 40, 20, 50)],
+        dataUntil: until,
+      ) as RatioData;
+      expect(d.points.map((p) => p.value), [closeTo(0.2, 1e-9), isNull, isNull]);
+      expect(d.denominatorTotal, 50);
+      expect(d.unpublished, isNotNull);
+    });
+
+    test('fenêtre entièrement publiée : rien à signaler', () {
+      final d = externalDataOf(MetricUnit.count, _w, [_p(5, 1, 1, 1)],
+          dataUntil: DateTime(2026, 10, 9)) as CounterData;
+      expect(d.unpublished, isNull);
+    });
+
+    test('mois : le mois en cours reste, les mois d\'après sont des trous', () {
+      final w = DateWindow(DateTime(2026, 8, 1), DateTime(2026, 11, 1), TimeUnit.month);
+      final d = externalDataOf(
+        MetricUnit.count,
+        w,
+        [
+          MetricPoint(t: DateTime(2026, 8, 1), valeur: 3, numerateur: 3, denominateur: 1),
+          MetricPoint(t: DateTime(2026, 9, 1), valeur: 4, numerateur: 4, denominateur: 1),
+          MetricPoint(t: DateTime(2026, 10, 1), valeur: 9, numerateur: 9, denominateur: 1),
+        ],
+        dataUntil: DateTime(2026, 9, 28),
+      ) as CounterData;
+      expect(d.total, 7);
+      expect(d.unpublished!.from, DateTime(2026, 10, 1));
+    });
+
+    test('catalogue : donnees_jusqu_au lu en date locale, sinon null', () {
+      MetricDef def(Object? v) => MetricDef.fromJson(
+          {'id': 'a', 'libelle': 'A', 'unite': 'nombre', 'donnees_jusqu_au': v});
+      expect(def('2026-10-18').donneesJusquAu, DateTime(2026, 10, 18));
+      expect(def(null).donneesJusquAu, isNull);
+      expect(def('18/10/2026').donneesJusquAu, isNull);
+    });
+  });
 }
