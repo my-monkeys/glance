@@ -73,4 +73,40 @@ void main() {
     await _pump(tester, 375);
     expect(_dy(tester, button), greaterThan(_dy(tester, periods)));
   });
+
+  testWidgets('« Affichage » ouvre un menu déroulant, qui reste ouvert au réglage',
+      (tester) async {
+    final container = await _pump(tester, _wide);
+    expect(find.text('GRAPHIQUE'), findsNothing);
+
+    await tester.tap(button);
+    await tester.pumpAndSettle();
+    expect(find.text('GRAPHIQUE'), findsOneWidget);
+    expect(find.byType(BottomSheet), findsNothing);
+    // Ancré sous le bouton, pas en bas de l'écran.
+    expect(_dy(tester, find.text('GRAPHIQUE')), greaterThan(_dy(tester, button)));
+    expect(tester.getTopLeft(find.text('GRAPHIQUE')).dy, lessThan(300));
+
+    final other = ChartStyle.values
+        .firstWhere((s) => s != container.read(settingsProvider).chartStyle);
+    await tester.tap(find.text(other.label));
+    await tester.pumpAndSettle();
+    expect(container.read(settingsProvider).chartStyle, other);
+    expect(find.text('GRAPHIQUE'), findsOneWidget);
+
+    await tester.tapAt(const Offset(10, 590));
+    await tester.pumpAndSettle();
+    expect(find.text('GRAPHIQUE'), findsNothing);
+  });
+
+  testWidgets('le découpage n\'apparaît que s\'il y a un choix', (tester) async {
+    final container = await _pump(tester, _wide);
+    container.read(periodProvider.notifier).set(Period.d30);
+    await tester.pumpAndSettle();
+    await tester.tap(button);
+    await tester.pumpAndSettle();
+    expect(find.text('DÉCOUPAGE'), findsOneWidget);
+    // Une seule rangée par réglage : les puces ne passent pas à la ligne.
+    expect(_dy(tester, find.text('Courbe')), _dy(tester, find.text('Barres')));
+  });
 }
