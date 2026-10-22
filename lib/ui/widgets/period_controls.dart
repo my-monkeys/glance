@@ -15,9 +15,10 @@ import 'chip.dart';
 /// Les réglages du graphique — découpage, courbe ou barres — tenaient
 /// auparavant dans des boutons sans libellé posés à droite des périodes, qu'ils
 /// recouvraient. Ils n'étaient ni lisibles ni atteignables sans faire défiler.
-/// Regroupés dans une feuille, ils ont la place de porter leur nom. La
-/// comparaison n'y est plus : elle se coche dans la légende du graphique, à
-/// côté des courbes qu'elle compare.
+/// Regroupés dans un menu déroulant sous le bouton, ils ont la place de porter
+/// leur nom ; une feuille du bas était disproportionnée pour deux
+/// réglages. La comparaison n'y est plus : elle se coche dans la légende du
+/// graphique, à côté des courbes qu'elle compare.
 ///
 /// Quand la largeur disponible loge toutes les périodes ET les contrôles sans
 /// défilement (bureau), tout tient sur une seule ligne ; sinon les contrôles
@@ -87,9 +88,11 @@ class PeriodControls extends ConsumerWidget {
             room >= _DisplayButton.widthOf(context, compact: true);
         final compact = room < _DisplayButton.widthOf(context, compact: false);
 
-        final button = _DisplayButton(
+        // Sur une ligne, le bouton est au bord droit : le menu s'aligne sur sa
+        // droite, sinon il déborderait de l'écran.
+        final button = _DisplayMenu(
           compact: fitsOneRow && compact,
-          onTap: () => _openSheet(context),
+          alignEnd: fitsOneRow,
         );
 
         if (fitsOneRow) {
@@ -133,15 +136,47 @@ class PeriodControls extends ConsumerWidget {
       },
     );
   }
+}
 
-  void _openSheet(BuildContext context) {
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: context.glance.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+/// Le bouton « Affichage » et son menu déroulant. Le menu reste ouvert quand on
+/// change un réglage : on peut régler les deux d'affilée et voir le graphique
+/// changer derrière.
+class _DisplayMenu extends ConsumerWidget {
+  const _DisplayMenu({required this.compact, required this.alignEnd});
+  final bool compact;
+
+  /// Bord droit du menu aligné sur celui du bouton.
+  final bool alignEnd;
+
+  static const double _gap = 6;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final p = context.glance;
+    final window = ref.watch(windowProvider);
+    final shift = alignEnd
+        ? _DisplayButton.widthOf(context, compact: compact) -
+            _DisplayPanel.widthOf(context, _DisplayPanel.unitsOf(window))
+        : 0.0;
+    return MenuAnchor(
+      alignmentOffset: Offset(shift, _gap),
+      style: MenuStyle(
+        backgroundColor: WidgetStatePropertyAll(p.surface),
+        surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
+        elevation: const WidgetStatePropertyAll(6),
+        shadowColor: const WidgetStatePropertyAll(Color(0x33000000)),
+        padding: const WidgetStatePropertyAll(EdgeInsets.zero),
+        shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+          side: BorderSide(color: p.line),
+        )),
       ),
-      builder: (_) => const _DisplaySheet(),
+      menuChildren: const [_DisplayPanel()],
+      builder: (context, controller, _) => _DisplayButton(
+        compact: compact,
+        open: controller.isOpen,
+        onTap: () => controller.isOpen ? controller.close() : controller.open(),
+      ),
     );
   }
 }
@@ -149,8 +184,13 @@ class PeriodControls extends ConsumerWidget {
 /// Bouton « Affichage ». [compact] : icône seule, le libellé passe dans
 /// l'infobulle.
 class _DisplayButton extends StatelessWidget {
-  const _DisplayButton({required this.onTap, this.compact = false});
+  const _DisplayButton({
+    required this.onTap,
+    this.compact = false,
+    this.open = false,
+  });
   final bool compact;
+  final bool open;
   final VoidCallback onTap;
 
   static const String _label = 'Affichage';
@@ -178,7 +218,7 @@ class _DisplayButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = context.glance;
-    final ink = p.fg2;
+    final ink = open ? p.fg : p.fg2;
     final button = GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -188,7 +228,7 @@ class _DisplayButton extends StatelessWidget {
         height: 32,
         padding: const EdgeInsets.symmetric(horizontal: _hPad),
         decoration: BoxDecoration(
-          color: p.chip,
+          color: open ? p.line : p.chip,
           borderRadius: BorderRadius.circular(9),
         ),
         child: Row(
@@ -208,57 +248,85 @@ class _DisplayButton extends StatelessWidget {
   }
 }
 
-/// Découpage et style de graphique.
-class _DisplaySheet extends ConsumerWidget {
-  const _DisplaySheet();
+/// Contenu du menu : découpage et style de graphique. Des `Row` plutôt que
+/// `ChipRow` : un menu mesure sa largeur intrinsèque, qu'une zone défilante
+/// n'a pas. Trois puces au plus par rangée, qui tiennent toujours.
+class _DisplayPanel extends ConsumerWidget {
+  const _DisplayPanel();
+
+  static const double _pad = 14;
+  static const double _chipGap = 6;
+
+  /// Découpages proposés ; un seul (« Aujourd'hui ») = rien à choisir.
+  static List<TimeUnit> unitsOf(DateWindow? w) =>
+      w == null ? const [] : allowedUnits(w);
+
+  /// Largeur de la plus longue rangée de puces : le menu se cale sur la droite
+  /// du bouton, il faut donc l'estimer avant de l'ouvrir (le menu, lui, prend
+  /// sa largeur réelle ; l'écart de l'arrondi est invisible).
+  static double widthOf(BuildContext context, List<TimeUnit> units) {
+    double row(Iterable<String> labels) =>
+        labels.fold<double>(0, (w, l) => w + GlanceChip.widthOf(context, l)) +
+        _chipGap * (labels.length - 1);
+    final rows = [
+      row(ChartStyle.values.map((s) => s.label)),
+      if (units.length > 1) row(units.map((u) => u.label)),
+    ];
+    return 2 * _pad + rows.reduce((a, b) => a > b ? a : b);
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final p = context.glance;
     final window = ref.watch(windowProvider);
-    final units = window == null ? const <TimeUnit>[] : allowedUnits(window);
+    final units = unitsOf(window);
     final style = ref.watch(settingsProvider.select((s) => s.chartStyle));
 
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+    Widget section(String title, List<Widget> chips) => Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title.toUpperCase(), style: GT.label(color: p.fg2)),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (var i = 0; i < chips.length; i++) ...[
+                  if (i > 0) const SizedBox(width: _chipGap),
+                  chips[i],
+                ],
+              ],
+            ),
+          ],
+        );
+
+    return Padding(
+        padding: const EdgeInsets.all(_pad),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Affichage', style: GT.display(22, color: p.fg)),
-            const SizedBox(height: 18),
             if (units.length > 1) ...[
-              Text('Découpage', style: GT.body(15, color: p.fg)),
-              const SizedBox(height: 10),
-              ChipRow(
-                children: [
-                  for (final u in units)
-                    GlanceChip(
-                      label: u.label,
-                      selected: u == window!.unit,
-                      onTap: () => ref.read(periodProvider.notifier).setUnit(u),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 18),
-            ],
-            Text('Graphique', style: GT.body(15, color: p.fg)),
-            const SizedBox(height: 10),
-            ChipRow(
-              children: [
-                for (final s in ChartStyle.values)
+              section('Découpage', [
+                for (final u in units)
                   GlanceChip(
-                    label: s.label,
-                    selected: s == style,
-                    onTap: () =>
-                        ref.read(settingsProvider.notifier).setChartStyle(s),
+                    label: u.label,
+                    selected: u == window!.unit,
+                    onTap: () => ref.read(periodProvider.notifier).setUnit(u),
                   ),
-              ],
-            ),
+              ]),
+              const SizedBox(height: 14),
+            ],
+            section('Graphique', [
+              for (final s in ChartStyle.values)
+                GlanceChip(
+                  label: s.label,
+                  selected: s == style,
+                  onTap: () =>
+                      ref.read(settingsProvider.notifier).setChartStyle(s),
+                ),
+            ]),
           ],
         ),
-      ),
     );
   }
 }

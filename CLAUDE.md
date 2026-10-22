@@ -142,12 +142,21 @@ l'appelant montre son squelette sans rien déclencher.
 
 `PeriodControls` (`ui/widgets/period_controls.dart`), sous le titre de chaque
 écran : les périodes sur toute la largeur, puis un bouton **« Affichage »** qui
-ouvre une feuille — découpage, courbe ou barres — et, sur l'accueil, la bascule
-liste/grille à droite.
+ouvre un **menu déroulant** (`MenuAnchor`) — découpage, courbe ou barres — et,
+sur l'accueil, la bascule liste/grille à droite.
 
 Les réglages tenaient auparavant dans des boutons sans libellé posés **à droite
 des périodes**, qu'ils recouvraient, et les premières périodes n'étaient plus
-atteignables sans faire défiler. Dans une feuille, chaque réglage porte son nom.
+atteignables sans faire défiler. Dans le menu, chaque réglage porte son nom. Une
+feuille du bas a précédé le menu : disproportionnée pour deux réglages.
+- Le menu **reste ouvert** quand on change un réglage (on règle les deux d'affilée,
+  le graphique change derrière) ; un tap à l'extérieur le ferme.
+- Bouton à droite (une ligne) → le menu s'aligne sur **sa droite** : `MenuAnchor`
+  s'ancre à gauche, d'où un `alignmentOffset` calculé par `_DisplayPanel.widthOf`.
+  Bouton à gauche (téléphone, deux lignes) → aligné à gauche.
+- Des `Row` dans le menu, pas `ChipRow` ni `Wrap` : un menu prend sa largeur
+  intrinsèque, qu'une zone défilante n'a pas, et un `Wrap` calé sur une largeur
+  calculée passait la dernière puce à la ligne pour un pixel d'arrondi.
 
 **Une ligne ou deux, selon la place.** Un `LayoutBuilder` (jamais `MediaQuery.size`)
 mesure les périodes sur leur contenu réel (`GlanceChip.widthOf`, `TextPainter`) et
@@ -177,11 +186,11 @@ large) : `onToggleCompare` vaut alors `null`.
 
 ### Découpage du graphique (heure / jour / mois)
 
-Dans la feuille « Affichage », le découpage n'offre que
+Dans le menu « Affichage », le découpage n'offre que
 `allowedUnits(window)` — la règle d'Umami (`getMinimumUnit` : heure jusqu'à 30 j,
 jour jusqu'à 7 mois, mois au-delà), bornée à **800 buckets** et à au moins 3 (pour
 ne pas proposer « Mois » sur sept jours, qui donnerait une seule barre). Rien à
-choisir sur « Aujourd'hui » → la section disparaît de la feuille.
+choisir sur « Aujourd'hui » → la section disparaît du menu.
 
 ⚠️ La granularité est appliquée **avant** le calcul des bornes (`Period.window(unit:)`),
 jamais posée après coup dans le 3ᵉ champ de `DateWindow` : une journée demandée en
