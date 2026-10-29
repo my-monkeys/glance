@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../data/sync/sync_api.dart' show kSyncMinPasswordLength;
 import '../../state/sync.dart';
 import '../../theme/motion.dart';
 import '../../theme/palette.dart';
@@ -128,6 +129,7 @@ class _AuthFormState extends ConsumerState<_AuthForm> {
         GlanceField(
           label: 'Mot de passe',
           controller: _password,
+          hint: _createMode ? '$kSyncMinPasswordLength caractères minimum' : null,
           obscure: true,
           onSubmitted: (_) => _submit(),
         ),
