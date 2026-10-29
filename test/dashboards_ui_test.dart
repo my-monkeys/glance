@@ -201,9 +201,10 @@ void main() {
     expect(find.text(fmtPct(100, decimals: 0)), findsOneWidget);
   });
 
-  testWidgets('onglet : une carte large prend toute la largeur, les autres 2 colonnes',
+  testWidgets('onglet : jusqu\'à 3 colonnes, une carte large prend toute la largeur',
       (tester) async {
-    tester.view.physicalSize = const Size(1000, 2400);
+    // 900 : le panneau central du bureau à sa largeur maximale.
+    tester.view.physicalSize = const Size(900, 2400);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     SharedPreferences.setMockInitialValues({});
@@ -213,6 +214,7 @@ void main() {
     final all = [
       c('a'),
       c('b'),
+      c('c'),
       const BreakdownIndicator(
           id: 'large', name: 'large', event: 'e', property: 'p', overTime: true),
       c('d'),
@@ -231,16 +233,43 @@ void main() {
     Rect at(String id) =>
         tester.getRect(find.byKey(ValueKey(id)));
     final full = at('large').width;
-    expect(at('a').width, lessThan(full / 1.9));
-    expect(at('b').width, closeTo(at('a').width, 0.5));
+    expect(at('a').width, lessThan(full / 2.9));
+    for (final id in ['b', 'c']) {
+      expect(at(id).width, closeTo(at('a').width, 0.5));
+      expect(at(id).top, closeTo(at('a').top, 0.5));
+    }
     expect(at('a').left, lessThan(at('b').left));
-    expect(at('a').top, closeTo(at('b').top, 0.5));
+    expect(at('b').left, lessThan(at('c').left));
     // Large : sur toute la largeur, sous la première rangée, avant la suivante.
     expect(at('large').left, closeTo(at('a').left, 0.5));
-    expect(at('large').right, closeTo(at('b').right, 0.5));
+    expect(at('large').right, closeTo(at('c').right, 0.5));
     expect(at('large').top, greaterThan(at('a').bottom));
     expect(at('d').top, greaterThan(at('large').bottom));
     expect(at('d').top, closeTo(at('e').top, 0.5));
+  });
+
+  testWidgets('onglet : 2 colonnes quand 3 ne tiennent pas', (tester) async {
+    tester.view.physicalSize = const Size(700, 2400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+    CounterIndicator c(String id) =>
+        CounterIndicator(id: id, name: id, query: EventQuery(id));
+    await tester.pumpWidget(_host(
+      [
+        sharedPrefsProvider.overrideWithValue(prefs),
+        indicatorDataProvider.overrideWith((ref, key) => const CounterData([], 5)),
+        siteIndicatorsProvider.overrideWith((ref, site) => [c('a'), c('b'), c('c')]),
+      ],
+      IndicatorsTab(site: _site, window: _window),
+    ));
+    await tester.pump();
+
+    Rect at(String id) => tester.getRect(find.byKey(ValueKey(id)));
+    expect(at('a').top, closeTo(at('b').top, 0.5));
+    expect(at('c').top, greaterThan(at('a').bottom));
+    expect(at('c').left, closeTo(at('a').left, 0.5));
   });
 
   testWidgets("onglet sans indicateur : explique ce qu'est un tableau", (tester) async {

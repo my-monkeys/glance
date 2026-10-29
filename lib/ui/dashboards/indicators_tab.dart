@@ -147,10 +147,11 @@ class _CardsGrid extends StatelessWidget {
   final List<Indicator> indicators;
 
   /// Largeur minimale d'une carte : en deçà, les colonnes de chiffres d'un
-  /// entonnoir ne tiennent plus à côté de son libellé.
-  static const double _minCard = 320;
+  /// entonnoir ne tiennent plus à côté de son libellé. 270 et non plus : le
+  /// panneau central du bureau (900 px moins ses marges) doit en tenir trois.
+  static const double _minCard = 270;
   static const double _gutter = 14;
-  static const int _maxColumns = 2;
+  static const int _maxColumns = 3;
 
   @override
   Widget build(BuildContext context) {
