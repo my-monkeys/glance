@@ -10,6 +10,7 @@ import 'package:glance/data/models/period.dart';
 import 'package:glance/state/indicators.dart';
 import 'package:glance/state/providers.dart';
 import 'package:glance/theme/theme.dart';
+import 'package:glance/ui/widgets/events_chart.dart';
 import 'package:glance/ui/dashboards/indicator_card.dart';
 import 'package:glance/ui/dashboards/indicators_tab.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -157,6 +158,89 @@ void main() {
       const BreakdownData([], 0),
     );
     expect(find.text('Aucune donnée sur la période'), findsOneWidget);
+  });
+
+  testWidgets('répartition dans le temps : courbes, puces et barres', (tester) async {
+    EventSeries serie(String n, List<double> v) => EventSeries(
+          name: n,
+          points: [for (var i = 0; i < v.length; i++) SeriesPoint(_days[i], v[i], 0)],
+          total: v.fold<double>(0, (a, b) => a + b).round(),
+        );
+    await _pumpCard(
+      tester,
+      const BreakdownIndicator(
+          id: '4', name: 'Par jeu', event: 'partie', property: 'jeu', overTime: true),
+      BreakdownData(
+        const [MetricRow(label: 'france', value: 30), MetricRow(label: 'flags', value: 10)],
+        40,
+        [serie('france', [5, 10, 15, 0]), serie('flags', [1, 2, 3, 4])],
+      ),
+    );
+    expect(find.byType(EventsChart), findsOneWidget);
+    expect(find.byType(EventChip), findsNWidgets(2));
+    expect(find.text(fmtPct(75, decimals: 0)), findsOneWidget);
+
+    await tester.tap(find.byType(EventChip).first);
+    await tester.pumpAndSettle();
+    expect(tester.widget<EventsChart>(find.byType(EventsChart)).series.map((s) => s.name),
+        ['flags']);
+  });
+
+  testWidgets('répartition dans le temps sans point : barres seules', (tester) async {
+    await _pumpCard(
+      tester,
+      const BreakdownIndicator(
+          id: '4', name: 'Par jeu', event: 'partie', property: 'jeu', overTime: true),
+      BreakdownData(
+        const [MetricRow(label: 'france', value: 1)],
+        1,
+        [EventSeries(name: 'france', points: [SeriesPoint(_days[0], 1, 0)], total: 1)],
+      ),
+    );
+    expect(find.byType(EventsChart), findsNothing);
+    expect(find.text(fmtPct(100, decimals: 0)), findsOneWidget);
+  });
+
+  testWidgets('onglet : une carte large prend toute la largeur, les autres 2 colonnes',
+      (tester) async {
+    tester.view.physicalSize = const Size(1000, 2400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+    CounterIndicator c(String id) =>
+        CounterIndicator(id: id, name: id, query: EventQuery(id));
+    final all = [
+      c('a'),
+      c('b'),
+      const BreakdownIndicator(
+          id: 'large', name: 'large', event: 'e', property: 'p', overTime: true),
+      c('d'),
+      c('e'),
+    ];
+    await tester.pumpWidget(_host(
+      [
+        sharedPrefsProvider.overrideWithValue(prefs),
+        indicatorDataProvider.overrideWith((ref, key) => const CounterData([], 5)),
+        siteIndicatorsProvider.overrideWith((ref, site) => all),
+      ],
+      IndicatorsTab(site: _site, window: _window),
+    ));
+    await tester.pump();
+
+    Rect at(String id) =>
+        tester.getRect(find.byKey(ValueKey(id)));
+    final full = at('large').width;
+    expect(at('a').width, lessThan(full / 1.9));
+    expect(at('b').width, closeTo(at('a').width, 0.5));
+    expect(at('a').left, lessThan(at('b').left));
+    expect(at('a').top, closeTo(at('b').top, 0.5));
+    // Large : sur toute la largeur, sous la première rangée, avant la suivante.
+    expect(at('large').left, closeTo(at('a').left, 0.5));
+    expect(at('large').right, closeTo(at('b').right, 0.5));
+    expect(at('large').top, greaterThan(at('a').bottom));
+    expect(at('d').top, greaterThan(at('large').bottom));
+    expect(at('d').top, closeTo(at('e').top, 0.5));
   });
 
   testWidgets("onglet sans indicateur : explique ce qu'est un tableau", (tester) async {

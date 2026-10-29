@@ -663,7 +663,7 @@ class _EventsTabState extends ConsumerState<_EventsTab> {
                 runSpacing: 8,
                 children: [
                   for (final s in data.series)
-                    _EventChip(
+                    EventChip(
                       label: s.name,
                       color: colors[s.name]!,
                       on: !_hidden.contains(s.name),
@@ -713,57 +713,6 @@ class _EventsTabState extends ConsumerState<_EventsTab> {
         ),
         const SizedBox(height: 24),
       ],
-    );
-  }
-}
-
-/// Puce de légende cliquable (couleur + nom) qui active/désactive une courbe.
-class _EventChip extends StatelessWidget {
-  const _EventChip({
-    required this.label,
-    required this.color,
-    required this.on,
-    required this.onTap,
-  });
-  final String label;
-  final Color color;
-  final bool on;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final p = context.glance;
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedOpacity(
-        duration: kMotionFast,
-        curve: kCurveOut,
-        opacity: on ? 1 : 0.4,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
-          decoration: BoxDecoration(
-            color: p.chip,
-            borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: on ? color : Colors.transparent),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 9,
-                height: 9,
-                decoration: BoxDecoration(
-                  color: color,
-                  shape: BoxShape.circle,
-                ),
-              ),
-              const SizedBox(width: 7),
-              Text(label, style: GT.mono(12, weight: 500, color: p.fg)),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }
