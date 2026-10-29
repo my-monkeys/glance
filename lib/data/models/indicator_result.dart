@@ -140,8 +140,15 @@ class FunnelData extends IndicatorData {
   final List<FunnelStepResult> steps;
 }
 
+/// Lignes d'une répartition : au-delà, la carte deviendrait une liste.
+const int kBreakdownRows = 8;
+
 class BreakdownData extends IndicatorData {
-  const BreakdownData(this.rows, this.total);
+  const BreakdownData(this.rows, this.total, [this.series]);
   final List<MetricRow> rows;
   final int total;
+
+  /// Une série par valeur (les [kBreakdownRows] premières), dans l'ordre de
+  /// [rows]. Null sans l'option « évolution dans le temps ».
+  final List<EventSeries>? series;
 }

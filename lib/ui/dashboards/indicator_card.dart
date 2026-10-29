@@ -18,9 +18,6 @@ import 'indicator_chart.dart';
 import 'indicator_menu.dart';
 import 'labels.dart';
 
-/// Lignes d'une répartition : au-delà, la carte deviendrait une liste.
-const int kBreakdownRows = 8;
-
 const _kindLabels = {
   IndicatorKind.counter: 'Compteur',
   IndicatorKind.ratio: 'Taux',

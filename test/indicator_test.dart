@@ -40,6 +40,12 @@ void main() {
         windowMinutes: 7),
     const BreakdownIndicator(
         id: 'd', name: 'Niveaux', event: 'partie', property: 'niveau'),
+    const BreakdownIndicator(
+        id: 'd2',
+        name: 'Niveaux dans le temps',
+        event: 'partie',
+        property: 'niveau',
+        overTime: true),
     const ExternalIndicator(
         id: 'e',
         name: 'Rétention J1',
@@ -54,6 +60,15 @@ void main() {
       expect(back, i, reason: i.kind.name);
       expect(back.hashCode, i.hashCode);
     }
+  });
+
+  test('overTime : écrit seulement quand vrai, absent = faux', () {
+    const base = BreakdownIndicator(
+        id: 'd', name: 'Niveaux', event: 'partie', property: 'niveau');
+    expect(base.toJson().containsKey('overTime'), isFalse);
+    expect(base.copyWith(overTime: true).toJson()['overTime'], isTrue);
+    final back = Indicator.fromJson(base.toJson()) as BreakdownIndicator;
+    expect(back.overTime, isFalse);
   });
 
   test('gaps : écrit seulement quand vrai, absent = faux', () {
