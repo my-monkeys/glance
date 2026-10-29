@@ -147,10 +147,11 @@ class _CardsGrid extends StatelessWidget {
   final List<Indicator> indicators;
 
   /// Largeur minimale d'une carte : en deçà, les colonnes de chiffres d'un
-  /// entonnoir ne tiennent plus à côté de son libellé.
-  static const double _minCard = 320;
+  /// entonnoir ne tiennent plus à côté de son libellé. 270 et non plus : le
+  /// panneau central du bureau (900 px moins ses marges) doit en tenir trois.
+  static const double _minCard = 270;
   static const double _gutter = 14;
-  static const int _maxColumns = 2;
+  static const int _maxColumns = 3;
 
   @override
   Widget build(BuildContext context) {
@@ -163,37 +164,88 @@ class _CardsGrid extends StatelessWidget {
             .floor()
             .clamp(1, _maxColumns);
 
-        Widget card(int i) => IndicatorCard(
+        Widget card(Indicator i) => IndicatorCard(
               // L'id suffit : le déplacement d'une carte d'une colonne à
               // l'autre doit la déplacer, pas la reconstruire.
-              key: ValueKey(indicators[i].id),
+              key: ValueKey(i.id),
               site: site,
               window: window,
-              indicator: indicators[i],
+              indicator: i,
             );
 
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        // Une carte large coupe la grille : les cartes normales d'avant et
+        // d'après se répartissent chacune en colonnes, de leur côté.
+        final children = <Widget>[];
+        var run = <Indicator>[];
+        void flush() {
+          if (run.isEmpty) return;
+          children.add(_Columns(
+            columns: columns,
+            gutter: _gutter,
+            cards: [for (final i in run) card(i)],
+          ));
+          run = [];
+        }
+
+        for (final i in indicators) {
+          if (columns > 1 && _isWide(i)) {
+            flush();
+            children.add(card(i));
+          } else {
+            run.add(i);
+          }
+        }
+        flush();
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            for (var col = 0; col < columns; col++) ...[
-              if (col > 0) const SizedBox(width: _gutter),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    for (var i = col; i < indicators.length; i += columns) ...[
-                      if (i > col) const SizedBox(height: _gutter),
-                      card(i),
-                    ],
-                  ],
-                ),
-              ),
+            for (final (n, w) in children.indexed) ...[
+              if (n > 0) const SizedBox(height: _gutter),
+              w,
             ],
           ],
         );
       },
     );
   }
+
+  /// Une répartition dans le temps a besoin de largeur pour sa courbe.
+  static bool _isWide(Indicator i) => i is BreakdownIndicator && i.overTime;
+}
+
+/// Cartes réparties en colonnes, rangée après rangée (0 à gauche, 1 à droite…).
+class _Columns extends StatelessWidget {
+  const _Columns({
+    required this.columns,
+    required this.gutter,
+    required this.cards,
+  });
+
+  final int columns;
+  final double gutter;
+  final List<Widget> cards;
+
+  @override
+  Widget build(BuildContext context) => Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (var col = 0; col < columns; col++) ...[
+            if (col > 0) SizedBox(width: gutter),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (var i = col; i < cards.length; i += columns) ...[
+                    if (i > col) SizedBox(height: gutter),
+                    cards[i],
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ],
+      );
 }
 
 class _EmptyState extends StatelessWidget {

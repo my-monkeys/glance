@@ -40,6 +40,7 @@ class IndicatorDraft {
     this.breakdownEvent = '',
     this.breakdownProperty = '',
     this.gapsWhenEmpty = false,
+    this.breakdownOverTime = false,
     this.metricId = '',
     this.metricLabel = '',
     this.metricUnit = MetricUnit.count,
@@ -57,6 +58,7 @@ class IndicatorDraft {
   final String breakdownEvent;
   final String breakdownProperty;
   final bool gapsWhenEmpty;
+  final bool breakdownOverTime;
 
   /// Métrique de la source du site ; libellé et unité viennent du catalogue.
   final String metricId;
@@ -89,6 +91,7 @@ class IndicatorDraft {
           name: i.name,
           breakdownEvent: i.event,
           breakdownProperty: i.property,
+          breakdownOverTime: i.overTime,
         ),
       ExternalIndicator() => IndicatorDraft(
           kind: i.kind,
@@ -111,6 +114,7 @@ class IndicatorDraft {
     String? breakdownEvent,
     String? breakdownProperty,
     bool? gapsWhenEmpty,
+    bool? breakdownOverTime,
     String? metricId,
     String? metricLabel,
     MetricUnit? metricUnit,
@@ -126,6 +130,7 @@ class IndicatorDraft {
         breakdownEvent: breakdownEvent ?? this.breakdownEvent,
         breakdownProperty: breakdownProperty ?? this.breakdownProperty,
         gapsWhenEmpty: gapsWhenEmpty ?? this.gapsWhenEmpty,
+        breakdownOverTime: breakdownOverTime ?? this.breakdownOverTime,
         metricId: metricId ?? this.metricId,
         metricLabel: metricLabel ?? this.metricLabel,
         metricUnit: metricUnit ?? this.metricUnit,
@@ -273,6 +278,7 @@ class IndicatorDraft {
           name: label,
           event: breakdownEvent,
           property: breakdownProperty,
+          overTime: breakdownOverTime,
         ),
       IndicatorKind.external => ExternalIndicator(
           id: id,

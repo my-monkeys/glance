@@ -131,10 +131,29 @@ final indicatorDataProvider = FutureProvider.autoDispose
       case FunnelIndicator():
         final p = await analyticsProviderFor(ref, site);
         return FunnelData(await gate.run(() => p.funnel(site, w, indicator)));
-      case BreakdownIndicator(:final event, :final property):
+      case BreakdownIndicator(:final event, :final property, :final overTime):
         final p = await analyticsProviderFor(ref, site);
         final rows = await gate.run(() => p.propertyValues(site, w, event, property));
-        return BreakdownData(rows, rows.fold<int>(0, (a, r) => a + r.value));
+        final total = rows.fold<int>(0, (a, r) => a + r.value);
+        if (!overTime) return BreakdownData(rows, total);
+        // Le type fixe la forme du filtre `epf` : texte par défaut si le
+        // fournisseur ne sait pas lister les propriétés.
+        final props = await gate.run(() => p.eventProperties(site, w, event));
+        final type = props
+            .firstWhere((x) => x.name == property,
+                orElse: () => EventProperty(property, PropertyType.string))
+            .type;
+        final series = await Future.wait([
+          for (final r in rows.take(kBreakdownRows))
+            count(EventQuery(event, [
+              EventFilter(property: property, type: type, op: FilterOp.eq, value: r.label),
+            ])).then((points) => EventSeries(
+                  name: r.label,
+                  points: points,
+                  total: points.fold<double>(0, (a, b) => a + b.visitors).round(),
+                )),
+        ]);
+        return BreakdownData(rows, total, series);
       case ExternalIndicator():
         return _externalData(ref, site, w, indicator);
     }

@@ -301,6 +301,13 @@ attendre d'instance. Couverture par fournisseur :
 - **Répartition** : % = part du **total des événements** de la répartition.
   C'est l'inverse de la règle du détail (part de `summary.visitors`) : ici les
   lignes partitionnent un même événement, leur somme est donc le bon dénominateur.
+- **Répartition « Évolution dans le temps »** (clé JSON facultative `overTime`) :
+  une courbe par valeur (les `kBreakdownRows` = 8 premières) au-dessus des barres,
+  et la carte prend **toute la largeur** de la grille. Une requête
+  `/events/series` filtrée (`epf` `eq`) par valeur, plus une pour le type de la
+  propriété : 10 requêtes au lieu d'une, d'où l'option plutôt qu'un défaut.
+- **Grille** : 1 à 3 colonnes, carte de 270 px minimum — le panneau central du
+  bureau (900 px) en tient trois. Une carte large coupe la répartition en colonnes.
 - **Cartes sans données masquées** : voir « Source de métriques » plus bas
   (`hasDisplayableData`, ligne « N tableaux sans données · Afficher »).
 - **Éditeur** : les suggestions (événements, propriétés, valeurs) portent sur

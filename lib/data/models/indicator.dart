@@ -176,6 +176,7 @@ sealed class Indicator {
           name: name,
           event: j['event'] as String,
           property: j['property'] as String,
+          overTime: (j['overTime'] as bool?) ?? false,
         );
       case 'external':
         return ExternalIndicator(
@@ -334,24 +335,39 @@ class BreakdownIndicator extends Indicator {
     required super.name,
     required this.event,
     required this.property,
+    this.overTime = false,
   });
 
   final String event;
   final String property;
 
+  /// Une courbe par valeur, au-dessus des barres. Clé JSON facultative : une
+  /// app plus ancienne l'ignore et affiche les barres seules.
+  final bool overTime;
+
   @override
   IndicatorKind get kind => IndicatorKind.breakdown;
 
-  BreakdownIndicator copyWith({String? name, String? event, String? property}) =>
+  BreakdownIndicator copyWith({
+    String? name,
+    String? event,
+    String? property,
+    bool? overTime,
+  }) =>
       BreakdownIndicator(
         id: id,
         name: name ?? this.name,
         event: event ?? this.event,
         property: property ?? this.property,
+        overTime: overTime ?? this.overTime,
       );
 
   @override
-  Map<String, dynamic> toJson() => _base({'event': event, 'property': property});
+  Map<String, dynamic> toJson() => _base({
+        'event': event,
+        'property': property,
+        if (overTime) 'overTime': true,
+      });
 
   @override
   bool operator ==(Object other) =>
@@ -359,10 +375,11 @@ class BreakdownIndicator extends Indicator {
       other.id == id &&
       other.name == name &&
       other.event == event &&
-      other.property == property;
+      other.property == property &&
+      other.overTime == overTime;
 
   @override
-  int get hashCode => Object.hash(kind, id, name, event, property);
+  int get hashCode => Object.hash(kind, id, name, event, property, overTime);
 }
 
 /// Un indicateur calculé par le site lui-même, via sa source de métriques.

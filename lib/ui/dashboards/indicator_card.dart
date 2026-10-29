@@ -12,14 +12,13 @@ import '../../theme/motion.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
 import '../widgets/common.dart';
+import '../widgets/events_chart.dart';
 import '../widgets/motion.dart';
+import 'breakdown_body.dart';
 import 'funnel_bars.dart';
 import 'indicator_chart.dart';
 import 'indicator_menu.dart';
 import 'labels.dart';
-
-/// Lignes d'une répartition : au-delà, la carte deviendrait une liste.
-const int kBreakdownRows = 8;
 
 const _kindLabels = {
   IndicatorKind.counter: 'Compteur',
@@ -173,16 +172,25 @@ class _CardBody extends StatelessWidget {
             : _Stat(
                 big: fmtInt(d.total),
                 sub: _unlessName('$event · $property'),
-                child: MetricBars(
-                  rows: [
-                    for (final r in d.rows.take(kBreakdownRows))
-                      MetricBarRow(label: r.label, value: r.value),
-                  ],
-                  // Ici le dénominateur est la somme des lignes, pas les
-                  // visiteurs du résumé comme dans le détail : chaque ligne est
-                  // un nombre d'événements d'UNE propriété, qui partitionne
-                  // l'événement. Leur somme est donc bien l'univers de la part.
-                  total: d.total,
+                child: BreakdownBody(
+                  series: d.series,
+                  unit: window.unit,
+                  bars: MetricBars(
+                    rows: [
+                      for (final (i, r) in d.rows.take(kBreakdownRows).indexed)
+                        MetricBarRow(
+                          label: r.label,
+                          value: r.value,
+                          // Même couleur que la courbe de cette valeur.
+                          color: d.series == null ? null : eventColorAt(i),
+                        ),
+                    ],
+                    // Ici le dénominateur est la somme des lignes, pas les
+                    // visiteurs du résumé comme dans le détail : chaque ligne est
+                    // un nombre d'événements d'UNE propriété, qui partitionne
+                    // l'événement. Leur somme est donc bien l'univers de la part.
+                    total: d.total,
+                  ),
                 ),
               ),
       // Résultat d'un autre genre (indicateur modifié pendant un rechargement).
