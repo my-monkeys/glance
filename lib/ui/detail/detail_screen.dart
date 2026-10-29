@@ -249,11 +249,12 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                 // a des événements) : la barre se déplie au lieu de pousser le
                 // contenu.
                 GlanceReveal(
-                  show: hasEvents,
+                  show: hasEvents || showIndicators,
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
                     child: _SegTabs(
                       current: tab,
+                      showEvents: hasEvents,
                       showIndicators: showIndicators,
                       onChanged: (t) => setState(() => _tab = t),
                     ),
@@ -527,10 +528,12 @@ class _Kpi extends StatelessWidget {
 class _SegTabs extends StatelessWidget {
   const _SegTabs({
     required this.current,
+    required this.showEvents,
     required this.showIndicators,
     required this.onChanged,
   });
   final _DetailTab current;
+  final bool showEvents;
   final bool showIndicators;
   final ValueChanged<_DetailTab> onChanged;
 
@@ -580,7 +583,7 @@ class _SegTabs extends StatelessWidget {
       child: Row(
         children: [
           seg(_DetailTab.overview, "Vue d'ensemble"),
-          seg(_DetailTab.events, 'Événements'),
+          if (showEvents) seg(_DetailTab.events, 'Événements'),
           if (showIndicators) seg(_DetailTab.indicators, 'Tableaux'),
         ],
       ),
