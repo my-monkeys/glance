@@ -489,9 +489,11 @@ final siteHasEventsProvider =
   final gate = ref.watch(fetchGateProvider);
   final p = await analyticsProviderFor(ref, site);
   final w = Period.d30.window();
+  // Une erreur remonte au lieu de valoir « aucun événement » : persistée, elle
+  // masquait les onglets jusqu'à la prochaine réponse (vécu sur geography,
+  // appel lancé avant l'accès au trousseau). L'écran garde la valeur connue.
   final rows = await gate
-      .run(() => p.metric(site, w, MetricType.events, limit: 1))
-      .catchError((_) => <MetricRow>[]);
+      .run(() => p.metric(site, w, MetricType.events, limit: 1));
   final has = rows.isNotEmpty;
   ref.read(sharedPrefsProvider).setBool(_hasEventsKey(site), has);
   return has;
