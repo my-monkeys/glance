@@ -295,26 +295,44 @@ class _IndicatorEditorState extends ConsumerState<IndicatorEditor> {
     };
   }
 
-  Widget _gapsRow() {
+  Widget _gapsRow() => _checkRow(
+        on: _draft.gapsWhenEmpty,
+        label: 'Laisser un trou quand rien ne s\'est passé',
+        hint: 'Sinon, ces jours-là comptent pour 0 %.',
+        onTap: () =>
+            _update(_draft.copyWith(gapsWhenEmpty: !_draft.gapsWhenEmpty)),
+      );
+
+  Widget _overTimeRow() => _checkRow(
+        on: _draft.breakdownOverTime,
+        label: 'Évolution dans le temps',
+        hint: 'Une courbe par valeur, sur toute la largeur',
+        onTap: () => _update(
+            _draft.copyWith(breakdownOverTime: !_draft.breakdownOverTime)),
+      );
+
+  Widget _checkRow({
+    required bool on,
+    required String label,
+    required String hint,
+    required VoidCallback onTap,
+  }) {
     final p = context.glance;
     return GestureDetector(
-      onTap: () => _update(
-          _draft.copyWith(gapsWhenEmpty: !_draft.gapsWhenEmpty)),
+      onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          GlanceCheck(on: _draft.gapsWhenEmpty),
+          GlanceCheck(on: on),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Laisser un trou quand rien ne s\'est passé',
-                    style: GT.body(14, color: p.fg)),
+                Text(label, style: GT.body(14, color: p.fg)),
                 const SizedBox(height: 2),
-                Text('Sinon, ces jours-là comptent pour 0 %.',
-                    style: GT.body(12.5, color: p.fg3)),
+                Text(hint, style: GT.body(12.5, color: p.fg3)),
               ],
             ),
           ),
@@ -368,6 +386,8 @@ class _IndicatorEditorState extends ConsumerState<IndicatorEditor> {
               if (prop != null) _update(_draft.copyWith(breakdownProperty: prop.name));
             },
           ),
+          const SizedBox(height: 18),
+          _overTimeRow(),
         ],
       );
 }

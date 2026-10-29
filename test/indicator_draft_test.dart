@@ -36,6 +36,12 @@ void main() {
       ),
       const BreakdownIndicator(
           id: 'b', name: 'Par jeu', event: 'partie', property: 'jeu'),
+      const BreakdownIndicator(
+          id: 'bt',
+          name: 'Par jeu dans le temps',
+          event: 'partie',
+          property: 'jeu',
+          overTime: true),
       const ExternalIndicator(
         id: 'x',
         name: 'Comptes',
@@ -49,6 +55,19 @@ void main() {
         expect(IndicatorDraft.fromIndicator(i).toIndicator(i.id), i);
       });
     }
+  });
+
+  test('répartition : la case « évolution dans le temps » fait l\'aller-retour', () {
+    const d = IndicatorDraft(
+      kind: IndicatorKind.breakdown,
+      breakdownEvent: 'partie',
+      breakdownProperty: 'jeu',
+    );
+    expect((d.toIndicator('x') as BreakdownIndicator).overTime, isFalse);
+    final on = d.copyWith(breakdownOverTime: true);
+    final i = on.toIndicator('x') as BreakdownIndicator;
+    expect(i.overTime, isTrue);
+    expect(IndicatorDraft.fromIndicator(i).breakdownOverTime, isTrue);
   });
 
   group('métrique du site', () {
