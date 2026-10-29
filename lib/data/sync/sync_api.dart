@@ -38,9 +38,27 @@ class RemoteConfig {
 }
 
 class SyncAuthError implements Exception {
-  SyncAuthError(this.message);
+  SyncAuthError(this.message, {this.code});
   final String message;
+
+  /// Code d'erreur de Better Auth (`PASSWORD_TOO_SHORT`…), quand il y en a un.
+  final String? code;
 }
+
+/// Longueur minimale d'un mot de passe : doit suivre `minPasswordLength` dans
+/// glance-sync (`src/auth.ts`).
+const kSyncMinPasswordLength = 8;
+
+/// Message d'un refus d'inscription, d'après le code de Better Auth.
+String signUpErrorMessage(String? code) => switch (code) {
+      'PASSWORD_TOO_SHORT' =>
+        'Mot de passe trop court : $kSyncMinPasswordLength caractères minimum.',
+      'PASSWORD_TOO_LONG' => 'Mot de passe trop long.',
+      'INVALID_EMAIL' => 'Adresse e-mail invalide.',
+      'USER_ALREADY_EXISTS' || 'USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL' =>
+        'Cet e-mail a déjà un compte : connectez-vous.',
+      _ => 'Impossible de créer le compte.',
+    };
 
 /// Le compte n'est pas Pro : la sync (écriture) est réservée aux comptes payants.
 class SyncProRequired implements Exception {}
@@ -103,8 +121,11 @@ class SyncApi {
       throw SyncNetworkError();
     }
     if (r.statusCode != 200) {
-      final msg = (r.data is Map ? r.data['message'] : null)?.toString();
-      throw SyncAuthError(msg ?? 'Identifiants refusés');
+      final body = r.data is Map ? r.data as Map : const {};
+      throw SyncAuthError(
+        body['message']?.toString() ?? 'Identifiants refusés',
+        code: body['code']?.toString(),
+      );
     }
     final token = r.headers.value('set-auth-token');
     if (token != null) await _saveToken(token);

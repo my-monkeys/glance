@@ -116,13 +116,19 @@ class SyncController extends Notifier<SyncState> {
     }
   }
 
-  Future<bool> signUp(String email, String password) => _enter(
-        () => _api.signUp(email, password),
-        password,
-        (msg) => msg.toLowerCase().contains('exist')
-            ? 'Cet e-mail est déjà utilisé.'
-            : 'Impossible de créer le compte.',
-      );
+  Future<bool> signUp(String email, String password) async {
+    // Vérifié ici aussi : le serveur refuserait, mais sans dire pourquoi à
+    // l'écran avant que son code d'erreur soit traduit.
+    if (password.length < kSyncMinPasswordLength) {
+      state = state.copyWith(error: signUpErrorMessage('PASSWORD_TOO_SHORT'));
+      return false;
+    }
+    return _enter(
+      () => _api.signUp(email, password),
+      password,
+      (e) => signUpErrorMessage(e.code),
+    );
+  }
 
   Future<bool> signIn(String email, String password) => _enter(
         () => _api.signIn(email, password),
@@ -133,7 +139,7 @@ class SyncController extends Notifier<SyncState> {
   Future<bool> _enter(
     Future<SyncUser> Function() call,
     String password,
-    String Function(String backendMessage) frenchError,
+    String Function(SyncAuthError error) frenchError,
   ) async {
     state = state.copyWith(busy: true, clearError: true);
     try {
@@ -149,7 +155,7 @@ class SyncController extends Notifier<SyncState> {
       await pull(); // récupère une éventuelle config existante
       return true;
     } on SyncAuthError catch (e) {
-      state = state.copyWith(busy: false, error: frenchError(e.message));
+      state = state.copyWith(busy: false, error: frenchError(e));
       return false;
     } on SyncNetworkError {
       state = state.copyWith(busy: false, error: 'Serveur injoignable.');
