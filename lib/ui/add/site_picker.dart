@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../../core/site_search.dart';
 import '../../data/models/models.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
 import '../widgets/common.dart';
 import '../widgets/site_avatar.dart';
 import '../widgets/field.dart';
+import '../widgets/site_search_field.dart';
 
 /// Résultat du choix des sites (pop du picker). Un pop **sans valeur** (`null`)
 /// = annulé. Un [SiteChoice] = confirmé, où [sites] encode les trois cas gérés
@@ -49,6 +51,18 @@ class SitePickerScreen extends StatefulWidget {
 class _SitePickerScreenState extends State<SitePickerScreen> {
   late bool _followNew;
   late final Set<String> _checked;
+  final _search = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
+
+  /// Sites affichés : « Tout cocher » ne porte que sur eux pendant une
+  /// recherche, pour cocher d'un geste tous les sites d'un même client.
+  List<Site> get _shown => filterSites(widget.sites, _query);
 
   @override
   void initState() {
@@ -71,12 +85,15 @@ class _SitePickerScreenState extends State<SitePickerScreen> {
 
   bool get _allChecked => widget.sites.every((s) => _checked.contains(s.id));
 
+  bool get _allShownChecked => _shown.every((s) => _checked.contains(s.id));
+
   void _toggleAll() {
+    final ids = _shown.map((s) => s.id);
     setState(() {
-      if (_allChecked) {
-        _checked.clear();
+      if (_allShownChecked) {
+        _checked.removeAll(ids);
       } else {
-        _checked.addAll(widget.sites.map((s) => s.id));
+        _checked.addAll(ids);
       }
     });
   }
@@ -114,6 +131,7 @@ class _SitePickerScreenState extends State<SitePickerScreen> {
   Widget build(BuildContext context) {
     final p = context.glance;
     final sites = widget.sites;
+    final shown = _shown;
 
     return Scaffold(
       body: SafeArea(
@@ -183,23 +201,36 @@ class _SitePickerScreenState extends State<SitePickerScreen> {
                     ),
                   ),
                   const SizedBox(height: 18),
+                  if (sites.length > kSiteSearchThreshold) ...[
+                    SiteSearchField(
+                      controller: _search,
+                      onChanged: (v) => setState(() => _query = v),
+                    ),
+                    const SizedBox(height: 14),
+                  ],
                   Padding(
                     padding: const EdgeInsets.only(left: 3, right: 3, bottom: 8),
                     child: Row(
                       children: [
-                        Expanded(child: SectionLabel('Sites actuels')),
-                        GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onTap: _toggleAll,
-                          child: Text(
-                            _allChecked ? 'Tout décocher' : 'Tout cocher',
-                            style: GT.body(13, weight: 500, color: p.accent),
-                          ),
+                        Expanded(
+                          child: SectionLabel(shown.length == sites.length
+                              ? 'Sites actuels'
+                              : '${shown.length} sur ${sites.length}'),
                         ),
+                        if (shown.isNotEmpty)
+                          GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: _toggleAll,
+                            child: Text(
+                              _allShownChecked ? 'Tout décocher' : 'Tout cocher',
+                              style: GT.body(13, weight: 500, color: p.accent),
+                            ),
+                          ),
                       ],
                     ),
                   ),
-                  for (final s in sites) ...[
+                  if (shown.isEmpty) NoSiteMatch(_query),
+                  for (final s in shown) ...[
                     GlanceCard(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 15,

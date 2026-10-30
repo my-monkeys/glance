@@ -45,7 +45,8 @@ void main() {
   });
 
   group('écran de choix', () {
-    final sites = [_site('1'), _site('2'), _site('3')];
+    var sites = [_site('1'), _site('2'), _site('3')];
+    tearDown(() => sites = [_site('1'), _site('2'), _site('3')]);
 
     Future<SiteChoice?> pick(
       WidgetTester tester, {
@@ -140,6 +141,27 @@ void main() {
       });
       expect(r!.sites, isNull);
       expect(r.excluded, isEmpty);
+    });
+
+    testWidgets('recherche : « Tout décocher » ne touche que les sites affichés',
+        (tester) async {
+      sites = [
+        for (final id in ['a1', 'a2', 'b1', 'b2', 'b3', 'b4', 'b5']) _site(id),
+      ];
+      final r = await pick(tester, actions: () async {
+        await tester.enterText(find.byType(TextField), 'site a');
+        await tester.pumpAndSettle();
+        expect(find.text('Site b1'), findsNothing);
+        expect(find.text('2 SUR 7'), findsOneWidget);
+        await tester.tap(find.text('Tout décocher'));
+        await tester.pumpAndSettle();
+        await tester.enterText(find.byType(TextField), 'zzz');
+        await tester.pumpAndSettle();
+        expect(find.textContaining('Aucun site ne correspond'), findsOneWidget);
+        await tester.tap(find.text('Suivre 5 sites et les nouveaux'));
+      });
+      expect(r!.sites, isNull);
+      expect(r.excluded, ['a1', 'a2']);
     });
   });
 }
