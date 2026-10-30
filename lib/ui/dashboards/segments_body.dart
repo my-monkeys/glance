@@ -68,13 +68,16 @@ class SegmentsBody extends StatelessWidget {
           : MetricBars(
               dense: true,
               rows: [
+                // Une part sans total (la source ne la comptait pas encore sur
+                // la fenêtre) est inconnue : pas de barre à 0 %.
                 for (final (i, s) in segments.indexed)
-                  MetricBarRow(
-                    label: _label(s),
-                    value: s.periodTotal ?? 0,
-                    // Le total prend la 1re couleur des courbes.
-                    color: eventColorAt(i + 1),
-                  ),
+                  if (s.periodTotal != null)
+                    MetricBarRow(
+                      label: _label(s),
+                      value: s.periodTotal!,
+                      // Le total prend la 1re couleur des courbes.
+                      color: eventColorAt(i + 1),
+                    ),
               ],
               total: sum,
             ),

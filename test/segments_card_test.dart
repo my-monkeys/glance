@@ -120,6 +120,20 @@ void main() {
     }
   });
 
+  testWidgets('une plateforme sans total n\'a pas de barre à 0 %', (tester) async {
+    final d = _data(split: true);
+    await _pump(
+      tester,
+      CounterData(d.points, d.total, segments: [
+        d.segments[0],
+        d.segments[1],
+        const CounterSegment(label: 'Alldle', estimated: true, values: [null, null, null]),
+      ]),
+    );
+    expect(find.textContaining(RegExp(r'^0\s%$')), findsNothing);
+    expect(find.textContaining(RegExp(r'^71\s%$')), findsOneWidget); // 25 / 35
+  });
+
   test('isolatedPoint : connu, sans voisin connu', () {
     final s = EventSeries(
       name: 'x',
