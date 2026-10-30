@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 
+import '../../core/grid_layout.dart';
 import 'metrics_source.dart';
 import 'workspace.dart';
 
@@ -435,14 +436,27 @@ class ExternalIndicator extends Indicator {
 /// Les indicateurs d'un site, dans l'ordre choisi par l'utilisateur.
 @immutable
 class SiteIndicators {
-  const SiteIndicators(this.site, this.indicators);
+  const SiteIndicators(this.site, this.indicators, [this.layouts = const {}]);
 
   final SiteRef site;
   final List<Indicator> indicators;
 
+  /// Disposition de la grille, par nombre de colonnes : un téléphone et un
+  /// bureau n'ont pas la même grille, chacun garde la sienne.
+  final Map<int, Map<String, GridSlot>> layouts;
+
   Map<String, dynamic> toJson() => {
         'site': site.toJson(),
         'indicators': indicators.map((i) => i.toJson()).toList(),
+        // Clé facultative : une app plus ancienne l'ignore et range les
+        // cartes dans l'ordre de la liste.
+        if (layouts.isNotEmpty)
+          'layouts': {
+            for (final l in layouts.entries)
+              '${l.key}': {
+                for (final s in l.value.entries) s.key: s.value.toJson(),
+              },
+          },
       };
 
   /// Les indicateurs de `kind` inconnu sont écartés (cf. [Indicator.fromJson]).
@@ -452,7 +466,20 @@ class SiteIndicators {
             .map((e) => Indicator.fromJson(e as Map<String, dynamic>))
             .whereType<Indicator>()
             .toList(),
+        _layoutsFromJson(j['layouts']),
       );
+
+  static Map<int, Map<String, GridSlot>> _layoutsFromJson(Object? j) {
+    if (j is! Map<String, dynamic>) return const {};
+    return {
+      for (final l in j.entries)
+        if ((int.tryParse(l.key), l.value)
+            case (final cols?, final Map<String, dynamic> slots))
+          cols: {
+            for (final s in slots.entries) s.key: ?GridSlot.fromJson(s.value),
+          },
+    };
+  }
 
   static String encodeList(List<SiteIndicators> l) =>
       jsonEncode(l.map((s) => s.toJson()).toList());
