@@ -16,6 +16,7 @@ class CardStat extends StatelessWidget {
     this.child,
     this.detail,
     this.notes = const [],
+    this.keepChildHeight = false,
   });
   final String big;
 
@@ -29,6 +30,10 @@ class CardStat extends StatelessWidget {
 
   /// La carte a une taille imposée par la grille (cf. `IndicatorCard.fill`).
   final bool fill;
+
+  /// Le détail garde sa hauteur naturelle au lieu de prendre celle qui reste
+  /// (un entonnoir : ses étapes ne s'étirent pas).
+  final bool keepChildHeight;
 
   static const double _gap = 14;
 
@@ -81,7 +86,7 @@ class CardStat extends StatelessWidget {
       );
     }
     return CustomMultiChildLayout(
-      delegate: _StatLayout(gap: _gap, stretch: child is IndicatorChart),
+      delegate: _StatLayout(gap: _gap, stretch: !keepChildHeight),
       children: [
         LayoutId(
           id: _StatPart.head,
@@ -103,10 +108,10 @@ class CardStat extends StatelessWidget {
 
 enum _StatPart { head, body }
 
-/// Le chiffre en haut à sa hauteur naturelle, le détail dessous : une courbe
-/// ([stretch]) prend toute la hauteur qui reste, une liste (entonnoir,
-/// répartition) garde la sienne et la carte la coupe. Une `Column` signalerait
-/// un débordement là où la grille coupe volontairement.
+/// Le chiffre en haut à sa hauteur naturelle, le détail dessous : il prend
+/// toute la hauteur qui reste ([stretch] ; une courbe, ou des courbes au-dessus
+/// de barres), ou garde la sienne et la carte le coupe (entonnoir). Une
+/// `Column` signalerait un débordement là où la grille coupe volontairement.
 class _StatLayout extends MultiChildLayoutDelegate {
   _StatLayout({required this.gap, required this.stretch});
 

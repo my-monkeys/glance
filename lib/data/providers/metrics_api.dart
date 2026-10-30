@@ -60,7 +60,14 @@ typedef MetricsRange = ({String de, String a, String granularite});
 /// [delayDays] : une métrique à délai est mesurée J + délai jours après sa
 /// cohorte J, donc on demande les cohortes de `[début − délai, fin − délai]`
 /// pour que leurs mesures tombent dans la fenêtre.
-MetricsRange metricsRangeFor(DateWindow w, {int delayDays = 0}) {
+///
+/// [hourly] : l'indicateur annonce `heure` dans son catalogue ; une fenêtre
+/// horaire demande alors des heures (`t` = « AAAA-MM-JJTHH:00 » local).
+MetricsRange metricsRangeFor(
+  DateWindow w, {
+  int delayDays = 0,
+  bool hourly = false,
+}) {
   final last = w.end.subtract(const Duration(milliseconds: 1));
   final start =
       DateTime(w.start.year, w.start.month, w.start.day - delayDays);
@@ -73,7 +80,11 @@ MetricsRange metricsRangeFor(DateWindow w, {int delayDays = 0}) {
   return (
     de: _date(de),
     a: _date(fin.isBefore(de) ? de : fin),
-    granularite: w.unit == TimeUnit.month ? 'mois' : 'jour',
+    granularite: switch (w.unit) {
+      TimeUnit.month => 'mois',
+      TimeUnit.hour when hourly => 'heure',
+      _ => 'jour',
+    },
   );
 }
 
@@ -117,8 +128,8 @@ class MetricsApi {
     ];
   }
 
-  /// Points par id d'indicateur.
-  Future<Map<String, List<MetricPoint>>> series({
+  /// Séries par id d'indicateur.
+  Future<Map<String, MetricSeries>> series({
     required List<String> ids,
     required MetricsRange range,
     required String tz,
@@ -132,10 +143,7 @@ class MetricsApi {
     });
     return {
       for (final s in (j['series'] as List).cast<Map<String, dynamic>>())
-        s['id'] as String: [
-          for (final p in (s['points'] as List).cast<Map<String, dynamic>>())
-            MetricPoint.fromJson(p),
-        ],
+        s['id'] as String: MetricSeries.fromJson(s),
     };
   }
 

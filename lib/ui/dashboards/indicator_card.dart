@@ -20,6 +20,7 @@ import 'funnel_bars.dart';
 import 'indicator_chart.dart';
 import 'indicator_menu.dart';
 import 'labels.dart';
+import 'segments_body.dart';
 
 /// En deçà, l'en-tête n'affiche plus le genre de la carte.
 const double _kindLabelMinWidth = 180;
@@ -193,13 +194,14 @@ class _CardBody extends StatelessWidget {
         ),
       // Le libellé de la métrique EST le titre : pas de ligne de contexte.
       (ExternalIndicator(), RatioData d) =>
-        _ratioStat(d, unit: externalUnitOf(window.unit)),
+        _ratioStat(d, unit: d.unit ?? externalUnitOf(window.unit)),
       (ExternalIndicator(), CounterData d) =>
-        _counterStat(d, unit: externalUnitOf(window.unit)),
+        _counterStat(d, unit: d.unit ?? externalUnitOf(window.unit)),
       (FunnelIndicator(), FunnelData d) => d.steps.isEmpty || d.steps.first.visitors == 0
           ? const _NoData()
           : CardStat(
               fill: fill,
+              keepChildHeight: true,
               big: fmtPct(d.steps.last.remaining * 100),
               sub: '${fmtInt(d.steps.last.visitors)} / '
                   '${fmtInt(d.steps.first.visitors)} visiteurs',
@@ -216,6 +218,7 @@ class _CardBody extends StatelessWidget {
                   series: d.series,
                   unit: window.unit,
                   bars: MetricBars(
+                    dense: true,
                     rows: [
                       for (final (i, r) in d.rows.take(kBreakdownRows).indexed)
                         MetricBarRow(
@@ -266,15 +269,17 @@ class _CardBody extends StatelessWidget {
       big: fmtInt(d.total),
       sub: sub,
       notes: _notes(d.cohorts, d.member, gaps),
-      child: _plots(values)
-          ? IndicatorChart(
-              points: [
-                for (var i = 0; i < d.points.length; i++)
-                  IndicatorPoint(d.points[i].t, values[i]),
-              ],
-              unit: unit,
-            )
-          : null,
+      child: hasSegmentData(d)
+          ? SegmentsBody(data: d, totals: values, unit: unit)
+          : _plots(values)
+              ? IndicatorChart(
+                  points: [
+                    for (var i = 0; i < d.points.length; i++)
+                      IndicatorPoint(d.points[i].t, values[i]),
+                  ],
+                  unit: unit,
+                )
+              : null,
     );
   }
 

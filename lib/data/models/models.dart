@@ -122,10 +122,14 @@ class EventSeries {
     required this.name,
     required this.points,
     required this.total,
+    this.gaps = const {},
   });
   final String name;
   final List<SeriesPoint> points;
   final int total;
+
+  /// Indices des points inconnus, dessinés en trou (pas à zéro).
+  final Set<int> gaps;
 }
 
 /// Données d'événements personnalisés pour un site sur une fenêtre : une série

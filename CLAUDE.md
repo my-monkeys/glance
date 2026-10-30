@@ -384,8 +384,18 @@ dans le code.
   le taux global. Pour un `nombre`, null vaut 0 (un compteur n'est pas
   « non mesurable »). Taux global = Σnumérateur / Σdénominateur, masqué si
   Σdénominateur < 5 (`core/external_metrics.dart`, testé).
-- **Heures → jours** : l'API n'a pas d'heures. Une fenêtre horaire demande
+- **Heures** : une fenêtre horaire demande `granularite=heure` **seulement** si
+  l'indicateur a `"heure"` dans ses `granularites` et n'a pas de délai ; sinon
   `granularite=jour` et la carte affiche un point par jour (`externalUnitOf`).
+  En heures, `t` = « AAAA-MM-JJTHH:00 » local (sans fuseau), une heure par point,
+  vides comprises (23 ou 25 points les jours de changement d'heure), 30 jours
+  au plus (400 `plage_trop_longue`). `de`/`a` restent des jours : la source
+  rend des journées entières, Glance ne garde que les heures de la fenêtre, et
+  `totaux` porte alors sur ces journées entières. Le résultat porte sa
+  granularité (`CounterData.unit`, `RatioData.unit`), que la carte suit.
+  Convenu avec GeoDaily (2026-10-30) : `joueurs_actifs`, `nouveaux_joueurs`,
+  `comptes_crees` ; heure de réception de la partie, donc la somme des heures
+  d'un jour peut différer un peu du point du jour.
   `a` = le jour qui contient `w.end - 1 ms` (`end` est exclusif : pile à minuit,
   c'est la veille ; `metricsRangeFor`, testé). `semaine` n'est jamais demandée :
   Glance n'a pas de granularité hebdomadaire.
@@ -496,6 +506,24 @@ dans le code.
   seul un bucket qui commence après vaut null. Premiers indicateurs :
   `installations_ios`, `mises_a_jour_ios` (rapport de ventes App Store, jour du
   Pacifique, 0 un jour sans vente).
+- **Découpage par plateforme (`segments`)** : champ facultatif du catalogue,
+  `[{id, libelle, estime}]`, sur un `nombre` seulement (premiers : `joueurs_actifs`,
+  `nouveaux_joueurs` de GeoDaily, site / appli / alldle, depuis le 2026-10-30).
+  Chaque point porte alors `segments: {id: n}`, et la série
+  `totaux: {id: n}` = distincts sur toute la fenêtre. Convenu avec la session
+  GeoDaily.
+  - ⚠️ Un point **sans** clé `segments` est **inconnu**, pas zéro (la source ne
+    savait pas encore découper) : chaque part y est un trou (`FlSpot.nullSpot`,
+    `EventSeries.gaps`). `valeur` reste le vrai total distinct.
+  - ⚠️ Les parts se calculent sur `totaux`, **jamais** sur la somme des points
+    (un joueur actif deux jours compterait deux fois). Leur somme peut dépasser
+    le total : un joueur peut passer par deux plateformes. La barre se lit donc
+    en part de Σ`totaux`.
+  - Carte (`SegmentsBody`) : courbes Total + une par part (légende cliquable), puis
+    une barre par part sur la période ; `estime` ajoute « · estimé » au libellé.
+    Tant qu'aucune part n'a de valeur (`hasSegmentData`), la carte reste un
+    compteur simple. Une carte découpée démarre à 11 rangées dans la grille
+    (la hauteur se décide sur la donnée reçue, pas sur l'indicateur).
 - ⚠️ Le serveur refuse plus de 400 jours : `metricsRangeFor` ramène `de` à
   `a − 399 jours` (« Tout », période perso). Les buckets d'avant la borne restent
   vides : trou pour un %, 0 pour un nombre.

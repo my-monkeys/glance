@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import 'indicator.dart';
 import 'models.dart';
+import 'period.dart';
 
 /// Propriété d'un événement, telle que la liste le fournisseur.
 @immutable
@@ -82,11 +83,40 @@ class Unpublished {
   bool covers(DateTime t) => !t.isBefore(from);
 }
 
+/// Une part d'un compteur découpé (une plateforme), alignée sur ses points.
+class CounterSegment {
+  const CounterSegment({
+    required this.label,
+    required this.values,
+    this.estimated = false,
+    this.periodTotal,
+  });
+
+  final String label;
+  final bool estimated;
+
+  /// Un par point du compteur. Null = bucket que la source ne savait pas
+  /// encore découper : un trou, jamais un zéro.
+  final List<double?> values;
+
+  /// Distinct sur toute la période (`totaux`), null si la source ne le donne
+  /// pas. Les parts se calculent sur ces totaux, pas sur la somme des points.
+  final int? periodTotal;
+}
+
 class CounterData extends IndicatorData {
   const CounterData(this.points, this.total,
-      {this.cohorts, this.member, this.unpublished});
+      {this.cohorts,
+      this.member,
+      this.unpublished,
+      this.segments = const [],
+      this.unit});
   final List<SeriesPoint> points;
   final int total;
+
+  /// Granularité des points quand elle diffère de celle de la fenêtre : une
+  /// métrique de site sans heures se lit en jours. Null = celle de la fenêtre.
+  final TimeUnit? unit;
 
   /// Non null pour une métrique à délai ayant au moins une mesure.
   final CohortSpan? cohorts;
@@ -97,6 +127,9 @@ class CounterData extends IndicatorData {
   /// Non null quand la fenêtre dépasse les données publiées : les points
   /// couverts valent 0 dans [points] mais se dessinent en trou.
   final Unpublished? unpublished;
+
+  /// Découpage par part (métrique de site à `segments`), vide sinon.
+  final List<CounterSegment> segments;
 }
 
 class RatioData extends IndicatorData {
@@ -109,10 +142,14 @@ class RatioData extends IndicatorData {
     this.member,
     this.pending = false,
     this.delayDays = 0,
+    this.unit,
     this.unpublished,
   });
 
   final List<RatioPoint> points;
+
+  /// Cf. [CounterData.unit].
+  final TimeUnit? unit;
   final double? overall;
   final int numeratorTotal;
   final int denominatorTotal;

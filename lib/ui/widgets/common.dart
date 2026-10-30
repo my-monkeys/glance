@@ -178,9 +178,13 @@ class MetricBars extends StatelessWidget {
     this.accountId,
     this.reserveRows = 0,
     this.valueLabel,
+    this.dense = false,
   });
 
   final List<MetricBarRow> rows;
+
+  /// Lignes resserrées, pour une carte de tableau où la place est comptée.
+  final bool dense;
 
   /// Libellé en police à chasse fixe (chemins, requêtes, résolutions).
   final bool mono;
@@ -264,7 +268,7 @@ class MetricBars extends StatelessWidget {
       children: [
         for (var i = 0; i < rows.length; i++)
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 7),
+            padding: EdgeInsets.symmetric(vertical: dense ? 3 : 7),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -346,7 +350,7 @@ class MetricBars extends StatelessWidget {
                     ],
                   ],
                 ),
-                const SizedBox(height: 6),
+                SizedBox(height: dense ? 4 : 6),
                 _Bar(
                   fraction: (rows[i].value / maxV).clamp(0.02, 1.0),
                   color: rows[i].color,

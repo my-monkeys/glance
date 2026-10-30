@@ -26,6 +26,12 @@ const List<Color> kEventPalette = [
 
 Color eventColorAt(int i) => kEventPalette[i % kEventPalette.length];
 
+/// Le point [i] est connu mais aucun de ses voisins ne l'est.
+bool isolatedPoint(EventSeries s, int i) {
+  bool known(int j) => j >= 0 && j < s.points.length && !s.gaps.contains(j);
+  return known(i) && !known(i - 1) && !known(i + 1);
+}
+
 /// Graphique multi-lignes : une courbe lissée par événement, échelle Y partagée,
 /// tooltip qui liste chaque événement à la date pointée.
 class EventsChart extends StatelessWidget {
@@ -165,7 +171,9 @@ class EventsChart extends StatelessWidget {
               LineChartBarData(
                 spots: [
                   for (var i = 0; i < len; i++)
-                    FlSpot(i.toDouble(), series[s].points[i].visitors),
+                    series[s].gaps.contains(i)
+                        ? FlSpot.nullSpot
+                        : FlSpot(i.toDouble(), series[s].points[i].visitors),
                 ],
                 isCurved: true,
                 curveSmoothness: 0.32,
@@ -174,7 +182,17 @@ class EventsChart extends StatelessWidget {
                 barWidth: 2.2,
                 isStrokeCapRound: true,
                 isStrokeJoinRound: true,
-                dotData: const FlDotData(show: false),
+                // Un point sans voisin connu ne trace aucun trait : sans pastille,
+                // une série qui n'a qu'un jour connu serait invisible.
+                dotData: FlDotData(
+                  checkToShowDot: (spot, _) =>
+                      isolatedPoint(series[s], spot.x.round()),
+                  getDotPainter: (_, _, bar, _) => FlDotCirclePainter(
+                    radius: 3.5,
+                    color: bar.color ?? eventColorAt(s),
+                    strokeWidth: 0,
+                  ),
+                ),
               ),
           ],
         ),
@@ -185,7 +203,9 @@ class EventsChart extends StatelessWidget {
   }
 }
 
-/// Puce de légende cliquable (couleur + nom) qui active/désactive une courbe.
+/// Élément de légende cliquable (pastille + nom dans la couleur de la courbe)
+/// qui active/désactive une courbe. Sans fond ni contour, comme la légende de
+/// la Vue d'ensemble : une rangée de puces prenait trop de place dans une carte.
 class EventChip extends StatelessWidget {
   const EventChip({
     super.key,
@@ -201,7 +221,6 @@ class EventChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final p = context.glance;
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -209,26 +228,19 @@ class EventChip extends StatelessWidget {
         duration: kMotionFast,
         curve: kCurveOut,
         opacity: on ? 1 : 0.4,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
-          decoration: BoxDecoration(
-            color: p.chip,
-            borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: on ? color : Colors.transparent),
-          ),
+        // Zone de tap plus haute que le texte, sans élargir la rangée.
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
                 width: 9,
                 height: 9,
-                decoration: BoxDecoration(
-                  color: color,
-                  shape: BoxShape.circle,
-                ),
+                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
               ),
-              const SizedBox(width: 7),
-              Text(label, style: GT.mono(12, weight: 500, color: p.fg)),
+              const SizedBox(width: 6),
+              Text(label, style: GT.mono(12, weight: 600, color: color)),
             ],
           ),
         ),
