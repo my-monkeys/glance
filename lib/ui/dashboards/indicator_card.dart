@@ -31,6 +31,7 @@ const _kindLabels = {
   IndicatorKind.funnel: 'Entonnoir',
   IndicatorKind.breakdown: 'Répartition',
   IndicatorKind.external: 'Métrique',
+  IndicatorKind.sites: 'Sites',
 };
 
 /// Une carte = un indicateur = une clé de `indicatorDataProvider` : chaque
@@ -197,6 +198,7 @@ class _CardBody extends StatelessWidget {
         _ratioStat(d, unit: d.unit ?? externalUnitOf(window.unit)),
       (ExternalIndicator(), CounterData d) =>
         _counterStat(d, unit: d.unit ?? externalUnitOf(window.unit)),
+      (SitesIndicator(), CounterData d) => _counterStat(d, unit: window.unit),
       (FunnelIndicator(), FunnelData d) => d.steps.isEmpty || d.steps.first.visitors == 0
           ? const _NoData()
           : CardStat(

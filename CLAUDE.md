@@ -259,11 +259,13 @@ Reprise mobile de la vue « referrals » du dashboard monkey : les referrers de 
 
 3ᵉ onglet du détail d'un site, à côté de « Vue d'ensemble » et « Événements ».
 L'utilisateur y compose ses propres indicateurs à partir des événements du site.
-Il en existe quatre types (`data/models/indicator.dart`) :
+Il en existe cinq types construits sur l'instance (`data/models/indicator.dart`),
+plus la « Métrique du site » (cf. « Source de métriques ») :
 - **Compteur** : un événement filtré.
 - **Taux** : deux compteurs divisés.
 - **Entonnoir** : 2 à 8 étapes.
 - **Répartition** : les valeurs d'une propriété.
+- **Sites** : les visiteurs uniques de plusieurs sites côte à côte (cf. plus bas).
 
 Côté code :
 - **Données** : `state/indicators.dart`.
@@ -275,8 +277,9 @@ L'onglet s'affiche si le site a des événements **et** si
 métriques (cf. plus bas). Cette fonction est synchrone, à
 côté de `credentialFieldsFor` : la visibilité se décide au premier build, sans
 attendre d'instance. Couverture par fournisseur :
-- **Umami** : les 4 types.
-- **Plausible** : compteur, taux et répartition (sa Stats API n'a pas d'entonnoir).
+- **Umami** : les 5 types.
+- **Plausible** : compteur, taux et répartition (sa Stats API n'a pas d'entonnoir,
+  et le filtre de référent des « Sites » n'est implémenté que pour Umami).
 - **Fathom** : aucun.
 
 - ⚠️ **Tout passe par `/events/series`, jamais `/stats?event=`** : `/stats` ne
@@ -340,6 +343,21 @@ attendre d'instance. Couverture par fournisseur :
     (entonnoir, répartition) garde sa hauteur et la carte la coupe, sans signaler
     de débordement. Sous 48 px, la courbe disparaît. Sous 180 px de large,
     l'en-tête n'affiche plus le genre (« COMPTEUR »).
+- **Sites** (`SitesIndicator`, fichier `part` `sites_indicator.dart`) : 1 à 6
+  lignes, chacune = un site suivi (n'importe quel compte Umami, pas forcément
+  celui qui porte le tableau), un libellé, et un filtre de référent : tous,
+  « venus de » ou « sauf venus de » un domaine. Premier usage : GeoDaily
+  (geodaily-app, geography sauf alldle.net, geography venus d'alldle.net).
+  - Filtre `referrer=<domaine>` sur `/stats` et `/pageviews` = **égalité
+    exacte** du domaine (vérifié : 75 visiteurs venus d'alldle.net, comme en
+    base). Le domaine est normalisé à l'enregistrement (`normDomain`).
+  - ⚠️ **« Sauf » se calcule par soustraction** (tous − venus de), jamais avec
+    `referrer=neq.<domaine>` : `neq` écarte aussi les visites **sans**
+    référent (vérifié sur geography : 243 au lieu de 511 − 75 = 436).
+  - Une même requête (site, référent) sert toutes les lignes qui en ont besoin.
+  - Rendu = un compteur découpé (`sitesCounterOf` → `CounterData.segments`),
+    donc la carte des plateformes : courbe Total (somme des lignes), une courbe
+    et une part par ligne.
 - **Cartes sans données masquées** : voir « Source de métriques » plus bas
   (`hasDisplayableData`, ligne « N tableaux sans données · Afficher »).
 - **Éditeur** : les suggestions (événements, propriétés, valeurs) portent sur

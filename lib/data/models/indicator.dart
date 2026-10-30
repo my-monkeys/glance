@@ -6,6 +6,8 @@ import '../../core/grid_layout.dart';
 import 'metrics_source.dart';
 import 'workspace.dart';
 
+part 'sites_indicator.dart';
+
 /// Type d'une propriété d'événement. Le code est celui de `dataType` côté Umami
 /// (1 texte, 2 nombre, 3 booléen) : il sert aussi de préfixe aux filtres `epf`.
 enum PropertyType {
@@ -122,7 +124,7 @@ class EventQuery {
   int get hashCode => Object.hash(event, Object.hashAll(filters));
 }
 
-enum IndicatorKind { counter, ratio, funnel, breakdown, external }
+enum IndicatorKind { counter, ratio, funnel, breakdown, external, sites }
 
 /// Un indicateur personnalisé d'un site. L'égalité porte sur TOUS les champs
 /// (id compris) : un indicateur sert de clé de `family` Riverpod, donc le
@@ -188,6 +190,8 @@ sealed class Indicator {
           unit: MetricUnit.fromApi(j['unit'] as String?),
           familyId: j['family'] as String?,
         );
+      case 'sites':
+        return SitesIndicator.fromJson(id, name, j);
     }
     return null;
   }

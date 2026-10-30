@@ -61,6 +61,10 @@ Future<void> _pump(WidgetTester tester, {Indicator? initial}) async {
       ],
     ),
     indicatorDataProvider.overrideWith((ref, key) => const CounterData([], 0)),
+    sitesProvider.overrideWith((ref) async => const [
+          Site(id: 'geo', accountId: 'a', name: 'geography', domain: 'geodaily.eu'),
+          Site(id: 'app', accountId: 'a', name: 'geodaily-app', domain: 'app.geodaily.eu'),
+        ]),
   ];
   await tester.pumpWidget(ProviderScope(
     overrides: overrides,
@@ -245,5 +249,37 @@ void main() {
     await _tap(tester, find.text('partie_demarree'));
     expect(_primary(tester).onTap, isNotNull);
     expect(find.text('Choisissez un événement'), findsNothing);
+  });
+
+  testWidgets('Sites : choisir un site, filtrer par référent, créer', (tester) async {
+    await _pump(tester);
+    await _tap(tester, find.text('Sites'));
+    expect(find.text('LIGNE 1'), findsOneWidget);
+    expect(find.text('Choisissez le site de chaque ligne'), findsOneWidget);
+
+    await _tap(tester, find.text('Choisir un site'));
+    await _tap(tester, find.text('geography'));
+    // Le nom du site devient le libellé de la ligne.
+    expect(find.widgetWithText(TextField, 'geography'), findsOneWidget);
+
+    await _tap(tester, find.text('Sauf venus de'));
+    expect(find.text('Indiquez le domaine du référent'), findsOneWidget);
+    final referrer = find.descendant(
+      of: find.widgetWithText(GlanceField, 'DOMAINE DU RÉFÉRENT'),
+      matching: find.byType(TextField),
+    );
+    await tester.scrollUntilVisible(referrer, 200,
+        scrollable: find.byType(Scrollable).first);
+    await tester.enterText(referrer, 'alldle.net');
+    await tester.pumpAndSettle();
+    expect(_primary(tester).onTap, isNotNull);
+
+    await tester.tap(find.text('Créer'));
+    await tester.pumpAndSettle();
+    final saved = _container.read(siteIndicatorsProvider(_site)).single as SitesIndicator;
+    expect(saved.lines.single.site.siteId, 'geo');
+    expect(saved.lines.single.mode, ReferrerMode.except);
+    expect(saved.lines.single.referrer, 'alldle.net');
+    await tester.pump(const Duration(seconds: 4)); // toast « Tableau créé »
   });
 }

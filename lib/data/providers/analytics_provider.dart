@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 
+import '../../core/sites_visitors.dart';
 import '../models/account.dart';
 import '../models/dimension.dart';
 import '../models/indicator.dart';
@@ -56,6 +57,15 @@ abstract class AnalyticsProvider {
           Site site, DateWindow w, EventQuery q) =>
       throw UnsupportedError('Indicateurs non pris en charge');
 
+  /// Visiteurs uniques par bucket et sur la fenêtre, restreints à ceux venus
+  /// de [referrer] (domaine exact) s'il est donné.
+  Future<SiteVisitors> visitors(
+    Site site,
+    DateWindow w, {
+    String? referrer,
+  }) =>
+      throw UnsupportedError('Tableaux de sites non pris en charge');
+
   Future<List<FunnelStepResult>> funnel(
           Site site, DateWindow w, FunnelIndicator f) =>
       throw UnsupportedError('Entonnoirs non pris en charge');
@@ -106,6 +116,7 @@ abstract class AnalyticsProvider {
 Set<IndicatorKind> supportedIndicatorsFor(ProviderKind kind) => switch (kind) {
       ProviderKind.umami => IndicatorKind.values.toSet(),
       ProviderKind.plausible => const {
+          // Pas `sites` : le filtre de référent n'est implémenté que pour Umami.
           IndicatorKind.counter,
           IndicatorKind.ratio,
           IndicatorKind.breakdown,
