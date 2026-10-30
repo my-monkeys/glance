@@ -20,6 +20,7 @@ import 'funnel_bars.dart';
 import 'indicator_chart.dart';
 import 'indicator_menu.dart';
 import 'labels.dart';
+import 'segments_body.dart';
 
 /// En deçà, l'en-tête n'affiche plus le genre de la carte.
 const double _kindLabelMinWidth = 180;
@@ -266,15 +267,17 @@ class _CardBody extends StatelessWidget {
       big: fmtInt(d.total),
       sub: sub,
       notes: _notes(d.cohorts, d.member, gaps),
-      child: _plots(values)
-          ? IndicatorChart(
-              points: [
-                for (var i = 0; i < d.points.length; i++)
-                  IndicatorPoint(d.points[i].t, values[i]),
-              ],
-              unit: unit,
-            )
-          : null,
+      child: hasSegmentData(d)
+          ? SegmentsBody(data: d, totals: values, unit: unit)
+          : _plots(values)
+              ? IndicatorChart(
+                  points: [
+                    for (var i = 0; i < d.points.length; i++)
+                      IndicatorPoint(d.points[i].t, values[i]),
+                  ],
+                  unit: unit,
+                )
+              : null,
     );
   }
 

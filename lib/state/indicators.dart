@@ -235,17 +235,19 @@ Future<IndicatorData> _externalData(
   final range = metricsRangeFor(w, delayDays: delay);
   final gate = ref.read(fetchGateProvider);
   final series =
-      await gate.run(() => api.series(ids: [id], range: range, tz: tz));
+      (await gate.run(() => api.series(ids: [id], range: range, tz: tz)))[id];
   // ⚠️ `now` est lu ici, jamais dans une clé de `family` (cf. « Chargement
   // infini »).
   return externalDataOf(
     indicator.unit,
     w,
-    series[id] ?? const [],
+    series?.points ?? const [],
     delayDays: delay,
     now: DateTime.now(),
     member: members.isNotEmpty ? 'J$delay' : null,
     dataUntil: def?.donneesJusquAu,
+    segments: def?.segments ?? const [],
+    totals: series?.totaux,
   );
 }
 

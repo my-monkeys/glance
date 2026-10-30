@@ -4,8 +4,9 @@ import '../../data/models/models.dart';
 import '../../data/models/period.dart';
 import '../widgets/events_chart.dart';
 
-/// Corps d'une carte « Répartition » : les courbes par valeur (si demandées)
-/// au-dessus des barres. L'état des courbes masquées reste local à la carte.
+/// Courbes par valeur (si demandées) au-dessus des barres : corps d'une carte
+/// « Répartition », et d'un compteur découpé par part. L'état des courbes
+/// masquées reste local à la carte.
 class BreakdownBody extends StatefulWidget {
   const BreakdownBody({
     super.key,

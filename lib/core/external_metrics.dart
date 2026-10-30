@@ -55,6 +55,10 @@ class _Placed {
 /// [dataUntil] (`donnees_jusqu_au` du catalogue) : dernier jour publié par la
 /// source. Les buckets d'après sont des trous, même pour un nombre (un jour pas
 /// encore publié n'est pas un jour à 0), et ne comptent pas dans les totaux.
+///
+/// [segments] (catalogue) et [totals] (`totaux` de la série) : découpage d'un
+/// nombre par part. Un bucket sans découpage, ou pas encore publié, est un trou
+/// de chaque part.
 IndicatorData externalDataOf(
   MetricUnit unit,
   DateWindow window,
@@ -63,6 +67,8 @@ IndicatorData externalDataOf(
   DateTime? now,
   String? member,
   DateTime? dataUntil,
+  List<MetricSegment> segments = const [],
+  Map<String, int>? totals,
 }) {
   final w = externalWindowOf(window);
   // Le dernier jour publié porte sur la date de la série ; son point est placé
@@ -108,8 +114,24 @@ IndicatorData externalDataOf(
       if (value(t) != null) seen(byBucket[t]!.point.t);
     }
     final total = series.fold<double>(0, (a, s) => a + s.visitors);
+    double? part(DateTime t, String id) {
+      final p = byBucket[t];
+      return p == null || !p.done || !published(t) ? null : p.point.segments?[id];
+    }
+
     return CounterData(series, total.round(),
-        cohorts: span(), member: member, unpublished: unpublished);
+        cohorts: span(),
+        member: member,
+        unpublished: unpublished,
+        segments: [
+          for (final s in segments)
+            CounterSegment(
+              label: s.libelle,
+              estimated: s.estime,
+              values: [for (final t in buckets) part(t, s.id)],
+              periodTotal: totals?[s.id],
+            ),
+        ]);
   }
 
   var num = 0;

@@ -165,7 +165,9 @@ class EventsChart extends StatelessWidget {
               LineChartBarData(
                 spots: [
                   for (var i = 0; i < len; i++)
-                    FlSpot(i.toDouble(), series[s].points[i].visitors),
+                    series[s].gaps.contains(i)
+                        ? FlSpot.nullSpot
+                        : FlSpot(i.toDouble(), series[s].points[i].visitors),
                 ],
                 isCurved: true,
                 curveSmoothness: 0.32,

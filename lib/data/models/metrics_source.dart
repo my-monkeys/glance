@@ -51,6 +51,30 @@ enum MetricUnit {
       MetricUnit.values.firstWhere((u) => u.api == a, orElse: () => count);
 }
 
+/// Une part d'un indicateur découpé (une plateforme : site, appli…).
+@immutable
+class MetricSegment {
+  const MetricSegment({required this.id, required this.libelle, this.estime = false});
+
+  final String id;
+  final String libelle;
+
+  /// La source ne fait qu'estimer cette part (joueurs comptés sans profil).
+  final bool estime;
+
+  /// Une entrée mal formée rend null : elle est ignorée, pas fatale.
+  static MetricSegment? fromJson(Object? j) {
+    if (j is! Map<String, dynamic>) return null;
+    final id = j['id'];
+    if (id is! String) return null;
+    return MetricSegment(
+      id: id,
+      libelle: (j['libelle'] as String?) ?? id,
+      estime: j['estime'] == true,
+    );
+  }
+}
+
 /// Un indicateur du catalogue d'une source.
 @immutable
 class MetricDef {
@@ -64,6 +88,7 @@ class MetricDef {
     this.famille,
     this.libelleFamille,
     this.donneesJusquAu,
+    this.segments = const [],
   });
 
   final String id;
@@ -86,6 +111,10 @@ class MetricDef {
   /// suivants sont des trous, pas des zéros. Null = tout est à jour.
   final DateTime? donneesJusquAu;
 
+  /// Parts de l'indicateur (`segments`, facultatif), dans l'ordre du serveur.
+  /// Seul un `nombre` en a : chaque point porte alors sa valeur par part.
+  final List<MetricSegment> segments;
+
   factory MetricDef.fromJson(Map<String, dynamic> j) => MetricDef(
         id: j['id'] as String,
         libelle: j['libelle'] as String,
@@ -97,6 +126,10 @@ class MetricDef {
         famille: j['famille'] as String?,
         libelleFamille: j['libelle_famille'] as String?,
         donneesJusquAu: _localDay(j['donnees_jusqu_au']),
+        segments: [
+          for (final s in (j['segments'] as List?) ?? const [])
+            ?MetricSegment.fromJson(s),
+        ],
       );
 
   /// « 2026-10-18 » → minuit local ; tout autre format est ignoré.
@@ -167,12 +200,18 @@ class MetricPoint {
     required this.valeur,
     required this.numerateur,
     required this.denominateur,
+    this.segments,
   });
 
   final DateTime t;
   final double? valeur;
   final int numerateur;
   final int denominateur;
+
+  /// Valeur par part, pour un indicateur découpé. Null quand le point n'a pas
+  /// de clé `segments` : la source ne savait pas encore découper ce jour-là,
+  /// c'est **inconnu**, pas zéro.
+  final Map<String, double>? segments;
 
   /// `t` est une date locale `YYYY-MM-DD` : on la lit sans fuseau.
   factory MetricPoint.fromJson(Map<String, dynamic> j) {
@@ -182,8 +221,40 @@ class MetricPoint {
       valeur: (j['valeur'] as num?)?.toDouble(),
       numerateur: (j['numerateur'] as num?)?.round() ?? 0,
       denominateur: (j['denominateur'] as num?)?.round() ?? 0,
+      segments: switch (j['segments']) {
+        final Map<String, dynamic> m => {
+            for (final e in m.entries)
+              if (e.value case final num v) e.key: v.toDouble(),
+          },
+        _ => null,
+      },
     );
   }
+}
+
+/// Une série de l'API : ses points et, pour un indicateur découpé, le total
+/// distinct de chaque part sur toute la fenêtre demandée (`totaux`). Ce total
+/// n'est pas la somme des points : un joueur actif deux jours compte une fois.
+@immutable
+class MetricSeries {
+  const MetricSeries(this.points, [this.totaux]);
+
+  final List<MetricPoint> points;
+  final Map<String, int>? totaux;
+
+  factory MetricSeries.fromJson(Map<String, dynamic> j) => MetricSeries(
+        [
+          for (final p in (j['points'] as List).cast<Map<String, dynamic>>())
+            MetricPoint.fromJson(p),
+        ],
+        switch (j['totaux']) {
+          final Map<String, dynamic> m => {
+              for (final e in m.entries)
+                if (e.value case final num v) e.key: v.round(),
+            },
+          _ => null,
+        },
+      );
 }
 
 /// Une source avec son jeton, pour la synchro chiffrée de bout en bout (le

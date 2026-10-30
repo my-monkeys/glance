@@ -82,9 +82,30 @@ class Unpublished {
   bool covers(DateTime t) => !t.isBefore(from);
 }
 
+/// Une part d'un compteur découpé (une plateforme), alignée sur ses points.
+class CounterSegment {
+  const CounterSegment({
+    required this.label,
+    required this.values,
+    this.estimated = false,
+    this.periodTotal,
+  });
+
+  final String label;
+  final bool estimated;
+
+  /// Un par point du compteur. Null = bucket que la source ne savait pas
+  /// encore découper : un trou, jamais un zéro.
+  final List<double?> values;
+
+  /// Distinct sur toute la période (`totaux`), null si la source ne le donne
+  /// pas. Les parts se calculent sur ces totaux, pas sur la somme des points.
+  final int? periodTotal;
+}
+
 class CounterData extends IndicatorData {
   const CounterData(this.points, this.total,
-      {this.cohorts, this.member, this.unpublished});
+      {this.cohorts, this.member, this.unpublished, this.segments = const []});
   final List<SeriesPoint> points;
   final int total;
 
@@ -97,6 +118,9 @@ class CounterData extends IndicatorData {
   /// Non null quand la fenêtre dépasse les données publiées : les points
   /// couverts valent 0 dans [points] mais se dessinent en trou.
   final Unpublished? unpublished;
+
+  /// Découpage par part (métrique de site à `segments`), vide sinon.
+  final List<CounterSegment> segments;
 }
 
 class RatioData extends IndicatorData {

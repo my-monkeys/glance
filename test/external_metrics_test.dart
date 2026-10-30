@@ -316,4 +316,60 @@ void main() {
       expect(def('18/10/2026').donneesJusquAu, isNull);
     });
   });
+
+  group('compteur découpé', () {
+    const parts = [
+      MetricSegment(id: 'site', libelle: 'Site'),
+      MetricSegment(id: 'alldle', libelle: 'Alldle', estime: true),
+    ];
+    MetricPoint split(int day, double v, Map<String, double>? segments) =>
+        MetricPoint(
+          t: DateTime(2026, 10, day),
+          valeur: v,
+          numerateur: 0,
+          denominateur: 0,
+          segments: segments,
+        );
+
+    test('un point sans découpage est un trou de chaque part, pas un zéro', () {
+      final d = externalDataOf(
+        MetricUnit.count,
+        _w,
+        [
+          split(5, 120, null),
+          split(6, 12, {'site': 7, 'alldle': 5}),
+        ],
+        segments: parts,
+        totals: {'site': 7, 'alldle': 5},
+      ) as CounterData;
+
+      expect(d.total, 132);
+      expect(d.segments.map((s) => s.label), ['Site', 'Alldle']);
+      expect(d.segments.first.values, [null, 7, null]);
+      expect(d.segments.last.values, [null, 5, null]);
+      expect(d.segments.last.estimated, isTrue);
+      expect(d.segments.first.periodTotal, 7);
+    });
+
+    test('un jour pas encore publié reste un trou, même découpé', () {
+      final d = externalDataOf(
+        MetricUnit.count,
+        _w,
+        [split(7, 4, {'site': 4, 'alldle': 0})],
+        segments: parts,
+        dataUntil: DateTime(2026, 10, 6),
+      ) as CounterData;
+      expect(d.segments.first.values, [null, null, null]);
+      expect(d.segments.first.periodTotal, isNull);
+    });
+
+    test('sans parts au catalogue, pas de découpage', () {
+      final d = externalDataOf(
+        MetricUnit.count,
+        _w,
+        [split(5, 3, {'site': 3})],
+      ) as CounterData;
+      expect(d.segments, isEmpty);
+    });
+  });
 }

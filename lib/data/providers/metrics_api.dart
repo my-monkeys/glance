@@ -117,8 +117,8 @@ class MetricsApi {
     ];
   }
 
-  /// Points par id d'indicateur.
-  Future<Map<String, List<MetricPoint>>> series({
+  /// Séries par id d'indicateur.
+  Future<Map<String, MetricSeries>> series({
     required List<String> ids,
     required MetricsRange range,
     required String tz,
@@ -132,10 +132,7 @@ class MetricsApi {
     });
     return {
       for (final s in (j['series'] as List).cast<Map<String, dynamic>>())
-        s['id'] as String: [
-          for (final p in (s['points'] as List).cast<Map<String, dynamic>>())
-            MetricPoint.fromJson(p),
-        ],
+        s['id'] as String: MetricSeries.fromJson(s),
     };
   }
 

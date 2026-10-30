@@ -11,10 +11,12 @@ import '../../theme/palette.dart';
 import '../../theme/type.dart';
 import '../widgets/field.dart';
 import '../widgets/motion.dart';
+import '../../data/models/indicator_result.dart';
 import 'dashboard_grid.dart';
 import 'editor/indicator_editor.dart';
 import 'indicator_card.dart';
 import 'metrics_source_screen.dart';
+import 'segments_body.dart';
 
 /// Contenu de l'onglet Tableaux : les indicateurs du site, sur une grille
 /// que « Organiser » permet d'arranger (déplacer, redimensionner). Une carte
@@ -58,11 +60,17 @@ class _IndicatorsTabState extends ConsumerState<IndicatorsTab> {
 
     // Même clé que celle de chaque carte : aucune requête de plus. Une erreur
     // ou un chargement en cours ne masque rien.
-    final empty = {
+    final data = {
       for (final i in indicators)
-        if (ref.watch(indicatorDataProvider((site, window, i))).value
-            case final data? when !hasDisplayableData(data))
-          i.id,
+        i.id: ref.watch(indicatorDataProvider((site, window, i))).value,
+    };
+    final empty = {
+      for (final e in data.entries)
+        if (e.value case final d? when !hasDisplayableData(d)) e.key,
+    };
+    final segmented = {
+      for (final e in data.entries)
+        if (e.value case final CounterData d when hasSegmentData(d)) e.key,
     };
     final shown = _revealed || _editing
         ? indicators
@@ -85,6 +93,7 @@ class _IndicatorsTabState extends ConsumerState<IndicatorsTab> {
               window: window,
               indicators: indicators,
               shown: {for (final i in shown) i.id},
+              segmented: segmented,
               editing: _editing,
             ),
           if (!_revealed && !_editing && empty.isNotEmpty)
@@ -228,8 +237,12 @@ int _columnsFor(double width) =>
     _kColumnsPerCard;
 
 /// Taille d'une carte encore jamais placée : la largeur d'une carte d'avant la
-/// grille, et une hauteur qui montre son contenu habituel.
-GridItem _gridItemFor(Indicator i, int columns) => switch (i) {
+/// grille, et une hauteur qui montre son contenu habituel. [segmented] : un
+/// compteur découpé par plateforme (légende, courbes et parts).
+GridItem _gridItemFor(Indicator i, int columns, {required bool segmented}) =>
+    switch (i) {
+      _ when segmented =>
+        GridItem(i.id, w: _kColumnsPerCard, h: 11, minH: 3),
       // Une répartition dans le temps a besoin de largeur pour sa courbe.
       BreakdownIndicator(overTime: true) => GridItem(i.id,
           w: columns, h: 12, minW: _kColumnsPerCard, minH: 6),
@@ -250,6 +263,7 @@ class _Grid extends ConsumerWidget {
     required this.window,
     required this.indicators,
     required this.shown,
+    required this.segmented,
     required this.editing,
   });
 
@@ -260,6 +274,7 @@ class _Grid extends ConsumerWidget {
   /// cartes masquées en sont retirées.
   final List<Indicator> indicators;
   final Set<String> shown;
+  final Set<String> segmented;
   final bool editing;
 
   @override
@@ -272,7 +287,10 @@ class _Grid extends ConsumerWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final columns = _columnsFor(constraints.maxWidth);
-        final items = [for (final i in indicators) _gridItemFor(i, columns)];
+        final items = [
+          for (final i in indicators)
+            _gridItemFor(i, columns, segmented: segmented.contains(i.id)),
+        ];
         final full = resolveLayout(layouts[columns], items, columns);
         // Une carte masquée laisse remonter celles d'en dessous.
         final layout = shown.length == indicators.length

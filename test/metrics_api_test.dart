@@ -98,7 +98,7 @@ void main() {
         tz: 'Europe/Paris',
       );
 
-      final pts = out['a']!;
+      final pts = out['a']!.points;
       expect(pts[0].t, DateTime(2026, 10, 5));
       expect(pts[0].valeur, 15.03);
       expect(pts[0].numerateur, 26);
@@ -111,6 +111,45 @@ void main() {
         'granularite': 'jour',
         'tz': 'Europe/Paris',
       });
+    });
+
+    test('segments : parts du catalogue, valeurs par point, totaux', () async {
+      final def = MetricDef.fromJson({
+        'id': 'joueurs_actifs',
+        'libelle': 'Joueurs actifs',
+        'unite': 'nombre',
+        'segments': [
+          {'id': 'site', 'libelle': 'Site'},
+          {'id': 'alldle', 'libelle': 'Alldle', 'estime': true},
+          'illisible',
+        ],
+      });
+      expect(def.segments.map((s) => s.id), ['site', 'alldle']);
+      expect(def.segments.last.estime, isTrue);
+      expect(MetricDef.fromJson({'id': 'x', 'libelle': 'X'}).segments, isEmpty);
+
+      final out = await _api(FakeAdapter(200, {
+        'version': 1,
+        'series': [
+          {
+            'id': 'joueurs_actifs',
+            'points': [
+              {'t': '2026-10-29', 'valeur': 122},
+              {'t': '2026-10-30', 'valeur': 12, 'segments': {'site': 7, 'alldle': 5}},
+            ],
+            'totaux': {'site': 7, 'alldle': 5},
+          },
+        ],
+      })).series(
+        ids: ['joueurs_actifs'],
+        range: (de: '2026-10-29', a: '2026-10-30', granularite: 'jour'),
+        tz: 'Europe/Paris',
+      );
+      final series = out['joueurs_actifs']!;
+      // Avant le découpage : pas de clé, donc inconnu (null), pas zéro.
+      expect(series.points[0].segments, isNull);
+      expect(series.points[1].segments, {'site': 7.0, 'alldle': 5.0});
+      expect(series.totaux, {'site': 7, 'alldle': 5});
     });
 
     Future<Object?> failure(int status, Object body) async {

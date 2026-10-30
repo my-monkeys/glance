@@ -47,11 +47,16 @@ const _defs = [
 
 /// Client sans réseau : catalogue et séries fixes, ou une erreur.
 class FakeMetricsApi extends MetricsApi {
-  FakeMetricsApi({this.error, this.points = const [], this.defs = _defs})
-      : super(baseUrl: 'https://x.eu/', token: 't', dio: Dio());
+  FakeMetricsApi({
+    this.error,
+    this.points = const [],
+    this.defs = _defs,
+    this.totaux,
+  }) : super(baseUrl: 'https://x.eu/', token: 't', dio: Dio());
   final MetricsApiException? error;
   final List<MetricPoint> points;
   final List<MetricDef> defs;
+  final Map<String, int>? totaux;
   MetricsRange? lastRange;
 
   @override
@@ -61,14 +66,14 @@ class FakeMetricsApi extends MetricsApi {
   }
 
   @override
-  Future<Map<String, List<MetricPoint>>> series({
+  Future<Map<String, MetricSeries>> series({
     required List<String> ids,
     required MetricsRange range,
     required String tz,
   }) async {
     lastRange = range;
     if (error != null) throw error!;
-    return {for (final id in ids) id: points};
+    return {for (final id in ids) id: MetricSeries(points, totaux)};
   }
 }
 
