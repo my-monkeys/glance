@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 
 import '../../core/format.dart';
 import '../../core/predict.dart';
+import '../../core/site_search.dart';
 import '../../data/models/models.dart';
 import '../../data/models/period.dart';
 import '../../data/models/workspace.dart';
@@ -29,6 +30,7 @@ import '../widgets/motion.dart';
 import '../widgets/pulse_dot.dart';
 import '../widgets/sparkline.dart';
 import '../widgets/period_controls.dart';
+import '../widgets/site_search_field.dart';
 import '../widgets/workspace_switcher.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -41,6 +43,8 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   Timer? _timer;
+  final _search = TextEditingController();
+  String _query = '';
 
   Future<void> _pickCustom() async {
     final now = DateTime.now();
@@ -82,6 +86,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void dispose() {
     _timer?.cancel();
+    _search.dispose();
     super.dispose();
   }
 
@@ -121,7 +126,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final loadedSites = loaded.map((c) => c.site).toList();
     final loadedSet = loadedSites.toSet();
     final pendingSites = sites.where((s) => !loadedSet.contains(s)).toList();
-    final orderedSites = [...loadedSites, ...pendingSites];
+    // La recherche ne filtre que les cartes : le total reste celui du groupe.
+    final orderedSites = filterSites([...loadedSites, ...pendingSites], _query);
 
     return Stack(
       children: [
@@ -206,6 +212,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           window: window,
                           viewMode: viewMode,
                           orderedSites: orderedSites,
+                          // Champ gardé tant qu'une requête est active : sinon,
+                          // passer à un petit groupe laisserait un filtre invisible.
+                          searchable: sites.length > kSiteSearchThreshold ||
+                              _query.isNotEmpty,
                         ),
                 ),
               ),
@@ -230,6 +240,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     required DateWindow window,
     required HomeViewMode viewMode,
     required List<Site> orderedSites,
+    required bool searchable,
   }) {
     if (sitesAsync.hasError && sites.isEmpty) {
       return _ErrorBox(
@@ -261,6 +272,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
         _InternalCard(window: window),
         const SizedBox(height: 22),
+        if (searchable)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 14),
+            child: SiteSearchField(
+              controller: _search,
+              onChanged: (v) => setState(() => _query = v),
+            ),
+          ),
+        if (orderedSites.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: NoSiteMatch(_query),
+          ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           // Liste ↔ grille : fondu pur, les cartes gardent leur ValueKey.

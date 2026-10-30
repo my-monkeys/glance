@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 
 import '../../core/format.dart';
 import '../../core/predict.dart';
+import '../../core/site_search.dart';
 import '../../data/models/models.dart';
 import '../../data/models/period.dart';
 import '../../data/models/workspace.dart';
@@ -28,6 +29,7 @@ import '../widgets/pulse_dot.dart';
 import '../widgets/site_avatar.dart';
 import '../widgets/sparkline.dart';
 import '../widgets/period_controls.dart';
+import '../widgets/site_search_field.dart';
 import '../widgets/workspace_switcher.dart';
 
 /// Largeur minimale pour basculer en shell desktop master-détail.
@@ -86,11 +88,25 @@ class DesktopShell extends ConsumerWidget {
 // Panneau gauche : navigation + liste des sites.
 // ---------------------------------------------------------------------------
 
-class _Sidebar extends ConsumerWidget {
+class _Sidebar extends ConsumerStatefulWidget {
   const _Sidebar();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_Sidebar> createState() => _SidebarState();
+}
+
+class _SidebarState extends ConsumerState<_Sidebar> {
+  final _search = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final p = context.glance;
     final nav = ref.watch(desktopNavProvider);
     final periodState = ref.watch(periodProvider);
@@ -122,6 +138,13 @@ class _Sidebar extends ConsumerWidget {
     // Masqués = sites chargés à 0 visiteur écartés par le filtre (les pending,
     // pas encore chargés, restent affichés).
     final hiddenCount = sorted.length - loaded.length;
+    // Gardé tant qu'une requête est active : sinon, passer à un petit groupe
+    // laisserait un filtre invisible.
+    final searchable = sites.length > kSiteSearchThreshold || _query.isNotEmpty;
+    final shownLoaded = [
+      for (final c in loaded) if (siteMatches(c.site, _query)) c,
+    ];
+    final shownPending = filterSites(pending, _query);
 
     return Container(
       color: p.bg,
@@ -187,7 +210,22 @@ class _Sidebar extends ConsumerWidget {
                     ],
                   ),
                 ),
-                for (final c in loaded)
+                if (searchable)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(4, 2, 4, 8),
+                    child: SiteSearchField(
+                      dense: true,
+                      controller: _search,
+                      onChanged: (v) => setState(() => _query = v),
+                    ),
+                  ),
+                if (shownLoaded.isEmpty && shownPending.isEmpty &&
+                    _query.trim().isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    child: NoSiteMatch(_query),
+                  ),
+                for (final c in shownLoaded)
                   _SiteTile(
                     key: ValueKey(c.site),
                     card: c,
@@ -196,7 +234,8 @@ class _Sidebar extends ConsumerWidget {
                     onTap: () =>
                         ref.read(desktopNavProvider.notifier).openSite(c.site),
                   ),
-                for (final s in pending) _SiteTileSkeleton(key: ValueKey(s)),
+                for (final s in shownPending)
+                  _SiteTileSkeleton(key: ValueKey(s)),
               ],
             ),
           ),

@@ -52,6 +52,16 @@ figure pas, il s'affiche donc seul. Décochée, c'est une liste explicite (`site
   recharge à l'ouverture. La minuterie, elle, n'y touche pas (une liste par compte à
   chaque tick).
 
+**Recherche de sites** : un champ au-dessus des cartes de l'accueil, de la barre
+latérale du bureau et de l'écran de choix, dès que la liste dépasse
+`kSiteSearchThreshold` (6) sites. Il cherche dans le nom **et** le domaine, sans tenir compte de la casse ni des
+accents, et chaque mot doit y figurer (`core/site_search.dart`, testé).
+- Elle ne filtre **que les cartes** : le total et la courbe restent ceux du groupe.
+- Le champ reste affiché tant qu'une requête est active, même sous le seuil.
+  Sinon, passer à un petit groupe laisserait un filtre invisible.
+- Dans l'écran de choix, « Tout cocher / décocher » ne porte que sur les sites
+  affichés : on coche d'un geste tous les sites d'un même client.
+
 ## Chargement des données (incrémental)
 
 **Un provider par site**, pas un gros lot. Chaque carte s'affiche/s'actualise dès que SA donnée arrive :
