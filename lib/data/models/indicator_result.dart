@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import 'indicator.dart';
 import 'models.dart';
+import 'period.dart';
 
 /// Propriété d'un événement, telle que la liste le fournisseur.
 @immutable
@@ -105,9 +106,17 @@ class CounterSegment {
 
 class CounterData extends IndicatorData {
   const CounterData(this.points, this.total,
-      {this.cohorts, this.member, this.unpublished, this.segments = const []});
+      {this.cohorts,
+      this.member,
+      this.unpublished,
+      this.segments = const [],
+      this.unit});
   final List<SeriesPoint> points;
   final int total;
+
+  /// Granularité des points quand elle diffère de celle de la fenêtre : une
+  /// métrique de site sans heures se lit en jours. Null = celle de la fenêtre.
+  final TimeUnit? unit;
 
   /// Non null pour une métrique à délai ayant au moins une mesure.
   final CohortSpan? cohorts;
@@ -133,10 +142,14 @@ class RatioData extends IndicatorData {
     this.member,
     this.pending = false,
     this.delayDays = 0,
+    this.unit,
     this.unpublished,
   });
 
   final List<RatioPoint> points;
+
+  /// Cf. [CounterData.unit].
+  final TimeUnit? unit;
   final double? overall;
   final int numeratorTotal;
   final int denominatorTotal;

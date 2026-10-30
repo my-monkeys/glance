@@ -194,9 +194,9 @@ class _CardBody extends StatelessWidget {
         ),
       // Le libellé de la métrique EST le titre : pas de ligne de contexte.
       (ExternalIndicator(), RatioData d) =>
-        _ratioStat(d, unit: externalUnitOf(window.unit)),
+        _ratioStat(d, unit: d.unit ?? externalUnitOf(window.unit)),
       (ExternalIndicator(), CounterData d) =>
-        _counterStat(d, unit: externalUnitOf(window.unit)),
+        _counterStat(d, unit: d.unit ?? externalUnitOf(window.unit)),
       (FunnelIndicator(), FunnelData d) => d.steps.isEmpty || d.steps.first.visitors == 0
           ? const _NoData()
           : CardStat(

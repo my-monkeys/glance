@@ -232,7 +232,9 @@ Future<IndicatorData> _externalData(
       : defs.where((d) => d.id == indicator.metricId).firstOrNull;
   final id = def?.id ?? indicator.metricId;
   final delay = def?.delaiJours ?? 0;
-  final range = metricsRangeFor(w, delayDays: delay);
+  // Des heures seulement si la source en annonce, et jamais pour une cohorte.
+  final hourly = delay == 0 && (def?.granularites.contains('heure') ?? false);
+  final range = metricsRangeFor(w, delayDays: delay, hourly: hourly);
   final gate = ref.read(fetchGateProvider);
   final series =
       (await gate.run(() => api.series(ids: [id], range: range, tz: tz)))[id];
@@ -248,6 +250,7 @@ Future<IndicatorData> _externalData(
     dataUntil: def?.donneesJusquAu,
     segments: def?.segments ?? const [],
     totals: series?.totaux,
+    hourly: hourly,
   );
 }
 

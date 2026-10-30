@@ -384,8 +384,18 @@ dans le code.
   le taux global. Pour un `nombre`, null vaut 0 (un compteur n'est pas
   « non mesurable »). Taux global = Σnumérateur / Σdénominateur, masqué si
   Σdénominateur < 5 (`core/external_metrics.dart`, testé).
-- **Heures → jours** : l'API n'a pas d'heures. Une fenêtre horaire demande
+- **Heures** : une fenêtre horaire demande `granularite=heure` **seulement** si
+  l'indicateur a `"heure"` dans ses `granularites` et n'a pas de délai ; sinon
   `granularite=jour` et la carte affiche un point par jour (`externalUnitOf`).
+  En heures, `t` = « AAAA-MM-JJTHH:00 » local (sans fuseau), une heure par point,
+  vides comprises (23 ou 25 points les jours de changement d'heure), 30 jours
+  au plus (400 `plage_trop_longue`). `de`/`a` restent des jours : la source
+  rend des journées entières, Glance ne garde que les heures de la fenêtre, et
+  `totaux` porte alors sur ces journées entières. Le résultat porte sa
+  granularité (`CounterData.unit`, `RatioData.unit`), que la carte suit.
+  Convenu avec GeoDaily (2026-10-30) : `joueurs_actifs`, `nouveaux_joueurs`,
+  `comptes_crees` ; heure de réception de la partie, donc la somme des heures
+  d'un jour peut différer un peu du point du jour.
   `a` = le jour qui contient `w.end - 1 ms` (`end` est exclusif : pile à minuit,
   c'est la veille ; `metricsRangeFor`, testé). `semaine` n'est jamais demandée :
   Glance n'a pas de granularité hebdomadaire.

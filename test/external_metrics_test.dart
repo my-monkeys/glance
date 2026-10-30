@@ -372,4 +372,53 @@ void main() {
       expect(d.segments, isEmpty);
     });
   });
+
+  group('heures', () {
+    // 30 octobre, de 10 h à 13 h : trois heures.
+    final hours =
+        DateWindow(DateTime(2026, 10, 30, 10), DateTime(2026, 10, 30, 13), TimeUnit.hour);
+    MetricPoint at(int hour, double v, [Map<String, double>? segments]) => MetricPoint(
+          t: DateTime(2026, 10, 30, hour),
+          valeur: v,
+          numerateur: 0,
+          denominateur: 0,
+          segments: segments,
+        );
+
+    test('une source horaire est rangée heure par heure', () {
+      final d = externalDataOf(
+        MetricUnit.count,
+        hours,
+        [at(9, 50), at(10, 4), at(12, 6, {'site': 6})],
+        hourly: true,
+        segments: const [MetricSegment(id: 'site', libelle: 'Site')],
+      ) as CounterData;
+      expect(d.unit, TimeUnit.hour);
+      expect(d.points.map((p) => p.t.hour), [10, 11, 12]);
+      expect(d.points.map((p) => p.visitors), [4, 0, 6]); // 9 h hors fenêtre
+      expect(d.segments.single.values, [null, null, 6]);
+    });
+
+    test('sans heures à la source, la fenêtre se lit en jours', () {
+      final d = externalDataOf(
+        MetricUnit.count,
+        hours,
+        [MetricPoint(t: DateTime(2026, 10, 30), valeur: 12, numerateur: 0, denominateur: 0)],
+      ) as CounterData;
+      expect(d.unit, TimeUnit.day);
+      expect(d.total, 12);
+    });
+
+    test('toutes les heures du dernier jour publié le sont', () {
+      final d = externalDataOf(
+        MetricUnit.count,
+        hours,
+        [at(10, 1), at(11, 2), at(12, 3)],
+        hourly: true,
+        dataUntil: DateTime(2026, 10, 30),
+      ) as CounterData;
+      expect(d.unpublished, isNull);
+      expect(d.total, 6);
+    });
+  });
 }

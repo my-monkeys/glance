@@ -8,15 +8,17 @@ import '../data/providers/buckets.dart';
 /// de confidentialité que celui du serveur, qui renvoie alors `valeur: null`.
 const kMinRatioDenominator = 5;
 
-/// Granularité affichée d'une fenêtre : l'API n'a pas d'heures, donc une
-/// fenêtre horaire se lit en jours (cf. `metricsRangeFor`).
-TimeUnit externalUnitOf(TimeUnit u) => u == TimeUnit.hour ? TimeUnit.day : u;
+/// Granularité affichée d'une fenêtre : une fenêtre horaire se lit en jours,
+/// sauf pour un indicateur qui annonce `heure` dans son catalogue ([hourly],
+/// cf. `metricsRangeFor`).
+TimeUnit externalUnitOf(TimeUnit u, {bool hourly = false}) =>
+    u == TimeUnit.hour && !hourly ? TimeUnit.day : u;
 
 /// La fenêtre telle que la source la voit : mêmes bornes, granularité
 /// ramenée à [externalUnitOf], fin alignée sur le bucket suivant (une fenêtre
 /// horaire s'arrête en cours de journée, et `bucketsOf` n'en verrait aucun).
-DateWindow externalWindowOf(DateWindow w) {
-  final unit = externalUnitOf(w.unit);
+DateWindow externalWindowOf(DateWindow w, {bool hourly = false}) {
+  final unit = externalUnitOf(w.unit, hourly: hourly);
   final last = truncateBucket(w.end.subtract(const Duration(milliseconds: 1)), unit);
   return DateWindow(w.start, advanceBucket(last, unit), unit);
 }
@@ -59,6 +61,9 @@ class _Placed {
 /// [segments] (catalogue) et [totals] (`totaux` de la série) : découpage d'un
 /// nombre par part. Un bucket sans découpage, ou pas encore publié, est un trou
 /// de chaque part.
+///
+/// [hourly] : la source a répondu en heures (fenêtre horaire, indicateur sans
+/// délai qui annonce `heure`) ; les points sont alors rangés heure par heure.
 IndicatorData externalDataOf(
   MetricUnit unit,
   DateWindow window,
@@ -69,20 +74,24 @@ IndicatorData externalDataOf(
   DateTime? dataUntil,
   List<MetricSegment> segments = const [],
   Map<String, int>? totals,
+  bool hourly = false,
 }) {
-  final w = externalWindowOf(window);
+  final w = externalWindowOf(window, hourly: hourly);
   // Le dernier jour publié porte sur la date de la série ; son point est placé
   // à sa date de mesure, comme les autres.
   final lastPlaced = dataUntil == null
       ? null
       : DateTime(dataUntil.year, dataUntil.month, dataUntil.day + delayDays);
+  // Par jour : en heures, toutes celles du dernier jour publié le sont.
   bool published(DateTime bucket) =>
-      lastPlaced == null || !bucket.isAfter(lastPlaced);
+      lastPlaced == null ||
+      !DateTime(bucket.year, bucket.month, bucket.day).isAfter(lastPlaced);
   final t0 = now ?? DateTime.now();
   final today = DateTime(t0.year, t0.month, t0.day);
   final byBucket = <DateTime, _Placed>{};
   for (final p in points) {
-    final measured = DateTime(p.t.year, p.t.month, p.t.day + delayDays);
+    final measured =
+        DateTime(p.t.year, p.t.month, p.t.day + delayDays, p.t.hour);
     byBucket[truncateBucket(measured, w.unit)] =
         _Placed(p, delayDays == 0 || measured.isBefore(today));
   }
@@ -123,6 +132,7 @@ IndicatorData externalDataOf(
         cohorts: span(),
         member: member,
         unpublished: unpublished,
+        unit: w.unit,
         segments: [
           for (final s in segments)
             CounterSegment(
@@ -173,5 +183,6 @@ IndicatorData externalDataOf(
     pending: den == 0 && (anyDen > 0 || unfinished),
     delayDays: delayDays,
     unpublished: unpublished,
+    unit: w.unit,
   );
 }

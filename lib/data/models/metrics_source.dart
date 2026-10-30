@@ -213,11 +213,12 @@ class MetricPoint {
   /// c'est **inconnu**, pas zéro.
   final Map<String, double>? segments;
 
-  /// `t` est une date locale `YYYY-MM-DD` : on la lit sans fuseau.
+  /// `t` est une date locale `YYYY-MM-DD`, ou `YYYY-MM-DDTHH:00` en heures :
+  /// on la lit sans fuseau.
   factory MetricPoint.fromJson(Map<String, dynamic> j) {
     final d = DateTime.parse(j['t'] as String);
     return MetricPoint(
-      t: DateTime(d.year, d.month, d.day),
+      t: DateTime(d.year, d.month, d.day, d.hour),
       valeur: (j['valeur'] as num?)?.toDouble(),
       numerateur: (j['numerateur'] as num?)?.round() ?? 0,
       denominateur: (j['denominateur'] as num?)?.round() ?? 0,

@@ -188,10 +188,19 @@ void main() {
       expect(r, (de: '2026-08-01', a: '2026-10-31', granularite: 'mois'));
     });
 
-    test('heures → jour (l\'API n\'a pas d\'heures)', () {
-      final r = metricsRangeFor(DateWindow(
-          DateTime(2026, 10, 20, 0), DateTime(2026, 10, 20, 15), TimeUnit.hour));
-      expect(r, (de: '2026-10-20', a: '2026-10-20', granularite: 'jour'));
+    test('heures → jour, sauf pour un indicateur qui annonce `heure`', () {
+      final w = DateWindow(
+          DateTime(2026, 10, 19, 16), DateTime(2026, 10, 20, 16), TimeUnit.hour);
+      expect(metricsRangeFor(w),
+          (de: '2026-10-19', a: '2026-10-20', granularite: 'jour'));
+      expect(metricsRangeFor(w, hourly: true),
+          (de: '2026-10-19', a: '2026-10-20', granularite: 'heure'));
+    });
+
+    test('`t` horaire : l\'heure locale est conservée', () {
+      final p = MetricPoint.fromJson({'t': '2026-10-30T14:00', 'valeur': 3});
+      expect(p.t, DateTime(2026, 10, 30, 14));
+      expect(MetricPoint.fromJson({'t': '2026-10-30'}).t, DateTime(2026, 10, 30));
     });
 
     test('plus de 400 jours : `de` est ramené à `a` − 399 jours', () {
