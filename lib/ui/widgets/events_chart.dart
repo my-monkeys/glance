@@ -26,6 +26,12 @@ const List<Color> kEventPalette = [
 
 Color eventColorAt(int i) => kEventPalette[i % kEventPalette.length];
 
+/// Le point [i] est connu mais aucun de ses voisins ne l'est.
+bool isolatedPoint(EventSeries s, int i) {
+  bool known(int j) => j >= 0 && j < s.points.length && !s.gaps.contains(j);
+  return known(i) && !known(i - 1) && !known(i + 1);
+}
+
 /// Graphique multi-lignes : une courbe lissée par événement, échelle Y partagée,
 /// tooltip qui liste chaque événement à la date pointée.
 class EventsChart extends StatelessWidget {
@@ -176,7 +182,17 @@ class EventsChart extends StatelessWidget {
                 barWidth: 2.2,
                 isStrokeCapRound: true,
                 isStrokeJoinRound: true,
-                dotData: const FlDotData(show: false),
+                // Un point sans voisin connu ne trace aucun trait : sans pastille,
+                // une série qui n'a qu'un jour connu serait invisible.
+                dotData: FlDotData(
+                  checkToShowDot: (spot, _) =>
+                      isolatedPoint(series[s], spot.x.round()),
+                  getDotPainter: (_, _, bar, _) => FlDotCirclePainter(
+                    radius: 3.5,
+                    color: bar.color ?? eventColorAt(s),
+                    strokeWidth: 0,
+                  ),
+                ),
               ),
           ],
         ),
