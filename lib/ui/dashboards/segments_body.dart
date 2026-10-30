@@ -66,6 +66,7 @@ class SegmentsBody extends StatelessWidget {
       bars: sum == 0
           ? const SizedBox.shrink()
           : MetricBars(
+              dense: true,
               rows: [
                 for (final (i, s) in segments.indexed)
                   MetricBarRow(

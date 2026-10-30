@@ -187,7 +187,9 @@ class EventsChart extends StatelessWidget {
   }
 }
 
-/// Puce de légende cliquable (couleur + nom) qui active/désactive une courbe.
+/// Élément de légende cliquable (pastille + nom dans la couleur de la courbe)
+/// qui active/désactive une courbe. Sans fond ni contour, comme la légende de
+/// la Vue d'ensemble : une rangée de puces prenait trop de place dans une carte.
 class EventChip extends StatelessWidget {
   const EventChip({
     super.key,
@@ -203,7 +205,6 @@ class EventChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final p = context.glance;
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -211,26 +212,19 @@ class EventChip extends StatelessWidget {
         duration: kMotionFast,
         curve: kCurveOut,
         opacity: on ? 1 : 0.4,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
-          decoration: BoxDecoration(
-            color: p.chip,
-            borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: on ? color : Colors.transparent),
-          ),
+        // Zone de tap plus haute que le texte, sans élargir la rangée.
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
                 width: 9,
                 height: 9,
-                decoration: BoxDecoration(
-                  color: color,
-                  shape: BoxShape.circle,
-                ),
+                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
               ),
-              const SizedBox(width: 7),
-              Text(label, style: GT.mono(12, weight: 500, color: p.fg)),
+              const SizedBox(width: 6),
+              Text(label, style: GT.mono(12, weight: 600, color: color)),
             ],
           ),
         ),

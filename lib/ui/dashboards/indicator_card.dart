@@ -201,6 +201,7 @@ class _CardBody extends StatelessWidget {
           ? const _NoData()
           : CardStat(
               fill: fill,
+              keepChildHeight: true,
               big: fmtPct(d.steps.last.remaining * 100),
               sub: '${fmtInt(d.steps.last.visitors)} / '
                   '${fmtInt(d.steps.first.visitors)} visiteurs',
@@ -217,6 +218,7 @@ class _CardBody extends StatelessWidget {
                   series: d.series,
                   unit: window.unit,
                   bars: MetricBars(
+                    dense: true,
                     rows: [
                       for (final (i, r) in d.rows.take(kBreakdownRows).indexed)
                         MetricBarRow(
