@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../data/models/account.dart';
 import '../../../data/models/indicator.dart';
 import '../../../data/models/indicator_result.dart';
 import '../../../data/models/models.dart';
 import '../../../state/indicators.dart';
+import '../../../state/providers.dart';
 import '../../../theme/palette.dart';
 import '../../../theme/type.dart';
 import '../../widgets/field.dart';
@@ -110,6 +112,36 @@ Future<String?> pickEvent(BuildContext context, Site site) =>
         ),
       ),
     );
+
+/// Choisit un des sites suivis, tous comptes Umami confondus : seul Umami sait
+/// filtrer les visiteurs par référent.
+Future<Site?> pickSite(BuildContext context) async {
+  final byName = <String, Site>{};
+  final name = await showGlanceSheet<String>(
+    context,
+    (_) => Consumer(
+      builder: (context, ref, _) {
+        final umami = {
+          for (final a in ref.watch(accountsProvider))
+            if (a.kind == ProviderKind.umami) a.id,
+        };
+        return _SearchSheet(
+          title: 'Site',
+          freeTextHint: 'Rechercher un site',
+          options: ref.watch(sitesProvider).whenData((sites) {
+            final shown = [for (final s in sites) if (umami.contains(s.accountId)) s];
+            for (final s in shown) {
+              byName.putIfAbsent(s.name, () => s);
+            }
+            return [for (final s in shown) _Option(s.name, hint: s.domain)];
+          }),
+        );
+      },
+    ),
+  );
+  // Un nom saisi qui n'est pas un site suivi ne choisit rien.
+  return name == null ? null : byName[name];
+}
 
 String propertyTypeHint(PropertyType t) => switch (t) {
       PropertyType.string => 'texte',

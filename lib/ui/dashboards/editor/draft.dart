@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 
+import '../../../core/internal_traffic.dart' show normDomain;
 import '../../../data/models/indicator.dart';
 import '../../../data/models/metrics_source.dart';
+import '../../../data/models/workspace.dart';
 import '../labels.dart';
 
 /// Opérateurs que l'API d'entonnoir d'Umami accepte : elle ne sait pas
@@ -21,6 +23,12 @@ const int kFunnelMaxWindow = 1440;
 const int kFunnelDefaultWindow = 60;
 
 const String _fallbackName = 'Sans titre';
+
+/// Au-delà, les couleurs des courbes se répètent (une est prise par le total).
+const int kSiteLinesMax = 6;
+
+/// Ligne d'un tableau « Sites » dont le site reste à choisir.
+const SiteLine kEmptySiteLine = SiteLine(site: SiteRef('', ''), label: '');
 
 /// Un indicateur en cours d'édition. Tous les champs de tous les genres
 /// coexistent : changer de genre ne perd rien, et revenir en arrière retrouve
@@ -45,6 +53,7 @@ class IndicatorDraft {
     this.metricLabel = '',
     this.metricUnit = MetricUnit.count,
     this.metricFamily = '',
+    this.siteLines = const [],
   });
 
   final IndicatorKind kind;
@@ -68,6 +77,10 @@ class IndicatorDraft {
   /// Vide = une métrique seule ; sinon la famille, dont [metricId] est le
   /// membre de repli.
   final String metricFamily;
+
+  /// Lignes d'un tableau « Sites ». Une ligne sans site choisi a un
+  /// [SiteRef] vide.
+  final List<SiteLine> siteLines;
 
   factory IndicatorDraft.fromIndicator(Indicator i) {
     return switch (i) {
@@ -101,6 +114,8 @@ class IndicatorDraft {
           metricUnit: i.unit,
           metricFamily: i.familyId ?? '',
         ),
+      SitesIndicator() =>
+        IndicatorDraft(kind: i.kind, name: i.name, siteLines: i.lines),
     };
   }
 
@@ -119,6 +134,7 @@ class IndicatorDraft {
     String? metricLabel,
     MetricUnit? metricUnit,
     String? metricFamily,
+    List<SiteLine>? siteLines,
   }) =>
       IndicatorDraft(
         kind: kind ?? this.kind,
@@ -135,6 +151,7 @@ class IndicatorDraft {
         metricLabel: metricLabel ?? this.metricLabel,
         metricUnit: metricUnit ?? this.metricUnit,
         metricFamily: metricFamily ?? this.metricFamily,
+        siteLines: siteLines ?? this.siteLines,
       );
 
   /// Change de genre en reportant ce qui a un sens de l'un à l'autre : la
@@ -148,11 +165,12 @@ class IndicatorDraft {
       IndicatorKind.counter || IndicatorKind.ratio => query,
       IndicatorKind.funnel => steps.first,
       IndicatorKind.breakdown => EventQuery(breakdownEvent),
-      IndicatorKind.external => const EventQuery(''),
+      IndicatorKind.external || IndicatorKind.sites => const EventQuery(''),
     };
-    if (carried.event.isEmpty) return copyWith(kind: next);
+    if (carried.event.isEmpty) return _withFirstLine(copyWith(kind: next));
     return switch (next) {
       IndicatorKind.external => copyWith(kind: next),
+      IndicatorKind.sites => _withFirstLine(copyWith(kind: next)),
       IndicatorKind.counter || IndicatorKind.ratio => copyWith(
           kind: next,
           query: query.event.isEmpty ? carried : query,
@@ -171,6 +189,12 @@ class IndicatorDraft {
     };
   }
 
+  /// Un tableau « Sites » s'ouvre sur une ligne à remplir.
+  static IndicatorDraft _withFirstLine(IndicatorDraft d) =>
+      d.kind == IndicatorKind.sites && d.siteLines.isEmpty
+          ? d.copyWith(siteLines: const [kEmptySiteLine])
+          : d;
+
   /// Nom proposé tant que le champ « Nom » reste vide.
   String suggestedName() {
     final parts = switch (kind) {
@@ -179,10 +203,12 @@ class IndicatorDraft {
       IndicatorKind.funnel => [steps.first.event, steps.last.event],
       IndicatorKind.breakdown => [breakdownEvent, breakdownProperty],
       IndicatorKind.external => [metricLabel],
+      IndicatorKind.sites => [for (final l in siteLines) l.label.trim()],
     }.where((s) => s.isNotEmpty).toList();
     if (parts.isEmpty) return _fallbackName;
     if (parts.length == 1) return parts.single;
     return switch (kind) {
+      IndicatorKind.sites => parts.join(' · '),
       IndicatorKind.ratio => '${parts[0]} / ${parts[1]}',
       IndicatorKind.funnel => '${parts[0]} → ${parts[1]}',
       _ => '${parts[0]} par ${parts[1]}',
@@ -213,7 +239,24 @@ class IndicatorDraft {
         return null;
       case IndicatorKind.external:
         return metricId.isEmpty ? 'Choisissez une métrique' : null;
+      case IndicatorKind.sites:
+        return _sitesError();
     }
+  }
+
+  String? _sitesError() {
+    if (siteLines.isEmpty) return 'Ajoutez au moins un site';
+    if (siteLines.length > kSiteLinesMax) {
+      return 'Un tableau compte au plus $kSiteLinesMax sites';
+    }
+    for (final l in siteLines) {
+      if (l.site.siteId.isEmpty) return 'Choisissez le site de chaque ligne';
+      if (l.label.trim().isEmpty) return 'Nommez chaque ligne';
+      if (l.mode != ReferrerMode.all && normDomain(l.referrer).isEmpty) {
+        return 'Indiquez le domaine du référent';
+      }
+    }
+    return null;
   }
 
   String? _funnelError() {
@@ -287,6 +330,18 @@ class IndicatorDraft {
           label: metricLabel,
           unit: metricUnit,
           familyId: metricFamily.isEmpty ? null : metricFamily,
+        ),
+      IndicatorKind.sites => SitesIndicator(
+          id: id,
+          name: label,
+          lines: [
+            for (final l in siteLines)
+              l.copyWith(
+                label: l.label.trim(),
+                // Umami range le référent sans schéma ni `www.`.
+                referrer: l.mode == ReferrerMode.all ? '' : normDomain(l.referrer),
+              ),
+          ],
         ),
     };
   }

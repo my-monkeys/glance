@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import '../../core/countries.dart';
 import '../../core/entities.dart';
+import '../../core/sites_visitors.dart';
 import '../../core/timezone.dart';
 import '../models/indicator.dart';
 import '../models/indicator_result.dart';
@@ -132,6 +133,41 @@ class UmamiProvider extends AnalyticsProvider {
       visits: visits,
       bounceRatePct: visits == 0 ? 0 : n(d['bounces']) / visits * 100,
       avgVisitSec: visits == 0 ? 0 : n(d['totaltime']) ~/ visits,
+    );
+  }
+
+  @override
+  Future<SiteVisitors> visitors(
+    Site site,
+    DateWindow w, {
+    String? referrer,
+  }) async {
+    // `referrer=<domaine>` = égalité exacte sur le domaine du référent,
+    // vérifié sur l'instance : 75 visiteurs venus d'alldle.net, comme en base.
+    final filter = {'referrer': ?referrer};
+    final tz = await _timezone();
+    final (stats, views) = await (
+      _get('/api/websites/${site.id}/stats', {
+        'startAt': w.startMs,
+        'endAt': w.endMs,
+        ...filter,
+      }),
+      _get('/api/websites/${site.id}/pageviews', {
+        'startAt': w.startMs,
+        'endAt': w.endMs,
+        'unit': w.unit.api,
+        'timezone': tz,
+        ...filter,
+      }),
+    ).wait;
+    // `sessions` = visiteurs uniques par bucket (cf. [series]).
+    final byBucket = _bin((views as Map)['sessions'], w.unit);
+    return (
+      points: [
+        for (final b in bucketsOf(w))
+          SeriesPoint(b, byBucket[b.millisecondsSinceEpoch] ?? 0, 0),
+      ],
+      total: _vp((stats as Map)['visitors']).$1,
     );
   }
 

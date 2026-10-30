@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../core/external_metrics.dart';
 import '../core/grid_layout.dart';
 import '../core/indicator_math.dart';
+import '../core/sites_visitors.dart';
 import '../core/timezone.dart';
 import '../data/models/dimension.dart';
 import '../data/models/indicator.dart';
@@ -204,9 +205,42 @@ final indicatorDataProvider = FutureProvider.autoDispose
         return BreakdownData(rows, total, series);
       case ExternalIndicator():
         return _externalData(ref, site, w, indicator);
+      case SitesIndicator(:final lines):
+        return _sitesData(ref, w, lines);
     }
   },
 );
+
+/// Visiteurs de chaque ligne d'un tableau « Sites ». Une même requête (site,
+/// référent) sert toutes les lignes qui en ont besoin : « geography sauf
+/// alldle.net » et « alldle.net » partagent la requête filtrée.
+Future<IndicatorData> _sitesData(
+  Ref ref,
+  DateWindow w,
+  List<SiteLine> lines,
+) async {
+  final gate = ref.read(fetchGateProvider);
+  final requests = <(SiteRef, String?), Future<SiteVisitors>>{};
+  Future<SiteVisitors> fetch(SiteRef s, String? referrer) =>
+      requests.putIfAbsent((s, referrer), () async {
+        // Le fournisseur ne lit que l'id et le compte du site.
+        final site = Site(id: s.siteId, accountId: s.accountId, name: '', domain: '');
+        final p = await analyticsProviderFor(ref, site);
+        return gate.run(() => p.visitors(site, w, referrer: referrer));
+      });
+
+  final values = await Future.wait([
+    for (final l in lines)
+      switch (l.mode) {
+        ReferrerMode.all => fetch(l.site, null),
+        ReferrerMode.only => fetch(l.site, l.referrer),
+        ReferrerMode.except => (fetch(l.site, null), fetch(l.site, l.referrer))
+            .wait
+            .then((r) => visitorsExcept(r.$1, r.$2)),
+      },
+  ]);
+  return sitesCounterOf(lines, values);
+}
 
 /// Données d'une métrique de site : le catalogue (en cache) donne le délai, et
 /// pour une famille le membre qui convient à la période.

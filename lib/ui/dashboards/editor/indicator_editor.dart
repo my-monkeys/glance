@@ -25,6 +25,7 @@ import 'kind_picker.dart';
 import 'metric_picker.dart';
 import 'pickers.dart';
 import 'query_editor.dart';
+import 'site_lines.dart';
 
 /// Délai de silence avant de recalculer l'aperçu : chaque recalcul est une
 /// requête à l'instance de statistiques, et taper un nom d'événement en
@@ -292,6 +293,10 @@ class _IndicatorEditorState extends ConsumerState<IndicatorEditor> {
         ),
       IndicatorKind.breakdown => _breakdownForm(site),
       IndicatorKind.external => _metricForm(site),
+      IndicatorKind.sites => SiteLinesEditor(
+          lines: _draft.siteLines,
+          onChanged: (l) => _update(_draft.copyWith(siteLines: l)),
+        ),
     };
   }
 

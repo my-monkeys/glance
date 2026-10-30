@@ -11,6 +11,7 @@ const kindNames = {
   IndicatorKind.funnel: 'Entonnoir',
   IndicatorKind.breakdown: 'Répartition',
   IndicatorKind.external: 'Métrique du site',
+  IndicatorKind.sites: 'Sites',
 };
 
 const _kindHints = {
@@ -19,6 +20,7 @@ const _kindHints = {
   IndicatorKind.funnel: 'Le parcours étape par étape',
   IndicatorKind.breakdown: 'Les valeurs d\'une propriété',
   IndicatorKind.external: 'Un indicateur fourni par votre API',
+  IndicatorKind.sites: 'Les visiteurs de plusieurs sites',
 };
 
 /// Les genres en grille de deux colonnes : empilés, ils remplissaient l'écran
