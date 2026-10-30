@@ -11,9 +11,10 @@ import 'editor/confirm_button.dart';
 import 'editor/indicator_editor.dart';
 import 'editor/pickers.dart';
 
-enum _Action { edit, up, down, delete }
+enum _Action { edit, delete }
 
-/// Menu « ⋯ » d'une carte : modifier, déplacer, supprimer. La feuille ne fait
+/// Menu « ⋯ » d'une carte : modifier, supprimer (on la déplace dans la
+/// grille, bouton « Organiser »). La feuille ne fait
 /// que choisir ; l'action s'exécute ici, une fois la feuille fermée, avec le
 /// contexte de la carte (celui de la feuille est mort à ce moment-là).
 Future<void> showIndicatorMenu(
@@ -24,24 +25,13 @@ Future<void> showIndicatorMenu(
 ) async {
   final action = await showGlanceSheet<_Action>(
     context,
-    (_) => _MenuSheet(site: site, indicator: indicator),
+    (_) => _MenuSheet(indicator: indicator),
   );
   if (action == null || !context.mounted) return;
   final notifier = ref.read(indicatorsProvider.notifier);
-  final index = ref
-      .read(siteIndicatorsProvider(site))
-      .indexWhere((i) => i.id == indicator.id);
   switch (action) {
     case _Action.edit:
       await openIndicatorEditor(context, site, initial: indicator);
-    case _Action.up:
-      await notifier.reorder(site, index, index - 1);
-      if (context.mounted) showGlanceToast(context, 'Tableau monté');
-    case _Action.down:
-      // `reorder` suit la convention d'`onReorder` : l'indice cible est donné
-      // avant retrait de l'élément.
-      await notifier.reorder(site, index, index + 2);
-      if (context.mounted) showGlanceToast(context, 'Tableau descendu');
     case _Action.delete:
       await notifier.remove(site, indicator.id);
       if (context.mounted) {
@@ -50,17 +40,14 @@ Future<void> showIndicatorMenu(
   }
 }
 
-class _MenuSheet extends ConsumerWidget {
-  const _MenuSheet({required this.site, required this.indicator});
+class _MenuSheet extends StatelessWidget {
+  const _MenuSheet({required this.indicator});
 
-  final Site site;
   final Indicator indicator;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final p = context.glance;
-    final all = ref.watch(siteIndicatorsProvider(site));
-    final index = all.indexWhere((i) => i.id == indicator.id);
     void pick(_Action a) => Navigator.of(context).pop(a);
 
     return SafeArea(
@@ -78,11 +65,6 @@ class _MenuSheet extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             _Item('Modifier', Icons.edit_outlined, () => pick(_Action.edit)),
-            if (index > 0)
-              _Item('Monter', Icons.arrow_upward_rounded, () => pick(_Action.up)),
-            if (index >= 0 && index < all.length - 1)
-              _Item('Descendre', Icons.arrow_downward_rounded,
-                  () => pick(_Action.down)),
             const SizedBox(height: 14),
             ConfirmButton(
               label: 'Supprimer',

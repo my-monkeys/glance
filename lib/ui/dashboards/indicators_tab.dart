@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/grid_layout.dart';
 import '../../core/indicator_math.dart';
 import '../../data/models/indicator.dart';
 import '../../data/models/models.dart';
@@ -9,13 +10,16 @@ import '../../state/indicators.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
 import '../widgets/field.dart';
+import '../widgets/motion.dart';
+import 'dashboard_grid.dart';
 import 'editor/indicator_editor.dart';
 import 'indicator_card.dart';
 import 'metrics_source_screen.dart';
 
-/// Contenu de l'onglet Tableaux : les indicateurs du site, en une ou deux
-/// colonnes selon la place. Une carte chargée sans valeur à montrer est
-/// masquée (elle ne dit rien) ; une ligne en bas permet de la retrouver.
+/// Contenu de l'onglet Tableaux : les indicateurs du site, sur une grille
+/// que « Organiser » permet d'arranger (déplacer, redimensionner). Une carte
+/// chargée sans valeur à montrer est masquée (elle ne dit rien) ; une ligne en
+/// bas permet de la retrouver.
 class IndicatorsTab extends ConsumerStatefulWidget {
   const IndicatorsTab({super.key, required this.site, required this.window});
 
@@ -30,6 +34,10 @@ class _IndicatorsTabState extends ConsumerState<IndicatorsTab> {
   /// Les cartes vides ont été demandées : valable jusqu'au prochain changement
   /// de période.
   bool _revealed = false;
+
+  /// Mode « Organiser » : toutes les cartes sont montrées, vides comprises,
+  /// sinon leur place dans la grille serait perdue.
+  bool _editing = false;
 
   @override
   void didUpdateWidget(IndicatorsTab old) {
@@ -56,7 +64,7 @@ class _IndicatorsTabState extends ConsumerState<IndicatorsTab> {
             case final data? when !hasDisplayableData(data))
           i.id,
     };
-    final shown = _revealed
+    final shown = _revealed || _editing
         ? indicators
         : [for (final i in indicators) if (!empty.contains(i.id)) i];
 
@@ -65,11 +73,21 @@ class _IndicatorsTabState extends ConsumerState<IndicatorsTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          _ArrangeBar(
+            editing: _editing,
+            onToggle: () => setState(() => _editing = !_editing),
+          ),
           if (shown.isEmpty)
             const _AllHidden()
           else
-            _CardsGrid(site: site, window: window, indicators: shown),
-          if (!_revealed && empty.isNotEmpty)
+            _Grid(
+              site: site,
+              window: window,
+              indicators: indicators,
+              shown: {for (final i in shown) i.id},
+              editing: _editing,
+            ),
+          if (!_revealed && !_editing && empty.isNotEmpty)
             _HiddenLink(
               count: empty.length,
               onTap: () => setState(() => _revealed = true),
@@ -135,117 +153,153 @@ class _HiddenLink extends StatelessWidget {
   }
 }
 
-class _CardsGrid extends StatelessWidget {
-  const _CardsGrid({
+/// « Organiser » à droite, au-dessus des cartes ; en édition, la consigne et
+/// « Terminé ».
+class _ArrangeBar extends StatelessWidget {
+  const _ArrangeBar({required this.editing, required this.onToggle});
+  final bool editing;
+  final VoidCallback onToggle;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.glance;
+    final color = editing ? p.accent : p.fg2;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Expanded(
+            child: GlanceReveal(
+              show: editing,
+              // GlanceReveal s'ancre au centre : la consigne reste à gauche.
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Maintenez une carte pour la déplacer, tirez son coin pour la '
+                  'redimensionner.',
+                  style: GT.body(12.5, color: p.fg3),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          GestureDetector(
+            onTap: onToggle,
+            behavior: HitTestBehavior.opaque,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    editing
+                        ? Icons.check_rounded
+                        : Icons.dashboard_customize_outlined,
+                    size: 17,
+                    color: color,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    editing ? 'Terminé' : 'Organiser',
+                    style: GT.body(13, weight: 600, color: color),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Largeur d'une carte avant la grille : en deçà, les colonnes de chiffres
+/// d'un entonnoir ne tiennent plus à côté de son libellé. Elle fixe le nombre
+/// de colonnes : deux par carte de cette largeur, pour pouvoir aussi en poser
+/// deux plus étroites côte à côte.
+const double _kCardWidth = 270;
+const int _kMaxCards = 3;
+const int _kColumnsPerCard = 2;
+
+int _columnsFor(double width) =>
+    ((width + kGridGutter) / (_kCardWidth + kGridGutter))
+        .floor()
+        .clamp(1, _kMaxCards) *
+    _kColumnsPerCard;
+
+/// Taille d'une carte encore jamais placée : la largeur d'une carte d'avant la
+/// grille, et une hauteur qui montre son contenu habituel.
+GridItem _gridItemFor(Indicator i, int columns) => switch (i) {
+      // Une répartition dans le temps a besoin de largeur pour sa courbe.
+      BreakdownIndicator(overTime: true) => GridItem(i.id,
+          w: columns, h: 12, minW: _kColumnsPerCard, minH: 6),
+      BreakdownIndicator() =>
+        GridItem(i.id, w: _kColumnsPerCard, h: 8, minW: _kColumnsPerCard, minH: 4),
+      // Le chiffre, puis une quarantaine de pixels par étape.
+      FunnelIndicator(:final steps) => GridItem(i.id,
+          w: _kColumnsPerCard,
+          h: ((150 + 38 * steps.length) / (kGridRow + kGridGutter)).ceil(),
+          minW: _kColumnsPerCard,
+          minH: 4),
+      _ => GridItem(i.id, w: _kColumnsPerCard, h: 5, minH: 3),
+    };
+
+class _Grid extends ConsumerWidget {
+  const _Grid({
     required this.site,
     required this.window,
     required this.indicators,
+    required this.shown,
+    required this.editing,
   });
 
   final Site site;
   final DateWindow window;
-  final List<Indicator> indicators;
 
-  /// Largeur minimale d'une carte : en deçà, les colonnes de chiffres d'un
-  /// entonnoir ne tiennent plus à côté de son libellé. 270 et non plus : le
-  /// panneau central du bureau (900 px moins ses marges) doit en tenir trois.
-  static const double _minCard = 270;
-  static const double _gutter = 14;
-  static const int _maxColumns = 3;
+  /// Toutes les cartes du site : la grille se calcule sur toutes, puis les
+  /// cartes masquées en sont retirées.
+  final List<Indicator> indicators;
+  final Set<String> shown;
+  final bool editing;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final layouts = ref.watch(siteLayoutsProvider(site));
+    final byId = {for (final i in indicators) i.id: i};
     // La largeur vient des contraintes, jamais de la taille de l'écran (cf.
     // MetricSectionGrid : le panneau central du bureau est plus étroit que la
     // fenêtre).
     return LayoutBuilder(
       builder: (context, constraints) {
-        final columns = ((constraints.maxWidth + _gutter) / (_minCard + _gutter))
-            .floor()
-            .clamp(1, _maxColumns);
-
-        Widget card(Indicator i) => IndicatorCard(
-              // L'id suffit : le déplacement d'une carte d'une colonne à
-              // l'autre doit la déplacer, pas la reconstruire.
-              key: ValueKey(i.id),
-              site: site,
-              window: window,
-              indicator: i,
-            );
-
-        // Une carte large coupe la grille : les cartes normales d'avant et
-        // d'après se répartissent chacune en colonnes, de leur côté.
-        final children = <Widget>[];
-        var run = <Indicator>[];
-        void flush() {
-          if (run.isEmpty) return;
-          children.add(_Columns(
-            columns: columns,
-            gutter: _gutter,
-            cards: [for (final i in run) card(i)],
-          ));
-          run = [];
-        }
-
-        for (final i in indicators) {
-          if (columns > 1 && _isWide(i)) {
-            flush();
-            children.add(card(i));
-          } else {
-            run.add(i);
-          }
-        }
-        flush();
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            for (final (n, w) in children.indexed) ...[
-              if (n > 0) const SizedBox(height: _gutter),
-              w,
-            ],
-          ],
+        final columns = _columnsFor(constraints.maxWidth);
+        final items = [for (final i in indicators) _gridItemFor(i, columns)];
+        final full = resolveLayout(layouts[columns], items, columns);
+        // Une carte masquée laisse remonter celles d'en dessous.
+        final layout = shown.length == indicators.length
+            ? full
+            : settleLayout({
+                for (final e in full.entries)
+                  if (shown.contains(e.key)) e.key: e.value,
+              });
+        return DashboardGrid(
+          columns: columns,
+          items: {for (final i in items) i.id: i},
+          layout: layout,
+          editing: editing,
+          onChanged: (next) => ref
+              .read(indicatorsProvider.notifier)
+              .setLayout(site, columns, next),
+          cardBuilder: (id) => IndicatorCard(
+            site: site,
+            window: window,
+            indicator: byId[id]!,
+            fill: true,
+            editing: editing,
+          ),
         );
       },
     );
   }
-
-  /// Une répartition dans le temps a besoin de largeur pour sa courbe.
-  static bool _isWide(Indicator i) => i is BreakdownIndicator && i.overTime;
-}
-
-/// Cartes réparties en colonnes, rangée après rangée (0 à gauche, 1 à droite…).
-class _Columns extends StatelessWidget {
-  const _Columns({
-    required this.columns,
-    required this.gutter,
-    required this.cards,
-  });
-
-  final int columns;
-  final double gutter;
-  final List<Widget> cards;
-
-  @override
-  Widget build(BuildContext context) => Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          for (var col = 0; col < columns; col++) ...[
-            if (col > 0) SizedBox(width: gutter),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  for (var i = col; i < cards.length; i += columns) ...[
-                    if (i > col) SizedBox(height: gutter),
-                    cards[i],
-                  ],
-                ],
-              ),
-            ),
-          ],
-        ],
-      );
 }
 
 class _EmptyState extends StatelessWidget {

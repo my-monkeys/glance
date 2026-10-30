@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/external_metrics.dart';
+import '../core/grid_layout.dart';
 import '../core/indicator_math.dart';
 import '../core/timezone.dart';
 import '../data/models/dimension.dart';
@@ -30,17 +31,29 @@ class IndicatorsNotifier extends Notifier<List<SiteIndicators>> {
     state = next;
   }
 
-  List<Indicator> forSite(Site site) {
+  SiteIndicators? _entry(SiteRef ref) {
     for (final s in state) {
-      if (s.site.matches(site)) return s.indicators;
+      if (s.site == ref) return s;
     }
-    return const [];
+    return null;
   }
 
-  /// Remplace la liste d'un site (la crée au besoin) ; vide = on l'oublie.
-  Future<void> _setFor(SiteRef ref, List<Indicator> list) {
+  List<Indicator> forSite(Site site) =>
+      _entry(SiteRef.of(site))?.indicators ?? const [];
+
+  /// Remplace la liste d'un site (la crée au besoin) en gardant ses grilles,
+  /// sauf si [layouts] est donné ; vide = on l'oublie.
+  Future<void> _setFor(
+    SiteRef ref,
+    List<Indicator> list, [
+    Map<int, Map<String, GridSlot>>? layouts,
+  ]) {
+    final kept = layouts ?? _entry(ref)?.layouts ?? const {};
     final others = state.where((s) => s.site != ref);
-    return _save([...others, if (list.isNotEmpty) SiteIndicators(ref, list)]);
+    return _save([
+      ...others,
+      if (list.isNotEmpty) SiteIndicators(ref, list, kept),
+    ]);
   }
 
   Future<void> add(Site site, Indicator i) =>
@@ -50,24 +63,48 @@ class IndicatorsNotifier extends Notifier<List<SiteIndicators>> {
         for (final e in forSite(site)) if (e.id == i.id) i else e,
       ]);
 
-  Future<void> remove(Site site, String id) => _setFor(
-        SiteRef.of(site),
-        forSite(site).where((e) => e.id != id).toList(),
-      );
+  Future<void> remove(Site site, String id) {
+    final ref = SiteRef.of(site);
+    return _setFor(
+      ref,
+      forSite(site).where((e) => e.id != id).toList(),
+      {
+        for (final l in (_entry(ref)?.layouts ?? const {}).entries)
+          l.key: {...l.value}..remove(id),
+      },
+    );
+  }
 
-  /// Même convention que `ReorderableListView.onReorder` : [newIndex] est
-  /// donné avant retrait de l'élément déplacé.
-  Future<void> reorder(Site site, int oldIndex, int newIndex) {
-    final list = [...forSite(site)];
-    if (newIndex > oldIndex) newIndex -= 1;
-    list.insert(newIndex, list.removeAt(oldIndex));
-    return _setFor(SiteRef.of(site), list);
+  /// Enregistre la grille d'un site pour [columns] colonnes. La liste prend
+  /// l'ordre de lecture de la grille : une grille d'une autre largeur, jamais
+  /// arrangée, reprend ainsi cet ordre.
+  Future<void> setLayout(
+    Site site,
+    int columns,
+    Map<String, GridSlot> layout,
+  ) {
+    final ref = SiteRef.of(site);
+    final list = forSite(site);
+    final read = readingOrder(layout);
+    // Les cartes absentes de la grille gardent leur rang relatif, à la fin.
+    int rank(Indicator i) {
+      final at = read.indexOf(i.id);
+      return at >= 0 ? at : read.length + list.indexOf(i);
+    }
+
+    return _setFor(
+      ref,
+      [...list]..sort((a, b) => rank(a).compareTo(rank(b))),
+      {...?_entry(ref)?.layouts, columns: layout},
+    );
   }
 
   /// Fusionne des indicateurs venus d'un autre appareil : par site, à id égal
-  /// l'entrant gagne → réimporter le même transfert ne duplique pas.
+  /// l'entrant gagne → réimporter le même transfert ne duplique pas. Une
+  /// grille entrante remplace celle de même largeur.
   Future<void> upsertAll(List<SiteIndicators> incoming) {
     final bySite = {for (final s in state) s.site: [...s.indicators]};
+    final layouts = {for (final s in state) s.site: {...s.layouts}};
     for (final inc in incoming) {
       final list = bySite.putIfAbsent(inc.site, () => []);
       for (final i in inc.indicators) {
@@ -78,10 +115,12 @@ class IndicatorsNotifier extends Notifier<List<SiteIndicators>> {
           list.add(i);
         }
       }
+      layouts.putIfAbsent(inc.site, () => {}).addAll(inc.layouts);
     }
     return _save([
       for (final e in bySite.entries)
-        if (e.value.isNotEmpty) SiteIndicators(e.key, e.value),
+        if (e.value.isNotEmpty)
+          SiteIndicators(e.key, e.value, layouts[e.key] ?? const {}),
     ]);
   }
 
@@ -94,15 +133,24 @@ final indicatorsProvider =
   IndicatorsNotifier.new,
 );
 
+SiteIndicators _siteEntry(List<SiteIndicators> all, Site site) =>
+    all.firstWhere(
+      (s) => s.site.matches(site),
+      orElse: () => SiteIndicators(SiteRef.of(site), const []),
+    );
+
 final siteIndicatorsProvider = Provider.family<List<Indicator>, Site>(
-  (ref, site) => ref.watch(indicatorsProvider.select(
-    (all) => all
-        .firstWhere(
-          (s) => s.site.matches(site),
-          orElse: () => SiteIndicators(SiteRef.of(site), const []),
-        )
-        .indicators,
-  )),
+  (ref, site) => ref.watch(
+    indicatorsProvider.select((all) => _siteEntry(all, site).indicators),
+  ),
+);
+
+/// Grilles enregistrées d'un site, par nombre de colonnes.
+final siteLayoutsProvider =
+    Provider.family<Map<int, Map<String, GridSlot>>, Site>(
+  (ref, site) => ref.watch(
+    indicatorsProvider.select((all) => _siteEntry(all, site).layouts),
+  ),
 );
 
 /// Résultat d'un indicateur sur une fenêtre. L'indicateur fait partie de la

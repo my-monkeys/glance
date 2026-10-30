@@ -145,6 +145,8 @@ class IndicatorChart extends StatelessWidget {
           lineTouchData: LineTouchData(
             touchTooltipData: LineTouchTooltipData(
               getTooltipColor: (_) => p.fg,
+              fitInsideHorizontally: true,
+              fitInsideVertically: true,
               tooltipBorderRadius: BorderRadius.circular(10),
               tooltipPadding:
                   const EdgeInsets.symmetric(horizontal: 10, vertical: 7),

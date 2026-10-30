@@ -15,10 +15,14 @@ import '../widgets/common.dart';
 import '../widgets/events_chart.dart';
 import '../widgets/motion.dart';
 import 'breakdown_body.dart';
+import 'card_stat.dart';
 import 'funnel_bars.dart';
 import 'indicator_chart.dart';
 import 'indicator_menu.dart';
 import 'labels.dart';
+
+/// En deçà, l'en-tête n'affiche plus le genre de la carte.
+const double _kindLabelMinWidth = 180;
 
 const _kindLabels = {
   IndicatorKind.counter: 'Compteur',
@@ -39,6 +43,8 @@ class IndicatorCard extends ConsumerWidget {
     required this.indicator,
     this.menu = true,
     this.title,
+    this.fill = false,
+    this.editing = false,
   });
 
   final Site site;
@@ -52,6 +58,15 @@ class IndicatorCard extends ConsumerWidget {
   /// saisie sans que celui-ci entre dans la clé du provider.
   final String? title;
 
+  /// La grille impose la taille de la carte : la courbe prend la hauteur qui
+  /// reste, et ce qui dépasse est coupé. Sinon la carte prend sa hauteur
+  /// naturelle (aperçu de l'éditeur).
+  final bool fill;
+
+  /// Mode « Organiser » : une poignée remplace le menu (la grille capte les
+  /// gestes, la carte ne fait que les dessiner).
+  final bool editing;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final p = context.glance;
@@ -60,67 +75,83 @@ class IndicatorCard extends ConsumerWidget {
     // flash de squelette à chaque tick.
     final async = ref.watch(indicatorDataProvider(key));
     final data = async.value;
+    Widget loose(Widget w) => fill ? CardLoose(child: w) : w;
+    final body = GlanceSwap(
+      dy: 0,
+      child: KeyedSubtree(
+        key: ValueKey(data == null),
+        child: data == null
+            ? loose(async.hasError
+                ? _CardError(
+                    message: metricsErrorMessage(async.error!),
+                    onRetry: () => ref.invalidate(indicatorDataProvider(key)),
+                  )
+                : _CardSkeleton(kind: indicator.kind))
+            : _CardBody(
+                name: title ?? indicator.name,
+                indicator: indicator,
+                data: data,
+                window: window,
+                fill: fill,
+              ),
+      ),
+    );
 
     return GlanceCard(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Expanded(
-                child: Text(
-                  title ?? indicator.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: GT.body(14.5, weight: 600, color: p.fg),
-                ),
-              ),
-              const SizedBox(width: 10),
-              SectionLabel(_kindLabels[indicator.kind]!, color: p.fg3),
-              if (menu)
-                GestureDetector(
-                  onTap: () => showIndicatorMenu(context, ref, site, indicator),
-                  behavior: HitTestBehavior.opaque,
-                  // Zone de tap élargie : l'icône seule fait 18 px.
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 8),
-                    child: Icon(Icons.more_horiz_rounded,
-                        size: 20, color: p.fg2, semanticLabel: 'Options du tableau'),
+          LayoutBuilder(
+            builder: (context, c) => Row(
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                Expanded(
+                  child: Text(
+                    title ?? indicator.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GT.body(14.5, weight: 600, color: p.fg),
                   ),
                 ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          ClipRect(
-            child: AnimatedSize(
-              duration: kMotionBase,
-              curve: kCurveOutCubic,
-              alignment: Alignment.topCenter,
-              child: GlanceSwap(
-                dy: 0,
-                child: KeyedSubtree(
-                  key: ValueKey(data == null),
-                  child: data == null
-                      ? (async.hasError
-                          ? _CardError(
-                              message: metricsErrorMessage(async.error!),
-                              onRetry: () =>
-                                  ref.invalidate(indicatorDataProvider(key)),
-                            )
-                          : _CardSkeleton(kind: indicator.kind))
-                      : _CardBody(
-                          name: title ?? indicator.name,
-                          indicator: indicator,
-                          data: data,
-                          window: window,
-                        ),
-                ),
-              ),
+                // Une carte étroite de la grille garde la place pour son titre.
+                if (c.maxWidth >= _kindLabelMinWidth) ...[
+                  const SizedBox(width: 10),
+                  SectionLabel(_kindLabels[indicator.kind]!, color: p.fg3),
+                ],
+                if (editing)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8),
+                    child: Icon(Icons.drag_indicator_rounded,
+                        size: 20, color: p.fg2, semanticLabel: 'Déplacer le tableau'),
+                  )
+                else if (menu)
+                  GestureDetector(
+                    onTap: () => showIndicatorMenu(context, ref, site, indicator),
+                    behavior: HitTestBehavior.opaque,
+                    // Zone de tap élargie : l'icône seule fait 18 px.
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 8),
+                      child: Icon(Icons.more_horiz_rounded,
+                          size: 20, color: p.fg2, semanticLabel: 'Options du tableau'),
+                    ),
+                  ),
+              ],
             ),
           ),
+          const SizedBox(height: 10),
+          if (fill)
+            Expanded(child: ClipRect(child: body))
+          else
+            ClipRect(
+              child: AnimatedSize(
+                duration: kMotionBase,
+                curve: kCurveOutCubic,
+                alignment: Alignment.topCenter,
+                child: body,
+              ),
+            ),
         ],
       ),
     );
@@ -133,6 +164,7 @@ class _CardBody extends StatelessWidget {
     required this.indicator,
     required this.data,
     required this.window,
+    required this.fill,
   });
 
   /// Titre affiché de la carte : une ligne de contexte qui le répète est
@@ -141,9 +173,15 @@ class _CardBody extends StatelessWidget {
   final Indicator indicator;
   final IndicatorData data;
   final DateWindow window;
+  final bool fill;
 
   @override
   Widget build(BuildContext context) {
+    final body = _body();
+    return fill && body is! CardStat ? CardLoose(child: body) : body;
+  }
+
+  Widget _body() {
     return switch ((indicator, data)) {
       (CounterIndicator(:final query), CounterData d) =>
         _counterStat(d, sub: _unlessName(queryLabel(query)), unit: window.unit),
@@ -160,7 +198,8 @@ class _CardBody extends StatelessWidget {
         _counterStat(d, unit: externalUnitOf(window.unit)),
       (FunnelIndicator(), FunnelData d) => d.steps.isEmpty || d.steps.first.visitors == 0
           ? const _NoData()
-          : _Stat(
+          : CardStat(
+              fill: fill,
               big: fmtPct(d.steps.last.remaining * 100),
               sub: '${fmtInt(d.steps.last.visitors)} / '
                   '${fmtInt(d.steps.first.visitors)} visiteurs',
@@ -169,7 +208,8 @@ class _CardBody extends StatelessWidget {
       (BreakdownIndicator(:final event, :final property), BreakdownData d) =>
         d.rows.isEmpty
             ? const _NoData()
-            : _Stat(
+            : CardStat(
+                fill: fill,
                 big: fmtInt(d.total),
                 sub: _unlessName('$event · $property'),
                 child: BreakdownBody(
@@ -215,13 +255,14 @@ class _CardBody extends StatelessWidget {
       return _NoData(_unpublishedMessage(gaps));
     }
     if (d.total == 0 && d.points.every((s) => s.visitors == 0)) {
-      return const _Stat(big: '0', sub: 'Aucun événement sur la période');
+      return CardStat(big: '0', sub: 'Aucun événement sur la période', fill: fill);
     }
     final values = [
       for (final s in d.points)
         gaps != null && gaps.covers(s.t) ? null : s.visitors,
     ];
-    return _Stat(
+    return CardStat(
+      fill: fill,
       big: fmtInt(d.total),
       sub: sub,
       notes: _notes(d.cohorts, d.member, gaps),
@@ -257,7 +298,8 @@ class _CardBody extends StatelessWidget {
                       ? _unpublishedMessage(d.unpublished!)
                       : 'Aucune donnée sur la période',
             )
-          : _Stat(
+          : CardStat(
+              fill: fill,
               notes: _notes(d.cohorts, d.member, d.unpublished),
               big: d.overall == null ? '—' : fmtPct(d.overall! * 100),
               sub: '${fmtInt(d.numeratorTotal)} / ${fmtInt(d.denominatorTotal)}',
@@ -298,72 +340,6 @@ class _CardBody extends StatelessWidget {
         if (member != null) '$member · s\'ajuste à la période',
         if (u != null) 'Données jusqu\'au ${fmtDay(u.until)}',
       ];
-}
-
-/// Grand chiffre, ligne de contexte, puis le détail de l'indicateur.
-class _Stat extends StatelessWidget {
-  const _Stat({
-    required this.big,
-    this.sub,
-    this.child,
-    this.detail,
-    this.notes = const [],
-  });
-  final String big;
-
-  /// Mentions discrètes sous la ligne de contexte (cohortes, membre retenu).
-  final List<String> notes;
-  final String? sub;
-  final String? detail;
-
-  /// Absent : la carte ne montre que son chiffre.
-  final Widget? child;
-
-  @override
-  Widget build(BuildContext context) {
-    final p = context.glance;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        FittedBox(
-          fit: BoxFit.scaleDown,
-          alignment: Alignment.centerLeft,
-          // Fredoka n'a pas l'espace fine insécable (U+202F) que `intl` met
-          // entre les milliers : le groupe disparaissait (« 1994 »).
-          child: Text(big.replaceAll('\u202f', '\u00a0'),
-              style: GT.stat(40, color: p.fg)),
-        ),
-        if (sub != null) ...[
-          const SizedBox(height: 4),
-          Text(
-            sub!,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: GT.mono(11.5, color: p.fg2),
-          ),
-        ],
-        for (final n in notes)
-          Padding(
-            padding: const EdgeInsets.only(top: 2),
-            child: Text(n, style: GT.mono(10.5, color: p.fg3)),
-          ),
-        if (detail != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 2),
-            child: Text(
-              detail!,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: GT.mono(10.5, color: p.fg3),
-            ),
-          ),
-        if (child != null) ...[
-          const SizedBox(height: 14),
-          child!,
-        ],
-      ],
-    );
-  }
 }
 
 class _NoData extends StatelessWidget {

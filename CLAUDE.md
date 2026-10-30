@@ -306,8 +306,40 @@ attendre d'instance. Couverture par fournisseur :
   et la carte prend **toute la largeur** de la grille. Une requête
   `/events/series` filtrée (`epf` `eq`) par valeur, plus une pour le type de la
   propriété : 10 requêtes au lieu d'une, d'où l'option plutôt qu'un défaut.
-- **Grille** : 1 à 3 colonnes, carte de 270 px minimum — le panneau central du
-  bureau (900 px) en tient trois. Une carte large coupe la répartition en colonnes.
+- **Grille** (`ui/dashboards/dashboard_grid.dart`, moteur pur et testé dans
+  `core/grid_layout.dart`) : chaque carte a une place `x, y, w, h` en cellules,
+  rangées de 40 px. Deux colonnes par « carte de 270 px » qui tient dans la
+  largeur : 2 sur téléphone, 4, 6 sur le panneau central du bureau. Une carte
+  jamais placée prend deux colonnes, comme avant la grille (une répartition dans
+  le temps : toute la largeur).
+  - **« Organiser »** (au-dessus des cartes) : la grille se dessine. Un appui long
+    (220 ms) sur une carte la déplace, sa poignée ⠿ la déplace tout de suite, son
+    coin bas droit la redimensionne. Les poignées prennent la main sur le
+    défilement de la page (`EagerGestureRecognizer`), pas l'appui long, sinon on
+    ne pourrait plus faire défiler une page couverte de cartes. Près du bord de
+    l'écran, la page défile sous la carte tenue.
+  - **Poussée** (`settleLayout`) : les cartes sont posées dans l'ordre de leur
+    centre, chacune passe sous ce qu'elle recouvre puis remonte jusqu'à toucher
+    une autre carte. La carte déplacée est rangée selon **son** centre : la
+    descendre sur sa voisine les échange dès que son centre dépasse celui de la
+    voisine. Une carte redimensionnée est rangée par son **haut**, sinon en
+    s'élargissant elle passerait sous sa voisine au lieu de la pousser.
+  - **Stockage** : `SiteIndicators.layouts`, une grille **par nombre de
+    colonnes** (le téléphone et le bureau gardent chacun la leur), **hors** de
+    l'`Indicator` : celui-ci est une clé de `indicatorDataProvider`, et
+    redimensionner relancerait les requêtes. Clé JSON `layouts` **facultative**
+    (une app plus ancienne range les cartes dans l'ordre de la liste). Enregistrer
+    une grille remet la liste dans son ordre de lecture : une largeur jamais
+    arrangée suit alors cet ordre. Une suppression retire la carte de toutes les
+    grilles. En synchro, une grille entrante remplace celle de même largeur.
+  - En mode « Organiser », **toutes** les cartes sont montrées, vides comprises :
+    masquées, elles perdraient leur place. Hors édition, une carte masquée laisse
+    remonter celles d'en dessous.
+  - **Carte à taille imposée** (`IndicatorCard.fill`) : la courbe prend la hauteur
+    qui reste sous le chiffre (`CardStat`, `CustomMultiChildLayout`), une liste
+    (entonnoir, répartition) garde sa hauteur et la carte la coupe, sans signaler
+    de débordement. Sous 48 px, la courbe disparaît. Sous 180 px de large,
+    l'en-tête n'affiche plus le genre (« COMPTEUR »).
 - **Cartes sans données masquées** : voir « Source de métriques » plus bas
   (`hasDisplayableData`, ligne « N tableaux sans données · Afficher »).
 - **Éditeur** : les suggestions (événements, propriétés, valeurs) portent sur
