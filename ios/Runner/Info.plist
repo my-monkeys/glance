@@ -8,6 +8,10 @@
 		<false/>
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
+		<key>CFBundleLocalizations</key>
+		<array>
+			<string>fr</string>
+		</array>
 		<key>CFBundleDisplayName</key>
 		<string>Glance</string>
 		<key>CFBundleExecutable</key>
