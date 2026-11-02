@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../data/models/indicator.dart';
 import '../../data/models/models.dart';
@@ -14,6 +15,10 @@ import '../widgets/motion.dart';
 import '../widgets/toast.dart';
 import 'editor/confirm_button.dart';
 import 'labels.dart';
+
+/// Page du site qui décrit le contrat de l'API à exposer. À tenir à jour avec
+/// `store/site/docs/source-de-metriques.html`.
+const kMetricsDocUrl = 'https://glance-analytics.com/docs/source-de-metriques.html';
 
 /// Ouvre l'écran de la source de métriques d'un site.
 Future<void> openMetricsSource(BuildContext context, Site site) =>
@@ -160,9 +165,29 @@ class _MetricsSourceScreenState extends ConsumerState<MetricsSourceScreen> {
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
                 children: [
                   Text(
-                    'Une API qui fournit des indicateurs calculés par le site '
-                    'lui-même (rétention, comptes…).',
+                    'Une petite API de votre site qui fournit des indicateurs '
+                    'calculés sur sa base (rétention, comptes…) : un catalogue '
+                    'et des séries, protégés par un jeton.',
                     style: GT.body(13.5, color: p.fg2),
+                  ),
+                  const SizedBox(height: 10),
+                  GestureDetector(
+                    key: const ValueKey('metrics-doc-link'),
+                    onTap: () => launchUrl(Uri.parse(kMetricsDocUrl),
+                        mode: LaunchMode.externalApplication),
+                    behavior: HitTestBehavior.opaque,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('Comment ça marche ?',
+                              style: GT.body(13.5, weight: 600, color: p.accent)),
+                          const SizedBox(width: 6),
+                          Icon(Icons.open_in_new_rounded, size: 15, color: p.accent),
+                        ],
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 22),
                   GlanceField(
