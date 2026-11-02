@@ -39,7 +39,7 @@ double chartNiceMax(double m) {
 
 /// Date d'entête de tooltip selon la granularité.
 String chartTooltipDate(DateTime t, TimeUnit unit) => switch (unit) {
-  TimeUnit.hour => DateFormat("d MMM · HH'h'", 'fr_FR').format(t),
-  TimeUnit.day => DateFormat('EEE d MMM', 'fr_FR').format(t),
-  TimeUnit.month => DateFormat('MMMM yyyy', 'fr_FR').format(t),
+  TimeUnit.hour => '${DateFormat.MMMd().format(t)} · ${DateFormat('HH').format(t)}h',
+  TimeUnit.day => DateFormat.MMMEd().format(t),
+  TimeUnit.month => DateFormat.yMMMM().format(t),
 };

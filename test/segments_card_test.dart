@@ -16,6 +16,7 @@ import 'package:glance/ui/dashboards/indicators_tab.dart';
 import 'package:glance/ui/widgets/events_chart.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'helpers/l10n.dart';
 
 const _site = Site(id: 's', accountId: 'a', name: 'S', domain: 's.fr');
 final _window =
@@ -66,6 +67,9 @@ Future<void> _pump(WidgetTester tester, CounterData data) async {
       indicatorDataProvider.overrideWith((ref, key) async => data),
     ],
     child: MaterialApp(
+      locale: testLocale,
+      localizationsDelegates: glanceLocalizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       theme: glanceTheme(Brightness.light),
       home: Scaffold(
         body: SingleChildScrollView(

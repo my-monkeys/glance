@@ -8,6 +8,7 @@ import 'package:glance/state/settings.dart';
 import 'package:glance/theme/theme.dart';
 import 'package:glance/ui/widgets/period_controls.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'helpers/l10n.dart';
 
 Future<ProviderContainer> _pump(WidgetTester tester, double width,
     {bool withToggle = false}) async {
@@ -19,6 +20,9 @@ Future<ProviderContainer> _pump(WidgetTester tester, double width,
   await tester.pumpWidget(ProviderScope(
     overrides: [sharedPrefsProvider.overrideWithValue(prefs)],
     child: MaterialApp(
+      locale: testLocale,
+      localizationsDelegates: glanceLocalizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       theme: glanceTheme(Brightness.light),
       home: Scaffold(
         body: PeriodControls(

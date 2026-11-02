@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/account.dart';
 import '../../data/models/period.dart';
 import '../../data/providers/analytics_provider.dart';
+import '../../l10n/l10n.dart';
 import '../../state/providers.dart';
 import '../../state/settings.dart';
 import '../../state/sync.dart';
@@ -178,6 +179,33 @@ class SettingsScreen extends ConsumerWidget {
         _GroupLabel('Apparence'),
         _Group(
           children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 13, 16, 14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(context.l10n.settingsLanguageTitle,
+                      style: GT.body(15, color: p.fg)),
+                  const SizedBox(height: 12),
+                  ChipRow(
+                    children: [
+                      GlanceChip(
+                        label: context.l10n.settingsLanguageAuto,
+                        selected: settings.locale == null,
+                        onTap: () => notifier.setLocale(null),
+                      ),
+                      // Une langue ajoutée à l'app apparaît ici sans autre geste.
+                      for (final l in AppLocalizations.supportedLocales)
+                        GlanceChip(
+                          label: nativeLanguageName(l),
+                          selected: settings.locale == l,
+                          onTap: () => notifier.setLocale(l),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 13, 16, 14),
               child: Column(

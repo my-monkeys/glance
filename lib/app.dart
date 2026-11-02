@@ -7,6 +7,7 @@ import 'data/models/account.dart';
 import 'data/models/indicator.dart';
 import 'data/models/metrics_source.dart';
 import 'data/models/workspace.dart';
+import 'l10n/l10n.dart';
 import 'state/indicators.dart';
 import 'state/metrics_sources.dart';
 import 'state/period_state.dart';
@@ -25,6 +26,7 @@ class GlanceApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = ref.watch(settingsProvider.select((s) => s.theme));
+    final locale = ref.watch(settingsProvider.select((s) => s.locale));
     return MaterialApp(
       title: 'Glance',
       // Donne au toaster l'accès à l'overlay racine (au-dessus des dialogs).
@@ -33,6 +35,11 @@ class GlanceApp extends ConsumerWidget {
       theme: glanceTheme(Brightness.light),
       darkTheme: glanceTheme(Brightness.dark),
       themeMode: theme.mode,
+      locale: locale,
+      localizationsDelegates: glanceLocalizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localeListResolutionCallback: (requested, supported) =>
+          resolveGlanceLocale(requested, supported),
       // On atterrit toujours sur l'app : l'ajout d'une source se fait depuis
       // l'état vide de l'accueil (flux fournisseur → sites).
       home: const _SyncBridge(child: _WidgetSync(child: RootScaffold())),

@@ -350,7 +350,7 @@ class _Header extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '${DateFormat('EEE d MMM', 'fr_FR').format(now)} · ${period.label}'
+                      '${DateFormat.MMMEd().format(now)} · ${period.label}'
                           .toUpperCase(),
                       style: GT.label(color: p.fg2),
                     ),

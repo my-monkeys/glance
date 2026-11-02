@@ -1,0 +1,20 @@
+{
+  "@@locale": "fr",
+  "settingsLanguageTitle": "Langue",
+  "@settingsLanguageTitle": {
+    "description": "Titre du réglage de langue dans Réglages"
+  },
+  "settingsLanguageAuto": "Automatique",
+  "dayRange": "du {from} au {to}",
+  "@dayRange": {
+    "description": "Plage de jours : « du 7 au 13 oct. »",
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  }
+}

@@ -7,6 +7,7 @@ import '../../data/models/indicator.dart';
 import '../../data/models/indicator_result.dart';
 import '../../data/models/models.dart';
 import '../../data/models/period.dart';
+import '../../l10n/l10n.dart';
 import '../../state/indicators.dart';
 import '../../theme/motion.dart';
 import '../../theme/palette.dart';
@@ -179,26 +180,27 @@ class _CardBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final body = _body();
+    final body = _body(context);
     return fill && body is! CardStat ? CardLoose(child: body) : body;
   }
 
-  Widget _body() {
+  Widget _body(BuildContext context) {
     return switch ((indicator, data)) {
       (CounterIndicator(:final query), CounterData d) =>
-        _counterStat(d, sub: _unlessName(queryLabel(query)), unit: window.unit),
+        _counterStat(context, d, sub: _unlessName(queryLabel(query)), unit: window.unit),
       (RatioIndicator(:final numerator, :final denominator), RatioData d) =>
         _ratioStat(
+          context,
           d,
           detail: _unlessName('${queryLabel(numerator)} ÷ ${queryLabel(denominator)}'),
           unit: window.unit,
         ),
       // Le libellé de la métrique EST le titre : pas de ligne de contexte.
       (ExternalIndicator(), RatioData d) =>
-        _ratioStat(d, unit: d.unit ?? externalUnitOf(window.unit)),
+        _ratioStat(context, d, unit: d.unit ?? externalUnitOf(window.unit)),
       (ExternalIndicator(), CounterData d) =>
-        _counterStat(d, unit: d.unit ?? externalUnitOf(window.unit)),
-      (SitesIndicator(), CounterData d) => _counterStat(d, unit: window.unit),
+        _counterStat(context, d, unit: d.unit ?? externalUnitOf(window.unit)),
+      (SitesIndicator(), CounterData d) => _counterStat(context, d, unit: window.unit),
       (FunnelIndicator(), FunnelData d) => d.steps.isEmpty || d.steps.first.visitors == 0
           ? const _NoData()
           : CardStat(
@@ -251,6 +253,7 @@ class _CardBody extends StatelessWidget {
   }
 
   Widget _counterStat(
+    BuildContext context,
     CounterData d, {
     String? sub,
     required TimeUnit unit,
@@ -270,7 +273,7 @@ class _CardBody extends StatelessWidget {
       fill: fill,
       big: fmtInt(d.total),
       sub: sub,
-      notes: _notes(d.cohorts, d.member, gaps),
+      notes: _notes(context, d.cohorts, d.member, gaps),
       child: hasSegmentData(d)
           ? SegmentsBody(data: d, totals: values, unit: unit)
           : _plots(values)
@@ -296,7 +299,12 @@ class _CardBody extends StatelessWidget {
 
   // Les trous (dénominateur nul, ou non mesurable pour une métrique de site)
   // viennent des points du résultat, pas d'ici.
-  Widget _ratioStat(RatioData d, {String? detail, required TimeUnit unit}) =>
+  Widget _ratioStat(
+    BuildContext context,
+    RatioData d, {
+    String? detail,
+    required TimeUnit unit,
+  }) =>
       d.denominatorTotal == 0
           ? _NoData(
               d.pending
@@ -307,7 +315,7 @@ class _CardBody extends StatelessWidget {
             )
           : CardStat(
               fill: fill,
-              notes: _notes(d.cohorts, d.member, d.unpublished),
+              notes: _notes(context, d.cohorts, d.member, d.unpublished),
               big: d.overall == null ? '—' : fmtPct(d.overall! * 100),
               sub: '${fmtInt(d.numeratorTotal)} / ${fmtInt(d.denominatorTotal)}',
               detail: detail,
@@ -339,11 +347,16 @@ class _CardBody extends StatelessWidget {
 
   /// Cohortes mesurées, le membre retenu d'une famille, puis la fin des
   /// données publiées.
-  static List<String> _notes(CohortSpan? c, String? member, Unpublished? u) => [
+  static List<String> _notes(
+    BuildContext context,
+    CohortSpan? c,
+    String? member,
+    Unpublished? u,
+  ) => [
         if (c != null)
           c.first == c.last
               ? 'Mesurée sur la cohorte du ${fmtDay(c.first)}'
-              : 'Mesurée sur les cohortes ${fmtDayRange(c.first, c.last)}',
+              : 'Mesurée sur les cohortes ${fmtDayRange(context.l10n, c.first, c.last)}',
         if (member != null) '$member · s\'ajuste à la période',
         if (u != null) 'Données jusqu\'au ${fmtDay(u.until)}',
       ];

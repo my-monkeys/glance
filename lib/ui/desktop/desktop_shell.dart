@@ -672,7 +672,7 @@ class _OverviewState extends ConsumerState<_Overview> {
     final data = totals.data;
     final hidden = ref.watch(settingsProvider.select((s) => s.hiddenSeries));
     final refreshing = totals.loading && data.cards.isNotEmpty;
-    final dateLabel = DateFormat('EEE d MMM', 'fr_FR').format(DateTime.now());
+    final dateLabel = DateFormat.MMMEd().format(DateTime.now());
     final group = ref.watch(activeWorkspaceProvider);
     final scope = group?.name ?? 'Tous les sites';
 

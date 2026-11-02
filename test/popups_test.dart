@@ -14,6 +14,7 @@ import 'package:glance/ui/widgets/adaptive_sheet.dart';
 import 'package:glance/ui/widgets/custom_range_picker.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'helpers/l10n.dart';
 
 const _account =
     Account(id: 'a', kind: ProviderKind.umami, baseUrl: 'https://u.fr', label: 'Mon Umami');
@@ -68,6 +69,9 @@ Future<void> _pumpSettings(
   await tester.pumpWidget(ProviderScope(
     overrides: overrides,
     child: MaterialApp(
+      locale: testLocale,
+      localizationsDelegates: glanceLocalizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       theme: glanceTheme(Brightness.light),
       home: const Scaffold(body: SettingsScreen()),
     ),
@@ -231,6 +235,9 @@ void main() {
       await tester.pumpWidget(ProviderScope(
         overrides: [sharedPrefsProvider.overrideWithValue(prefs)],
         child: MaterialApp(
+          locale: testLocale,
+          localizationsDelegates: glanceLocalizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           theme: glanceTheme(Brightness.light),
           home: Scaffold(
             body: Consumer(
@@ -266,11 +273,11 @@ void main() {
         (tester) async {
       final container = await pumpPicker(tester, _desktop);
       final today = DateTime.now().day;
-      await tester.tap(find.text('$today').last);
+      await tester.tap(find.text('$today').first);
       await tester.pump();
-      await tester.tap(find.text('$today').last);
+      await tester.tap(find.text('$today').first);
       await tester.pump();
-      await tester.tap(find.text('Save'));
+      await tester.tap(find.text('Enregistrer'));
       await tester.pumpAndSettle();
       final end = container.read(periodProvider).customEnd;
       expect(end?.hour, 23);

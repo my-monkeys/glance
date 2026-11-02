@@ -93,7 +93,7 @@ class DayNav extends ConsumerWidget {
         return 'Avant-hier';
       default:
         final day = DateTime.now().add(Duration(days: offset));
-        return DateFormat('EEEE d MMMM', 'fr_FR').format(day);
+        return DateFormat.MMMMEEEEd().format(day);
     }
   }
 }
@@ -124,7 +124,7 @@ class MonthNav extends ConsumerWidget {
       default:
         final now = DateTime.now();
         final month = DateTime(now.year, now.month + offset, 1);
-        return DateFormat('MMMM yyyy', 'fr_FR').format(month);
+        return DateFormat.yMMMM().format(month);
     }
   }
 }

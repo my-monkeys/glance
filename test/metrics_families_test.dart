@@ -16,6 +16,7 @@ import 'package:glance/theme/theme.dart';
 import 'package:glance/ui/dashboards/indicators_tab.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'helpers/l10n.dart';
 
 MetricDef _def(String id, int delay, {String? famille, String? libFamille}) =>
     MetricDef(
@@ -199,6 +200,9 @@ void main() {
       await tester.pumpWidget(ProviderScope(
         overrides: overrides,
         child: MaterialApp(
+          locale: testLocale,
+          localizationsDelegates: glanceLocalizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           theme: glanceTheme(Brightness.light),
           home: Scaffold(
             body: SingleChildScrollView(

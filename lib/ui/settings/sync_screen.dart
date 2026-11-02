@@ -225,7 +225,7 @@ class _Account extends ConsumerWidget {
                     Text(
                       sync.lastSyncAt == null
                           ? 'Jamais synchronisé'
-                          : 'Sync ${DateFormat('d MMM HH:mm', 'fr_FR').format(sync.lastSyncAt!)}',
+                          : 'Sync ${DateFormat.MMMd().add_Hm().format(sync.lastSyncAt!)}',
                       style: GT.body(12, color: p.fg2),
                     ),
                   ],

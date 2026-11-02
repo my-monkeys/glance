@@ -5,6 +5,7 @@ import 'package:glance/data/models/account.dart';
 import 'package:glance/data/models/models.dart';
 import 'package:glance/theme/theme.dart';
 import 'package:glance/ui/add/site_picker.dart';
+import 'helpers/l10n.dart';
 
 const _base = Account(id: 'a', kind: ProviderKind.umami, baseUrl: 'u.fr');
 
@@ -60,6 +61,9 @@ void main() {
       addTearDown(tester.view.reset);
       SiteChoice? result;
       await tester.pumpWidget(ProviderScope(child: MaterialApp(
+        locale: testLocale,
+        localizationsDelegates: glanceLocalizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         theme: glanceTheme(Brightness.light),
         home: Builder(
           builder: (context) => Scaffold(

@@ -1,0 +1,6 @@
+{
+  "@@locale": "en",
+  "settingsLanguageTitle": "Language",
+  "settingsLanguageAuto": "Automatic",
+  "dayRange": "{from} – {to}"
+}
