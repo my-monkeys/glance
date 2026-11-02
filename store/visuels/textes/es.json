@@ -97,5 +97,25 @@
     "prevision": "Previsión",
     "etiquette_v": "Visitantes",
     "w_titre": "Todos los sitios"
+  },
+  "app": {
+    "homeTitleDefault": "Mis sitios",
+    "homeTotalVisitorsAll": "Visitantes · todos los sitios",
+    "homeVsPrevious": "vs. periodo ant.",
+    "homeLiveCount": "{count} en vivo",
+    "periodToday": "Hoy",
+    "period24h": "24 h",
+    "period7d": "7 días",
+    "period30d": "30 d",
+    "periodThisMonth": "Este mes",
+    "period12m": "12 m",
+    "periodThisYear": "Este año",
+    "periodAllTime": "Todo",
+    "periodCustom": "Rango",
+    "commonVisitors": "Visitantes",
+    "commonPageviews": "Vistas",
+    "tabSites": "Sitios",
+    "tabDirect": "En vivo",
+    "tabSettings": "Ajustes"
   }
 }

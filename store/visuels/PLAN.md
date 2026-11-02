@@ -2,8 +2,8 @@
 
 Huit visuels **stylisés** à la place des captures brutes (`store/screenshots/`, `store/play/`, qui
 restent en place jusqu'à validation) : une idée par image, mise en avant de ce que les captures ne
-montraient pas (tableaux, événements, entonnoir, rétention, prévision). Seul le premier montre une
-vraie capture, dans un téléphone dessiné en CSS. La mécanique est celle de GeoDaily
+montraient pas (tableaux, événements, entonnoir, rétention, prévision). Le premier montre l'écran
+d'accueil redessiné en HTML/CSS/SVG dans un téléphone dessiné en CSS, traduit comme l'appli. La mécanique est celle de GeoDaily
 (`geodaily-app/publication/visuels/`), le style est celui de Glance : calme et éditorial.
 
 Ticket : #20. Le site viendra dans un autre lot (il reprendra les mêmes scènes).
@@ -25,13 +25,13 @@ Ticket : #20. Le site viendra dans un autre lot (il reprendra les mêmes scènes
   `commun.js` (`graphe`, `spark`), lissage monotone comme `isCurved` de fl_chart.
 - **Rien n'est inventé** : chaque fonction montrée existe (cf. `CLAUDE.md`). Les chiffres sont des
   exemples, les noms de sites sont fictifs (`atelier-lune.fr`, `carnet.app`, `studio-nord.com`…).
-  Exception : le visuel 1 est une vraie capture, avec les sites réels de son compte de démonstration.
+  Le visuel 1 aussi : ses sites sont fictifs, ses textes d'interface viennent des `.arb` de l'appli.
 
 ## Les visuels, dans l'ordre de la galerie
 
 | # | Fichier | Fond | Titre FR | Titre EN | Ce qu'on voit |
 |---|---|---|---|---|---|
-| 1 | `1-accueil` | crème | Tous vos sites, d'un coup d'œil | All your sites, at a glance | La vraie capture de l'accueil (`sources/cap-accueil.png`) dans un téléphone ; pastilles Umami, Plausible, rien n'est collecté |
+| 1 | `1-accueil` | crème | Tous vos sites, d'un coup d'œil | All your sites, at a glance | L'écran d'accueil redessiné (total, courbes, liste de sites, onglets) dans un téléphone ; pastilles Umami, Plausible, rien n'est collecté |
 | 2 | `2-sites` | vert forêt | Croisez vos sites | Compare your sites | Le tableau « Sites » : 4 lignes, une courbe par ligne plus le total, parts, filtre « venus de » |
 | 3 | `3-evenements` | sable | Suivez chaque événement | Track every event | Courbes à une couleur par événement (`kEventPalette`), compteur filtré par propriété, répartition |
 | 4 | `4-entonnoir` | sombre | Voyez où ils décrochent | See where they drop off | Entonnoir en 4 étapes, perte à chaque passage, taux final |
@@ -66,8 +66,8 @@ Pour voir un gabarit dans un navigateur : `python3 -m http.server` à la racine,
 `/store/visuels/gabarits/4-entonnoir.html?lang=en&format=ipad`.
 
 - `--site` : rend la scène seule (sans l'en-tête marque + titre) en WebP, 1320 px de large, dans
-  `store/site/img/scenes/<langue>/` (visuels 2 à 8) et `store/site/img/scenes/1-accueil.webp` (le téléphone,
-  commun aux langues). Le site pose ses propres titres en HTML ; il charge ces images.
+  `store/site/img/scenes/<langue>/` (visuels 1 à 8 ; le 1 est le téléphone seul, fond transparent).
+  Le site pose ses propres titres en HTML ; il charge ces images.
 - `gabarits/commun.css` : palette, en-tête, cartes, pastilles, unité `--u`.
 - `gabarits/commun.js` : format et langue lus dans l'adresse, textes, nombres localisés
   (`Intl`), données d'exemple déterministes, graphiques.
@@ -80,7 +80,7 @@ Pour voir un gabarit dans un navigateur : `python3 -m http.server` à la racine,
 Six langues sont rendues : `fr`, `en`, `de`, `es`, `pt-BR`, `zh-Hans` (même fichier de textes par
 langue, rien à toucher dans les gabarits).
 
-1. Copier `textes/en.json` en `textes/<langue>.json` et traduire.
+1. Copier `textes/en.json` en `textes/<langue>.json` et traduire (sauf la clé `app`, que `outils/textes_app.py` écrit).
 2. Si le code n'est pas dans `LOCALE` (`commun.js`), l'y ajouter (`pt-BR` et `zh-Hans` y sont, et
    passent à `Intl.NumberFormat`) ; relancer `rendre.py` : la langue est découverte toute seule.
 3. Regarder la planche : un titre plus long peut passer à trois lignes.
@@ -93,13 +93,23 @@ chaque famille pour les seuls caractères CJK (`unicode-range`) avec `PingFang S
 chinois (titres compris, en semi-gras) suit la police système. Vérifié au rendu : PingFang SC, pas
 de carré ni de police à empattements. Sur une machine sans ces polices, installer Noto Sans SC.
 
-**Capture du visuel 1** : la vraie capture est en français (« Mes sites ») dans toutes les langues ;
-la refaire dans chaque langue quand l'app sera traduite (ticket #16).
+**Textes de l'écran du visuel 1** : ils ne sont pas retapés, ils viennent de `lib/l10n/app_<code>.arb`
+(mêmes clés que l'appli : `homeTitleDefault`, `period*`, `commonVisitors`, `homeLiveCount`, `tab*`…).
+`outils/textes_app.py` les copie dans `textes/<langue>.json`, clé `app` (`pt` → `pt-BR`, `zh` →
+`zh-Hans`). **À relancer après chaque traduction de l'appli**, puis `rendre.py` et `rendre.py --site` :
+
+```bash
+python3 -I store/visuels/outils/textes_app.py
+```
+
+La date suit la langue (`Intl.DateTimeFormat`, au format de l'appli : jour, mois, jour du mois).
+La rangée de périodes défile comme dans l'appli : en allemand, les puces qui ne tiennent pas sont
+coupées au bord, la période choisie reste visible.
 
 ## À valider
 
-1. **La capture du visuel 1** montre les sites réels du compte de démonstration (`opensuperwhisper`,
-   `tamdoku.fr`…), qui sont des projets My-Monkey. Les huit autres scènes utilisent des noms fictifs.
+1. **Le visuel 1** : les cinq sites sont fictifs (`atelier-lune.fr`, `carnet.app`…) et leurs
+   favicons sont dessinés ; le total (1 454) est la somme des cinq, la variation (+7,5 %) leur variation pondérée.
 2. **Visuel 6** : les 30 jours sont des données fixes écrites dans le gabarit (semaine haute,
    week-end bas, un pic le 9, un creux le 14, 2 570 visiteurs sur les 19 jours observés).
 3. **Les chiffres** (4 812 visiteurs, 31,4 % de rétention J1, 4 010 projetés…) sont des exemples.

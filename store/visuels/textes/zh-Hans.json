@@ -97,5 +97,25 @@
     "prevision": "预测",
     "etiquette_v": "访客",
     "w_titre": "所有站点"
+  },
+  "app": {
+    "homeTitleDefault": "我的站点",
+    "homeTotalVisitorsAll": "访客 · 所有站点",
+    "homeVsPrevious": "较上一时期",
+    "homeLiveCount": "{count} 人在线",
+    "periodToday": "今天",
+    "period24h": "24 小时",
+    "period7d": "7 天",
+    "period30d": "30 天",
+    "periodThisMonth": "本月",
+    "period12m": "12 个月",
+    "periodThisYear": "今年",
+    "periodAllTime": "全部",
+    "periodCustom": "自定义",
+    "commonVisitors": "访客",
+    "commonPageviews": "浏览量",
+    "tabSites": "站点",
+    "tabDirect": "实时",
+    "tabSettings": "设置"
   }
 }

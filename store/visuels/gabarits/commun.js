@@ -112,8 +112,9 @@ let compteurDegrade = 0;
 // el : un .graphe dimensionné par la mise en page. Les valeurs null sont des trous (une prévision
 // commence là où l'observé s'arrête).
 //   series : [{ v, couleur, aire, pointille, epaisseur, opacite, point }]
-//   max, ticks : échelle ; xlabels : [[indice, texte]] ; gauche : gouttière de l'axe Y, en u.
-function graphe(el, { series, max, ticks = [], xlabels = [], gauche = 0, bas = 0, haut = 14, droite = 10 }) {
+//   max, ticks : échelle ; xlabels : [[indice, texte]] ; gauche : gouttière de l'axe Y, en u ;
+//   police : corps des étiquettes d'axe, en u.
+function graphe(el, { series, max, ticks = [], xlabels = [], gauche = 0, bas = 0, haut = 14, droite = 10, police = 29 }) {
   const w = el.clientWidth, h = el.clientHeight;
   const x0 = gauche * U, x1 = w - droite * U, y0 = haut * U, y1 = h - bas * U;
   const n = Math.max(...series.map((s) => s.v.length));
@@ -122,11 +123,11 @@ function graphe(el, { series, max, ticks = [], xlabels = [], gauche = 0, bas = 0
   let svg = "";
   for (const t of ticks) {
     svg += `<line x1="${x0}" x2="${x1}" y1="${Y(t)}" y2="${Y(t)}" style="stroke:var(--line)" stroke-width="${2 * U}"/>`;
-    if (gauche) svg += `<text x="0" y="${Y(t) + 9 * U}" font-family="JetBrains Mono" font-size="${29 * U}" style="fill:var(--fg3)">${nb(t)}</text>`;
+    if (gauche) svg += `<text x="0" y="${Y(t) + police * .31 * U}" font-family="JetBrains Mono" font-size="${police * U}" style="fill:var(--fg3)">${nb(t)}</text>`;
   }
   for (const [i, texte] of xlabels) {
     const ancre = i === 0 ? "start" : i === n - 1 ? "end" : "middle";
-    svg += `<text x="${X(i)}" y="${h - 2 * U}" text-anchor="${ancre}" font-family="JetBrains Mono" font-size="${29 * U}" style="fill:var(--fg3)">${texte}</text>`;
+    svg += `<text x="${X(i)}" y="${h - 2 * U}" text-anchor="${ancre}" font-family="JetBrains Mono" font-size="${police * U}" style="fill:var(--fg3)">${texte}</text>`;
   }
   let defs = "";
   for (const s of series) {
