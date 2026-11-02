@@ -148,7 +148,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get homeEmptyGroupChoose => 'Choose its sites';
+  String get homeEmptyGroupChoose => 'Choose sites';
 
   @override
   String get homeEmptyGroupSeeAll => 'See all sites';
@@ -182,7 +182,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get detailKpiAvgDuration => 'Avg. time';
 
   @override
-  String get detailKpiBounce => 'Bounce';
+  String get detailKpiBounce => 'Bounce rate';
 
   @override
   String get detailLiveNow => 'Live now';
@@ -197,7 +197,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get detailTabEvents => 'Events';
 
   @override
-  String get detailTabDashboards => 'Dashboards';
+  String get detailTabDashboards => 'Dashboard';
 
   @override
   String get detailEventsEmpty => 'No events in this period';
@@ -316,13 +316,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboardsKindSites => 'Sites';
 
   @override
-  String get dashboardsMoveCard => 'Move dashboard';
+  String get dashboardsMoveCard => 'Move card';
 
   @override
-  String get dashboardsCardOptions => 'Dashboard options';
+  String get dashboardsCardOptions => 'Card options';
 
   @override
-  String get dashboardsResizeCard => 'Resize dashboard';
+  String get dashboardsResizeCard => 'Resize card';
 
   @override
   String get dashboardsLoadFailed => 'Couldn\'t load.';
@@ -391,21 +391,21 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get dashboardsDeleted => 'Dashboard deleted';
+  String get dashboardsDeleted => 'Card deleted';
 
   @override
   String get dashboardsConfirmDelete => 'Confirm deletion';
 
   @override
-  String get dashboardsAllHidden => 'No dashboard has data for this period';
+  String get dashboardsAllHidden => 'No card has data for this period';
 
   @override
   String dashboardsHiddenCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count dashboards without data for this period',
-      one: '1 dashboard without data for this period',
+      other: '$count cards without data for this period',
+      one: '1 card without data for this period',
     );
     return '$_temp0';
   }
@@ -424,17 +424,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboardsArrangeDone => 'Done';
 
   @override
-  String get dashboardsNew => 'New dashboard';
+  String get dashboardsNew => 'New card';
 
   @override
-  String get dashboardsEmptyTitle => 'No dashboards';
+  String get dashboardsEmptyTitle => 'No cards yet';
 
   @override
   String get dashboardsEmptyBody =>
       'Track a rate, a funnel or a breakdown built on your events.';
 
   @override
-  String get dashboardsCreate => 'Create a dashboard';
+  String get dashboardsCreate => 'Create a card';
 
   @override
   String get dashboardsMetricsSource => 'Metrics source';
@@ -481,8 +481,8 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count dashboards',
-      one: '1 dashboard',
+      other: '$count cards',
+      one: '1 card',
     );
     return 'Remove source and $_temp0';
   }
@@ -495,8 +495,8 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count dashboards deleted',
-      one: '1 dashboard deleted',
+      other: '$count cards deleted',
+      one: '1 card deleted',
     );
     return 'Source removed, $_temp0';
   }
@@ -538,7 +538,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String editorErrSitesMax(int max) {
-    return 'A dashboard has at most $max sites';
+    return 'A card has at most $max sites';
   }
 
   @override
@@ -579,7 +579,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editorErrFilterNotNumber => 'Filter value isn\'t a number';
 
   @override
-  String get editorTitleEdit => 'Edit dashboard';
+  String get editorTitleEdit => 'Edit card';
 
   @override
   String get editorFieldName => 'Name';
@@ -592,16 +592,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get editorPreviewEmpty =>
-      'The preview appears as soon as the dashboard is complete.';
+      'The preview appears as soon as the card is complete.';
 
   @override
-  String get editorCreated => 'Dashboard created';
+  String get editorCreated => 'Card created';
 
   @override
-  String get editorSaved => 'Dashboard saved';
+  String get editorSaved => 'Card saved';
 
   @override
-  String get editorDelete => 'Delete this dashboard';
+  String get editorDelete => 'Delete this card';
 
   @override
   String get editorCreate => 'Create';
@@ -832,7 +832,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsGroupsTitle => 'Groups';
 
   @override
-  String get settingsGroupsHint => 'Read some of your sites separately';
+  String get settingsGroupsHint => 'View a subset of your sites on its own';
 
   @override
   String get settingsSyncConnected => 'Signed in';
@@ -1077,7 +1077,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'A transfer is only valid for a few minutes.';
 
   @override
-  String get transferRegenerate => 'Generate again';
+  String get transferRegenerate => 'New code';
 
   @override
   String get transferTooLargeTitle => 'Config too large';
@@ -1159,7 +1159,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get groupsSubtitle =>
-      'A reading scope: totals and chart only count its sites.';
+      'A view of some of your sites: totals and the chart only count its sites.';
 
   @override
   String get groupsEmptyTitle => 'No groups';
