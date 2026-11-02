@@ -65,6 +65,9 @@ racine du dépôt et imprime `ATTENTION` quand un texte est coupé ou qu'une car
 Pour voir un gabarit dans un navigateur : `python3 -m http.server` à la racine, puis
 `/store/visuels/gabarits/4-entonnoir.html?lang=en&format=ipad`.
 
+- `--site` : rend la scène seule (sans l'en-tête marque + titre) en WebP, 1320 px de large, dans
+  `store/site/img/scenes/<langue>/` (visuels 2 à 8) et `store/site/img/scenes/1-accueil.webp` (le téléphone,
+  commun aux langues). Le site pose ses propres titres en HTML ; il charge ces images.
 - `gabarits/commun.css` : palette, en-tête, cartes, pastilles, unité `--u`.
 - `gabarits/commun.js` : format et langue lus dans l'adresse, textes, nombres localisés
   (`Intl`), données d'exemple déterministes, graphiques.

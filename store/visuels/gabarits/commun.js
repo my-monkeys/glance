@@ -15,7 +15,9 @@ let PAGE = "";
 // La hauteur de référence (2 400 u) borne l'unité des formats moins hauts que l'iPhone : sans elle
 // le titre de l'iPad (2 064 px de large) mangerait la moitié de l'image.
 function poserUnite() {
-  U = FORMAT === "presentation" ? innerWidth / 1024 : Math.min(innerWidth / 1320, innerHeight / 2400);
+  U = FORMAT === "presentation" ? innerWidth / 1024
+    : FORMAT === "site" ? innerWidth / 1320
+    : Math.min(innerWidth / 1320, innerHeight / 2400);
   const racine = document.documentElement;
   racine.style.setProperty("--u", `${U}px`);
   racine.classList.add(`f-${FORMAT}`, `l-${LANGUE}`);
@@ -164,6 +166,7 @@ async function imagesChargees() {
 // Un contrôle de mise en page : rien ne déborde de l'image, aucun texte n'est coupé.
 function verifierDebordement() {
   const problemes = [];
+  if (FORMAT === "site") return problemes; // la scène a sa hauteur naturelle : rien ne peut déborder de l'image
   const bas = innerHeight - 30 * U;
   for (const el of document.querySelectorAll(".scene > *")) {
     const r = el.getBoundingClientRect();

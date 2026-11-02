@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>document.documentElement.className+=" js";</script>
+<script src="/js/langue.js"></script>
+<title>Glance — 适用于 Mac、iOS 和 Android 的 Umami 与 Plausible 客户端 · 免费开源</title>
+<meta name="description" content="Glance：清晰的移动端与桌面端客户端，查看您的 Umami 和 Plausible 统计数据。所有站点尽在 iOS、Android、macOS 和 Windows —— 开源，无第三方服务器。">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml">
+<link rel="canonical" href="https://glance-analytics.com/zh/">
+<link rel="alternate" hreflang="fr" href="https://glance-analytics.com/">
+<link rel="alternate" hreflang="en" href="https://glance-analytics.com/en/">
+<link rel="alternate" hreflang="de" href="https://glance-analytics.com/de/">
+<link rel="alternate" hreflang="es" href="https://glance-analytics.com/es/">
+<link rel="alternate" hreflang="pt-BR" href="https://glance-analytics.com/pt/">
+<link rel="alternate" hreflang="zh-Hans" href="https://glance-analytics.com/zh/">
+<link rel="alternate" hreflang="x-default" href="https://glance-analytics.com/en/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Glance">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:title" content="Glance — 网站数据，一眼尽览。">
+<meta property="og:description" content="清晰易读的 Umami 与 Plausible 客户端。所有站点，尽在 iOS、Android、macOS 和 Windows。">
+<meta property="og:url" content="https://glance-analytics.com/zh/">
+<meta property="og:image" content="https://glance-analytics.com/img/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="macOS 上的 Glance — 站点列表与概览">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://glance-analytics.com/img/og.jpg">
+<link rel="preload" as="image" href="/img/scenes/1-accueil.webp" fetchpriority="high">
+<script defer src="https://uuu.my-monkey.fr/u.js" data-website-id="0d62b5ee-a8e2-4b05-959c-9e8b5a41c0dc"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/site.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "@id": "https://my-monkey.fr/#organization",
+  "name": "My-Monkey",
+  "url": "https://my-monkey.fr",
+  "sameAs": [
+    "https://github.com/my-monkeys",
+    "https://www.linkedin.com/company/my-monkey"
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "@id": "https://glance-analytics.com/#website",
+  "name": "Glance",
+  "url": "https://glance-analytics.com",
+  "inLanguage": "zh-Hans",
+  "publisher": {
+    "@id": "https://my-monkey.fr/#organization"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "@id": "https://glance-analytics.com/#app",
+  "name": "Glance",
+  "description": "Glance：清晰的移动端与桌面端客户端，查看您的 Umami 和 Plausible 统计数据。所有站点尽在 iOS、Android、macOS 和 Windows —— 开源，无第三方服务器。",
+  "url": "https://glance-analytics.com",
+  "image": "https://glance-analytics.com/img/og.jpg",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "iOS, Android, macOS, Windows",
+  "inLanguage": "zh-Hans",
+  "isAccessibleForFree": true,
+  "license": "https://github.com/my-monkeys/glance/blob/main/LICENSE",
+  "downloadUrl": "https://github.com/my-monkeys/glance/releases/download/v1.13.0/Glance-1.13.0.dmg",
+  "softwareHelp": "https://github.com/my-monkeys/glance",
+  "screenshot": [
+    "https://glance-analytics.com/img/scenes/zh-Hans/2-sites.webp",
+    "https://glance-analytics.com/img/scenes/zh-Hans/3-evenements.webp",
+    "https://glance-analytics.com/img/scenes/zh-Hans/4-entonnoir.webp",
+    "https://glance-analytics.com/img/scenes/zh-Hans/5-retention.webp",
+    "https://glance-analytics.com/img/scenes/1-accueil.webp"
+  ],
+  "featureList": [
+    "Umami 与 Plausible 统一客户端",
+    "访客和页面浏览量的平滑曲线，涵盖 8 个时间段",
+    "当前时间段（日、月、年）的流量预测",
+    "多站点实时数据",
+    "站内互相导流：您的站点之间互相送去的访客",
+    "站点分组（查看范围）",
+    "iOS 和 Android 主屏幕小组件",
+    "凭据加密保存在钥匙串中，只读访问",
+    "可选的端到端加密备份（Glance Sync）",
+    "基于事件的仪表盘：计数、比率、分布、漏斗（Umami）",
+    "基于您自己数据库计算的次日、7 日、30 日留存，通过指标数据源接入"
+  ],
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "EUR"
+  },
+  "publisher": {
+    "@id": "https://my-monkey.fr/#organization"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Glance 是什么？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Glance 是免费开源的移动端与桌面端客户端，用来查看您的 Umami 和 Plausible 统计数据。它把您所有的站点汇集到一个清晰的应用中——平滑曲线、实时数据和小组件——而且始终不离开您自己的分析实例。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Glance 免费吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "免费：应用免费且开源（MIT 许可证），无需账户、无需订阅，站点数量不限。唯一收费的是一项可选功能——Glance Sync，即配置的加密备份——一次性购买。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "支持哪些分析工具？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Glance 目前支持 Umami 和 Plausible，包括自托管实例。Fathom 已在计划中。您可以同时追踪多个账户和多个服务商，合并在同一视图中。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Glance 支持哪些平台？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Glance 支持 iOS（App Store）、Android（Google Play）、macOS（Homebrew 或 DMG）和 Windows。应用使用 Flutter 开发，是真正的跨平台应用。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "我的数据会发送给第三方吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "不会。Glance 直接与您的 Umami 或 Plausible 实例通信，只读访问，没有中间服务器，也没有追踪。您的凭据加密保存在设备的钥匙串中。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "什么是 Glance Sync？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "一项付费的可选功能（一次性购买），可备份您的账户和分组，并在其他设备上恢复。配置在设备上加密后才会发送：服务器只保存一段无法读取的数据。不使用它，Glance 也能完全在本地运行，二维码迁移依然免费。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "可以按客户或项目分开我的站点吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "可以，使用分组。分组是一个查看范围：总数、曲线和实时数据只统计该组的站点。在主页即可在各个分组之间切换。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Glance 支持自托管实例吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "支持。无论您的 Umami 或 Plausible 是自托管还是云端版，Glance 都通过您的 URL 和 API 密钥直接连接，服务器端无需任何配置。"
+      }
+    }
+  ],
+  "inLanguage": "zh-Hans"
+}
+</script>
+</head>
+<body>
+<!-- Ajouter une langue : copier ce fichier dans <code>/index.html, traduire les textes, changer <html lang>,
+     <title>, la description, canonical, og:locale, og:url, "inLanguage" et les liens internes, puis ajouter la langue à
+     la liste LANGUES de js/langue.js, aux hreflang de TOUTES les pages d'accueil, au sélecteur de langue et au sitemap.
+     Les scènes viennent de `python3 -I store/visuels/rendre.py --langue <code visuels> --site` (écrit img/scenes/<code visuels>/). -->
+<header class="haut">
+  <div class="wrap">
+    <a class="marque" href="/zh/"><img src="/favicon.svg?v=2" width="38" height="38" alt="">Glance</a>
+    <nav><a href="/en/docs/metrics-source.html" hreflang="en">文档</a><a href="/en/privacy.html" hreflang="en">隐私</a><a href="https://github.com/my-monkeys/glance">GitHub</a><details class="langues"><summary aria-label="语言 : 简体中文"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.7 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.7-3.8-9s1.3-6.4 3.8-9z"/></svg><span>简体中文</span></summary><ul><li><a href="/" lang="fr" hreflang="fr" data-lang="fr">Français</a></li><li><a href="/en/" lang="en" hreflang="en" data-lang="en">English</a></li><li><a href="/de/" lang="de" hreflang="de" data-lang="de">Deutsch</a></li><li><a href="/es/" lang="es" hreflang="es" data-lang="es">Español</a></li><li><a href="/pt/" lang="pt-BR" hreflang="pt-BR" data-lang="pt">Português</a></li><li><a href="/zh/" lang="zh-Hans" hreflang="zh-Hans" data-lang="zh" aria-current="true">简体中文</a></li></ul></details></nav>
+  </div>
+</header>
+<main>
+<section class="hero">
+  <svg class="courbe" viewBox="0 0 72 72" aria-hidden="true"><path d="M14 48C21 48 24 30 31 30C37 30 37 41 43 41C49 41 50 24 55 24"/><circle cx="55" cy="24" r="1.7"/></svg>
+  <div class="wrap">
+    <div class="texte">
+      <p class="surtitre" data-entree>免费 · 开源</p>
+      <h1 data-entree>网站数据，<br>一眼尽览。</h1>
+      <p class="accroche" data-entree>Glance 是 Umami 和 Plausible 的移动端与桌面端客户端。所有站点一眼尽览，还有真正的仪表盘，帮您看懂站点上发生的一切。</p>
+      <div class="badges" data-entree>
+      <a class="badge premier" href="https://apps.apple.com/app/glance-umami-plausible/id6789938289"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 12.5c0-2 1.1-3.3 1.6-3.7-.9-1.3-2.3-1.5-2.8-1.5-1.2-.1-2.3.7-2.9.7-.6 0-1.5-.7-2.5-.7-1.3 0-2.5.8-3.1 1.9-1.4 2.3-.4 5.8.9 7.7.6.9 1.4 2 2.4 1.9.9 0 1.3-.6 2.4-.6s1.4.6 2.4.6c1 0 1.6-.9 2.2-1.8.5-.7.8-1.5 1-2.1-1.2-.5-2-1.6-2-2.6zM15 5.9c.5-.6.9-1.5.8-2.4-.8 0-1.7.5-2.2 1.2-.5.5-.9 1.4-.8 2.3.9 0 1.7-.5 2.2-1.1z"/></svg><span><small>iPhone 和 iPad</small><b>App Store</b></span></a>
+      <a class="badge" href="https://play.google.com/store/apps/details?id=fr.mymonkey.glance"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 2.8v18.4c0 .5.5.8.9.5L20 12.7c.4-.3.4-.9 0-1.2L5.4 2.3c-.4-.3-.9 0-.9.5z"/></svg><span><small>Android</small><b>Google Play</b></span></a>
+      <a class="badge" href="https://github.com/my-monkeys/glance/releases/download/v1.13.0/Glance-1.13.0.dmg"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 12.5c0-2 1.1-3.3 1.6-3.7-.9-1.3-2.3-1.5-2.8-1.5-1.2-.1-2.3.7-2.9.7-.6 0-1.5-.7-2.5-.7-1.3 0-2.5.8-3.1 1.9-1.4 2.3-.4 5.8.9 7.7.6.9 1.4 2 2.4 1.9.9 0 1.3-.6 2.4-.6s1.4.6 2.4.6c1 0 1.6-.9 2.2-1.8.5-.7.8-1.5 1-2.1-1.2-.5-2-1.6-2-2.6zM15 5.9c.5-.6.9-1.5.8-2.4-.8 0-1.7.5-2.2 1.2-.5.5-.9 1.4-.8 2.3.9 0 1.7-.5 2.2-1.1z"/></svg><span><small>macOS · .dmg</small><b>Mac</b></span></a>
+      <a class="badge" href="https://github.com/my-monkeys/glance/releases/download/windows-v1.13.0/glance-windows-x64.zip"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="2" width="9.3" height="9.3"/><rect x="12.7" y="2" width="9.3" height="9.3"/><rect x="2" y="12.7" width="9.3" height="9.3"/><rect x="12.7" y="12.7" width="9.3" height="9.3"/></svg><span><small>Windows · .zip</small><b>Windows</b></span></a>
+      </div>
+    </div>
+    <div class="telephone" data-entree><img src="/img/scenes/1-accueil.webp" width="1320" height="1900" alt="iPhone 上的 Glance 主页：站点列表、访客总数和曲线" fetchpriority="high"></div>
+  </div>
+</section>
+<section class="idee etroit" id="sites">
+  <div class="wrap">
+    <div class="texte">
+      <p class="surtitre">站点对比</p>
+      <h2>站点交叉对比</h2>
+      <p>多个站点并排查看：每个站点一条曲线，外加总数。1 到 6 行，可来自一个或多个 Umami 账户。</p><p>再加一个“来自”或“不含来自”某个域名的筛选，就能看到您的站点之间互相送去了多少访客。另有一个专门的视图，汇总站点间互相导流的访客。</p>
+      
+    </div>
+    <figure class="scene"><img src="/img/scenes/zh-Hans/2-sites.webp" width="1320" height="1846" alt="Glance 的站点对比：四个站点并排，每行一条曲线，以及“来自”筛选" loading="lazy" decoding="async"></figure>
+  </div>
+</section>
+<section class="idee inverse" id="evenements">
+  <div class="wrap">
+    <div class="texte">
+      <p class="surtitre">事件</p>
+      <h2>追踪每个事件</h2>
+      <p>每个事件一条曲线、一种颜色，可按属性筛选：套餐 = pro，金额 ≥ 20。</p><p>可以计数、计算比率，也可以查看某个属性各个值的分布及其随时间的变化。</p>
+      
+    </div>
+    <figure class="scene"><img src="/img/scenes/zh-Hans/3-evenements.webp" width="1320" height="1546" alt="Glance 中的事件：每个事件一条曲线、一种颜色，按属性筛选的计数，以及分布" loading="lazy" decoding="async"></figure>
+  </div>
+</section>
+<section class="idee" id="entonnoir">
+  <div class="wrap">
+    <div class="texte">
+      <p class="surtitre">漏斗</p>
+      <h2>看清用户在哪流失</h2>
+      <p>2 到 8 个步骤，显示每一步的访客数和流失率。</p><p>两个步骤之间的时间间隔由您设定。仅限 Umami。</p>
+      
+    </div>
+    <figure class="scene"><img src="/img/scenes/zh-Hans/4-entonnoir.webp" width="1320" height="1399" alt="Glance 中的四步漏斗，显示访客数和每一步的流失" loading="lazy" decoding="async"></figure>
+  </div>
+</section>
+<section class="idee inverse etroit" id="retention">
+  <div class="wrap">
+    <div class="texte">
+      <p class="surtitre">留存</p>
+      <h2>衡量用户留存</h2>
+      <p>接入指标数据源：您站点上的一个小型 API，由令牌保护。</p><p>Glance 随即显示次日、7 日和 30 日留存、新增账户数，以及您的站点提供的任何指标。计算始终在您自己的数据库上完成。</p>
+      <a class="lien" href="/en/docs/metrics-source.html" hreflang="en">阅读指标数据源文档（英文）</a>
+    </div>
+    <figure class="scene"><img src="/img/scenes/zh-Hans/5-retention.webp" width="1320" height="1910" alt="Glance 的三张留存卡片（次日、7 日、30 日）和“指标数据源”界面" loading="lazy" decoding="async"></figure>
+  </div>
+</section>
+<section class="idee prevision" id="prevision">
+  <div class="wrap">
+    <div class="texte">
+      <p class="surtitre">预测</p>
+      <h2>预见月底数据</h2>
+      <p>在“本月”和“今年”下，曲线会以橙色虚线延伸，并给出预计总数。</p><p>预测基于近 7 天的水平和每周的规律。</p>
+      
+    </div>
+    <figure class="scene"><img src="/img/scenes/zh-Hans/6-prevision.webp" width="1320" height="1208" alt="Glance 的访客曲线以橙色虚线延伸，并给出本月预计总数" loading="lazy" decoding="async"></figure>
+  </div>
+</section>
+<section class="idee inverse etroit" id="direct">
+  <div class="wrap">
+    <div class="texte">
+      <p class="surtitre">实时与小组件</p>
+      <h2>实时数据，直达主屏幕</h2>
+      <p>每个站点此刻的在线访客，按活跃度排序。</p><p>iOS 和 Android 小组件，可显示总数或指定站点。</p>
+      
+    </div>
+    <figure class="scene"><img src="/img/scenes/zh-Hans/7-direct.webp" width="1320" height="2301" alt="Glance 的实时访客，以及主屏幕上的 iOS 和 Android 小组件" loading="lazy" decoding="async"></figure>
+  </div>
+</section>
+<section class="idee" id="appareils">
+  <div class="wrap">
+    <div class="texte">
+      <p class="surtitre">多设备</p>
+      <h2>所有设备，同步随行</h2>
+      <p>iPhone、iPad、Android、Mac 和 Windows，支持浅色与深色模式。在 Mac 和 Windows 上，站点列表在左，详情在右。</p><p>加密二维码，一次扫描即可迁移配置；也可在设备间使用端到端加密同步（可选，一次性购买）。</p>
+      
+    </div>
+    <figure class="scene"><img src="/img/scenes/zh-Hans/8-appareils.webp" width="1320" height="1550" alt="iPhone、Android、Mac 和 Windows 上的 Glance，支持端到端加密同步" loading="lazy" decoding="async"></figure>
+  </div>
+</section>
+<section class="bande" id="outils">
+  <div class="wrap">
+    <div class="texte"><p class="surtitre">支持的工具</p><h2>您的工具，您的实例。</h2></div>
+    <ul class="outils"><li class=""><h3>Umami</h3><span class="etat">可用</span><p>自托管。仪表盘、漏斗、指标数据源：Glance 的全部功能。</p></li><li class=""><h3>Plausible</h3><span class="etat">可用</span><p>云端版或自托管。计数、比率和分布。</p></li><li class="bientot"><h3>Fathom</h3><span class="etat">即将支持</span><p>界面已就绪，即将支持。</p></li></ul>
+  </div>
+</section>
+<section class="prive" id="vie-privee">
+  <div class="wrap">
+    <div class="titre-bloc"><p class="surtitre">隐私</p><h2>不收集任何数据。</h2></div>
+    <ul><li><h3>您与统计数据之间没有任何服务器</h3><p>Glance 直接与您的 Umami 和 Plausible 实例通信。</p></li><li><h3>凭据保存在钥匙串</h3><p>凭据加密保存在设备的钥匙串中，不会存放在别处。</p></li><li><h3>只读访问</h3><p>Glance 只显示您的统计数据，不会修改任何内容。没有广告，没有追踪。</p></li></ul>
+    <p class="note">详情见<a href="/en/privacy.html">隐私政策（英文）</a>。</p>
+  </div>
+</section>
+<section class="telecharger" id="telecharger">
+  <div class="wrap">
+    <div class="texte"><p class="surtitre">下载</p><h2>免费，覆盖所有屏幕。</h2><p>Glance 免费且开源（MIT 许可证）。在 macOS 上，最快的方式是 Homebrew：</p></div>
+    <div class="badges">
+      <a class="badge premier" href="https://apps.apple.com/app/glance-umami-plausible/id6789938289"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 12.5c0-2 1.1-3.3 1.6-3.7-.9-1.3-2.3-1.5-2.8-1.5-1.2-.1-2.3.7-2.9.7-.6 0-1.5-.7-2.5-.7-1.3 0-2.5.8-3.1 1.9-1.4 2.3-.4 5.8.9 7.7.6.9 1.4 2 2.4 1.9.9 0 1.3-.6 2.4-.6s1.4.6 2.4.6c1 0 1.6-.9 2.2-1.8.5-.7.8-1.5 1-2.1-1.2-.5-2-1.6-2-2.6zM15 5.9c.5-.6.9-1.5.8-2.4-.8 0-1.7.5-2.2 1.2-.5.5-.9 1.4-.8 2.3.9 0 1.7-.5 2.2-1.1z"/></svg><span><small>iPhone 和 iPad</small><b>App Store</b></span></a>
+      <a class="badge" href="https://play.google.com/store/apps/details?id=fr.mymonkey.glance"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 2.8v18.4c0 .5.5.8.9.5L20 12.7c.4-.3.4-.9 0-1.2L5.4 2.3c-.4-.3-.9 0-.9.5z"/></svg><span><small>Android</small><b>Google Play</b></span></a>
+      <a class="badge" href="https://github.com/my-monkeys/glance/releases/download/v1.13.0/Glance-1.13.0.dmg"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 12.5c0-2 1.1-3.3 1.6-3.7-.9-1.3-2.3-1.5-2.8-1.5-1.2-.1-2.3.7-2.9.7-.6 0-1.5-.7-2.5-.7-1.3 0-2.5.8-3.1 1.9-1.4 2.3-.4 5.8.9 7.7.6.9 1.4 2 2.4 1.9.9 0 1.3-.6 2.4-.6s1.4.6 2.4.6c1 0 1.6-.9 2.2-1.8.5-.7.8-1.5 1-2.1-1.2-.5-2-1.6-2-2.6zM15 5.9c.5-.6.9-1.5.8-2.4-.8 0-1.7.5-2.2 1.2-.5.5-.9 1.4-.8 2.3.9 0 1.7-.5 2.2-1.1z"/></svg><span><small>macOS · .dmg</small><b>Mac</b></span></a>
+      <a class="badge" href="https://github.com/my-monkeys/glance/releases/download/windows-v1.13.0/glance-windows-x64.zip"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="2" width="9.3" height="9.3"/><rect x="12.7" y="2" width="9.3" height="9.3"/><rect x="2" y="12.7" width="9.3" height="9.3"/><rect x="12.7" y="12.7" width="9.3" height="9.3"/></svg><span><small>Windows · .zip</small><b>Windows</b></span></a>
+    </div>
+    <div class="brew"><code><i>$</i> brew install --cask my-monkeys/tap/glance</code><a href="https://github.com/my-monkeys/glance">在 GitHub 上查看源码</a></div>
+  </div>
+</section>
+<section class="faq" id="faq">
+  <div class="wrap">
+    <h2>常见问题</h2>
+    <div class="liste"><details><summary>Glance 是什么？</summary><p>Glance 是免费开源的移动端与桌面端客户端，用来查看您的 Umami 和 Plausible 统计数据。它把您所有的站点汇集到一个清晰的应用中——平滑曲线、实时数据和小组件——而且始终不离开您自己的分析实例。</p></details><details><summary>Glance 免费吗？</summary><p>免费：应用免费且开源（MIT 许可证），无需账户、无需订阅，站点数量不限。唯一收费的是一项可选功能——Glance Sync，即配置的加密备份——一次性购买。</p></details><details><summary>支持哪些分析工具？</summary><p>Glance 目前支持 Umami 和 Plausible，包括自托管实例。Fathom 已在计划中。您可以同时追踪多个账户和多个服务商，合并在同一视图中。</p></details><details><summary>Glance 支持哪些平台？</summary><p>Glance 支持 iOS（App Store）、Android（Google Play）、macOS（Homebrew 或 DMG）和 Windows。应用使用 Flutter 开发，是真正的跨平台应用。</p></details><details><summary>我的数据会发送给第三方吗？</summary><p>不会。Glance 直接与您的 Umami 或 Plausible 实例通信，只读访问，没有中间服务器，也没有追踪。您的凭据加密保存在设备的钥匙串中。</p></details><details><summary>什么是 Glance Sync？</summary><p>一项付费的可选功能（一次性购买），可备份您的账户和分组，并在其他设备上恢复。配置在设备上加密后才会发送：服务器只保存一段无法读取的数据。不使用它，Glance 也能完全在本地运行，二维码迁移依然免费。</p></details><details><summary>可以按客户或项目分开我的站点吗？</summary><p>可以，使用分组。分组是一个查看范围：总数、曲线和实时数据只统计该组的站点。在主页即可在各个分组之间切换。</p></details><details><summary>Glance 支持自托管实例吗？</summary><p>支持。无论您的 Umami 或 Plausible 是自托管还是云端版，Glance 都通过您的 URL 和 API 密钥直接连接，服务器端无需任何配置。</p></details></div>
+  </div>
+</section>
+</main>
+<footer class="pied">
+  <div class="wrap">
+    <div><a class="marque" href="/zh/"><img src="/favicon.svg?v=2" width="38" height="38" alt="">Glance</a><p>My-Monkey 团队的项目。</p></div>
+    <ul><li><a href="/en/docs/metrics-source.html">文档</a></li><li><a href="/en/privacy.html">隐私</a></li><li><a href="https://github.com/my-monkeys/glance">GitHub</a></li></ul>
+    <ul class="pied-langues"><li><a href="/" lang="fr" hreflang="fr" data-lang="fr">Français</a></li><li><a href="/en/" lang="en" hreflang="en" data-lang="en">English</a></li><li><a href="/de/" lang="de" hreflang="de" data-lang="de">Deutsch</a></li><li><a href="/es/" lang="es" hreflang="es" data-lang="es">Español</a></li><li><a href="/pt/" lang="pt-BR" hreflang="pt-BR" data-lang="pt">Português</a></li><li><a href="/zh/" lang="zh-Hans" hreflang="zh-Hans" data-lang="zh">简体中文</a></li></ul>
+    <p class="droits">© 2026 My-Monkey · MIT 许可证</p>
+  </div>
+</footer>
+<button class="fab" type="button" aria-label="发送反馈" title="发送反馈"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 01-9 8.4 8.9 8.9 0 01-3.9-.9L3 20l1-4.9a8.4 8.4 0 015-11.7 8.4 8.4 0 0112 8.1z"/></svg></button>
+<div class="fbk-ov" hidden><div class="fbk" role="dialog" aria-modal="true" aria-labelledby="fbk-titre">
+<div data-f="form"><h3 id="fbk-titre">有想法，或遇到问题？</h3><p class="sub">告诉我们哪里好用、哪里卡壳——每一条反馈都很重要。</p>
+<textarea maxlength="4000" placeholder="您的留言……" aria-label="您的留言……"></textarea>
+<input type="email" autocomplete="email" placeholder="邮箱（可选，方便我们回复）" aria-label="邮箱（可选，方便我们回复）">
+<p class="err" hidden>发送失败，请稍后再试。</p>
+<div class="row"><button type="button" class="btn" data-f="cancel">取消</button><button type="button" class="btn primaire" data-f="send">发送</button></div></div>
+<div data-f="done" hidden><h3>谢谢</h3><p class="sub">您的反馈已送达。</p>
+<button type="button" class="btn primaire" data-f="close">关闭</button></div>
+</div></div>
+<script src="/js/retours.js"></script>
+<script src="/js/gsap.min.js"></script>
+<script src="/js/ScrollTrigger.min.js"></script>
+<script src="/js/anim.js"></script>
+</body>
+</html>
