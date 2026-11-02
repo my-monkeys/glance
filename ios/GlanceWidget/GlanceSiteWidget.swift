@@ -76,7 +76,7 @@ struct SiteEntry: TimelineEntry {
 @available(iOS 17.0, macOS 14.0, *)
 struct SiteProvider: AppIntentTimelineProvider {
     func placeholder(in context: Context) -> SiteEntry {
-        SiteEntry(date: Date(), record: .placeholder, periodLabel: "7 jours")
+        SiteEntry(date: Date(), record: .placeholder, periodLabel: String(localized: "7 jours"))
     }
     func snapshot(for configuration: SelectSiteIntent, in context: Context) async -> SiteEntry {
         resolve(configuration, preview: context.isPreview)
@@ -89,7 +89,7 @@ struct SiteProvider: AppIntentTimelineProvider {
     private func resolve(_ configuration: SelectSiteIntent, preview: Bool) -> SiteEntry {
         let all = loadAllSites()
         if preview && all.isEmpty {
-            return SiteEntry(date: Date(), record: .placeholder, periodLabel: "7 jours")
+            return SiteEntry(date: Date(), record: .placeholder, periodLabel: String(localized: "7 jours"))
         }
         let rec = all.first(where: { $0.i == configuration.site?.id }) ?? all.first
         let period = UserDefaults(suiteName: GlanceData.appGroup)?
@@ -107,7 +107,7 @@ struct SiteSmallView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             TitleStatsRow(
-                title: r.n, periodLabel: period, value: r.v, delta: r.d,
+                title: Text(verbatim: r.n), periodLabel: period, value: r.v, delta: r.d,
                 valueSize: 24, titleLines: 2, showPeriod: false
             )
             Spacer(minLength: 8)
@@ -123,7 +123,7 @@ struct SiteMediumView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             TitleStatsRow(
-                title: r.n, periodLabel: period, value: r.v, delta: r.d, valueSize: 28
+                title: Text(verbatim: r.n), periodLabel: period, value: r.v, delta: r.d, valueSize: 28
             )
             SparkView(points: r.spark).frame(maxWidth: .infinity).frame(height: 40)
             Divider().overlay(GT.line)
@@ -153,6 +153,7 @@ struct SiteWidgetEntryView: View {
             }
         }
         .modifier(GlanceBackground())
+        .environment(\.locale, GlanceData.appLocale)
     }
 }
 

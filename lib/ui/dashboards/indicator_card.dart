@@ -7,6 +7,7 @@ import '../../data/models/indicator.dart';
 import '../../data/models/indicator_result.dart';
 import '../../data/models/models.dart';
 import '../../data/models/period.dart';
+import '../../l10n/l10n.dart';
 import '../../state/indicators.dart';
 import '../../theme/motion.dart';
 import '../../theme/palette.dart';
@@ -25,14 +26,14 @@ import 'segments_body.dart';
 /// En deçà, l'en-tête n'affiche plus le genre de la carte.
 const double _kindLabelMinWidth = 180;
 
-const _kindLabels = {
-  IndicatorKind.counter: 'Compteur',
-  IndicatorKind.ratio: 'Taux',
-  IndicatorKind.funnel: 'Entonnoir',
-  IndicatorKind.breakdown: 'Répartition',
-  IndicatorKind.external: 'Métrique',
-  IndicatorKind.sites: 'Sites',
-};
+String _kindLabel(AppLocalizations l10n, IndicatorKind k) => switch (k) {
+      IndicatorKind.counter => l10n.dashboardsKindCounter,
+      IndicatorKind.ratio => l10n.dashboardsKindRatio,
+      IndicatorKind.funnel => l10n.dashboardsKindFunnel,
+      IndicatorKind.breakdown => l10n.dashboardsKindBreakdown,
+      IndicatorKind.external => l10n.dashboardsKindExternal,
+      IndicatorKind.sites => l10n.dashboardsKindSites,
+    };
 
 /// Une carte = un indicateur = une clé de `indicatorDataProvider` : chaque
 /// carte s'affiche dès que SA donnée arrive, une en échec ne bloque pas les
@@ -72,6 +73,7 @@ class IndicatorCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final p = context.glance;
+    final l10n = context.l10n;
     final key = (site, window, indicator);
     // `.value` garde la donnée précédente pendant un rafraîchissement : pas de
     // flash de squelette à chaque tick.
@@ -85,7 +87,7 @@ class IndicatorCard extends ConsumerWidget {
         child: data == null
             ? loose(async.hasError
                 ? _CardError(
-                    message: metricsErrorMessage(async.error!),
+                    message: metricsErrorMessage(l10n, async.error!),
                     onRetry: () => ref.invalidate(indicatorDataProvider(key)),
                   )
                 : _CardSkeleton(kind: indicator.kind))
@@ -120,13 +122,13 @@ class IndicatorCard extends ConsumerWidget {
                 // Une carte étroite de la grille garde la place pour son titre.
                 if (c.maxWidth >= _kindLabelMinWidth) ...[
                   const SizedBox(width: 10),
-                  SectionLabel(_kindLabels[indicator.kind]!, color: p.fg3),
+                  SectionLabel(_kindLabel(l10n, indicator.kind), color: p.fg3),
                 ],
                 if (editing)
                   Padding(
                     padding: const EdgeInsets.only(left: 8),
                     child: Icon(Icons.drag_indicator_rounded,
-                        size: 20, color: p.fg2, semanticLabel: 'Déplacer le tableau'),
+                        size: 20, color: p.fg2, semanticLabel: l10n.dashboardsMoveCard),
                   )
                 else if (menu)
                   GestureDetector(
@@ -136,7 +138,7 @@ class IndicatorCard extends ConsumerWidget {
                     child: Padding(
                       padding: const EdgeInsets.only(left: 8),
                       child: Icon(Icons.more_horiz_rounded,
-                          size: 20, color: p.fg2, semanticLabel: 'Options du tableau'),
+                          size: 20, color: p.fg2, semanticLabel: l10n.dashboardsCardOptions),
                     ),
                   ),
               ],
@@ -179,39 +181,42 @@ class _CardBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final body = _body();
+    final body = _body(context);
     return fill && body is! CardStat ? CardLoose(child: body) : body;
   }
 
-  Widget _body() {
+  Widget _body(BuildContext context) {
     return switch ((indicator, data)) {
       (CounterIndicator(:final query), CounterData d) =>
-        _counterStat(d, sub: _unlessName(queryLabel(query)), unit: window.unit),
+        _counterStat(context, d, sub: _unlessName(queryLabel(context.l10n, query)), unit: window.unit),
       (RatioIndicator(:final numerator, :final denominator), RatioData d) =>
         _ratioStat(
+          context,
           d,
-          detail: _unlessName('${queryLabel(numerator)} ÷ ${queryLabel(denominator)}'),
+          detail: _unlessName('${queryLabel(context.l10n, numerator)} ÷ ${queryLabel(context.l10n, denominator)}'),
           unit: window.unit,
         ),
       // Le libellé de la métrique EST le titre : pas de ligne de contexte.
       (ExternalIndicator(), RatioData d) =>
-        _ratioStat(d, unit: d.unit ?? externalUnitOf(window.unit)),
+        _ratioStat(context, d, unit: d.unit ?? externalUnitOf(window.unit)),
       (ExternalIndicator(), CounterData d) =>
-        _counterStat(d, unit: d.unit ?? externalUnitOf(window.unit)),
-      (SitesIndicator(), CounterData d) => _counterStat(d, unit: window.unit),
+        _counterStat(context, d, unit: d.unit ?? externalUnitOf(window.unit)),
+      (SitesIndicator(), CounterData d) => _counterStat(context, d, unit: window.unit),
       (FunnelIndicator(), FunnelData d) => d.steps.isEmpty || d.steps.first.visitors == 0
-          ? const _NoData()
+          ? _NoData(context.l10n.dashboardsNoData)
           : CardStat(
               fill: fill,
               keepChildHeight: true,
               big: fmtPct(d.steps.last.remaining * 100),
-              sub: '${fmtInt(d.steps.last.visitors)} / '
-                  '${fmtInt(d.steps.first.visitors)} visiteurs',
+              sub: context.l10n.dashboardsFunnelVisitors(
+                fmtInt(d.steps.last.visitors),
+                fmtInt(d.steps.first.visitors),
+              ),
               child: FunnelBars(steps: d.steps),
             ),
       (BreakdownIndicator(:final event, :final property), BreakdownData d) =>
         d.rows.isEmpty
-            ? const _NoData()
+            ? _NoData(context.l10n.dashboardsNoData)
             : CardStat(
                 fill: fill,
                 big: fmtInt(d.total),
@@ -224,7 +229,9 @@ class _CardBody extends StatelessWidget {
                     rows: [
                       for (final (i, r) in d.rows.take(kBreakdownRows).indexed)
                         MetricBarRow(
-                          label: r.label,
+                          label: r.label.isEmpty
+                              ? context.l10n.entityUnknown
+                              : r.label,
                           value: r.value,
                           // Même couleur que la courbe de cette valeur.
                           color: d.series == null ? null : eventColorAt(i),
@@ -244,23 +251,25 @@ class _CardBody extends StatelessWidget {
   }
 
   /// Le nom par défaut d'une carte reprend sa requête (« a / b » pour « a ÷ b »,
-  /// « e par p » pour « e · p ») : on compare sans les séparateurs.
+  /// « e par p » / « e by p » pour « e · p », selon la langue où le nom a été
+  /// enregistré) : on compare sans les séparateurs.
   String? _unlessName(String line) {
-    String norm(String t) => t.replaceAll(RegExp(r'\s*[÷/·]\s*| par '), ' ');
+    String norm(String t) => t.replaceAll(RegExp(r'\s*[÷/·]\s*| par | by '), ' ');
     return norm(line) == norm(name) ? null : line;
   }
 
   Widget _counterStat(
+    BuildContext context,
     CounterData d, {
     String? sub,
     required TimeUnit unit,
   }) {
     final gaps = d.unpublished;
     if (gaps != null && d.points.every((s) => gaps.covers(s.t))) {
-      return _NoData(_unpublishedMessage(gaps));
+      return _NoData(_unpublishedMessage(context.l10n, gaps));
     }
     if (d.total == 0 && d.points.every((s) => s.visitors == 0)) {
-      return CardStat(big: '0', sub: 'Aucun événement sur la période', fill: fill);
+      return CardStat(big: '0', sub: context.l10n.dashboardsNoEvents, fill: fill);
     }
     final values = [
       for (final s in d.points)
@@ -270,7 +279,7 @@ class _CardBody extends StatelessWidget {
       fill: fill,
       big: fmtInt(d.total),
       sub: sub,
-      notes: _notes(d.cohorts, d.member, gaps),
+      notes: _notes(context, d.cohorts, d.member, gaps),
       child: hasSegmentData(d)
           ? SegmentsBody(data: d, totals: values, unit: unit)
           : _plots(values)
@@ -285,29 +294,33 @@ class _CardBody extends StatelessWidget {
     );
   }
 
-  static String _unpublishedMessage(Unpublished u) =>
-      'Pas encore publiées : données jusqu\'au ${fmtDay(u.until)}';
+  static String _unpublishedMessage(AppLocalizations l10n, Unpublished u) =>
+      l10n.dashboardsUnpublished(fmtDay(u.until));
 
-  static String _pendingMessage(int delayDays) => switch (delayDays) {
-        0 => 'Pas encore mesurable sur cette période',
-        1 => 'Pas encore mesurable : il faut 1 jour de recul',
-        _ => 'Pas encore mesurable : il faut $delayDays jours de recul',
-      };
+  static String _pendingMessage(AppLocalizations l10n, int delayDays) =>
+      delayDays == 0
+          ? l10n.dashboardsPendingNow
+          : l10n.dashboardsPendingDelay(delayDays);
 
   // Les trous (dénominateur nul, ou non mesurable pour une métrique de site)
   // viennent des points du résultat, pas d'ici.
-  Widget _ratioStat(RatioData d, {String? detail, required TimeUnit unit}) =>
+  Widget _ratioStat(
+    BuildContext context,
+    RatioData d, {
+    String? detail,
+    required TimeUnit unit,
+  }) =>
       d.denominatorTotal == 0
           ? _NoData(
               d.pending
-                  ? _pendingMessage(d.delayDays)
+                  ? _pendingMessage(context.l10n, d.delayDays)
                   : d.unpublished != null
-                      ? _unpublishedMessage(d.unpublished!)
-                      : 'Aucune donnée sur la période',
+                      ? _unpublishedMessage(context.l10n, d.unpublished!)
+                      : context.l10n.dashboardsNoData,
             )
           : CardStat(
               fill: fill,
-              notes: _notes(d.cohorts, d.member, d.unpublished),
+              notes: _notes(context, d.cohorts, d.member, d.unpublished),
               big: d.overall == null ? '—' : fmtPct(d.overall! * 100),
               sub: '${fmtInt(d.numeratorTotal)} / ${fmtInt(d.denominatorTotal)}',
               detail: detail,
@@ -339,18 +352,26 @@ class _CardBody extends StatelessWidget {
 
   /// Cohortes mesurées, le membre retenu d'une famille, puis la fin des
   /// données publiées.
-  static List<String> _notes(CohortSpan? c, String? member, Unpublished? u) => [
-        if (c != null)
-          c.first == c.last
-              ? 'Mesurée sur la cohorte du ${fmtDay(c.first)}'
-              : 'Mesurée sur les cohortes ${fmtDayRange(c.first, c.last)}',
-        if (member != null) '$member · s\'ajuste à la période',
-        if (u != null) 'Données jusqu\'au ${fmtDay(u.until)}',
-      ];
+  static List<String> _notes(
+    BuildContext context,
+    CohortSpan? c,
+    String? member,
+    Unpublished? u,
+  ) {
+    final l10n = context.l10n;
+    return [
+      if (c != null)
+        c.first == c.last
+            ? l10n.dashboardsCohortOne(fmtDay(c.first))
+            : l10n.dashboardsCohortRange(fmtDayRange(l10n, c.first, c.last)),
+      if (member != null) l10n.dashboardsFamilyMember(member),
+      if (u != null) l10n.dashboardsDataUntil(fmtDay(u.until)),
+    ];
+  }
 }
 
 class _NoData extends StatelessWidget {
-  const _NoData([this.message = 'Aucune donnée sur la période']);
+  const _NoData(this.message);
   final String message;
 
   @override
@@ -431,7 +452,7 @@ class _CardError extends StatelessWidget {
           GestureDetector(
             onTap: onRetry,
             child: Text(
-              'Réessayer',
+              context.l10n.commonRetry,
               style: GT.body(13, weight: 600, color: p.accent),
             ),
           ),

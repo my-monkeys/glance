@@ -10,6 +10,7 @@ import '../../core/site_search.dart';
 import '../../data/models/models.dart';
 import '../../data/models/period.dart';
 import '../../data/models/workspace.dart';
+import '../../l10n/l10n.dart';
 import '../../state/home_data.dart';
 import '../../state/internal_traffic.dart';
 import '../../state/period_state.dart';
@@ -226,7 +227,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }) {
     if (sitesAsync.hasError && sites.isEmpty) {
       return _ErrorBox(
-        message: 'Chargement impossible.',
+        message: context.l10n.homeLoadFailed,
         onRetry: () => ref.invalidate(sitesProvider),
       );
     }
@@ -350,13 +351,13 @@ class _Header extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '${DateFormat('EEE d MMM', 'fr_FR').format(now)} · ${period.label}'
+                      '${DateFormat.MMMEd().format(now)} · ${period.label(context.l10n)}'
                           .toUpperCase(),
                       style: GT.label(color: p.fg2),
                     ),
                     const SizedBox(height: 9),
                     Text(
-                      active?.name ?? 'Mes sites',
+                      active?.name ?? context.l10n.homeTitleDefault,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: GT.display(34, color: p.fg),
@@ -457,7 +458,7 @@ class _InternalCard extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Entre vos sites',
+                  Text(context.l10n.homeInternalTitle,
                       style: GT.body(14, weight: 500, color: p.fg)),
                   const SizedBox(height: 2),
                   Text(
@@ -513,7 +514,10 @@ class _TotalCard extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SectionLabel(
-                      'Visiteurs · ${ref.watch(activeWorkspaceProvider)?.name ?? 'tous les sites'}',
+                      switch (ref.watch(activeWorkspaceProvider)) {
+                        final g? => context.l10n.homeTotalVisitors(g.name),
+                        null => context.l10n.homeTotalVisitorsAll,
+                      },
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -531,7 +535,7 @@ class _TotalCard extends ConsumerWidget {
             children: [
               DeltaText(data.totalDeltaPct),
               const SizedBox(width: 8),
-              Text('vs période préc.', style: GT.body(12, color: p.fg2)),
+              Text(context.l10n.homeVsPrevious, style: GT.body(12, color: p.fg2)),
             ],
           ),
           const SizedBox(height: 14),
@@ -592,7 +596,7 @@ class _SiteCardTile extends StatelessWidget {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      '${card.live} live',
+                      context.l10n.homeLiveCount(card.live),
                       style: GT.mono(11, color: card.live > 0 ? p.accent : p.fg3),
                     ),
                   ],
@@ -726,7 +730,7 @@ class _ErrorBox extends StatelessWidget {
           GestureDetector(
             onTap: onRetry,
             child: Text(
-              'Réessayer',
+              context.l10n.commonRetry,
               style: GT.body(15, weight: 600, color: p.accent),
             ),
           ),
@@ -751,10 +755,10 @@ class _EmptyBox extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 60),
       child: Column(
         children: [
-          Text('Aucun site affiché', style: GT.display(22, color: p.fg)),
+          Text(context.l10n.homeEmptyTitle, style: GT.display(22, color: p.fg)),
           const SizedBox(height: 8),
           Text(
-            'Aucun site suivi pour le moment. Choisis ceux à afficher.',
+            context.l10n.homeEmptyBody,
             textAlign: TextAlign.center,
             style: GT.body(14, color: p.fg2),
           ),
@@ -762,7 +766,7 @@ class _EmptyBox extends StatelessWidget {
           GestureDetector(
             onTap: onChoose,
             child: Text(
-              'Choisir les sites',
+              context.l10n.homeEmptyChooseSites,
               style: GT.body(15, weight: 600, color: p.accent),
             ),
           ),
@@ -770,7 +774,7 @@ class _EmptyBox extends StatelessWidget {
           GestureDetector(
             onTap: onAdd,
             child: Text(
-              '+ Ajouter une source',
+              context.l10n.homeEmptyAddSource,
               style: GT.body(13.5, color: p.fg3),
             ),
           ),
@@ -794,10 +798,10 @@ class _EmptyGroupBox extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 60),
       child: Column(
         children: [
-          Text('Groupe vide', style: GT.display(22, color: p.fg)),
+          Text(context.l10n.homeEmptyGroupTitle, style: GT.display(22, color: p.fg)),
           const SizedBox(height: 8),
           Text(
-            '« ${group.name} » ne contient aucun site.',
+            context.l10n.homeEmptyGroupBody(group.name),
             textAlign: TextAlign.center,
             style: GT.body(14, color: p.fg2),
           ),
@@ -805,7 +809,7 @@ class _EmptyGroupBox extends ConsumerWidget {
           GestureDetector(
             onTap: () => openWorkspaceEditor(context, group),
             child: Text(
-              'Choisir ses sites',
+              context.l10n.homeEmptyGroupChoose,
               style: GT.body(15, weight: 600, color: p.accent),
             ),
           ),
@@ -813,7 +817,7 @@ class _EmptyGroupBox extends ConsumerWidget {
           GestureDetector(
             onTap: () => ref.read(activeWorkspaceIdProvider.notifier).set(null),
             child: Text(
-              'Voir tous les sites',
+              context.l10n.homeEmptyGroupSeeAll,
               style: GT.body(13.5, color: p.fg3),
             ),
           ),
@@ -853,7 +857,7 @@ class _WelcomeEmpty extends StatelessWidget {
             Text('Glance', style: GT.display(44, color: p.fg)),
             const SizedBox(height: 8),
             Text(
-              "Vos statistiques, en un clin d'œil.",
+              context.l10n.homeWelcomeTagline,
               textAlign: TextAlign.center,
               style: GT.body(15, color: p.fg2),
             ),
@@ -863,18 +867,18 @@ class _WelcomeEmpty extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    'Connectez votre premier outil',
+                    context.l10n.homeWelcomeTitle,
                     style: GT.body(16, weight: 600, color: p.fg),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Umami, Plausible… ajoutez une source puis choisissez les sites à suivre.',
+                    context.l10n.homeWelcomeBody,
                     textAlign: TextAlign.center,
                     style: GT.body(13, color: p.fg2, height: 1.4),
                   ),
                   const SizedBox(height: 18),
                   GlanceButton(
-                    label: 'Ajouter une source',
+                    label: context.l10n.homeWelcomeAddSource,
                     icon: Icons.add,
                     onTap: onAdd,
                   ),
@@ -883,7 +887,7 @@ class _WelcomeEmpty extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'Clé en lecture seule · vos données restent chez vous',
+              context.l10n.homeWelcomeFootnote,
               textAlign: TextAlign.center,
               style: GT.body(12, color: p.fg3),
             ),
@@ -1010,7 +1014,7 @@ class _SiteErrorCard extends StatelessWidget {
             children: [
               Icon(Icons.cloud_off_rounded, size: 15, color: p.fg3),
               const SizedBox(width: 6),
-              Text('Indisponible', style: GT.body(13, color: p.fg3)),
+              Text(context.l10n.homeSiteUnavailable, style: GT.body(13, color: p.fg3)),
             ],
           ),
         ],

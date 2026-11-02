@@ -12,6 +12,36 @@ import 'workspaces.dart';
 
 enum SyncStatus { unknown, signedOut, signedIn }
 
+/// Message de synchro affiché sous le formulaire : un code, pas une phrase.
+/// L'écran choisit le texte dans la langue de l'app (`syncMessageText`).
+enum SyncMessage {
+  unreachable,
+  sessionExpired,
+  purchaseFailed,
+  purchasePending,
+  nothingToRestore,
+  restorePending,
+  cannotDecrypt,
+  proRequired,
+  badCredentials,
+  passwordTooShort,
+  passwordTooLong,
+  invalidEmail,
+  accountExists,
+  signUpFailed,
+}
+
+/// Raison d'un refus d'inscription, d'après le code de Better Auth.
+SyncMessage signUpMessageFor(String? code) => switch (code) {
+      'PASSWORD_TOO_SHORT' => SyncMessage.passwordTooShort,
+      'PASSWORD_TOO_LONG' => SyncMessage.passwordTooLong,
+      'INVALID_EMAIL' => SyncMessage.invalidEmail,
+      'USER_ALREADY_EXISTS' ||
+      'USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL' =>
+        SyncMessage.accountExists,
+      _ => SyncMessage.signUpFailed,
+    };
+
 @immutable
 class SyncState {
   const SyncState({
@@ -29,11 +59,11 @@ class SyncState {
   final bool isPro;
   final DateTime? lastSyncAt;
   final bool busy;
-  final String? error;
+  final SyncMessage? error;
 
   /// Message d'information non bloquant (ex. « activation en cours ») —
   /// distinct de [error] pour ne pas afficher du positif en rouge.
-  final String? notice;
+  final SyncMessage? notice;
 
   SyncState copyWith({
     SyncStatus? status,
@@ -41,8 +71,8 @@ class SyncState {
     bool? isPro,
     DateTime? lastSyncAt,
     bool? busy,
-    String? error,
-    String? notice,
+    SyncMessage? error,
+    SyncMessage? notice,
     bool clearError = false,
   }) =>
       SyncState(
@@ -120,26 +150,26 @@ class SyncController extends Notifier<SyncState> {
     // Vérifié ici aussi : le serveur refuserait, mais sans dire pourquoi à
     // l'écran avant que son code d'erreur soit traduit.
     if (password.length < kSyncMinPasswordLength) {
-      state = state.copyWith(error: signUpErrorMessage('PASSWORD_TOO_SHORT'));
+      state = state.copyWith(error: SyncMessage.passwordTooShort);
       return false;
     }
     return _enter(
       () => _api.signUp(email, password),
       password,
-      (e) => signUpErrorMessage(e.code),
+      (e) => signUpMessageFor(e.code),
     );
   }
 
   Future<bool> signIn(String email, String password) => _enter(
         () => _api.signIn(email, password),
         password,
-        (_) => 'E-mail ou mot de passe incorrect.',
+        (_) => SyncMessage.badCredentials,
       );
 
   Future<bool> _enter(
     Future<SyncUser> Function() call,
     String password,
-    String Function(SyncAuthError error) frenchError,
+    SyncMessage Function(SyncAuthError error) messageFor,
   ) async {
     state = state.copyWith(busy: true, clearError: true);
     try {
@@ -155,10 +185,10 @@ class SyncController extends Notifier<SyncState> {
       await pull(); // récupère une éventuelle config existante
       return true;
     } on SyncAuthError catch (e) {
-      state = state.copyWith(busy: false, error: frenchError(e));
+      state = state.copyWith(busy: false, error: messageFor(e));
       return false;
     } on SyncNetworkError {
-      state = state.copyWith(busy: false, error: 'Serveur injoignable.');
+      state = state.copyWith(busy: false, error: SyncMessage.unreachable);
       return false;
     }
   }
@@ -178,12 +208,12 @@ class SyncController extends Notifier<SyncState> {
     try {
       await _api.deleteAccount();
     } on SyncNetworkError {
-      state = state.copyWith(busy: false, error: 'Serveur injoignable. Réessayez.');
+      state = state.copyWith(busy: false, error: SyncMessage.unreachable);
       return false;
     } on SyncAuthError {
       state = state.copyWith(
         busy: false,
-        error: 'Session expirée. Reconnectez-vous puis réessayez.',
+        error: SyncMessage.sessionExpired,
       );
       return false;
     }
@@ -206,7 +236,7 @@ class SyncController extends Notifier<SyncState> {
         state = state.copyWith(busy: false);
         return false;
       case PurchaseOutcome.error:
-        state = state.copyWith(busy: false, error: 'Achat impossible. Réessayez.');
+        state = state.copyWith(busy: false, error: SyncMessage.purchaseFailed);
         return false;
       case PurchaseOutcome.purchased:
         final activated = await _awaitProActivation();
@@ -217,7 +247,7 @@ class SyncController extends Notifier<SyncState> {
         }
         state = state.copyWith(
           busy: false,
-          notice: 'Achat validé — activation en cours, réessayez la sync dans un instant.',
+          notice: SyncMessage.purchasePending,
         );
         return false;
     }
@@ -230,7 +260,7 @@ class SyncController extends Notifier<SyncState> {
     state = state.copyWith(busy: true, clearError: true);
     final entitled = await _purchases.restore();
     if (!entitled) {
-      state = state.copyWith(busy: false, notice: 'Aucun achat à restaurer.');
+      state = state.copyWith(busy: false, notice: SyncMessage.nothingToRestore);
       return false;
     }
     final activated = await _awaitProActivation();
@@ -239,7 +269,7 @@ class SyncController extends Notifier<SyncState> {
       await push();
       return true;
     }
-    state = state.copyWith(busy: false, notice: 'Achat restauré — activation en cours…');
+    state = state.copyWith(busy: false, notice: SyncMessage.restorePending);
     return false;
   }
 
@@ -278,7 +308,7 @@ class SyncController extends Notifier<SyncState> {
       return true;
     } on SyncBadPassword {
       // Config chiffrée avec un autre mot de passe (changé ailleurs).
-      state = state.copyWith(error: 'Impossible de déchiffrer la config distante.');
+      state = state.copyWith(error: SyncMessage.cannotDecrypt);
       return false;
     } catch (_) {
       return false; // réseau : on retentera
@@ -298,7 +328,7 @@ class SyncController extends Notifier<SyncState> {
       state = state.copyWith(lastSyncAt: DateTime.now(), clearError: true);
       return true;
     } on SyncProRequired {
-      state = state.copyWith(isPro: false, error: 'Sync réservée à Glance Sync (Pro).');
+      state = state.copyWith(isPro: false, error: SyncMessage.proRequired);
       return false;
     } catch (_) {
       return false; // réseau : on retentera
@@ -313,7 +343,7 @@ class SyncController extends Notifier<SyncState> {
     if (state.isPro) ok = await push() && ok;
     state = state.copyWith(busy: false);
     if (!ok && state.error == null) {
-      state = state.copyWith(error: 'Serveur injoignable. Réessayez.');
+      state = state.copyWith(error: SyncMessage.unreachable);
     }
     return ok;
   }

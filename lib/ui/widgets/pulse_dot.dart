@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/l10n.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
 
@@ -111,7 +112,7 @@ class LivePill extends StatelessWidget {
         children: [
           PulseDot(pulse: live, color: fg),
           const SizedBox(width: 6),
-          Text(text ?? '$count live', style: GT.mono(12, weight: 600, color: fg)),
+          Text(text ?? context.l10n.homeLiveCount(count), style: GT.mono(12, weight: 600, color: fg)),
         ],
       ),
     );

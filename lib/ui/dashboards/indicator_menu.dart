@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/models/indicator.dart';
 import '../../data/models/models.dart';
+import '../../l10n/l10n.dart';
 import '../../state/indicators.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
@@ -35,7 +36,8 @@ Future<void> showIndicatorMenu(
     case _Action.delete:
       await notifier.remove(site, indicator.id);
       if (context.mounted) {
-        showGlanceToast(context, 'Tableau supprimé', kind: ToastKind.info);
+        showGlanceToast(context, context.l10n.dashboardsDeleted,
+            kind: ToastKind.info);
       }
   }
 }
@@ -64,11 +66,11 @@ class _MenuSheet extends StatelessWidget {
               style: GT.display(22, color: p.fg),
             ),
             const SizedBox(height: 8),
-            _Item('Modifier', Icons.edit_outlined, () => pick(_Action.edit)),
+            _Item(context.l10n.commonEdit, Icons.edit_outlined, () => pick(_Action.edit)),
             const SizedBox(height: 14),
             ConfirmButton(
-              label: 'Supprimer',
-              confirmLabel: 'Confirmer la suppression',
+              label: context.l10n.commonDelete,
+              confirmLabel: context.l10n.dashboardsConfirmDelete,
               onConfirmed: () => pick(_Action.delete),
             ),
           ],

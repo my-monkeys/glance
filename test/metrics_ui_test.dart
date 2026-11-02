@@ -24,6 +24,7 @@ import 'package:glance/ui/dashboards/indicator_chart.dart';
 import 'package:glance/ui/dashboards/metrics_source_screen.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'helpers/l10n.dart';
 
 const _site = Site(id: 's', accountId: 'a', name: 'S', domain: 's.fr');
 final _window = DateWindow(DateTime(2026, 7, 1), DateTime(2026, 7, 4), TimeUnit.day);
@@ -113,6 +114,9 @@ Future<ProviderContainer> _pump(
   await tester.pumpWidget(ProviderScope(
     overrides: overrides,
     child: MaterialApp(
+      locale: testLocale,
+      localizationsDelegates: glanceLocalizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       theme: glanceTheme(Brightness.light),
       home: Builder(
         builder: (context) => Scaffold(body: open(context)),
@@ -287,6 +291,9 @@ void main() {
           indicatorDataProvider.overrideWith((ref, key) => data),
         ],
         child: MaterialApp(
+          locale: testLocale,
+          localizationsDelegates: glanceLocalizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           theme: glanceTheme(Brightness.light),
           home: Scaffold(
             body: IndicatorCard(

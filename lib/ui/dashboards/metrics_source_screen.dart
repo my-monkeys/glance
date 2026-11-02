@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../data/models/indicator.dart';
 import '../../data/models/models.dart';
+import '../../l10n/l10n.dart';
 import '../../state/indicators.dart';
 import '../../state/metrics_sources.dart';
 import '../../theme/palette.dart';
@@ -16,9 +17,12 @@ import '../widgets/toast.dart';
 import 'editor/confirm_button.dart';
 import 'labels.dart';
 
-/// Page du site qui décrit le contrat de l'API à exposer. À tenir à jour avec
-/// `store/site/docs/source-de-metriques.html`.
-const kMetricsDocUrl = 'https://glance-analytics.com/docs/source-de-metriques.html';
+/// Page du site qui décrit le contrat de l'API à exposer, dans la langue de
+/// l'app (français, sinon anglais). À tenir à jour avec
+/// `store/site/docs/source-de-metriques.html` et sa version `en/`.
+String metricsDocUrl(Locale locale) => locale.languageCode == 'fr'
+    ? 'https://glance-analytics.com/docs/source-de-metriques.html'
+    : 'https://glance-analytics.com/en/docs/metrics-source.html';
 
 /// Ouvre l'écran de la source de métriques d'un site.
 Future<void> openMetricsSource(BuildContext context, Site site) =>
@@ -70,6 +74,7 @@ class _MetricsSourceScreenState extends ConsumerState<MetricsSourceScreen> {
   void _edited() => setState(() => _result = null);
 
   Future<void> _test() async {
+    final l10n = context.l10n;
     setState(() {
       _testing = true;
       _result = null;
@@ -81,9 +86,9 @@ class _MetricsSourceScreenState extends ConsumerState<MetricsSourceScreen> {
         _token.text.trim(),
       );
       final n = (await api.catalogue()).length;
-      result = (n == 1 ? '1 indicateur disponible' : '$n indicateurs disponibles', true);
+      result = (l10n.dashboardsMetricsAvailable(n), true);
     } catch (e) {
-      result = (metricsErrorMessage(e), false);
+      result = (metricsErrorMessage(l10n, e), false);
     }
     if (mounted) {
       setState(() {
@@ -98,7 +103,7 @@ class _MetricsSourceScreenState extends ConsumerState<MetricsSourceScreen> {
         .read(metricsSourcesProvider.notifier)
         .set(widget.site, _url.text, _token.text);
     if (!mounted) return;
-    showGlanceToast(context, 'Source enregistrée');
+    showGlanceToast(context, context.l10n.dashboardsMetricsSaved);
     Navigator.of(context).pop();
   }
 
@@ -106,8 +111,6 @@ class _MetricsSourceScreenState extends ConsumerState<MetricsSourceScreen> {
       .read(siteIndicatorsProvider(widget.site))
       .whereType<ExternalIndicator>()
       .toList();
-
-  static String _tableaux(int n) => n == 1 ? '1 tableau' : '$n tableaux';
 
   /// Les cartes « Métrique » partent avec leur source : sans elle, elles
   /// afficheraient « Jeton refusé » pour toujours.
@@ -122,8 +125,8 @@ class _MetricsSourceScreenState extends ConsumerState<MetricsSourceScreen> {
     showGlanceToast(
       context,
       cards.isEmpty
-          ? 'Source retirée'
-          : 'Source retirée, ${_tableaux(cards.length)} supprimé${cards.length == 1 ? '' : 's'}',
+          ? context.l10n.dashboardsMetricsRemoved
+          : context.l10n.dashboardsMetricsRemovedWithCards(cards.length),
       kind: ToastKind.info,
     );
     Navigator.of(context).pop();
@@ -132,6 +135,7 @@ class _MetricsSourceScreenState extends ConsumerState<MetricsSourceScreen> {
   @override
   Widget build(BuildContext context) {
     final p = context.glance;
+    final l10n = context.l10n;
     final bottom = MediaQuery.of(context).padding.bottom;
     final result = _result;
     final cards = ref.watch(siteIndicatorsProvider(widget.site))
@@ -152,7 +156,7 @@ class _MetricsSourceScreenState extends ConsumerState<MetricsSourceScreen> {
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: Text('Source de métriques',
+                    child: Text(l10n.dashboardsMetricsSource,
                         style: GT.display(24, color: p.fg)),
                   ),
                 ],
@@ -165,15 +169,13 @@ class _MetricsSourceScreenState extends ConsumerState<MetricsSourceScreen> {
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
                 children: [
                   Text(
-                    'Une petite API de votre site qui fournit des indicateurs '
-                    'calculés sur sa base (rétention, comptes…) : un catalogue '
-                    'et des séries, protégés par un jeton.',
+                    l10n.dashboardsMetricsIntro,
                     style: GT.body(13.5, color: p.fg2),
                   ),
                   const SizedBox(height: 10),
                   GestureDetector(
                     key: const ValueKey('metrics-doc-link'),
-                    onTap: () => launchUrl(Uri.parse(kMetricsDocUrl),
+                    onTap: () => launchUrl(Uri.parse(metricsDocUrl(Localizations.localeOf(context))),
                         mode: LaunchMode.externalApplication),
                     behavior: HitTestBehavior.opaque,
                     child: Padding(
@@ -181,7 +183,7 @@ class _MetricsSourceScreenState extends ConsumerState<MetricsSourceScreen> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text('Comment ça marche ?',
+                          Text(l10n.dashboardsMetricsHowItWorks,
                               style: GT.body(13.5, weight: 600, color: p.accent)),
                           const SizedBox(width: 6),
                           Icon(Icons.open_in_new_rounded, size: 15, color: p.accent),
@@ -191,22 +193,22 @@ class _MetricsSourceScreenState extends ConsumerState<MetricsSourceScreen> {
                   ),
                   const SizedBox(height: 22),
                   GlanceField(
-                    label: 'Adresse de l\'API',
+                    label: l10n.dashboardsMetricsUrlLabel,
                     controller: _url,
-                    hint: 'https://exemple.fr/api/interne/metriques/',
+                    hint: l10n.dashboardsMetricsUrlHint,
                     url: true,
                     onChanged: (_) => _edited(),
                   ),
                   const SizedBox(height: 14),
                   GlanceField(
-                    label: 'Jeton',
+                    label: l10n.dashboardsMetricsToken,
                     controller: _token,
                     obscure: true,
                     onChanged: (_) => _edited(),
                   ),
                   const SizedBox(height: 18),
                   GlanceButtonOutline(
-                    label: 'Tester',
+                    label: l10n.dashboardsMetricsTest,
                     busy: _testing,
                     onTap: _filled ? _test : null,
                   ),
@@ -224,10 +226,10 @@ class _MetricsSourceScreenState extends ConsumerState<MetricsSourceScreen> {
                   if (_exists) ...[
                     const SizedBox(height: 28),
                     ConfirmButton(
-                      label: 'Retirer la source',
+                      label: l10n.dashboardsMetricsRemove,
                       confirmLabel: cards == 0
-                          ? 'Retirer la source'
-                          : 'Retirer la source et ${_tableaux(cards)}',
+                          ? l10n.dashboardsMetricsRemove
+                          : l10n.dashboardsMetricsRemoveWithCards(cards),
                       onConfirmed: _remove,
                     ),
                   ],
@@ -237,7 +239,7 @@ class _MetricsSourceScreenState extends ConsumerState<MetricsSourceScreen> {
             Padding(
               padding: EdgeInsets.fromLTRB(20, 8, 20, bottom + 12),
               child: GlanceButton(
-                label: 'Enregistrer',
+                label: l10n.commonSave,
                 onTap: _filled ? _save : null,
               ),
             ),

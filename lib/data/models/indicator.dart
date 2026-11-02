@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 
 import '../../core/grid_layout.dart';
+import '../../l10n/l10n.dart';
 import 'metrics_source.dart';
 import 'workspace.dart';
 
@@ -26,18 +27,29 @@ enum PropertyType {
 
 /// Opérateur d'un filtre de propriété. [api] est la forme attendue par Umami.
 enum FilterOp {
-  eq('eq', '='),
-  neq('neq', '≠'),
-  contains('c', 'contient'),
-  notContains('dnc', 'ne contient pas'),
-  gt('gt', '>'),
-  gte('gte', '≥'),
-  lt('lt', '<'),
-  lte('lte', '≤');
+  eq('eq'),
+  neq('neq'),
+  contains('c'),
+  notContains('dnc'),
+  gt('gt'),
+  gte('gte'),
+  lt('lt'),
+  lte('lte');
 
-  const FilterOp(this.api, this.label);
+  const FilterOp(this.api);
   final String api;
-  final String label;
+
+  /// Symbole, ou mots dans la langue de l'app pour « contient ».
+  String label(AppLocalizations l10n) => switch (this) {
+    eq => '=',
+    neq => '≠',
+    contains => l10n.filterOpContains,
+    notContains => l10n.filterOpNotContains,
+    gt => '>',
+    gte => '≥',
+    lt => '<',
+    lte => '≤',
+  };
 
   /// Opérateurs qui ont un sens pour un type de propriété.
   static List<FilterOp> forType(PropertyType t) => switch (t) {

@@ -1,4 +1,5 @@
 import '../models/period.dart';
+import 'provider_errors.dart';
 
 /// Au-delà, la série ne se lit plus et la remplir coûte plus que ce qu'elle
 /// apprend. `allowedUnits` (data/models/period.dart) n'offre jamais une
@@ -29,9 +30,7 @@ List<DateTime> bucketsOf(DateWindow w) {
   final end = truncateBucket(w.end, w.unit);
   while (c.isBefore(end)) {
     if (out.length >= kMaxBuckets) {
-      throw StateError(
-        'Découpage trop fin : plus de $kMaxBuckets points sur la période.',
-      );
+      throw const BucketsTooFine(kMaxBuckets);
     }
     out.add(c);
     c = advanceBucket(c, w.unit);

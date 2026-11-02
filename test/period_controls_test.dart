@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:glance/data/models/period.dart';
+import 'package:glance/l10n/app_localizations_fr.dart';
 import 'package:glance/state/period_state.dart';
 import 'package:glance/state/providers.dart';
 import 'package:glance/state/settings.dart';
 import 'package:glance/theme/theme.dart';
+import 'package:glance/ui/settings/settings_labels.dart';
 import 'package:glance/ui/widgets/period_controls.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'helpers/l10n.dart';
 
 Future<ProviderContainer> _pump(WidgetTester tester, double width,
     {bool withToggle = false}) async {
@@ -19,6 +22,9 @@ Future<ProviderContainer> _pump(WidgetTester tester, double width,
   await tester.pumpWidget(ProviderScope(
     overrides: [sharedPrefsProvider.overrideWithValue(prefs)],
     child: MaterialApp(
+      locale: testLocale,
+      localizationsDelegates: glanceLocalizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       theme: glanceTheme(Brightness.light),
       home: Scaffold(
         body: PeriodControls(
@@ -41,7 +47,7 @@ const _wide = 1500.0;
 double _dy(WidgetTester tester, Finder f) => tester.getCenter(f).dy;
 
 void main() {
-  final periods = find.text(Period.d7.label);
+  final periods = find.text(Period.d7.label(AppLocalizationsFr()));
   final button = find.text('Affichage');
 
   testWidgets('large : périodes et bouton partagent la même ligne', (tester) async {
@@ -89,7 +95,7 @@ void main() {
 
     final other = ChartStyle.values
         .firstWhere((s) => s != container.read(settingsProvider).chartStyle);
-    await tester.tap(find.text(other.label));
+    await tester.tap(find.text(other.localized(lookupAppLocalizations(testLocale))));
     await tester.pumpAndSettle();
     expect(container.read(settingsProvider).chartStyle, other);
     expect(find.text('GRAPHIQUE'), findsOneWidget);

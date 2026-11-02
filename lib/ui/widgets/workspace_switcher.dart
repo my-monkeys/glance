@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/models/models.dart';
 import '../../data/models/workspace.dart';
+import '../../l10n/l10n.dart';
 import '../../state/providers.dart';
 import '../../state/workspaces.dart';
 import '../../theme/palette.dart';
@@ -97,7 +98,7 @@ class _WorkspaceSheet extends ConsumerWidget {
           ],
           Padding(
             padding: const EdgeInsets.only(left: 20, bottom: 6),
-            child: Text('Périmètre', style: GT.label(color: p.fg2)),
+            child: Text(context.l10n.workspaceSheetTitle, style: GT.label(color: p.fg2)),
           ),
           Flexible(
             child: ListView(
@@ -106,9 +107,8 @@ class _WorkspaceSheet extends ConsumerWidget {
               children: [
                 _SheetRow(
                   group: null,
-                  title: 'Tous les sites',
-                  subtitle:
-                      '${sites.length} site${sites.length > 1 ? 's' : ''} suivi${sites.length > 1 ? 's' : ''}',
+                  title: context.l10n.workspaceAllSites,
+                  subtitle: context.l10n.workspaceTrackedSites(sites.length),
                   selected: active == null,
                   onTap: () => select(null),
                 ),
@@ -116,12 +116,9 @@ class _WorkspaceSheet extends ConsumerWidget {
                   _SheetRow(
                     group: g,
                     title: g.name,
-                    subtitle: () {
-                      final n = sites.where(g.contains).length;
-                      return n == 0
-                          ? 'Aucun site'
-                          : '$n site${n > 1 ? 's' : ''}';
-                    }(),
+                    subtitle: context.l10n.workspaceSiteCount(
+                      sites.where(g.contains).length,
+                    ),
                     selected: active?.id == g.id,
                     onTap: () => select(g.id),
                   ),
@@ -131,7 +128,7 @@ class _WorkspaceSheet extends ConsumerWidget {
           Divider(color: p.line, height: 20),
           _ActionRow(
             icon: Icons.add_rounded,
-            label: 'Nouveau groupe',
+            label: context.l10n.workspaceNewGroup,
             onTap: () {
               Navigator.of(context).pop();
               openWorkspaceEditor(context, null);
@@ -140,7 +137,7 @@ class _WorkspaceSheet extends ConsumerWidget {
           if (groups.isNotEmpty)
             _ActionRow(
               icon: Icons.tune_rounded,
-              label: 'Gérer les groupes',
+              label: context.l10n.workspaceManageGroups,
               onTap: () {
                 Navigator.of(context).pop();
                 openWorkspaces(context);

@@ -15,6 +15,7 @@ import 'package:glance/ui/dashboards/indicator_card.dart';
 import 'package:glance/ui/dashboards/indicators_tab.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'helpers/l10n.dart';
 
 const _site = Site(id: 's', accountId: 'a', name: 'S', domain: 's.fr');
 final _window = DateWindow(DateTime(2026, 7, 1), DateTime(2026, 7, 5), TimeUnit.day);
@@ -23,6 +24,9 @@ final _days = [for (var d = 0; d < 4; d++) DateTime(2026, 7, 1 + d)];
 Widget _host(List<Override> overrides, Widget child) => ProviderScope(
       overrides: overrides,
       child: MaterialApp(
+        locale: testLocale,
+        localizationsDelegates: glanceLocalizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         theme: glanceTheme(Brightness.light),
         home: Scaffold(body: SingleChildScrollView(child: child)),
       ),

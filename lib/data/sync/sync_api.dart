@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 
+import '../../core/errors.dart';
+import '../../l10n/l10n.dart';
 import '../repository/secret_vault.dart';
 
 /// Stockage du token de session. Abstrait pour être remplaçable en test (le
@@ -38,33 +40,32 @@ class RemoteConfig {
   final int updatedAt;
 }
 
-class SyncAuthError implements Exception {
-  SyncAuthError(this.message, {this.code});
-  final String message;
+/// Refus d'authentification : à la connexion / l'inscription, ou 401 d'une
+/// route authentifiée (session expirée).
+class SyncAuthError implements LocalizedError {
+  SyncAuthError({this.code});
 
   /// Code d'erreur de Better Auth (`PASSWORD_TOO_SHORT`…), quand il y en a un.
   final String? code;
+
+  @override
+  String message(AppLocalizations l10n) => l10n.syncMsgSessionExpired;
 }
 
 /// Longueur minimale d'un mot de passe : doit suivre `minPasswordLength` dans
 /// glance-sync (`src/auth.ts`).
 const kSyncMinPasswordLength = 8;
 
-/// Message d'un refus d'inscription, d'après le code de Better Auth.
-String signUpErrorMessage(String? code) => switch (code) {
-      'PASSWORD_TOO_SHORT' =>
-        'Mot de passe trop court : $kSyncMinPasswordLength caractères minimum.',
-      'PASSWORD_TOO_LONG' => 'Mot de passe trop long.',
-      'INVALID_EMAIL' => 'Adresse e-mail invalide.',
-      'USER_ALREADY_EXISTS' || 'USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL' =>
-        'Cet e-mail a déjà un compte : connectez-vous.',
-      _ => 'Impossible de créer le compte.',
-    };
-
 /// Le compte n'est pas Pro : la sync (écriture) est réservée aux comptes payants.
-class SyncProRequired implements Exception {}
+class SyncProRequired implements LocalizedError {
+  @override
+  String message(AppLocalizations l10n) => l10n.syncMsgProRequired;
+}
 
-class SyncNetworkError implements Exception {}
+class SyncNetworkError implements LocalizedError {
+  @override
+  String message(AppLocalizations l10n) => l10n.syncMsgUnreachable;
+}
 
 /// Client HTTP du backend **glance-sync** (Better Auth + coffre de config).
 ///
@@ -123,10 +124,7 @@ class SyncApi {
     }
     if (r.statusCode != 200) {
       final body = r.data is Map ? r.data as Map : const {};
-      throw SyncAuthError(
-        body['message']?.toString() ?? 'Identifiants refusés',
-        code: body['code']?.toString(),
-      );
+      throw SyncAuthError(code: body['code']?.toString());
     }
     final token = r.headers.value('set-auth-token');
     if (token != null) await _saveToken(token);
@@ -176,7 +174,7 @@ class SyncApi {
     } on DioException {
       throw SyncNetworkError();
     }
-    if (r.statusCode == 401) throw SyncAuthError('Session expirée');
+    if (r.statusCode == 401) throw SyncAuthError();
     if (r.statusCode != 200) throw SyncNetworkError();
     _token = null;
     await _store.clear();
@@ -191,7 +189,7 @@ class SyncApi {
     } on DioException {
       throw SyncNetworkError();
     }
-    if (r.statusCode == 401) throw SyncAuthError('Session expirée');
+    if (r.statusCode == 401) throw SyncAuthError();
     if (r.statusCode != 200) throw SyncNetworkError();
     return (r.data as Map)['isPro'] == true;
   }
@@ -204,7 +202,7 @@ class SyncApi {
     } on DioException {
       throw SyncNetworkError();
     }
-    if (r.statusCode == 401) throw SyncAuthError('Session expirée');
+    if (r.statusCode == 401) throw SyncAuthError();
     if (r.statusCode != 200) throw SyncNetworkError();
     final data = r.data as Map;
     return RemoteConfig(
@@ -222,7 +220,7 @@ class SyncApi {
     } on DioException {
       throw SyncNetworkError();
     }
-    if (r.statusCode == 401) throw SyncAuthError('Session expirée');
+    if (r.statusCode == 401) throw SyncAuthError();
     if (r.statusCode == 402) throw SyncProRequired();
     if (r.statusCode != 200) throw SyncNetworkError();
   }

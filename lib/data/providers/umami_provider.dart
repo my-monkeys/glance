@@ -1,7 +1,5 @@
 import 'package:dio/dio.dart';
 
-import '../../core/countries.dart';
-import '../../core/entities.dart';
 import '../../core/sites_visitors.dart';
 import '../../core/timezone.dart';
 import '../models/indicator.dart';
@@ -10,6 +8,7 @@ import '../models/models.dart';
 import '../models/period.dart';
 import 'analytics_provider.dart';
 import 'buckets.dart';
+import 'provider_errors.dart';
 import 'umami_filters.dart';
 
 /// Client Umami (self-hosted). Auth par login username/mot de passe → token JWT
@@ -50,7 +49,7 @@ class UmamiProvider extends AnalyticsProvider {
     final data = r.data;
     final token = (data is Map) ? data['token'] : null;
     if (token is! String || token.isEmpty) {
-      throw StateError('Réponse de login Umami inattendue');
+      throw const UmamiLoginUnexpected();
     }
     _token = token;
     final user = (data is Map) ? data['user'] : null;
@@ -378,9 +377,7 @@ class UmamiProvider extends AnalyticsProvider {
       FilterOp.notContains,
     };
     if (!allowed.contains(x.op)) {
-      throw ArgumentError(
-        "Opérateur « ${x.op.label} » indisponible dans un entonnoir Umami",
-      );
+      throw OperatorUnavailable(x.op, umamiFunnel: true);
     }
     return {'property': x.property, 'operator': x.op.api, 'value': x.value};
   }
@@ -457,37 +454,23 @@ class UmamiProvider extends AnalyticsProvider {
       case MetricType.exitPages:
         return MetricRow(label: x.isEmpty ? '/' : x, value: y, code: x);
       case MetricType.referrers:
-        if (x.isEmpty) return MetricRow(label: 'Accès direct', value: y);
+        if (x.isEmpty) return MetricRow.direct(y);
         final host = x.replaceFirst(RegExp(r'^https?://'), '').split('/').first;
-        if (host.isEmpty) return MetricRow(label: 'Accès direct', value: y);
+        if (host.isEmpty) return MetricRow.direct(y);
         return MetricRow(label: host, value: y, code: host);
       case MetricType.channels:
-        return MetricRow(label: channelName(x), value: y, code: x);
       case MetricType.countries:
-        return MetricRow(label: countryName(x), value: y, code: x);
       case MetricType.browsers:
-        return MetricRow(label: browserName(x), value: y, code: x);
       case MetricType.devices:
-        return MetricRow(label: deviceName(x), value: y, code: x);
       case MetricType.languages:
-        return MetricRow(label: languageName(x), value: y, code: x);
       case MetricType.operatingSystems:
-        return MetricRow(
-          label: x.isEmpty ? 'Inconnu' : x,
-          value: y,
-          code: x,
-        );
       case MetricType.pageTitles:
       case MetricType.queries:
       case MetricType.screens:
       case MetricType.regions:
       case MetricType.cities:
       case MetricType.events:
-        return MetricRow(
-          label: x.isEmpty ? 'Inconnu' : x,
-          value: y,
-          code: x,
-        );
+        return MetricRow(label: x, value: y, code: x);
     }
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/l10n.dart';
 import '../../theme/motion.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
@@ -55,7 +56,7 @@ class SiteSearchField extends StatelessWidget {
                 isDense: true,
                 contentPadding: EdgeInsets.zero,
                 border: InputBorder.none,
-                hintText: 'Rechercher un site',
+                hintText: context.l10n.siteSearchHint,
                 hintStyle: GT.body(fontSize, color: p.fg3),
               ),
             ),
@@ -69,7 +70,7 @@ class SiteSearchField extends StatelessWidget {
               child: IgnorePointer(
                 ignoring: value.text.isEmpty,
                 child: IconButton(
-                  tooltip: 'Effacer',
+                  tooltip: context.l10n.commonClear,
                   visualDensity: VisualDensity.compact,
                   iconSize: dense ? 16 : 18,
                   color: p.fg2,
@@ -96,7 +97,7 @@ class NoSiteMatch extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 4),
       child: Text(
-        'Aucun site ne correspond à « ${query.trim()} ».',
+        context.l10n.siteSearchNoMatch(query.trim()),
         style: GT.body(14, color: p.fg2),
       ),
     );

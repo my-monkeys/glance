@@ -7,6 +7,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../data/transfer/config_transfer.dart';
+import '../../l10n/l10n.dart';
 import '../../state/providers.dart';
 import '../../state/workspaces.dart';
 import '../../theme/motion.dart';
@@ -104,13 +105,14 @@ class _TransferExportScreenState extends ConsumerState<TransferExportScreen> {
   @override
   Widget build(BuildContext context) {
     final p = context.glance;
+    final l10n = context.l10n;
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
             _Head(
-              title: 'Transférer',
-              subtitle: 'Scannez ce code depuis l\'autre appareil.',
+              title: l10n.transferExportTitle,
+              subtitle: l10n.transferExportSubtitle,
             ),
             Expanded(
               child: ListView(
@@ -128,7 +130,7 @@ class _TransferExportScreenState extends ConsumerState<TransferExportScreen> {
                               : _left == Duration.zero
                                   ? 'expired'
                                   : 'loading'),
-                      child: _buildExportState(p),
+                      child: _buildExportState(context, p),
                     ),
                   ),
                 ],
@@ -140,7 +142,7 @@ class _TransferExportScreenState extends ConsumerState<TransferExportScreen> {
     );
   }
 
-  Widget _buildExportState(GlancePalette p) {
+  Widget _buildExportState(BuildContext context, GlancePalette p) {
     if (_error != null) return _ErrorNote(error: _error!);
     if (_data == null && _left == Duration.zero) {
       return _Expired(onRegen: () {
@@ -191,7 +193,8 @@ class _TransferExportScreenState extends ConsumerState<TransferExportScreen> {
         const SizedBox(height: 14),
         Center(
           child: Text(
-            'Expire dans ${_left.inMinutes}:${(_left.inSeconds % 60).toString().padLeft(2, '0')}',
+            context.l10n.transferExpiresIn(
+                '${_left.inMinutes}:${(_left.inSeconds % 60).toString().padLeft(2, '0')}'),
             style: GT.mono(12, color: p.fg2),
           ),
         ),
@@ -212,7 +215,7 @@ class _CodeBox extends StatelessWidget {
     final p = context.glance;
     return Column(
       children: [
-        SectionLabel('Code à saisir sur l\'autre appareil'),
+        SectionLabel(context.l10n.transferCodeLabel),
         const SizedBox(height: 10),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -251,9 +254,7 @@ class _Warning extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              'Ce code contient vos identifiants. Ne le photographiez pas et '
-              'ne le partagez pas : le QR seul ne suffit pas, mais avec le code '
-              'à 4 chiffres il donne accès à vos comptes.',
+              context.l10n.transferWarning,
               style: GT.body(12.5, color: p.fg2),
             ),
           ),
@@ -276,17 +277,17 @@ class _Expired extends StatelessWidget {
         children: [
           Icon(Icons.timer_off_rounded, size: 34, color: p.fg3),
           const SizedBox(height: 14),
-          Text('Code expiré', style: GT.display(22, color: p.fg)),
+          Text(context.l10n.transferExpiredTitle, style: GT.display(22, color: p.fg)),
           const SizedBox(height: 8),
           Text(
-            'Un transfert ne reste valable que quelques minutes.',
+            context.l10n.transferExpiredBody,
             textAlign: TextAlign.center,
             style: GT.body(14, color: p.fg2),
           ),
           const SizedBox(height: 18),
           GestureDetector(
             onTap: onRegen,
-            child: Text('Régénérer',
+            child: Text(context.l10n.transferRegenerate,
                 style: GT.body(15, weight: 600, color: p.accent)),
           ),
         ],
@@ -302,6 +303,7 @@ class _ErrorNote extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = context.glance;
+    final l10n = context.l10n;
     final e = error;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 50),
@@ -310,16 +312,16 @@ class _ErrorNote extends StatelessWidget {
           Icon(Icons.error_outline_rounded, size: 34, color: p.neg),
           const SizedBox(height: 14),
           Text(
-            e is TransferTooLarge ? 'Config trop grosse' : 'Transfert impossible',
+            e is TransferTooLarge
+                ? l10n.transferTooLargeTitle
+                : l10n.transferFailedTitle,
             style: GT.display(22, color: p.fg),
           ),
           const SizedBox(height: 8),
           Text(
             e is TransferTooLarge
-                ? 'Elle ne tient pas dans un QR code (${e.size} caractères pour '
-                    '${e.max} au maximum). Suivez « tous les sites » sur vos '
-                    'comptes plutôt qu\'une sélection, puis réessayez.'
-                : 'Impossible de préparer le transfert.',
+                ? l10n.transferTooLargeBody(e.size, e.max)
+                : l10n.transferFailedBody,
             textAlign: TextAlign.center,
             style: GT.body(14, color: p.fg2),
           ),
@@ -369,6 +371,7 @@ class _TransferImportScreenState extends ConsumerState<TransferImportScreen> {
 
   Future<void> _apply() async {
     final code = _code.text.trim();
+    final l10n = context.l10n;
     if (code.length != 4 || _scanned == null) return;
     setState(() {
       _busy = true;
@@ -385,19 +388,18 @@ class _TransferImportScreenState extends ConsumerState<TransferImportScreen> {
       // Toast avant le pop : il vit dans l'overlay racine, pas dans la route.
       showGlanceToast(
         context,
-        '${payload.accounts.length} compte${payload.accounts.length > 1 ? 's' : ''} '
-        'et ${payload.workspaces.length} groupe${payload.workspaces.length > 1 ? 's' : ''} importés',
+        context.l10n.transferImported(
+            payload.accounts.length, payload.workspaces.length),
       );
       Navigator.of(context).pop();
     } on TransferExpired {
       if (mounted) {
-        setState(() => _error =
-            'Ce code a expiré. Régénérez-le sur l\'autre appareil.');
+        setState(() => _error = l10n.transferErrExpired);
       }
     } on TransferBadCode {
-      if (mounted) setState(() => _error = 'Code incorrect.');
+      if (mounted) setState(() => _error = l10n.transferErrBadCode);
     } catch (_) {
-      if (mounted) setState(() => _error = 'Import impossible.');
+      if (mounted) setState(() => _error = l10n.transferErrFailed);
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -415,15 +417,16 @@ class _TransferImportScreenState extends ConsumerState<TransferImportScreen> {
   @override
   Widget build(BuildContext context) {
     final p = context.glance;
+    final l10n = context.l10n;
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
             _Head(
-              title: 'Importer',
+              title: l10n.transferImportTitle,
               subtitle: _scanned == null
-                  ? 'Visez le QR affiché sur l\'autre appareil.'
-                  : 'Saisissez le code affiché à côté du QR.',
+                  ? l10n.transferImportScanHint
+                  : l10n.transferImportCodeHint,
             ),
             Expanded(
               // Caméra ↔ formulaire : la bascule la plus brutale de l'app,
@@ -471,12 +474,12 @@ class _TransferImportScreenState extends ConsumerState<TransferImportScreen> {
                           ),
                           const SizedBox(height: 10),
                           Center(
-                            child: Text('Code scanné',
+                            child: Text(l10n.transferScanned,
                                 style: GT.body(14, color: p.fg2)),
                           ),
                           const SizedBox(height: 24),
                           GlanceField(
-                            label: 'Code à 4 chiffres',
+                            label: l10n.transferCodeField,
                             controller: _code,
                             hint: '0000',
                             mono: true,
@@ -493,7 +496,7 @@ class _TransferImportScreenState extends ConsumerState<TransferImportScreen> {
                           ),
                           const SizedBox(height: 20),
                           GlanceButton(
-                            label: 'Importer',
+                            label: l10n.transferImportButton,
                             busy: _busy,
                             onTap: _apply,
                           ),
@@ -501,7 +504,7 @@ class _TransferImportScreenState extends ConsumerState<TransferImportScreen> {
                           Center(
                             child: GestureDetector(
                               onTap: _rescan,
-                              child: Text('Scanner à nouveau',
+                              child: Text(l10n.transferRescan,
                                   style: GT.body(13.5, color: p.fg3)),
                             ),
                           ),
@@ -524,6 +527,7 @@ class _ScannerError extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = context.glance;
+    final l10n = context.l10n;
     final refused =
         error.errorCode == MobileScannerErrorCode.permissionDenied;
     return Container(
@@ -535,15 +539,16 @@ class _ScannerError extends StatelessWidget {
           Icon(Icons.no_photography_rounded, size: 34, color: p.fg3),
           const SizedBox(height: 14),
           Text(
-            refused ? 'Caméra refusée' : 'Caméra indisponible',
+            refused
+                ? l10n.transferCameraDenied
+                : l10n.transferCameraUnavailable,
             style: GT.display(20, color: p.fg),
           ),
           const SizedBox(height: 8),
           Text(
             refused
-                ? 'Autorisez l\'accès à la caméra dans les réglages du système '
-                    'pour scanner un transfert.'
-                : 'Aucune caméra utilisable sur cet appareil.',
+                ? l10n.transferCameraDeniedBody
+                : l10n.transferCameraUnavailableBody,
             textAlign: TextAlign.center,
             style: GT.body(13.5, color: p.fg2),
           ),

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../data/sync/sync_api.dart' show kSyncMinPasswordLength;
+import '../../l10n/l10n.dart';
 import '../../state/sync.dart';
 import '../../theme/motion.dart';
 import '../../theme/palette.dart';
@@ -12,6 +13,25 @@ import '../widgets/common.dart';
 import '../widgets/field.dart';
 import '../widgets/motion.dart';
 import '../widgets/toast.dart';
+
+/// Texte d'un message de synchro, dans la langue de l'app.
+String syncMessageText(AppLocalizations l10n, SyncMessage m) => switch (m) {
+      SyncMessage.unreachable => l10n.syncMsgUnreachable,
+      SyncMessage.sessionExpired => l10n.syncMsgSessionExpired,
+      SyncMessage.purchaseFailed => l10n.syncMsgPurchaseFailed,
+      SyncMessage.purchasePending => l10n.syncMsgPurchasePending,
+      SyncMessage.nothingToRestore => l10n.syncMsgNothingToRestore,
+      SyncMessage.restorePending => l10n.syncMsgRestorePending,
+      SyncMessage.cannotDecrypt => l10n.syncMsgCannotDecrypt,
+      SyncMessage.proRequired => l10n.syncMsgProRequired,
+      SyncMessage.badCredentials => l10n.syncMsgBadCredentials,
+      SyncMessage.passwordTooShort =>
+        l10n.syncMsgPasswordTooShort(kSyncMinPasswordLength),
+      SyncMessage.passwordTooLong => l10n.syncMsgPasswordTooLong,
+      SyncMessage.invalidEmail => l10n.syncMsgInvalidEmail,
+      SyncMessage.accountExists => l10n.syncMsgAccountExists,
+      SyncMessage.signUpFailed => l10n.syncMsgSignUpFailed,
+    };
 
 /// Ouvre l'écran Glance Sync (modale sur desktop, page sur mobile).
 Future<void> openSync(BuildContext context) =>
@@ -46,7 +66,7 @@ class SyncScreen extends ConsumerWidget {
                         Text('Glance Sync', style: GT.display(26, color: p.fg)),
                         const SizedBox(height: 2),
                         Text(
-                          'Vos comptes et groupes, synchronisés et chiffrés.',
+                          context.l10n.syncSubtitle,
                           style: GT.body(13, color: p.fg2),
                         ),
                       ],
@@ -105,13 +125,16 @@ class _AuthFormState extends ConsumerState<_AuthForm> {
     final create = _createMode;
     final ok = await (create ? ctrl.signUp(email, pw) : ctrl.signIn(email, pw));
     if (ok && mounted) {
-      showGlanceToast(context, create ? 'Compte créé' : 'Connecté');
+      final l10n = context.l10n;
+      showGlanceToast(
+          context, create ? l10n.syncToastCreated : l10n.syncToastSignedIn);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final p = context.glance;
+    final l10n = context.l10n;
     final sync = ref.watch(syncControllerProvider);
 
     return ListView(
@@ -119,17 +142,19 @@ class _AuthFormState extends ConsumerState<_AuthForm> {
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
       children: [
         GlanceField(
-          label: 'E-mail',
+          label: l10n.syncEmail,
           controller: _email,
-          hint: 'vous@exemple.fr',
+          hint: l10n.syncEmailHint,
           url: true,
           autofocus: true,
         ),
         const SizedBox(height: 14),
         GlanceField(
-          label: 'Mot de passe',
+          label: l10n.syncPassword,
           controller: _password,
-          hint: _createMode ? '$kSyncMinPasswordLength caractères minimum' : null,
+          hint: _createMode
+              ? l10n.syncPasswordHint(kSyncMinPasswordLength)
+              : null,
           obscure: true,
           onSubmitted: (_) => _submit(),
         ),
@@ -137,12 +162,15 @@ class _AuthFormState extends ConsumerState<_AuthForm> {
           show: sync.error != null,
           child: Padding(
             padding: const EdgeInsets.only(top: 12),
-            child: Text(sync.error ?? '', style: GT.body(13, color: p.neg)),
+            child: Text(
+              sync.error == null ? '' : syncMessageText(l10n, sync.error!),
+              style: GT.body(13, color: p.neg),
+            ),
           ),
         ),
         const SizedBox(height: 20),
         GlanceButton(
-          label: _createMode ? 'Créer le compte' : 'Se connecter',
+          label: _createMode ? l10n.syncCreateAccountButton : l10n.syncSignIn,
           busy: sync.busy,
           onTap: _submit,
         ),
@@ -157,7 +185,7 @@ class _AuthFormState extends ConsumerState<_AuthForm> {
                 duration: kMotionFast,
                 dy: 4,
                 child: Text(
-                  _createMode ? 'J\'ai déjà un compte' : 'Créer un compte',
+                  _createMode ? l10n.syncHaveAccount : l10n.syncCreateAccount,
                   key: ValueKey(_createMode),
                   style: GT.body(14, weight: 500, color: p.accent),
                 ),
@@ -175,9 +203,7 @@ class _AuthFormState extends ConsumerState<_AuthForm> {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'Votre config est chiffrée sur l\'appareil avant l\'envoi : le '
-                  'serveur ne peut pas la lire. Mot de passe oublié = sync '
-                  'irrécupérable.',
+                  l10n.syncEncryptedNote,
                   style: GT.body(12.5, color: p.fg2),
                 ),
               ),
@@ -196,6 +222,7 @@ class _Account extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final p = context.glance;
+    final l10n = context.l10n;
     final sync = ref.watch(syncControllerProvider);
     final ctrl = ref.read(syncControllerProvider.notifier);
 
@@ -224,8 +251,10 @@ class _Account extends ConsumerWidget {
                     const SizedBox(height: 2),
                     Text(
                       sync.lastSyncAt == null
-                          ? 'Jamais synchronisé'
-                          : 'Sync ${DateFormat('d MMM HH:mm', 'fr_FR').format(sync.lastSyncAt!)}',
+                          ? l10n.syncNever
+                          : l10n.syncLastSync(DateFormat.MMMd()
+                              .add_Hm()
+                              .format(sync.lastSyncAt!)),
                       style: GT.body(12, color: p.fg2),
                     ),
                   ],
@@ -249,12 +278,12 @@ class _Account extends ConsumerWidget {
             key: ValueKey(sync.isPro),
             child: sync.isPro
                 ? GlanceButton(
-                    label: 'Synchroniser maintenant',
+                    label: l10n.syncNow,
                     icon: Icons.sync_rounded,
                     busy: sync.busy,
                     onTap: () async {
                       if (await ctrl.syncNow() && context.mounted) {
-                        showGlanceToast(context, 'Synchronisé');
+                        showGlanceToast(context, l10n.syncToastSynced);
                       }
                     },
                   )
@@ -266,7 +295,10 @@ class _Account extends ConsumerWidget {
           child: Padding(
             padding: const EdgeInsets.only(top: 12),
             child: Text(
-              sync.error ?? sync.notice ?? '',
+              switch (sync.error ?? sync.notice) {
+                final m? => syncMessageText(l10n, m),
+                null => '',
+              },
               style: GT.body(13, color: sync.error != null ? p.neg : p.fg2),
             ),
           ),
@@ -278,12 +310,13 @@ class _Account extends ConsumerWidget {
             onTap: () async {
               await ctrl.signOut();
               if (context.mounted) {
-                showGlanceToast(context, 'Déconnecté', kind: ToastKind.info);
+                showGlanceToast(context, l10n.syncToastSignedOut,
+                    kind: ToastKind.info);
               }
             },
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              child: Text('Se déconnecter', style: GT.body(14, color: p.fg2)),
+              child: Text(l10n.syncSignOut, style: GT.body(14, color: p.fg2)),
             ),
           ),
         ),
@@ -293,7 +326,7 @@ class _Account extends ConsumerWidget {
             onTap: sync.busy ? null : () => _confirmDelete(context, ctrl),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              child: Text('Supprimer mon compte', style: GT.body(13, color: p.neg)),
+              child: Text(l10n.syncDeleteAccount, style: GT.body(13, color: p.neg)),
             ),
           ),
         ),
@@ -305,30 +338,27 @@ class _Account extends ConsumerWidget {
   /// effacement serveur + local. Irréversible.
   Future<void> _confirmDelete(BuildContext context, SyncController ctrl) async {
     final p = context.glance;
+    final l10n = context.l10n;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Supprimer le compte ?'),
-        content: const Text(
-          'Votre compte Glance Sync et toute la configuration synchronisée '
-          'seront définitivement supprimés du serveur. Action irréversible. '
-          'Vos sources analytics restent sur cet appareil.',
-        ),
+        title: Text(l10n.syncDeleteTitle),
+        content: Text(l10n.syncDeleteBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text('Annuler', style: GT.body(14, color: p.fg2)),
+            child: Text(l10n.commonCancel, style: GT.body(14, color: p.fg2)),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text('Supprimer',
+            child: Text(l10n.commonDelete,
                 style: GT.body(14, weight: 600, color: p.neg)),
           ),
         ],
       ),
     );
     if (confirmed == true && await ctrl.deleteAccount() && context.mounted) {
-      showGlanceToast(context, 'Compte supprimé', kind: ToastKind.info);
+      showGlanceToast(context, l10n.syncToastDeleted, kind: ToastKind.info);
     }
   }
 }
@@ -338,6 +368,7 @@ class _UnlockCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final p = context.glance;
+    final l10n = context.l10n;
     final sync = ref.watch(syncControllerProvider);
     final ctrl = ref.read(syncControllerProvider.notifier);
     final canBuy = ref.watch(purchasesSupportedProvider);
@@ -347,25 +378,22 @@ class _UnlockCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Débloquez Glance Sync', style: GT.body(16, weight: 600, color: p.fg)),
+          Text(l10n.syncUnlockTitle, style: GT.body(16, weight: 600, color: p.fg)),
           const SizedBox(height: 6),
           Text(
             canBuy
-                ? 'Sauvegardez et synchronisez vos comptes et groupes sur tous '
-                    'vos appareils. Achat unique.'
-                : 'Achat unique depuis l\'app mobile (iOS/Android). Une fois '
-                    'débloqué, connectez-vous ici avec le même compte : la sync '
-                    'suit automatiquement.',
+                ? l10n.syncUnlockBuy
+                : l10n.syncUnlockElsewhere,
             style: GT.body(13, color: p.fg2),
           ),
           const SizedBox(height: 14),
           if (canBuy) ...[
             GlanceButton(
-              label: 'Débloquer',
+              label: l10n.syncUnlockButton,
               busy: sync.busy,
               onTap: () async {
                 if (await ctrl.buyPro() && context.mounted) {
-                  showGlanceToast(context, 'Glance Sync débloqué');
+                  showGlanceToast(context, l10n.syncToastUnlocked);
                 }
               },
             ),
@@ -375,18 +403,18 @@ class _UnlockCard extends ConsumerWidget {
                 behavior: HitTestBehavior.opaque,
                 onTap: () async {
                   if (await ctrl.restorePurchase() && context.mounted) {
-                    showGlanceToast(context, 'Achat restauré');
+                    showGlanceToast(context, l10n.syncToastRestored);
                   }
                 },
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  child: Text('Restaurer un achat',
+                  child: Text(l10n.syncRestore,
                       style: GT.body(13, weight: 500, color: p.accent)),
                 ),
               ),
             ),
           ] else
-            const GlanceButton(label: 'Bientôt disponible', onTap: null),
+            GlanceButton(label: l10n.syncSoon, onTap: null),
         ],
       ),
     );

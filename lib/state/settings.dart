@@ -3,16 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/models/period.dart';
+import '../l10n/l10n.dart';
 import 'period_state.dart';
 import 'providers.dart';
 
 enum ThemeChoice {
-  auto('Auto', ThemeMode.system),
-  clair('Clair', ThemeMode.light),
-  sombre('Sombre', ThemeMode.dark);
+  auto(ThemeMode.system),
+  clair(ThemeMode.light),
+  sombre(ThemeMode.dark);
 
-  const ThemeChoice(this.label, this.mode);
-  final String label;
+  const ThemeChoice(this.mode);
   final ThemeMode mode;
 }
 
@@ -21,11 +21,8 @@ enum HomeViewMode { list, grid }
 
 /// Rendu des grands graphiques.
 enum ChartStyle {
-  curve('Courbe'),
-  bars('Barres');
-
-  const ChartStyle(this.label);
-  final String label;
+  curve,
+  bars,
 }
 
 @immutable
@@ -39,6 +36,7 @@ class Settings {
     this.defaultPeriod = Period.d7,
     this.hideZeroSites = false,
     this.chartStyle = ChartStyle.curve,
+    this.locale,
   });
 
   final ThemeChoice theme;
@@ -49,6 +47,7 @@ class Settings {
   final Period defaultPeriod; // période affichée au lancement
   final bool hideZeroSites; // masque les sites à 0 visiteur (liste desktop)
   final ChartStyle chartStyle; // courbe lissée ou barres
+  final Locale? locale; // null = langue du système
 
   Settings copyWith({
     ThemeChoice? theme,
@@ -59,6 +58,7 @@ class Settings {
     Period? defaultPeriod,
     bool? hideZeroSites,
     ChartStyle? chartStyle,
+    Locale? Function()? locale,
   }) => Settings(
     theme: theme ?? this.theme,
     refreshSeconds: refreshSeconds ?? this.refreshSeconds,
@@ -68,6 +68,7 @@ class Settings {
     defaultPeriod: defaultPeriod ?? this.defaultPeriod,
     hideZeroSites: hideZeroSites ?? this.hideZeroSites,
     chartStyle: chartStyle ?? this.chartStyle,
+    locale: locale != null ? locale() : this.locale,
   );
 }
 
@@ -80,6 +81,7 @@ class SettingsNotifier extends Notifier<Settings> {
   static const _kDefaultPeriod = 'glance.period.default';
   static const _kHideZeroSites = 'glance.sites.hideZero';
   static const _kChartStyle = 'glance.chart.style';
+  static const _kLocale = 'glance.locale';
 
   SharedPreferences get _p => ref.read(sharedPrefsProvider);
 
@@ -105,7 +107,23 @@ class SettingsNotifier extends Notifier<Settings> {
         (v) => v.name == _p.getString(_kChartStyle),
         orElse: () => ChartStyle.curve,
       ),
+      locale: _savedLocale(),
     );
+  }
+
+  /// Une langue retirée de l'app depuis l'enregistrement retombe sur « Auto ».
+  Locale? _savedLocale() {
+    final saved = parseLocaleTag(_p.getString(_kLocale));
+    return AppLocalizations.supportedLocales.contains(saved) ? saved : null;
+  }
+
+  void setLocale(Locale? locale) {
+    if (locale == null) {
+      _p.remove(_kLocale);
+    } else {
+      _p.setString(_kLocale, localeTag(locale));
+    }
+    state = state.copyWith(locale: () => locale);
   }
 
   void setHomeView(HomeViewMode v) {

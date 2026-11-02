@@ -21,6 +21,7 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		A1B2C3D4E5F60718293A4B5E /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B5F /* Localizable.xcstrings */; };
 		03EC6FBC2F6C291BCE348B04 /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 05B248277D105DE5B0310A22 /* Pods_RunnerTests.framework */; };
 		1EE2CEC458B0F189CB4EFA86 /* GlanceWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9160FF29F2286E3771E80162 /* GlanceWidget.swift */; };
 		331C80D8294CF71000263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C80D7294CF71000263BE5 /* RunnerTests.swift */; };
@@ -86,6 +87,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		A1B2C3D4E5F60718293A4B5F /* Localizable.xcstrings */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		05B248277D105DE5B0310A22 /* Pods_RunnerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RunnerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		2B27A0486F28C8D5D760549C /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		331C80D5294CF71000263BE5 /* RunnerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RunnerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -167,6 +169,7 @@
 			children = (
 				9160FF29F2286E3771E80162 /* GlanceWidget.swift */,
 				5CEDDF5FFC1959969AE9BD1B /* GlanceSiteWidget.swift */,
+				A1B2C3D4E5F60718293A4B5F /* Localizable.xcstrings */,
 			);
 			name = GlanceWidgetShared;
 			path = ../ios/GlanceWidget;
@@ -389,6 +392,11 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				fr,
+				de,
+				es,
+				"pt-BR",
+				"zh-Hans",
 				Base,
 			);
 			mainGroup = 33CC10E42044A3C60003C045;
@@ -409,6 +417,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A1B2C3D4E5F60718293A4B5E /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

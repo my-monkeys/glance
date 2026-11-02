@@ -1,12 +1,14 @@
 import 'package:dio/dio.dart';
 
 import '../../core/sites_visitors.dart';
+import '../../l10n/l10n.dart';
 import '../models/account.dart';
 import '../models/dimension.dart';
 import '../models/indicator.dart';
 import '../models/indicator_result.dart';
 import '../models/models.dart';
 import '../models/period.dart';
+import 'provider_errors.dart';
 
 export '../models/dimension.dart';
 
@@ -55,7 +57,7 @@ abstract class AnalyticsProvider {
   /// ratio aligne deux séries par index.
   Future<List<SeriesPoint>> eventCountSeries(
           Site site, DateWindow w, EventQuery q) =>
-      throw UnsupportedError('Indicateurs non pris en charge');
+      throw const FeatureUnsupported(UnsupportedFeature.indicators);
 
   /// Visiteurs uniques par bucket et sur la fenêtre, restreints à ceux venus
   /// de [referrer] (domaine exact) s'il est donné.
@@ -64,11 +66,11 @@ abstract class AnalyticsProvider {
     DateWindow w, {
     String? referrer,
   }) =>
-      throw UnsupportedError('Tableaux de sites non pris en charge');
+      throw const FeatureUnsupported(UnsupportedFeature.siteTables);
 
   Future<List<FunnelStepResult>> funnel(
           Site site, DateWindow w, FunnelIndicator f) =>
-      throw UnsupportedError('Entonnoirs non pris en charge');
+      throw const FeatureUnsupported(UnsupportedFeature.funnels);
 
   /// Valeurs d'une propriété d'événement, les plus fréquentes d'abord.
   Future<List<MetricRow>> propertyValues(
@@ -78,7 +80,7 @@ abstract class AnalyticsProvider {
     String property, {
     int limit = 30,
   }) =>
-      throw UnsupportedError('Répartitions non prises en charge');
+      throw const FeatureUnsupported(UnsupportedFeature.breakdowns);
 
   /// Propriétés connues d'un événement. Vide = le fournisseur ne sait pas les
   /// lister : l'éditeur retombe sur une saisie libre.
@@ -125,52 +127,54 @@ Set<IndicatorKind> supportedIndicatorsFor(ProviderKind kind) => switch (kind) {
     };
 
 /// Champs d'identifiants demandés à l'écran d'ajout, par fournisseur.
-List<CredentialField> credentialFieldsFor(ProviderKind kind) {
+List<CredentialField> credentialFieldsFor(
+  AppLocalizations l10n,
+  ProviderKind kind,
+) {
   switch (kind) {
     case ProviderKind.umami:
-      return const [
+      return [
         CredentialField(
           key: 'baseUrl',
-          label: "URL de l'instance",
-          placeholder: 'analytics.mondomaine.fr',
+          label: l10n.credInstanceUrl,
+          placeholder: l10n.credUmamiUrlPlaceholder,
           keyboardUrl: true,
         ),
-        CredentialField(key: 'username', label: "Nom d'utilisateur"),
-        CredentialField(key: 'password', label: 'Mot de passe', secret: true),
+        CredentialField(key: 'username', label: l10n.credUsername),
+        CredentialField(key: 'password', label: l10n.credPassword, secret: true),
       ];
     case ProviderKind.plausible:
-      return const [
+      return [
         CredentialField(
           key: 'baseUrl',
-          label: "URL de l'instance",
+          label: l10n.credInstanceUrl,
           placeholder: 'plausible.io',
           keyboardUrl: true,
         ),
-        CredentialField(key: 'apiKey', label: 'Clé API', secret: true),
+        CredentialField(key: 'apiKey', label: l10n.credApiKey, secret: true),
         CredentialField(
           key: 'email',
-          label: 'Email du compte (facultatif)',
-          placeholder: 'vous@exemple.fr',
+          label: l10n.credEmailOptional,
+          placeholder: l10n.credEmailPlaceholder,
           optional: true,
-          hint: 'Email + mot de passe : Glance liste vos sites automatiquement. '
-              'Sinon, laissez vide et renseignez un domaine ci-dessous.',
+          hint: l10n.credEmailHint,
         ),
         CredentialField(
           key: 'password',
-          label: 'Mot de passe (facultatif)',
+          label: l10n.credPasswordOptional,
           secret: true,
           optional: true,
         ),
         CredentialField(
           key: 'siteId',
-          label: 'Domaine (si pas d\'email/mot de passe)',
-          placeholder: 'mondomaine.fr',
+          label: l10n.credDomainFallback,
+          placeholder: l10n.credDomainPlaceholder,
           optional: true,
         ),
       ];
     case ProviderKind.fathom:
-      return const [
-        CredentialField(key: 'apiKey', label: 'Clé API', secret: true),
+      return [
+        CredentialField(key: 'apiKey', label: l10n.credApiKey, secret: true),
       ];
   }
 }

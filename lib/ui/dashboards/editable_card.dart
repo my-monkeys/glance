@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
+import '../../l10n/l10n.dart';
 import '../../theme/motion.dart';
 import '../../theme/palette.dart';
 
@@ -73,7 +74,7 @@ class EditableGridCard extends StatelessWidget {
               onUpdate: onUpdate,
               onEnd: onEnd,
               child: Semantics(
-                label: 'Redimensionner le tableau',
+                label: context.l10n.dashboardsResizeCard,
                 child: CustomPaint(painter: _CornerPainter(p.fg3)),
               ),
             ),

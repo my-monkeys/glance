@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/account.dart';
 import '../../data/models/period.dart';
 import '../../data/providers/analytics_provider.dart';
+import '../../l10n/l10n.dart';
 import '../../state/providers.dart';
 import '../../state/settings.dart';
 import '../../state/sync.dart';
@@ -16,6 +17,7 @@ import '../widgets/adaptive_sheet.dart';
 import '../widgets/chip.dart';
 import '../widgets/common.dart';
 import 'account_menu.dart';
+import 'settings_labels.dart';
 import 'sync_screen.dart';
 import 'transfer_screen.dart';
 import 'workspaces_screen.dart';
@@ -26,6 +28,7 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final p = context.glance;
+    final l10n = context.l10n;
     final accounts = ref.watch(accountsProvider);
     final settings = ref.watch(settingsProvider);
     final notifier = ref.read(settingsProvider.notifier);
@@ -43,11 +46,11 @@ class SettingsScreen extends ConsumerWidget {
         120,
       ),
       children: [
-        Text('Réglages', style: GT.display(34, color: p.fg)),
+        Text(l10n.settingsTitle, style: GT.display(34, color: p.fg)),
         const SizedBox(height: 22),
 
         // Compte.
-        _GroupLabel('Compte'),
+        _GroupLabel(l10n.settingsGroupAccount),
         _Group(
           children: [
             for (final a in accounts)
@@ -64,9 +67,10 @@ class SettingsScreen extends ConsumerWidget {
                   title: a.title,
                   subtitle: problem
                       ? (health == AccountHealth.badAuth
-                          ? 'Identifiants ou clé API refusés'
-                          : 'Instance injoignable')
-                      : '${a.kind.displayName} · ${siteCount(a)} site${siteCount(a) > 1 ? 's' : ''}',
+                          ? l10n.settingsAccountBadAuth
+                          : l10n.settingsAccountUnreachable)
+                      : l10n.settingsAccountSubtitle(
+                          a.kind.displayName, siteCount(a)),
                   subtitleColor: problem ? p.neg : null,
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -85,7 +89,7 @@ class SettingsScreen extends ConsumerWidget {
               }),
             _Row(
               leading: Icon(Icons.add, color: p.accent, size: 22),
-              title: 'Ajouter une source',
+              title: l10n.settingsAddSource,
               titleColor: p.accent,
               onTap: () => openAddSource(context),
             ),
@@ -94,14 +98,14 @@ class SettingsScreen extends ConsumerWidget {
         const SizedBox(height: 22),
 
         // Sites.
-        _GroupLabel('Sites'),
+        _GroupLabel(l10n.settingsGroupSites),
         _Group(
           children: [
             _Row(
               leading: Icon(Icons.folder_rounded, color: p.fg2, size: 20),
-              title: 'Groupes',
+              title: l10n.settingsGroupsTitle,
               subtitle: groups.isEmpty
-                  ? 'Lire une partie de vos sites à part'
+                  ? l10n.settingsGroupsHint
                   : groups.map((g) => g.name).join(' · '),
               trailing:
                   Icon(Icons.chevron_right_rounded, color: p.fg3, size: 22),
@@ -112,7 +116,7 @@ class SettingsScreen extends ConsumerWidget {
         const SizedBox(height: 22),
 
         // Synchronisation cloud (compte Glance Sync).
-        _GroupLabel('Synchronisation'),
+        _GroupLabel(l10n.settingsGroupSync),
         _Group(
           children: [
             Builder(builder: (context) {
@@ -126,8 +130,8 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 title: 'Glance Sync',
                 subtitle: signedIn
-                    ? (sync.email ?? 'Connecté')
-                    : 'Sauvegarder et synchroniser (chiffré)',
+                    ? (sync.email ?? l10n.settingsSyncConnected)
+                    : l10n.settingsSyncPitch,
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -148,15 +152,15 @@ class SettingsScreen extends ConsumerWidget {
         const SizedBox(height: 22),
 
         // Transfert d'un appareil à l'autre.
-        _GroupLabel('Transfert'),
+        _GroupLabel(l10n.settingsGroupTransfer),
         _Group(
           children: [
             _Row(
               leading: Icon(Icons.qr_code_2_rounded, color: p.fg2, size: 20),
-              title: 'Afficher un QR de transfert',
+              title: l10n.settingsTransferShow,
               subtitle: accounts.isEmpty
-                  ? 'Aucun compte à transférer'
-                  : 'Comptes, identifiants et groupes',
+                  ? l10n.settingsTransferNone
+                  : l10n.settingsTransferContents,
               trailing:
                   Icon(Icons.chevron_right_rounded, color: p.fg3, size: 22),
               onTap: accounts.isEmpty ? null : () => openTransferExport(context),
@@ -164,8 +168,8 @@ class SettingsScreen extends ConsumerWidget {
             _Row(
               leading: Icon(Icons.qr_code_scanner_rounded,
                   color: p.fg2, size: 20),
-              title: 'Importer depuis un autre appareil',
-              subtitle: 'Scanner un QR de transfert',
+              title: l10n.settingsTransferImport,
+              subtitle: l10n.settingsTransferScan,
               trailing:
                   Icon(Icons.chevron_right_rounded, color: p.fg3, size: 22),
               onTap: () => openTransferImport(context),
@@ -175,7 +179,7 @@ class SettingsScreen extends ConsumerWidget {
         const SizedBox(height: 22),
 
         // Apparence.
-        _GroupLabel('Apparence'),
+        _GroupLabel(l10n.settingsGroupAppearance),
         _Group(
           children: [
             Padding(
@@ -183,13 +187,40 @@ class SettingsScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text('Thème', style: GT.body(15, color: p.fg)),
+                  Text(context.l10n.settingsLanguageTitle,
+                      style: GT.body(15, color: p.fg)),
+                  const SizedBox(height: 12),
+                  ChipRow(
+                    children: [
+                      GlanceChip(
+                        label: context.l10n.settingsLanguageAuto,
+                        selected: settings.locale == null,
+                        onTap: () => notifier.setLocale(null),
+                      ),
+                      // Une langue ajoutée à l'app apparaît ici sans autre geste.
+                      for (final l in AppLocalizations.supportedLocales)
+                        GlanceChip(
+                          label: nativeLanguageName(l),
+                          selected: settings.locale == l,
+                          onTap: () => notifier.setLocale(l),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 13, 16, 14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(l10n.settingsThemeTitle, style: GT.body(15, color: p.fg)),
                   const SizedBox(height: 12),
                   ChipRow(
                     children: [
                       for (final t in ThemeChoice.values)
                         GlanceChip(
-                          label: t.label,
+                          label: t.localized(l10n),
                           selected: settings.theme == t,
                           onTap: () => notifier.setTheme(t),
                         ),
@@ -203,16 +234,16 @@ class SettingsScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text('Graphiques', style: GT.body(15, color: p.fg)),
+                  Text(l10n.settingsChartsTitle, style: GT.body(15, color: p.fg)),
                   const SizedBox(height: 4),
-                  Text('Courbe lissée ou barres',
+                  Text(l10n.settingsChartsHint,
                       style: GT.body(12.5, color: p.fg3)),
                   const SizedBox(height: 12),
                   ChipRow(
                     children: [
                       for (final style in ChartStyle.values)
                         GlanceChip(
-                          label: style.label,
+                          label: style.localized(l10n),
                           selected: settings.chartStyle == style,
                           onTap: () => notifier.setChartStyle(style),
                         ),
@@ -226,9 +257,9 @@ class SettingsScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text('Période par défaut', style: GT.body(15, color: p.fg)),
+                  Text(l10n.settingsDefaultPeriod, style: GT.body(15, color: p.fg)),
                   const SizedBox(height: 4),
-                  Text('À l\'ouverture de l\'application',
+                  Text(l10n.settingsDefaultPeriodHint,
                       style: GT.body(12.5, color: p.fg3)),
                   const SizedBox(height: 12),
                   ChipRow(
@@ -236,7 +267,7 @@ class SettingsScreen extends ConsumerWidget {
                       for (final per in Period.values)
                         if (per != Period.custom)
                           GlanceChip(
-                            label: per.label,
+                            label: per.label(l10n),
                             selected: settings.defaultPeriod == per,
                             onTap: () => notifier.setDefaultPeriod(per),
                           ),
@@ -250,16 +281,16 @@ class SettingsScreen extends ConsumerWidget {
         const SizedBox(height: 22),
 
         // Données.
-        _GroupLabel('Données'),
+        _GroupLabel(l10n.settingsGroupData),
         _Group(
           children: [
             _Row(
-              title: 'Actualisation auto',
+              title: l10n.settingsRefresh,
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    _refreshLabel(settings.refreshSeconds),
+                    _refreshLabel(l10n, settings.refreshSeconds),
                     style: GT.mono(13, color: p.fg2),
                   ),
                   const SizedBox(width: 8),
@@ -274,13 +305,13 @@ class SettingsScreen extends ConsumerWidget {
         // Application (desktop uniquement : les stores gèrent les MàJ mobiles).
         if (Updater.isSupported) ...[
           const SizedBox(height: 22),
-          _GroupLabel('Application'),
+          _GroupLabel(l10n.settingsGroupApp),
           _Group(
             children: [
               _Row(
                 leading:
                     Icon(Icons.system_update_rounded, color: p.fg2, size: 20),
-                title: 'Rechercher des mises à jour',
+                title: l10n.settingsCheckUpdates,
                 trailing:
                     Icon(Icons.chevron_right_rounded, color: p.fg3, size: 22),
                 onTap: () => Updater.checkNow(),
@@ -292,7 +323,9 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  static String _refreshLabel(int s) => s >= 60 ? '${s ~/ 60} min' : '$s s';
+  static String _refreshLabel(AppLocalizations l10n, int s) => s >= 60
+      ? l10n.settingsRefreshMinutes(s ~/ 60)
+      : l10n.settingsRefreshSeconds(s);
 
   void _pickRefresh(BuildContext context, WidgetRef ref, int current) {
     const options = [10, 30, 60, 300];
@@ -306,7 +339,7 @@ class SettingsScreen extends ConsumerWidget {
             for (final o in options)
               ListTile(
                 title: Text(
-                  _refreshLabel(o),
+                  _refreshLabel(ctx.l10n, o),
                   style: GT.body(16, color: ctx.glance.fg),
                 ),
                 trailing: o == current

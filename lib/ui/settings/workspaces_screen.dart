@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/models/models.dart';
 import '../../data/models/workspace.dart';
+import '../../l10n/l10n.dart';
 import '../../state/providers.dart';
 import '../../state/workspaces.dart';
 import '../../theme/palette.dart';
@@ -53,10 +54,11 @@ class WorkspacesScreen extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Groupes', style: GT.display(26, color: p.fg)),
+                        Text(context.l10n.settingsGroupsTitle,
+                            style: GT.display(26, color: p.fg)),
                         const SizedBox(height: 2),
                         Text(
-                          'Un périmètre de lecture : totaux et courbe ne comptent que ses sites.',
+                          context.l10n.groupsSubtitle,
                           style: GT.body(13, color: p.fg2),
                         ),
                       ],
@@ -97,7 +99,7 @@ class WorkspacesScreen extends ConsumerWidget {
                   MediaQuery.of(context).padding.bottom + 12,
                 ),
                 child: GlanceButton(
-                  label: 'Nouveau groupe',
+                  label: context.l10n.workspaceNewGroup,
                   onTap: () => openWorkspaceEditor(context, null),
                 ),
               ),
@@ -140,7 +142,7 @@ class _GroupCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  count == 0 ? 'Aucun site' : '$count site${count > 1 ? 's' : ''}',
+                  context.l10n.workspaceSiteCount(count),
                   style: GT.body(12, color: p.fg2),
                 ),
               ],
@@ -160,6 +162,7 @@ class _NoGroups extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = context.glance;
+    final l10n = context.l10n;
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 34),
@@ -168,11 +171,10 @@ class _NoGroups extends StatelessWidget {
           children: [
             Icon(Icons.folder_open_rounded, size: 34, color: p.fg3),
             const SizedBox(height: 14),
-            Text('Aucun groupe', style: GT.display(22, color: p.fg)),
+            Text(l10n.groupsEmptyTitle, style: GT.display(22, color: p.fg)),
             const SizedBox(height: 8),
             Text(
-              'Regroupez vos sites — par exemple « Jeux » ou « Clients » — pour '
-              'lire leurs statistiques à part, sans le reste.',
+              l10n.groupsEmptyBody,
               textAlign: TextAlign.center,
               style: GT.body(14, color: p.fg2),
             ),
@@ -180,7 +182,7 @@ class _NoGroups extends StatelessWidget {
             GestureDetector(
               onTap: onCreate,
               child: Text(
-                'Créer un groupe',
+                l10n.groupsCreate,
                 style: GT.body(15, weight: 600, color: p.accent),
               ),
             ),
@@ -280,28 +282,28 @@ class _WorkspaceEditScreenState extends ConsumerState<WorkspaceEditScreen> {
       );
     }
     if (mounted) {
-      showGlanceToast(context, _isNew ? 'Groupe créé' : 'Groupe enregistré');
+      final l10n = context.l10n;
+      showGlanceToast(
+          context, _isNew ? l10n.groupEditCreated : l10n.groupEditSaved);
       Navigator.of(context).pop();
     }
   }
 
   Future<void> _delete() async {
+    final l10n = context.l10n;
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Supprimer ce groupe ?'),
-        content: const Text(
-          'Les sites et leurs statistiques ne sont pas touchés — seul le '
-          'regroupement disparaît.',
-        ),
+        title: Text(l10n.groupEditDeleteTitle),
+        content: Text(l10n.groupEditDeleteBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Annuler'),
+            child: Text(l10n.commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Supprimer'),
+            child: Text(l10n.commonDelete),
           ),
         ],
       ),
@@ -309,7 +311,7 @@ class _WorkspaceEditScreenState extends ConsumerState<WorkspaceEditScreen> {
     if (ok != true) return;
     await ref.read(workspacesProvider.notifier).remove(widget.group!.id);
     if (mounted) {
-      showGlanceToast(context, 'Groupe supprimé', kind: ToastKind.info);
+      showGlanceToast(context, l10n.groupEditDeleted, kind: ToastKind.info);
       Navigator.of(context).pop();
     }
   }
@@ -317,6 +319,7 @@ class _WorkspaceEditScreenState extends ConsumerState<WorkspaceEditScreen> {
   @override
   Widget build(BuildContext context) {
     final p = context.glance;
+    final l10n = context.l10n;
     final sitesAsync = ref.watch(sitesProvider);
     final sites = sitesAsync.value ?? const <Site>[];
     final accounts = ref.watch(accountsProvider);
@@ -338,7 +341,7 @@ class _WorkspaceEditScreenState extends ConsumerState<WorkspaceEditScreen> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      _isNew ? 'Nouveau groupe' : 'Modifier le groupe',
+                      _isNew ? l10n.workspaceNewGroup : l10n.groupEditEditTitle,
                       style: GT.display(24, color: p.fg),
                     ),
                   ),
@@ -374,9 +377,9 @@ class _WorkspaceEditScreenState extends ConsumerState<WorkspaceEditScreen> {
                       const SizedBox(width: 14),
                       Expanded(
                         child: GlanceField(
-                          label: 'Nom',
+                          label: l10n.groupEditName,
                           controller: _name,
-                          hint: 'Jeux, Clients, Perso…',
+                          hint: l10n.groupEditNameHint,
                           autofocus: _isNew,
                         ),
                       ),
@@ -408,7 +411,7 @@ class _WorkspaceEditScreenState extends ConsumerState<WorkspaceEditScreen> {
                   const SizedBox(height: 22),
                   Padding(
                     padding: const EdgeInsets.only(left: 3, bottom: 8),
-                    child: SectionLabel('Sites du groupe'),
+                    child: SectionLabel(l10n.groupEditSitesLabel),
                   ),
                   _AddSourceRow(onTap: _addSource),
                   const SizedBox(height: 10),
@@ -426,8 +429,7 @@ class _WorkspaceEditScreenState extends ConsumerState<WorkspaceEditScreen> {
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 24),
                       child: Text(
-                        'Aucun site suivi pour l\'instant — ajoutez une source '
-                        'ci-dessus pour remplir ce groupe.',
+                        l10n.groupEditNoSites,
                         textAlign: TextAlign.center,
                         style: GT.body(14, color: p.fg3),
                       ),
@@ -459,7 +461,7 @@ class _WorkspaceEditScreenState extends ConsumerState<WorkspaceEditScreen> {
                 MediaQuery.of(context).padding.bottom + 12,
               ),
               child: GlanceButton(
-                label: _isNew ? 'Créer le groupe' : 'Enregistrer',
+                label: _isNew ? l10n.groupEditCreateButton : l10n.commonSave,
                 // Un groupe sans nom n'a pas de chip lisible ; sans site il
                 // reste valide (on le remplira plus tard).
                 onTap: _name.text.trim().isEmpty ? null : _save,
@@ -557,11 +559,11 @@ class _AddSourceRow extends StatelessWidget {
           const SizedBox(width: 13),
           Expanded(
             child: Text(
-              'Ajouter une source',
+              context.l10n.settingsAddSource,
               style: GT.body(15, weight: 500, color: p.accent),
             ),
           ),
-          Text('ses sites entrent ici', style: GT.body(11.5, color: p.fg3)),
+          Text(context.l10n.groupEditAddSourceHint, style: GT.body(11.5, color: p.fg3)),
         ],
       ),
     );

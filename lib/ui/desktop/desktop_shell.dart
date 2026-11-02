@@ -10,6 +10,7 @@ import '../../core/site_search.dart';
 import '../../data/models/models.dart';
 import '../../data/models/period.dart';
 import '../../data/models/workspace.dart';
+import '../../l10n/l10n.dart';
 import '../../state/desktop_nav.dart';
 import '../../state/home_data.dart';
 import '../../state/period_state.dart';
@@ -160,7 +161,7 @@ class _SidebarState extends ConsumerState<_Sidebar> {
               children: [
                 Expanded(
                   child: Text(
-                    active?.name ?? 'Mes sites',
+                    active?.name ?? context.l10n.homeTitleDefault,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: GT.display(24, color: p.fg),
@@ -182,7 +183,7 @@ class _SidebarState extends ConsumerState<_Sidebar> {
               children: [
                 _OverviewTile(
                   selected: nav.view == DesktopView.overview,
-                  scopeLabel: active?.name ?? 'Tous les sites',
+                  scopeLabel: active?.name ?? context.l10n.workspaceAllSites,
                   visitors: totals.data.totalVisitors,
                   live: totals.data.totalLive,
                   loading: totals.loading && totals.data.cards.isEmpty,
@@ -193,11 +194,11 @@ class _SidebarState extends ConsumerState<_Sidebar> {
                   padding: const EdgeInsets.fromLTRB(10, 12, 10, 6),
                   child: Row(
                     children: [
-                      SectionLabel('Sites (${sites.length})'),
+                      SectionLabel(context.l10n.desktopSitesHeader(sites.length)),
                       if (hiddenCount > 0) ...[
                         const SizedBox(width: 8),
                         Text(
-                          '$hiddenCount masqué${hiddenCount > 1 ? 's' : ''}',
+                          context.l10n.desktopHiddenCount(hiddenCount),
                           style: GT.body(11, color: p.fg3),
                         ),
                       ],
@@ -248,7 +249,7 @@ class _SidebarState extends ConsumerState<_Sidebar> {
             padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
             child: _NavTile(
               icon: Icons.tune_rounded,
-              label: 'Réglages',
+              label: context.l10n.tabSettings,
               selected: nav.view == DesktopView.settings,
               onTap: () => ref.read(desktopNavProvider.notifier).settings(),
             ),
@@ -300,7 +301,7 @@ class _OverviewTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Vue d\'ensemble',
+                Text(context.l10n.detailTabOverview,
                     style: GT.body(14, weight: 600, color: p.fg)),
                 Text(scopeLabel,
                     maxLines: 1,
@@ -344,7 +345,7 @@ class _LiveTag extends StatelessWidget {
       children: [
         PulseDot(size: 6, color: p.accent),
         const SizedBox(width: 4),
-        Text('$count live', style: GT.mono(10, color: p.accent)),
+        Text(context.l10n.homeLiveCount(count), style: GT.mono(10, color: p.accent)),
       ],
     );
   }
@@ -507,8 +508,8 @@ class _HideZeroToggle extends StatelessWidget {
     final p = context.glance;
     return Tooltip(
       message: on
-          ? 'Afficher tous les sites'
-          : 'Masquer les sites sans visiteur',
+          ? context.l10n.desktopShowAllSites
+          : context.l10n.desktopHideEmptySites,
       child: Material(
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(999),
@@ -672,9 +673,9 @@ class _OverviewState extends ConsumerState<_Overview> {
     final data = totals.data;
     final hidden = ref.watch(settingsProvider.select((s) => s.hiddenSeries));
     final refreshing = totals.loading && data.cards.isNotEmpty;
-    final dateLabel = DateFormat('EEE d MMM', 'fr_FR').format(DateTime.now());
+    final dateLabel = DateFormat.MMMEd().format(DateTime.now());
     final group = ref.watch(activeWorkspaceProvider);
-    final scope = group?.name ?? 'Tous les sites';
+    final scope = group?.name ?? context.l10n.workspaceAllSites;
 
     // Fenêtre pas encore résolue (« Tout » attend la date de première donnée) :
     // un « 0 visiteur » en gros chiffres se lirait comme une réponse.
@@ -701,7 +702,7 @@ class _OverviewState extends ConsumerState<_Overview> {
         ListView(
           padding: const EdgeInsets.fromLTRB(28, 26, 28, 40),
           children: [
-            Text('${dateLabel.toUpperCase()} · ${periodState.period.label}',
+            Text('${dateLabel.toUpperCase()} · ${periodState.period.label(context.l10n)}',
                 style: GT.mono(11.5, color: p.fg3)),
             const SizedBox(height: 4),
             Row(
@@ -713,7 +714,7 @@ class _OverviewState extends ConsumerState<_Overview> {
                       overflow: TextOverflow.ellipsis,
                       style: GT.display(30, color: p.fg)),
                 ),
-                LivePill(count: data.totalLive, text: '${data.totalLive} live'),
+                LivePill(count: data.totalLive),
               ],
             ),
             const SizedBox(height: 16),
@@ -724,7 +725,7 @@ class _OverviewState extends ConsumerState<_Overview> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SectionLabel('Visiteurs · $scope'),
+                  SectionLabel(context.l10n.homeTotalVisitors(scope)),
                   const SizedBox(height: 8),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
@@ -738,7 +739,7 @@ class _OverviewState extends ConsumerState<_Overview> {
                           children: [
                             DeltaText(data.totalDeltaPct, fontSize: 13),
                             const SizedBox(width: 6),
-                            Text('vs période préc.',
+                            Text(context.l10n.homeVsPrevious,
                                 style: GT.body(12.5, color: p.fg3)),
                           ],
                         ),
@@ -776,13 +777,13 @@ class _OverviewState extends ConsumerState<_Overview> {
             const SizedBox(height: 14),
             Row(
               children: [
-                _OverviewKpi(label: 'Visites', value: fmtInt(data.totalVisits)),
+                _OverviewKpi(label: context.l10n.detailKpiVisits, value: fmtInt(data.totalVisits)),
                 const SizedBox(width: 12),
                 _OverviewKpi(
-                    label: 'Pages vues', value: fmtInt(data.totalPageviews)),
+                    label: context.l10n.commonPageviews, value: fmtInt(data.totalPageviews)),
                 const SizedBox(width: 12),
                 _OverviewKpi(
-                    label: 'Sites', value: '${totals.siteCount}'),
+                    label: context.l10n.desktopKpiSites, value: '${totals.siteCount}'),
               ],
             ),
             const SizedBox(height: 24),
@@ -843,11 +844,11 @@ class _LiveNow extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SectionLabel('En direct maintenant'),
+          SectionLabel(context.l10n.detailLiveNow),
           if (live.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 14),
-              child: Text('Personne en ce moment.',
+              child: Text(context.l10n.desktopLiveNobody,
                   style: GT.body(14, color: p.fg3)),
             )
           else
@@ -923,7 +924,7 @@ class _DesktopEmpty extends StatelessWidget {
             Text('Glance', style: GT.display(30, color: p.fg)),
             const SizedBox(height: 8),
             Text(
-              'Vos statistiques, en un clin d\'œil.',
+              context.l10n.homeWelcomeTagline,
               textAlign: TextAlign.center,
               style: GT.body(15, color: p.fg2),
             ),
@@ -932,7 +933,7 @@ class _DesktopEmpty extends StatelessWidget {
               builder: (context) => FilledButton.icon(
                 onPressed: () => openAddSource(context),
                 icon: const Icon(Icons.add, size: 18),
-                label: const Text('Ajouter une source'),
+                label: Text(context.l10n.homeWelcomeAddSource),
                 style: FilledButton.styleFrom(
                   backgroundColor: p.accent,
                   foregroundColor: p.accentInk,
@@ -982,15 +983,16 @@ class _OverviewNoSites extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            Text(inGroup ? 'Groupe vide' : 'Aucun site affiché',
+            Text(
+                inGroup
+                    ? context.l10n.homeEmptyGroupTitle
+                    : context.l10n.homeEmptyTitle,
                 style: GT.display(26, color: p.fg)),
             const SizedBox(height: 8),
             Text(
               inGroup
-                  ? '« ${group!.name} » ne contient aucun site. Choisissez ceux '
-                      'qui en font partie.'
-                  : 'Vos comptes ne suivent aucun site pour le moment. '
-                      'Choisissez les sites à afficher depuis les réglages.',
+                  ? context.l10n.desktopNoSitesGroupBody(group!.name)
+                  : context.l10n.desktopNoSitesBody,
               textAlign: TextAlign.center,
               style: GT.body(14.5, color: p.fg2),
             ),
@@ -1001,7 +1003,9 @@ class _OverviewNoSites extends StatelessWidget {
                 inGroup ? Icons.folder_rounded : Icons.tune_rounded,
                 size: 18,
               ),
-              label: Text(inGroup ? 'Choisir ses sites' : 'Choisir les sites'),
+              label: Text(inGroup
+                  ? context.l10n.homeEmptyGroupChoose
+                  : context.l10n.homeEmptyChooseSites),
               style: FilledButton.styleFrom(
                 backgroundColor: p.accent,
                 foregroundColor: p.accentInk,

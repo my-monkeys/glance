@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:glance/data/models/metrics_source.dart';
 import 'package:glance/data/models/period.dart';
 import 'package:glance/data/providers/metrics_api.dart';
+import 'package:glance/l10n/app_localizations_fr.dart';
 
 /// Répond avec un statut et un corps fixes, et garde la dernière requête.
 class FakeAdapter implements HttpClientAdapter {
@@ -169,7 +170,8 @@ void main() {
       expect((bad as MetricsBadRequest).code, 'plage_trop_longue');
       final v = await failure(200, {'version': 2, 'indicateurs': []});
       expect(v, isA<MetricsUnsupportedVersion>());
-      expect(v.toString(), 'Version d\'API non prise en charge');
+      expect((v as MetricsApiException).message(AppLocalizationsFr()),
+          'Version d\'API non prise en charge');
       expect(await failure(500, {}), isA<MetricsUnexpectedResponse>());
       expect(await failure(200, 'pas du json'), isA<MetricsUnexpectedResponse>());
     });

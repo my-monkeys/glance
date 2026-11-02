@@ -92,9 +92,17 @@ class SeriesPoint {
 @immutable
 class MetricRow {
   const MetricRow({required this.label, required this.value, this.code});
+
+  /// Visite sans référent : ni libellé ni code, l'écran écrit « Accès direct ».
+  const MetricRow.direct(int value) : this(label: '', value: value);
+
+  /// Valeur brute du fournisseur pour les dimensions traduites à l'affichage
+  /// (pays, navigateur…), sinon le texte tel qu'il s'affiche (chemin, hôte).
   final String label;
   final int value;
   final String? code; // ex: code pays "FR"
+
+  bool get isDirect => label.isEmpty && code == null;
 }
 
 /// Plage réellement couverte par les données d'un site (première et dernière

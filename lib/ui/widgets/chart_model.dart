@@ -7,6 +7,7 @@ import '../../core/format.dart';
 import '../../core/predict.dart';
 import '../../data/models/models.dart';
 import '../../data/models/period.dart';
+import '../../l10n/l10n.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
 import 'chart_util.dart';
@@ -21,14 +22,12 @@ enum ChartSeriesRole { visitors, pageviews, forecast, compare }
 class ChartSeries {
   const ChartSeries({
     required this.role,
-    required this.label,
     required this.color,
     required this.values,
     this.offset = 0,
   });
 
   final ChartSeriesRole role;
-  final String label;
   final Color color;
   final List<double> values;
 
@@ -119,14 +118,12 @@ class ChartModel {
       if (showCompare)
         ChartSeries(
           role: ChartSeriesRole.compare,
-          label: 'période précédente',
           color: palette.fg3,
           values: [for (final e in cmp) e.visitors],
         ),
       if (showFc)
         ChartSeries(
           role: ChartSeriesRole.forecast,
-          label: 'prévision',
           color: palette.forecast,
           values: [for (final e in fcPoints) e.visitors],
           offset: fcStart,
@@ -134,14 +131,12 @@ class ChartModel {
       if (showViews)
         ChartSeries(
           role: ChartSeriesRole.pageviews,
-          label: 'pages vues',
           color: palette.fg2,
           values: views,
         ),
       if (showVisitors)
         ChartSeries(
           role: ChartSeriesRole.visitors,
-          label: 'visiteurs',
           color: palette.accent,
           values: visitors,
         ),
@@ -225,7 +220,11 @@ class ChartModel {
 
 /// Axes communs aux deux moteurs : l'échelle Y arrondie à gauche (et celle des
 /// pages vues à droite quand elles ont la leur), ~6 repères de temps en bas, ceux de la partie projetée dans la couleur de la prévision.
-FlTitlesData buildChartTitles(ChartModel m, GlancePalette p) => FlTitlesData(
+FlTitlesData buildChartTitles(
+  AppLocalizations l10n,
+  ChartModel m,
+  GlancePalette p,
+) => FlTitlesData(
       topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
       // Les couleurs des deux axes ne servent qu'à les distinguer, et seulement
       // quand il y en a deux.
@@ -281,7 +280,7 @@ FlTitlesData buildChartTitles(ChartModel m, GlancePalette p) => FlTitlesData(
             return Padding(
               padding: const EdgeInsets.only(top: 8),
               child: Text(
-                fmtAxis(m.timeAt(i), m.unit),
+                fmtAxis(l10n, m.timeAt(i), m.unit),
                 style: GT.mono(
                   9.5,
                   color: i > m.lastObsX ? p.forecast : p.fg3,

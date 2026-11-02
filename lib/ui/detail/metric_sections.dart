@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/entities.dart';
 import '../../core/internal_traffic.dart';
 import '../../data/models/dimension.dart';
+import '../../l10n/l10n.dart';
 import '../../data/models/models.dart';
 import '../../data/models/period.dart';
 import '../../state/internal_traffic.dart';
@@ -188,7 +190,7 @@ class _MetricSectionCardState extends ConsumerState<MetricSectionCard> {
                 onTap: () => _openAll(context, dim, rows),
                 behavior: HitTestBehavior.opaque,
                 child: Text(
-                  'Voir les ${rows.length} lignes',
+                  context.l10n.detailSectionViewAll(rows.length),
                   style: GT.body(12.5, weight: 500, color: p.accent),
                 ),
               ),
@@ -207,7 +209,7 @@ class _MetricSectionCardState extends ConsumerState<MetricSectionCard> {
           padding: const EdgeInsets.fromLTRB(20, 18, 20, 30),
           children: [
             Text(
-              '${widget.section.label} · ${dim.label}',
+              '${widget.section.label(ctx.l10n)} · ${dim.label(ctx.l10n)}',
               style: GT.display(22, color: ctx.glance.fg),
             ),
             const SizedBox(height: 14),
@@ -262,7 +264,7 @@ class _SectionRows extends ConsumerWidget {
       rows: [
         for (final r in rows.take(limit))
           MetricBarRow(
-            label: r.label,
+            label: metricRowLabel(context.l10n, dim, r),
             value: r.value,
             code: r.code,
             icon: dim.iconKind,
@@ -271,7 +273,7 @@ class _SectionRows extends ConsumerWidget {
                     r.code != null &&
                     known.contains(normDomain(r.code!)) &&
                     normDomain(r.code!) != self
-                ? 'INTERNE'
+                ? context.l10n.detailBadgeInternal
                 : null,
           ),
       ],
@@ -304,7 +306,7 @@ class _SectionHeader extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SectionLabel(section.label),
+        SectionLabel(section.label(context.l10n)),
         const SizedBox(height: 8),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -328,7 +330,7 @@ class _SectionHeader extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      t.label,
+                      t.label(context.l10n),
                       style: GT.mono(
                         10.5,
                         weight: t == current ? 600 : 400,
@@ -397,12 +399,12 @@ class _SectionError extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 22),
       child: Column(
         children: [
-          Text('Chargement impossible.', style: GT.body(13, color: p.fg2)),
+          Text(context.l10n.homeLoadFailed, style: GT.body(13, color: p.fg2)),
           const SizedBox(height: 8),
           GestureDetector(
             onTap: onRetry,
             child: Text(
-              'Réessayer',
+              context.l10n.commonRetry,
               style: GT.body(13, weight: 600, color: p.accent),
             ),
           ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../data/models/indicator.dart';
 import '../../../data/models/models.dart';
+import '../../../l10n/l10n.dart';
 import '../../../theme/palette.dart';
 import '../../../theme/type.dart';
 import '../../widgets/field.dart';
@@ -65,14 +66,14 @@ class FunnelStepsEditor extends StatelessWidget {
         if (steps.length < kFunnelMaxSteps) ...[
           const SizedBox(height: 12),
           GlanceButtonOutline(
-            label: 'Ajouter une étape',
+            label: context.l10n.editorFunnelAddStep,
             leading: Icon(Icons.add_rounded, size: 18, color: p.fg),
             onTap: () => onSteps([...steps, const EventQuery('')]),
           ),
         ],
         const SizedBox(height: 20),
         GlanceField(
-          label: 'Délai maximum entre deux étapes',
+          label: context.l10n.editorFunnelWindowLabel,
           controller: window,
           mono: true,
           hint: '$kFunnelDefaultWindow',
@@ -82,9 +83,7 @@ class FunnelStepsEditor extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.only(left: 3, top: 7),
           child: Text(
-            'En minutes (de $kFunnelMinWindow à $kFunnelMaxWindow) : un visiteur '
-            'qui met plus de temps à passer d\'une étape à la suivante n\'est '
-            'plus compté.',
+            context.l10n.editorFunnelWindowHint(kFunnelMinWindow, kFunnelMaxWindow),
             style: GT.body(12.5, color: p.fg3),
           ),
         ),
@@ -115,6 +114,7 @@ class _StepCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = context.glance;
+    final l10n = context.l10n;
     Widget action(IconData icon, String label, VoidCallback? onTap) => Tooltip(
           message: label,
           child: GestureDetector(
@@ -140,13 +140,13 @@ class _StepCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Text('ÉTAPE ${index + 1}', style: GT.label(color: p.fg2)),
+              Text(l10n.editorFunnelStep(index + 1), style: GT.label(color: p.fg2)),
               const Spacer(),
-              action(Icons.arrow_upward_rounded, 'Monter l\'étape',
+              action(Icons.arrow_upward_rounded, l10n.editorFunnelMoveUp,
                   canMoveUp ? () => onMove(-1) : null),
-              action(Icons.arrow_downward_rounded, 'Descendre l\'étape',
+              action(Icons.arrow_downward_rounded, l10n.editorFunnelMoveDown,
                   canMoveDown ? () => onMove(1) : null),
-              action(Icons.close_rounded, 'Retirer l\'étape',
+              action(Icons.close_rounded, l10n.editorFunnelRemove,
                   canRemove ? onRemove : null),
             ],
           ),

@@ -7,6 +7,7 @@ import '../../data/models/account.dart';
 import '../../data/providers/analytics_provider.dart';
 import '../../data/providers/provider_factory.dart';
 import '../../data/repository/accounts_repository.dart';
+import '../../l10n/l10n.dart';
 import '../../state/period_state.dart';
 import '../../state/providers.dart';
 import '../../theme/palette.dart';
@@ -45,7 +46,7 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
 
   /// Lit les identifiants saisis et signale s'il manque un champ obligatoire.
   ({Map<String, String> creds, bool missing}) _readCreds() {
-    final fields = credentialFieldsFor(_kind);
+    final fields = credentialFieldsFor(context.l10n, _kind);
     final creds = {for (final f in fields) f.key: _c(f.key).text.trim()};
     final missing =
         fields.any((f) => !f.optional && (creds[f.key] ?? '').isEmpty);
@@ -61,9 +62,10 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
 
   /// Teste la configuration sans l'enregistrer (valide identifiants + clé).
   Future<void> _test() async {
+    final l10n = context.l10n;
     final (:creds, :missing) = _readCreds();
     if (missing) {
-      setState(() => _error = 'Renseigne les champs obligatoires.');
+      setState(() => _error = l10n.addSourceMissingFields);
       return;
     }
     setState(() {
@@ -75,10 +77,10 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
       final n = await buildProvider(_accountFrom(creds), creds).verify();
       if (!mounted) return;
       setState(() => _testOk = n > 0
-          ? 'Connexion réussie · $n site${n > 1 ? 's' : ''} détecté${n > 1 ? 's' : ''}'
-          : 'Connexion réussie.');
+          ? l10n.addSourceTestOkSites(n)
+          : l10n.addSourceTestOk);
     } catch (e) {
-      if (mounted) setState(() => _error = friendlyError(e));
+      if (mounted) setState(() => _error = friendlyError(l10n, e));
     } finally {
       if (mounted) setState(() => _testing = false);
     }
@@ -113,12 +115,13 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
   }
 
   Future<void> _continue() async {
-    final fields = credentialFieldsFor(_kind);
+    final l10n = context.l10n;
+    final fields = credentialFieldsFor(context.l10n, _kind);
     final creds = {for (final f in fields) f.key: _c(f.key).text.trim()};
     final missingRequired =
         fields.any((f) => !f.optional && (creds[f.key] ?? '').isEmpty);
     if (missingRequired) {
-      setState(() => _error = 'Renseigne les champs obligatoires.');
+      setState(() => _error = l10n.addSourceMissingFields);
       return;
     }
     setState(() {
@@ -144,10 +147,8 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
         setState(() {
           _busy = false;
           _error = _kind == ProviderKind.plausible
-              ? 'Aucun site listé automatiquement : votre instance n\'expose pas '
-                  'l\'API de listing (Plausible Community Edition). Renseignez le '
-                  'domaine à suivre ci-dessus.'
-              : 'Aucun site trouvé pour ce compte.';
+              ? l10n.addSourceNoSitesPlausible
+              : l10n.addSourceNoSites;
         });
         return;
       }
@@ -162,8 +163,8 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
           setState(() {
             _busy = false;
             _error = _kind == ProviderKind.plausible
-                ? 'Clé API refusée (accès aux stats). Vérifiez la clé API.'
-                : 'Identifiants refusés.';
+                ? l10n.addSourceKeyRejected
+                : l10n.addSourceCredsRejected;
           });
           return;
         }
@@ -199,11 +200,11 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
           );
       if (mounted) {
         showGlanceToast(
-            context, _isEditing ? 'Source modifiée' : 'Source ajoutée');
+            context, _isEditing ? l10n.addSourceEdited : l10n.addSourceAdded);
         Navigator.of(context).pop();
       }
     } catch (e) {
-      if (mounted) setState(() => _error = friendlyError(e));
+      if (mounted) setState(() => _error = friendlyError(l10n, e));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -212,7 +213,8 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
   @override
   Widget build(BuildContext context) {
     final p = context.glance;
-    final fields = credentialFieldsFor(_kind);
+    final l10n = context.l10n;
+    final fields = credentialFieldsFor(context.l10n, _kind);
 
     return Scaffold(
       body: SafeArea(
@@ -228,7 +230,7 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
                     onTap: () => Navigator.of(context).pop(),
                   ),
                   const SizedBox(width: 12),
-                  Text(_isEditing ? 'Modifier la source' : 'Nouvelle source',
+                  Text(_isEditing ? l10n.accountMenuEdit : l10n.addSourceNewTitle,
                       style: GT.display(28, color: p.fg)),
                 ],
               ),
@@ -242,7 +244,7 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
                   if (!_isEditing) ...[
                     Padding(
                       padding: const EdgeInsets.only(left: 3, bottom: 7),
-                      child: Text('FOURNISSEUR', style: GT.label(color: p.fg2)),
+                      child: Text(l10n.addSourceProvider, style: GT.label(color: p.fg2)),
                     ),
                     Row(
                       children: [
@@ -279,9 +281,9 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
                     const SizedBox(height: 22),
                   ],
                   GlanceField(
-                    label: 'Nom (optionnel)',
+                    label: l10n.addSourceName,
                     controller: _name,
-                    hint: 'Mon domaine',
+                    hint: l10n.addSourceNameHint,
                   ),
                   const SizedBox(height: 14),
                   for (final f in fields) ...[
@@ -347,7 +349,7 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
               child: Column(
                 children: [
                   GlanceButtonOutline(
-                    label: 'Tester la configuration',
+                    label: l10n.addSourceTest,
                     busy: _testing,
                     leading: Icon(Icons.wifi_tethering_rounded,
                         size: 17, color: p.fg),
@@ -355,7 +357,7 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
                   ),
                   const SizedBox(height: 10),
                   GlanceButton(
-                    label: _isEditing ? 'Enregistrer' : 'Continuer',
+                    label: _isEditing ? l10n.commonSave : l10n.addSourceContinue,
                     busy: _busy,
                     icon: Icons.arrow_forward_rounded,
                     onTap: _continue,

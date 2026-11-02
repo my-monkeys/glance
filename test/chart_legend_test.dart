@@ -9,6 +9,7 @@ import 'package:glance/state/providers.dart';
 import 'package:glance/theme/theme.dart';
 import 'package:glance/ui/widgets/glance_chart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'helpers/l10n.dart';
 
 final _series = [
   for (var i = 0; i < 5; i++) SeriesPoint(DateTime(2026, 10, 1 + i), 10.0 + i, 40.0 + i),
@@ -21,6 +22,9 @@ Future<ProviderContainer> _pump(WidgetTester tester,
   await tester.pumpWidget(ProviderScope(
     overrides: [sharedPrefsProvider.overrideWithValue(prefs)],
     child: MaterialApp(
+      locale: testLocale,
+      localizationsDelegates: glanceLocalizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       theme: glanceTheme(Brightness.light),
       home: Scaffold(
         body: Consumer(

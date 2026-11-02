@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/models/period.dart';
+import '../../l10n/l10n.dart';
 import '../../state/period_state.dart';
 import '../../state/settings.dart';
 import '../../theme/motion.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
+import '../settings/settings_labels.dart';
 import 'chip.dart';
 
 /// Barre de contrôles sous le titre : les périodes, et un bouton « Affichage »
@@ -55,7 +57,7 @@ class PeriodControls extends ConsumerWidget {
       children: [
         for (final per in Period.values)
           GlanceChip(
-            label: per.label,
+            label: per.label(context.l10n),
             selected: current == per,
             onTap: () => per == Period.custom
                 ? onPickCustom()
@@ -73,7 +75,7 @@ class PeriodControls extends ConsumerWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final chipsWidth = Period.values.fold<double>(
-                0, (w, per) => w + GlanceChip.widthOf(context, per.label)) +
+                0, (w, per) => w + GlanceChip.widthOf(context, per.label(context.l10n))) +
             _chipGap * (Period.values.length - 1);
         final room = constraints.maxWidth -
             _padding.horizontal -
@@ -138,6 +140,14 @@ class PeriodControls extends ConsumerWidget {
   }
 }
 
+extension on TimeUnit {
+  String localized(AppLocalizations l10n) => switch (this) {
+    TimeUnit.hour => l10n.periodUnitHour,
+    TimeUnit.day => l10n.periodUnitDay,
+    TimeUnit.month => l10n.periodUnitMonth,
+  };
+}
+
 /// Le bouton « Affichage » et son menu déroulant. Le menu reste ouvert quand on
 /// change un réglage : on peut régler les deux d'affilée et voir le graphique
 /// changer derrière.
@@ -193,7 +203,6 @@ class _DisplayButton extends StatelessWidget {
   final bool open;
   final VoidCallback onTap;
 
-  static const String _label = 'Affichage';
   static const double _hPad = 10;
   static const double _iconWidth = 15;
   static const double _labelGap = 6;
@@ -213,7 +222,10 @@ class _DisplayButton extends StatelessWidget {
   static double widthOf(BuildContext context, {required bool compact}) =>
       2 * _hPad +
       _iconWidth +
-      (compact ? 0 : _labelGap + _textWidth(context, _label, _style()));
+      (compact
+          ? 0
+          : _labelGap +
+              _textWidth(context, context.l10n.periodControlsDisplay, _style()));
 
   @override
   Widget build(BuildContext context) {
@@ -237,14 +249,15 @@ class _DisplayButton extends StatelessWidget {
             Icon(Icons.tune_rounded, size: _iconWidth, color: ink),
             if (!compact) ...[
               const SizedBox(width: _labelGap),
-              Text(_label, style: GT.mono(11, color: ink)),
+              Text(context.l10n.periodControlsDisplay,
+                  style: GT.mono(11, color: ink)),
             ],
           ],
         ),
       ),
     );
     if (!compact) return button;
-    return Tooltip(message: _label, child: button);
+    return Tooltip(message: context.l10n.periodControlsDisplay, child: button);
   }
 }
 
@@ -269,8 +282,8 @@ class _DisplayPanel extends ConsumerWidget {
         labels.fold<double>(0, (w, l) => w + GlanceChip.widthOf(context, l)) +
         _chipGap * (labels.length - 1);
     final rows = [
-      row(ChartStyle.values.map((s) => s.label)),
-      if (units.length > 1) row(units.map((u) => u.label)),
+      row(ChartStyle.values.map((s) => s.localized(context.l10n))),
+      if (units.length > 1) row(units.map((u) => u.localized(context.l10n))),
     ];
     return 2 * _pad + rows.reduce((a, b) => a > b ? a : b);
   }
@@ -306,20 +319,20 @@ class _DisplayPanel extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (units.length > 1) ...[
-              section('Découpage', [
+              section(context.l10n.periodControlsSplit, [
                 for (final u in units)
                   GlanceChip(
-                    label: u.label,
+                    label: u.localized(context.l10n),
                     selected: u == window!.unit,
                     onTap: () => ref.read(periodProvider.notifier).setUnit(u),
                   ),
               ]),
               const SizedBox(height: 14),
             ],
-            section('Graphique', [
+            section(context.l10n.periodControlsChart, [
               for (final s in ChartStyle.values)
                 GlanceChip(
-                  label: s.label,
+                  label: s.localized(context.l10n),
                   selected: s == style,
                   onTap: () =>
                       ref.read(settingsProvider.notifier).setChartStyle(s),

@@ -1,0 +1,1371 @@
+{
+  "@@locale": "fr",
+  "settingsLanguageTitle": "Langue",
+  "@settingsLanguageTitle": {
+    "description": "Titre du réglage de langue dans Réglages"
+  },
+  "settingsLanguageAuto": "Automatique",
+  "dayRange": "du {from} au {to}",
+  "@dayRange": {
+    "description": "Plage de jours : « du 7 au 13 oct. »",
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "commonClose": "Fermer",
+  "commonClear": "Effacer",
+  "commonRetry": "Réessayer",
+  "tabSites": "Sites",
+  "@tabSites": {
+    "description": "Onglet de la barre du bas : la liste des sites"
+  },
+  "tabDirect": "Direct",
+  "@tabDirect": {
+    "description": "Onglet de la barre du bas : visiteurs en direct"
+  },
+  "tabSettings": "Réglages",
+  "@tabSettings": {
+    "description": "Onglet de la barre du bas"
+  },
+  "siteSearchHint": "Rechercher un site",
+  "siteSearchNoMatch": "Aucun site ne correspond à « {query} ».",
+  "@siteSearchNoMatch": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "navToday": "Aujourd'hui",
+  "navYesterday": "Hier",
+  "navDayBeforeYesterday": "Avant-hier",
+  "navThisMonth": "Ce mois-ci",
+  "navLastMonth": "Mois dernier",
+  "navThisYear": "Cette année",
+  "navLastYear": "Année dernière",
+  "workspaceSheetTitle": "Périmètre",
+  "@workspaceSheetTitle": {
+    "description": "Titre de la feuille qui liste les groupes de sites ; le périmètre = les sites affichés"
+  },
+  "workspaceAllSites": "Tous les sites",
+  "workspaceTrackedSites": "{count, plural, =0{0 site suivi} =1{1 site suivi} other{{count} sites suivis}}",
+  "@workspaceTrackedSites": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "workspaceSiteCount": "{count, plural, =0{Aucun site} =1{1 site} other{{count} sites}}",
+  "@workspaceSiteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "workspaceNewGroup": "Nouveau groupe",
+  "workspaceManageGroups": "Gérer les groupes",
+  "homeTitleDefault": "Mes sites",
+  "@homeTitleDefault": {
+    "description": "Titre de l'accueil quand aucun groupe n'est actif"
+  },
+  "homeLoadFailed": "Chargement impossible.",
+  "homeInternalTitle": "Entre vos sites",
+  "@homeInternalTitle": {
+    "description": "Carte : visiteurs que les sites suivis s'envoient entre eux"
+  },
+  "homeTotalVisitors": "Visiteurs · {name}",
+  "@homeTotalVisitors": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeTotalVisitorsAll": "Visiteurs · tous les sites",
+  "homeVsPrevious": "vs période préc.",
+  "homeLiveCount": "{count} live",
+  "@homeLiveCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeEmptyTitle": "Aucun site affiché",
+  "homeEmptyBody": "Aucun site suivi pour le moment. Choisis ceux à afficher.",
+  "homeEmptyChooseSites": "Choisir les sites",
+  "homeEmptyAddSource": "+ Ajouter une source",
+  "homeEmptyGroupTitle": "Groupe vide",
+  "homeEmptyGroupBody": "« {name} » ne contient aucun site.",
+  "@homeEmptyGroupBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeEmptyGroupChoose": "Choisir ses sites",
+  "homeEmptyGroupSeeAll": "Voir tous les sites",
+  "homeWelcomeTagline": "Vos statistiques, en un clin d'œil.",
+  "homeWelcomeTitle": "Connectez votre premier outil",
+  "homeWelcomeBody": "Umami, Plausible… ajoutez une source puis choisissez les sites à suivre.",
+  "homeWelcomeAddSource": "Ajouter une source",
+  "homeWelcomeFootnote": "Clé en lecture seule · vos données restent chez vous",
+  "homeSiteUnavailable": "Indisponible",
+  "detailVisitorsUnique": "Visiteurs uniques",
+  "detailKpiVisits": "Visites",
+  "@detailKpiVisits": {
+    "description": "Carte KPI : nombre de visites"
+  },
+  "detailKpiAvgDuration": "Durée moy.",
+  "@detailKpiAvgDuration": {
+    "description": "Carte KPI : durée moyenne d'une visite, libellé très court"
+  },
+  "detailKpiBounce": "Rebond",
+  "@detailKpiBounce": {
+    "description": "Carte KPI : taux de rebond, libellé très court"
+  },
+  "detailLiveNow": "En direct maintenant",
+  "detailLiveNobody": "Personne pour l'instant.",
+  "detailTabOverview": "Vue d'ensemble",
+  "@detailTabOverview": {
+    "description": "Onglet du détail d'un site ; trois onglets partagent une ligne étroite"
+  },
+  "detailTabEvents": "Événements",
+  "@detailTabEvents": {
+    "description": "Onglet du détail d'un site"
+  },
+  "detailTabDashboards": "Tableaux",
+  "@detailTabDashboards": {
+    "description": "Onglet du détail d'un site : indicateurs composés par l'utilisateur"
+  },
+  "detailEventsEmpty": "Aucun événement sur cette période",
+  "detailEventsTriggered": "Événements déclenchés",
+  "detailEventsByEvent": "Par événement",
+  "detailSectionViewAll": "Voir les {count} lignes",
+  "@detailSectionViewAll": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "detailBadgeInternal": "INTERNE",
+  "@detailBadgeInternal": {
+    "description": "Badge sur un référent qui est l'un des sites suivis par l'utilisateur"
+  },
+  "directEyebrow": "Temps réel",
+  "@directEyebrow": {
+    "description": "Petit titre au-dessus de « En direct »"
+  },
+  "directTitle": "En direct",
+  "directNow": "en ce moment",
+  "@directNow": {
+    "description": "Texte de la pastille live, à côté du nombre de visiteurs"
+  },
+  "directVisitorsAll": "visiteurs sur l'ensemble de vos sites",
+  "directVisitorsGroup": "visiteurs sur le groupe « {name} »",
+  "@directVisitorsGroup": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "directBySite": "Par site",
+  "directOnlyActive": "Actifs seulement",
+  "@directOnlyActive": {
+    "description": "Interrupteur : masquer les sites sans visiteur en direct"
+  },
+  "directNoneLive": "Aucun visiteur en direct pour l'instant.",
+  "directNoSites": "Aucun site.",
+  "directHiddenSites": "{count, plural, =1{1 site sans visiteur masqué} other{{count} sites sans visiteur masqués}}",
+  "@directHiddenSites": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "networkExchanged": "Visiteurs échangés · {period}",
+  "@networkExchanged": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "networkPending": "{count, plural, =1{1 site en cours…} other{{count} sites en cours…}}",
+  "@networkPending": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "networkExplainer": "Visiteurs arrivés sur un de vos sites depuis un autre de vos sites.",
+  "networkEmpty": "Aucune navigation interne sur cette période.",
+  "networkSenders": "Qui envoie",
+  "@networkSenders": {
+    "description": "Carte : sites qui envoient des visiteurs vers d'autres sites"
+  },
+  "networkReceivers": "Qui reçoit",
+  "@networkReceivers": {
+    "description": "Carte : sites qui reçoivent des visiteurs d'autres sites"
+  },
+  "networkFlows": "Flux",
+  "@networkFlows": {
+    "description": "Carte : liste des paires site source → site destination"
+  },
+  "commonEdit": "Modifier",
+  "commonDelete": "Supprimer",
+  "commonSave": "Enregistrer",
+  "dashboardsKindCounter": "Compteur",
+  "@dashboardsKindCounter": {
+    "description": "Genre d'une carte de tableau, en petites capitales dans l'en-tête"
+  },
+  "dashboardsKindRatio": "Taux",
+  "@dashboardsKindRatio": {
+    "description": "Genre d'une carte de tableau : deux compteurs divisés"
+  },
+  "dashboardsKindFunnel": "Entonnoir",
+  "@dashboardsKindFunnel": {
+    "description": "Genre d'une carte de tableau"
+  },
+  "dashboardsKindBreakdown": "Répartition",
+  "@dashboardsKindBreakdown": {
+    "description": "Genre d'une carte de tableau : les valeurs d'une propriété"
+  },
+  "dashboardsKindExternal": "Métrique",
+  "@dashboardsKindExternal": {
+    "description": "Genre d'une carte de tableau : indicateur fourni par la source de métriques du site"
+  },
+  "dashboardsKindSites": "Sites",
+  "@dashboardsKindSites": {
+    "description": "Genre d'une carte de tableau : plusieurs sites côte à côte"
+  },
+  "dashboardsMoveCard": "Déplacer le tableau",
+  "@dashboardsMoveCard": {
+    "description": "Libellé d'accessibilité de la poignée de déplacement d'une carte"
+  },
+  "dashboardsCardOptions": "Options du tableau",
+  "@dashboardsCardOptions": {
+    "description": "Libellé d'accessibilité du menu ⋯ d'une carte"
+  },
+  "dashboardsResizeCard": "Redimensionner le tableau",
+  "@dashboardsResizeCard": {
+    "description": "Libellé d'accessibilité du coin de redimensionnement d'une carte"
+  },
+  "dashboardsLoadFailed": "Chargement impossible.",
+  "dashboardsNoData": "Aucune donnée sur la période",
+  "dashboardsNoEvents": "Aucun événement sur la période",
+  "dashboardsUnpublished": "Pas encore publiées : données jusqu'au {date}",
+  "@dashboardsUnpublished": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardsPendingNow": "Pas encore mesurable sur cette période",
+  "dashboardsPendingDelay": "{count, plural, =1{Pas encore mesurable : il faut 1 jour de recul} other{Pas encore mesurable : il faut {count} jours de recul}}",
+  "@dashboardsPendingDelay": {
+    "description": "Métrique à délai (J1, J7…) : la cohorte n'est pas encore terminée",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardsCohortOne": "Mesurée sur la cohorte du {date}",
+  "@dashboardsCohortOne": {
+    "description": "Note sous le chiffre d'une métrique à délai",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardsCohortRange": "Mesurée sur les cohortes {range}",
+  "@dashboardsCohortRange": {
+    "description": "{range} est une plage de jours déjà formatée (« du 8 au 14 oct. »)",
+    "placeholders": {
+      "range": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardsFamilyMember": "{member} · s'ajuste à la période",
+  "@dashboardsFamilyMember": {
+    "description": "Famille de métriques : {member} est le membre retenu (J1, J7, J30)",
+    "placeholders": {
+      "member": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardsDataUntil": "Données jusqu'au {date}",
+  "@dashboardsDataUntil": {
+    "description": "Dernier jour publié par la source",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardsFunnelVisitors": "{last} / {first} visiteurs",
+  "@dashboardsFunnelVisitors": {
+    "description": "Entonnoir : visiteurs de la dernière étape sur ceux de la première",
+    "placeholders": {
+      "last": {
+        "type": "String"
+      },
+      "first": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardsCohortTooltip": "{date} · cohorte du {cohort}",
+  "@dashboardsCohortTooltip": {
+    "description": "Infobulle du graphique d'une métrique à délai ; {date} est la date de mesure",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "cohort": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardsTotal": "Total",
+  "@dashboardsTotal": {
+    "description": "Légende : la courbe de la somme des parts d'un compteur découpé"
+  },
+  "dashboardsSegmentEstimated": "{label} · estimé",
+  "@dashboardsSegmentEstimated": {
+    "description": "Part (plateforme) dont la valeur est une estimation",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardsDeleted": "Tableau supprimé",
+  "dashboardsConfirmDelete": "Confirmer la suppression",
+  "dashboardsAllHidden": "Aucun tableau n'a de données sur cette période",
+  "dashboardsHiddenCount": "{count, plural, =1{1 tableau sans données sur cette période} other{{count} tableaux sans données sur cette période}}",
+  "@dashboardsHiddenCount": {
+    "description": "Suivi d'un « · Afficher »",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardsShow": "Afficher",
+  "@dashboardsShow": {
+    "description": "Lien qui réaffiche les tableaux sans données"
+  },
+  "dashboardsArrangeHint": "Maintenez une carte pour la déplacer, tirez son coin pour la redimensionner.",
+  "dashboardsArrange": "Organiser",
+  "@dashboardsArrange": {
+    "description": "Bouton qui passe la grille en mode déplacement/redimensionnement"
+  },
+  "dashboardsArrangeDone": "Terminé",
+  "@dashboardsArrangeDone": {
+    "description": "Bouton qui quitte le mode Organiser"
+  },
+  "dashboardsNew": "Nouveau tableau",
+  "dashboardsEmptyTitle": "Aucun tableau",
+  "dashboardsEmptyBody": "Suivez un taux, un entonnoir ou une répartition construits sur vos événements.",
+  "dashboardsCreate": "Créer un tableau",
+  "dashboardsMetricsSource": "Source de métriques",
+  "dashboardsMetricsIntro": "Une petite API de votre site qui fournit des indicateurs calculés sur sa base (rétention, comptes…) : un catalogue et des séries, protégés par un jeton.",
+  "dashboardsMetricsHowItWorks": "Comment ça marche ?",
+  "@dashboardsMetricsHowItWorks": {
+    "description": "Lien vers la documentation de la source de métriques"
+  },
+  "dashboardsMetricsUrlLabel": "Adresse de l'API",
+  "dashboardsMetricsUrlHint": "https://exemple.fr/api/interne/metriques/",
+  "@dashboardsMetricsUrlHint": {
+    "description": "Exemple d'adresse, en placeholder"
+  },
+  "dashboardsMetricsToken": "Jeton",
+  "dashboardsMetricsTest": "Tester",
+  "dashboardsMetricsAvailable": "{count, plural, =1{1 indicateur disponible} other{{count} indicateurs disponibles}}",
+  "@dashboardsMetricsAvailable": {
+    "description": "Résultat positif du test de la source",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardsMetricsSaved": "Source enregistrée",
+  "dashboardsMetricsRemove": "Retirer la source",
+  "dashboardsMetricsRemoveWithCards": "Retirer la source et {count, plural, =1{1 tableau} other{{count} tableaux}}",
+  "@dashboardsMetricsRemoveWithCards": {
+    "description": "Confirmation : les cartes « Métrique » partent avec la source",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardsMetricsRemoved": "Source retirée",
+  "dashboardsMetricsRemovedWithCards": "Source retirée, {count, plural, =1{1 tableau supprimé} other{{count} tableaux supprimés}}",
+  "@dashboardsMetricsRemovedWithCards": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "commonCancel": "Annuler",
+  "commonAdd": "Ajouter",
+  "commonSearch": "Rechercher",
+  "editorNameFallback": "Sans titre",
+  "@editorNameFallback": {
+    "description": "Nom proposé quand rien n'est encore choisi"
+  },
+  "editorNameBy": "{a} par {b}",
+  "@editorNameBy": {
+    "description": "Nom proposé : une répartition « événement par propriété »",
+    "placeholders": {
+      "a": {
+        "type": "String"
+      },
+      "b": {
+        "type": "String"
+      }
+    }
+  },
+  "editorErrChooseEvent": "Choisissez un événement",
+  "@editorErrChooseEvent": {
+    "description": "Raison de validation affichée sous l'éditeur"
+  },
+  "editorErrChooseCountEvent": "Choisissez l'événement à compter",
+  "editorErrChooseRefEvent": "Choisissez l'événement de référence",
+  "@editorErrChooseRefEvent": {
+    "description": "Dénominateur d'un taux"
+  },
+  "editorErrChooseProperty": "Choisissez une propriété",
+  "editorErrChooseMetric": "Choisissez une métrique",
+  "editorErrAddSite": "Ajoutez au moins un site",
+  "editorErrSitesMax": "Un tableau compte au plus {max} sites",
+  "@editorErrSitesMax": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "editorErrChooseLineSite": "Choisissez le site de chaque ligne",
+  "editorErrNameLines": "Nommez chaque ligne",
+  "editorErrReferrer": "Indiquez le domaine du référent",
+  "editorErrFunnelMin": "Un entonnoir compte au moins {min} étapes",
+  "@editorErrFunnelMin": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "editorErrFunnelMax": "Un entonnoir compte au plus {max} étapes",
+  "@editorErrFunnelMax": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "editorErrStepEvent": "Choisissez l'événement de l'étape {n}",
+  "@editorErrStepEvent": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "editorErrFunnelNumeric": "Un entonnoir ne compare pas les nombres : retirez ce filtre",
+  "editorErrWindow": "Délai invalide",
+  "@editorErrWindow": {
+    "description": "Délai maximum entre deux étapes d'un entonnoir"
+  },
+  "editorErrFilterValueMissing": "Valeur du filtre manquante",
+  "editorErrFilterNotNumber": "Valeur de filtre non numérique",
+  "editorTitleEdit": "Modifier le tableau",
+  "editorFieldName": "Nom",
+  "editorHeadingType": "Type",
+  "@editorHeadingType": {
+    "description": "Titre de section : genre du tableau (compteur, taux…)"
+  },
+  "editorHeadingPreview": "Aperçu",
+  "editorPreviewEmpty": "L'aperçu apparaît dès que le tableau est complet.",
+  "editorCreated": "Tableau créé",
+  "editorSaved": "Tableau enregistré",
+  "editorDelete": "Supprimer ce tableau",
+  "editorCreate": "Créer",
+  "editorCountLabel": "Ce qu'on compte",
+  "@editorCountLabel": {
+    "description": "Numérateur d'un taux"
+  },
+  "editorRatioOf": "Rapporté à",
+  "@editorRatioOf": {
+    "description": "Dénominateur d'un taux"
+  },
+  "editorGapsLabel": "Laisser un trou quand rien ne s'est passé",
+  "editorGapsHint": "Sinon, ces jours-là comptent pour 0 %.",
+  "editorOverTimeLabel": "Évolution dans le temps",
+  "editorOverTimeHint": "Une courbe par valeur, sur toute la largeur",
+  "editorMetricLabel": "Métrique",
+  "editorMetricPlaceholder": "Choisir une métrique",
+  "editorMetricNone": "Cette source ne propose aucun indicateur.",
+  "editorMetricAdjusts": "s'ajuste à la période",
+  "@editorMetricAdjusts": {
+    "description": "Sous le nom d'une famille de métriques (J1, J7, J30)"
+  },
+  "editorEventLabel": "Événement",
+  "editorEventPlaceholder": "Choisir un événement",
+  "editorPropertyLabel": "Propriété",
+  "@editorPropertyLabel": {
+    "description": "Propriété d'un événement"
+  },
+  "editorPropertyPlaceholder": "Choisir une propriété",
+  "editorKindExternal": "Métrique du site",
+  "editorKindHintCounter": "Combien de fois un événement arrive",
+  "editorKindHintRatio": "Un événement rapporté à un autre",
+  "editorKindHintFunnel": "Le parcours étape par étape",
+  "editorKindHintBreakdown": "Les valeurs d'une propriété",
+  "editorKindHintExternal": "Un indicateur fourni par votre API",
+  "editorKindHintSites": "Les visiteurs de plusieurs sites",
+  "editorFunnelAddStep": "Ajouter une étape",
+  "editorFunnelWindowLabel": "Délai maximum entre deux étapes",
+  "editorFunnelWindowHint": "En minutes (de {min} à {max}) : un visiteur qui met plus de temps à passer d'une étape à la suivante n'est plus compté.",
+  "@editorFunnelWindowHint": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "editorFunnelStep": "ÉTAPE {n}",
+  "@editorFunnelStep": {
+    "description": "Titre d'une carte d'étape, en capitales",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "editorFunnelMoveUp": "Monter l'étape",
+  "editorFunnelMoveDown": "Descendre l'étape",
+  "editorFunnelRemove": "Retirer l'étape",
+  "editorTypeText": "texte",
+  "@editorTypeText": {
+    "description": "Type d'une propriété, en petit à droite d'une ligne"
+  },
+  "editorTypeNumber": "nombre",
+  "editorTypeBoolean": "oui-non",
+  "editorFreeEvent": "Saisir un nom d'événement",
+  "editorFreeProperty": "Saisir un nom de propriété",
+  "editorSiteLabel": "Site",
+  "editorUseTyped": "Utiliser « {value} »",
+  "@editorUseTyped": {
+    "description": "Ligne qui valide le texte saisi à la main",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "editorListUnavailable": "Liste indisponible — saisissez le nom à la main.",
+  "editorListEmpty": "Rien de vu sur 30 jours — saisissez le nom à la main.",
+  "editorAddFilter": "Ajouter un filtre",
+  "editorRemoveFilter": "Retirer le filtre",
+  "editorFilterValue": "Valeur",
+  "editorTrue": "vrai",
+  "@editorTrue": {
+    "description": "Valeur booléenne d'un filtre"
+  },
+  "editorFalse": "faux",
+  "editorModeAll": "Tous",
+  "@editorModeAll": {
+    "description": "Filtre de référent d'une ligne : aucun filtre"
+  },
+  "editorModeOnly": "Venus de",
+  "@editorModeOnly": {
+    "description": "Filtre de référent : seulement les visiteurs venus d'un domaine"
+  },
+  "editorModeExcept": "Sauf venus de",
+  "@editorModeExcept": {
+    "description": "Filtre de référent : tous sauf ceux venus d'un domaine"
+  },
+  "editorLineSitePlaceholder": "Choisir un site",
+  "editorLineLabel": "Libellé",
+  "@editorLineLabel": {
+    "description": "Nom court d'une ligne du tableau Sites"
+  },
+  "editorLineReferrer": "Domaine du référent",
+  "editorLineAdd": "Ajouter un site",
+  "editorLinesHint": "Visiteurs uniques de chaque ligne. « Sauf venus de » retire ceux que le site a reçus de ce domaine.",
+  "editorLineTitle": "LIGNE {n}",
+  "@editorLineTitle": {
+    "description": "Titre d'une carte de ligne, en capitales",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "editorLineRemove": "Retirer la ligne",
+  "commonSiteCount": "{count, plural, =0{0 site} =1{1 site} other{{count} sites}}",
+  "@commonSiteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsTitle": "Réglages",
+  "@settingsTitle": {
+    "description": "Titre de l'écran Réglages"
+  },
+  "settingsGroupAccount": "Compte",
+  "@settingsGroupAccount": {
+    "description": "Intitulé de groupe dans Réglages : les sources analytics"
+  },
+  "settingsGroupSites": "Sites",
+  "@settingsGroupSites": {
+    "description": "Intitulé de groupe dans Réglages"
+  },
+  "settingsGroupSync": "Synchronisation",
+  "@settingsGroupSync": {
+    "description": "Intitulé de groupe dans Réglages"
+  },
+  "settingsGroupTransfer": "Transfert",
+  "@settingsGroupTransfer": {
+    "description": "Intitulé de groupe dans Réglages : transfert vers un autre appareil"
+  },
+  "settingsGroupAppearance": "Apparence",
+  "@settingsGroupAppearance": {
+    "description": "Intitulé de groupe dans Réglages"
+  },
+  "settingsGroupData": "Données",
+  "@settingsGroupData": {
+    "description": "Intitulé de groupe dans Réglages"
+  },
+  "settingsGroupApp": "Application",
+  "@settingsGroupApp": {
+    "description": "Intitulé de groupe dans Réglages (bureau uniquement)"
+  },
+  "settingsAccountBadAuth": "Identifiants ou clé API refusés",
+  "settingsAccountUnreachable": "Instance injoignable",
+  "settingsAccountSubtitle": "{provider} · {count, plural, =0{0 site} =1{1 site} other{{count} sites}}",
+  "@settingsAccountSubtitle": {
+    "description": "Sous-titre d'un compte : fournisseur (Umami…) puis nombre de sites",
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsAddSource": "Ajouter une source",
+  "settingsGroupsTitle": "Groupes",
+  "@settingsGroupsTitle": {
+    "description": "Ligne de Réglages et titre de l'écran des groupes de sites"
+  },
+  "settingsGroupsHint": "Lire une partie de vos sites à part",
+  "settingsSyncConnected": "Connecté",
+  "settingsSyncPitch": "Sauvegarder et synchroniser (chiffré)",
+  "settingsTransferShow": "Afficher un QR de transfert",
+  "settingsTransferNone": "Aucun compte à transférer",
+  "settingsTransferContents": "Comptes, identifiants et groupes",
+  "settingsTransferImport": "Importer depuis un autre appareil",
+  "settingsTransferScan": "Scanner un QR de transfert",
+  "settingsThemeTitle": "Thème",
+  "settingsThemeAuto": "Auto",
+  "@settingsThemeAuto": {
+    "description": "Thème de l'app : suit le système"
+  },
+  "settingsThemeLight": "Clair",
+  "settingsThemeDark": "Sombre",
+  "settingsChartsTitle": "Graphiques",
+  "settingsChartsHint": "Courbe lissée ou barres",
+  "settingsChartCurve": "Courbe",
+  "settingsChartBars": "Barres",
+  "settingsDefaultPeriod": "Période par défaut",
+  "settingsDefaultPeriodHint": "À l'ouverture de l'application",
+  "settingsRefresh": "Actualisation auto",
+  "settingsRefreshSeconds": "{count} s",
+  "@settingsRefreshSeconds": {
+    "description": "Durée d'actualisation en secondes",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsRefreshMinutes": "{count} min",
+  "@settingsRefreshMinutes": {
+    "description": "Durée d'actualisation en minutes",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsCheckUpdates": "Rechercher des mises à jour",
+  "accountMenuConnectionOk": "Connexion réussie",
+  "accountMenuConnectionOkSites": "{count, plural, =1{Connexion réussie · 1 site} other{Connexion réussie · {count} sites}}",
+  "@accountMenuConnectionOkSites": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "accountMenuTest": "Tester la connexion",
+  "accountMenuEdit": "Modifier la source",
+  "accountMenuEditHint": "URL, identifiants, clé API…",
+  "accountMenuChooseSites": "Choisir les sites",
+  "accountMenuDelete": "Supprimer ce compte",
+  "accountMenuDeleted": "Source supprimée",
+  "accountMenuSelectionSaved": "Sélection enregistrée",
+  "accountSelectionAll": "tous les sites",
+  "@accountSelectionAll": {
+    "description": "Résumé de la sélection de sites d'un compte, en minuscules après « Umami · »"
+  },
+  "accountSelectionAllExcept": "{count, plural, =1{tous sauf 1 site} other{tous sauf {count} sites}}",
+  "@accountSelectionAllExcept": {
+    "description": "Résumé de la sélection de sites d'un compte",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "accountSelectionNone": "aucun site",
+  "@accountSelectionNone": {
+    "description": "Résumé de la sélection de sites d'un compte"
+  },
+  "syncSubtitle": "Vos comptes et groupes, synchronisés et chiffrés.",
+  "syncEmail": "E-mail",
+  "syncEmailHint": "vous@exemple.fr",
+  "syncPassword": "Mot de passe",
+  "syncPasswordHint": "{count} caractères minimum",
+  "@syncPasswordHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncCreateAccount": "Créer un compte",
+  "syncCreateAccountButton": "Créer le compte",
+  "syncSignIn": "Se connecter",
+  "syncHaveAccount": "J'ai déjà un compte",
+  "syncEncryptedNote": "Votre config est chiffrée sur l'appareil avant l'envoi : le serveur ne peut pas la lire. Mot de passe oublié = sync irrécupérable.",
+  "syncToastCreated": "Compte créé",
+  "syncToastSignedIn": "Connecté",
+  "syncToastSignedOut": "Déconnecté",
+  "syncToastSynced": "Synchronisé",
+  "syncToastDeleted": "Compte supprimé",
+  "syncToastUnlocked": "Glance Sync débloqué",
+  "syncToastRestored": "Achat restauré",
+  "syncNever": "Jamais synchronisé",
+  "syncLastSync": "Sync {date}",
+  "@syncLastSync": {
+    "description": "Date et heure de la dernière synchronisation, déjà formatées",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "syncNow": "Synchroniser maintenant",
+  "syncSignOut": "Se déconnecter",
+  "syncDeleteAccount": "Supprimer mon compte",
+  "syncDeleteTitle": "Supprimer le compte ?",
+  "syncDeleteBody": "Votre compte Glance Sync et toute la configuration synchronisée seront définitivement supprimés du serveur. Action irréversible. Vos sources analytics restent sur cet appareil.",
+  "syncUnlockTitle": "Débloquez Glance Sync",
+  "syncUnlockBuy": "Sauvegardez et synchronisez vos comptes et groupes sur tous vos appareils. Achat unique.",
+  "syncUnlockElsewhere": "Achat unique depuis l'app mobile (iOS/Android). Une fois débloqué, connectez-vous ici avec le même compte : la sync suit automatiquement.",
+  "syncUnlockButton": "Débloquer",
+  "syncRestore": "Restaurer un achat",
+  "syncSoon": "Bientôt disponible",
+  "transferExportTitle": "Transférer",
+  "transferExportSubtitle": "Scannez ce code depuis l'autre appareil.",
+  "transferExpiresIn": "Expire dans {time}",
+  "@transferExpiresIn": {
+    "description": "Compte à rebours déjà formaté (m:ss)",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "transferCodeLabel": "Code à saisir sur l'autre appareil",
+  "@transferCodeLabel": {
+    "description": "Petit titre en majuscules au-dessus des 4 chiffres"
+  },
+  "transferWarning": "Ce code contient vos identifiants. Ne le photographiez pas et ne le partagez pas : le QR seul ne suffit pas, mais avec le code à 4 chiffres il donne accès à vos comptes.",
+  "transferExpiredTitle": "Code expiré",
+  "transferExpiredBody": "Un transfert ne reste valable que quelques minutes.",
+  "transferRegenerate": "Régénérer",
+  "transferTooLargeTitle": "Config trop grosse",
+  "transferTooLargeBody": "Elle ne tient pas dans un QR code ({size} caractères pour {max} au maximum). Suivez « tous les sites » sur vos comptes plutôt qu'une sélection, puis réessayez.",
+  "@transferTooLargeBody": {
+    "placeholders": {
+      "size": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "transferFailedTitle": "Transfert impossible",
+  "transferFailedBody": "Impossible de préparer le transfert.",
+  "transferImportTitle": "Importer",
+  "@transferImportTitle": {
+    "description": "Titre de l'écran d'import par QR"
+  },
+  "transferImportScanHint": "Visez le QR affiché sur l'autre appareil.",
+  "transferImportCodeHint": "Saisissez le code affiché à côté du QR.",
+  "transferScanned": "Code scanné",
+  "transferCodeField": "Code à 4 chiffres",
+  "transferImportButton": "Importer",
+  "@transferImportButton": {
+    "description": "Bouton de validation de l'import"
+  },
+  "transferRescan": "Scanner à nouveau",
+  "transferImported": "{accounts, plural, =1{1 compte} other{{accounts} comptes}} et {groups, plural, =0{0 groupe} =1{1 groupe} other{{groups} groupes}} importés",
+  "@transferImported": {
+    "description": "Toast après l'import d'une config",
+    "placeholders": {
+      "accounts": {
+        "type": "int"
+      },
+      "groups": {
+        "type": "int"
+      }
+    }
+  },
+  "transferErrExpired": "Ce code a expiré. Régénérez-le sur l'autre appareil.",
+  "transferErrBadCode": "Code incorrect.",
+  "transferErrFailed": "Import impossible.",
+  "transferCameraDenied": "Caméra refusée",
+  "transferCameraUnavailable": "Caméra indisponible",
+  "transferCameraDeniedBody": "Autorisez l'accès à la caméra dans les réglages du système pour scanner un transfert.",
+  "transferCameraUnavailableBody": "Aucune caméra utilisable sur cet appareil.",
+  "groupsSubtitle": "Un périmètre de lecture : totaux et courbe ne comptent que ses sites.",
+  "groupsEmptyTitle": "Aucun groupe",
+  "groupsEmptyBody": "Regroupez vos sites — par exemple « Jeux » ou « Clients » — pour lire leurs statistiques à part, sans le reste.",
+  "groupsCreate": "Créer un groupe",
+  "groupEditEditTitle": "Modifier le groupe",
+  "groupEditName": "Nom",
+  "groupEditNameHint": "Jeux, Clients, Perso…",
+  "groupEditSitesLabel": "Sites du groupe",
+  "groupEditAddSourceHint": "ses sites entrent ici",
+  "@groupEditAddSourceHint": {
+    "description": "Petit texte à droite de « Ajouter une source » dans l'éditeur de groupe"
+  },
+  "groupEditNoSites": "Aucun site suivi pour l'instant — ajoutez une source ci-dessus pour remplir ce groupe.",
+  "groupEditCreateButton": "Créer le groupe",
+  "groupEditCreated": "Groupe créé",
+  "groupEditSaved": "Groupe enregistré",
+  "groupEditDeleted": "Groupe supprimé",
+  "groupEditDeleteTitle": "Supprimer ce groupe ?",
+  "groupEditDeleteBody": "Les sites et leurs statistiques ne sont pas touchés — seul le regroupement disparaît.",
+  "addSourceNewTitle": "Nouvelle source",
+  "addSourceProvider": "FOURNISSEUR",
+  "@addSourceProvider": {
+    "description": "Petit titre en majuscules au-dessus du choix Umami / Plausible / Fathom"
+  },
+  "addSourceName": "Nom (optionnel)",
+  "addSourceNameHint": "Mon domaine",
+  "addSourceTest": "Tester la configuration",
+  "addSourceContinue": "Continuer",
+  "addSourceMissingFields": "Renseigne les champs obligatoires.",
+  "addSourceTestOk": "Connexion réussie.",
+  "addSourceTestOkSites": "{count, plural, =1{Connexion réussie · 1 site détecté} other{Connexion réussie · {count} sites détectés}}",
+  "@addSourceTestOkSites": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addSourceNoSitesPlausible": "Aucun site listé automatiquement : votre instance n'expose pas l'API de listing (Plausible Community Edition). Renseignez le domaine à suivre ci-dessus.",
+  "addSourceNoSites": "Aucun site trouvé pour ce compte.",
+  "addSourceKeyRejected": "Clé API refusée (accès aux stats). Vérifiez la clé API.",
+  "addSourceCredsRejected": "Identifiants refusés.",
+  "addSourceAdded": "Source ajoutée",
+  "addSourceEdited": "Source modifiée",
+  "sitePickerTitle": "Choix des sites",
+  "sitePickerDetected": "{provider} · {count, plural, =1{1 site détecté} other{{count} sites détectés}}",
+  "@sitePickerDetected": {
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sitePickerFollowNew": "Afficher les nouveaux sites",
+  "sitePickerFollowNewHint": "Un site créé plus tard apparaît tout seul",
+  "sitePickerCurrent": "Sites actuels",
+  "sitePickerShownOf": "{shown} sur {total}",
+  "@sitePickerShownOf": {
+    "description": "Recherche de sites : nombre de sites affichés sur le total",
+    "placeholders": {
+      "shown": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "sitePickerCheckAll": "Tout cocher",
+  "sitePickerUncheckAll": "Tout décocher",
+  "sitePickerFollowAll": "Suivre tous les sites",
+  "sitePickerFollowAndNew": "{count, plural, =0{Suivre 0 site et les nouveaux} =1{Suivre 1 site et les nouveaux} other{Suivre {count} sites et les nouveaux}}",
+  "@sitePickerFollowAndNew": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sitePickerFollow": "{count, plural, =0{Suivre 0 site} =1{Suivre 1 site} other{Suivre {count} sites}}",
+  "@sitePickerFollow": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sitePickerShowNone": "N'afficher aucun site",
+  "commonVisitors": "Visiteurs",
+  "commonPageviews": "Pages vues",
+  "commonNoData": "Aucune donnée",
+  "desktopSitesHeader": "Sites ({count})",
+  "@desktopSitesHeader": {
+    "description": "En-tête de la liste de sites de la barre latérale ; count = nombre de sites",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "desktopHiddenCount": "{count, plural, =1{{count} masqué} other{{count} masqués}}",
+  "@desktopHiddenCount": {
+    "description": "À côté de l'en-tête de la liste : sites masqués car sans visiteur",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "desktopShowAllSites": "Afficher tous les sites",
+  "@desktopShowAllSites": {
+    "description": "Infobulle de l'interrupteur « ≠ 0 » quand les sites sans visiteur sont masqués"
+  },
+  "desktopHideEmptySites": "Masquer les sites sans visiteur",
+  "@desktopHideEmptySites": {
+    "description": "Infobulle de l'interrupteur « ≠ 0 »"
+  },
+  "desktopLiveNobody": "Personne en ce moment.",
+  "desktopKpiSites": "Sites",
+  "@desktopKpiSites": {
+    "description": "Carte KPI de la vue d'ensemble : nombre de sites"
+  },
+  "desktopNoSitesGroupBody": "« {name} » ne contient aucun site. Choisissez ceux qui en font partie.",
+  "@desktopNoSitesGroupBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "desktopNoSitesBody": "Vos comptes ne suivent aucun site pour le moment. Choisissez les sites à afficher depuis les réglages.",
+  "chartLegendForecast": "Prévision",
+  "chartLegendPrevious": "Période précédente",
+  "chartTooltipVisitors": "visiteurs",
+  "chartTooltipPageviews": "pages vues",
+  "chartTooltipForecast": "prévision",
+  "chartTooltipPrevious": "période précédente",
+  "chartNoSeries": "Aucune série sélectionnée",
+  "chartHour": "{hour}h",
+  "@chartHour": {
+    "description": "Heure d'un point de série, sur l'axe ou dans l'infobulle ; hour = « 14 » (deux chiffres, 24 h)",
+    "placeholders": {
+      "hour": {
+        "type": "String"
+      }
+    }
+  },
+  "periodControlsDisplay": "Affichage",
+  "@periodControlsDisplay": {
+    "description": "Bouton qui ouvre le menu de réglages du graphique (découpage et style)"
+  },
+  "periodControlsSplit": "Découpage",
+  "@periodControlsSplit": {
+    "description": "Titre de section du menu Affichage : granularité heure / jour / mois"
+  },
+  "periodControlsChart": "Graphique",
+  "@periodControlsChart": {
+    "description": "Titre de section du menu Affichage : courbe ou barres"
+  },
+  "periodUnitHour": "Heure",
+  "@periodUnitHour": {
+    "description": "Granularité du graphique, libellé de puce très court"
+  },
+  "periodUnitDay": "Jour",
+  "@periodUnitDay": {
+    "description": "Granularité du graphique, libellé de puce très court"
+  },
+  "periodUnitMonth": "Mois",
+  "@periodUnitMonth": {
+    "description": "Granularité du graphique, libellé de puce très court"
+  },
+  "errorsAuthRefused": "Identifiants refusés.",
+  "errorsRequestRefused": "Requête refusée par le serveur.",
+  "errorsNotFound": "Instance ou API introuvable.",
+  "errorsTimeout": "Délai dépassé — instance lente ou injoignable.",
+  "errorsUnreachable": "Instance injoignable. Vérifie l'URL.",
+  "errorsServerCode": "Erreur {code} du serveur.",
+  "@errorsServerCode": {
+    "placeholders": {
+      "code": {
+        "type": "int"
+      }
+    }
+  },
+  "errorsConnectionFailed": "Connexion impossible.",
+  "errorsGeneric": "Erreur : {detail}",
+  "@errorsGeneric": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "errUnsupportedIndicators": "Indicateurs non pris en charge",
+  "errUnsupportedSiteTables": "Tableaux de sites non pris en charge",
+  "errUnsupportedFunnels": "Entonnoirs non pris en charge",
+  "errUnsupportedBreakdowns": "Répartitions non prises en charge",
+  "errOperatorUmamiFunnel": "Opérateur « {op} » indisponible dans un entonnoir Umami",
+  "@errOperatorUmamiFunnel": {
+    "placeholders": {
+      "op": {
+        "type": "String"
+      }
+    }
+  },
+  "errOperatorPlausible": "Opérateur « {op} » indisponible chez Plausible (propriétés en texte seulement)",
+  "@errOperatorPlausible": {
+    "placeholders": {
+      "op": {
+        "type": "String"
+      }
+    }
+  },
+  "errFathomSoon": "Fathom arrive bientôt.",
+  "errPlausibleNeedsSite": "Renseignez un domaine, ou email + mot de passe pour lister vos sites automatiquement.",
+  "errUmamiLoginUnexpected": "Réponse de login Umami inattendue",
+  "errBucketsTooFine": "Découpage trop fin : plus de {count} points sur la période.",
+  "@errBucketsTooFine": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "errMetricsNotConfigured": "Source non configurée sur le serveur",
+  "errMetricsBadToken": "Jeton refusé",
+  "errMetricsBadRequest": "Requête refusée ({code})",
+  "@errMetricsBadRequest": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "errMetricsUnsupportedVersion": "Version d'API non prise en charge",
+  "errMetricsUnexpected": "Réponse inattendue du serveur",
+  "syncMsgUnreachable": "Serveur injoignable. Réessayez.",
+  "syncMsgSessionExpired": "Session expirée. Reconnectez-vous puis réessayez.",
+  "syncMsgPurchaseFailed": "Achat impossible. Réessayez.",
+  "syncMsgPurchasePending": "Achat validé — activation en cours, réessayez la sync dans un instant.",
+  "syncMsgNothingToRestore": "Aucun achat à restaurer.",
+  "syncMsgRestorePending": "Achat restauré — activation en cours…",
+  "syncMsgCannotDecrypt": "Impossible de déchiffrer la config distante.",
+  "syncMsgProRequired": "Sync réservée à Glance Sync (Pro).",
+  "syncMsgBadCredentials": "E-mail ou mot de passe incorrect.",
+  "syncMsgPasswordTooShort": "Mot de passe trop court : {count} caractères minimum.",
+  "@syncMsgPasswordTooShort": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncMsgPasswordTooLong": "Mot de passe trop long.",
+  "syncMsgInvalidEmail": "Adresse e-mail invalide.",
+  "syncMsgAccountExists": "Cet e-mail a déjà un compte : connectez-vous.",
+  "syncMsgSignUpFailed": "Impossible de créer le compte.",
+  "periodToday": "Aujourd'hui",
+  "@periodToday": {
+    "description": "Libellé court d'une période, dans la barre de contrôles"
+  },
+  "period24h": "24 h",
+  "@period24h": {
+    "description": "Libellé court d'une période, dans la barre de contrôles"
+  },
+  "period7d": "7 jours",
+  "@period7d": {
+    "description": "Libellé court d'une période, dans la barre de contrôles"
+  },
+  "period30d": "30 j",
+  "@period30d": {
+    "description": "Libellé court d'une période, dans la barre de contrôles"
+  },
+  "periodThisMonth": "Ce mois-ci",
+  "@periodThisMonth": {
+    "description": "Libellé court d'une période, dans la barre de contrôles"
+  },
+  "period12m": "12 m",
+  "@period12m": {
+    "description": "Libellé court d'une période, dans la barre de contrôles"
+  },
+  "periodThisYear": "Cette année",
+  "@periodThisYear": {
+    "description": "Libellé court d'une période, dans la barre de contrôles"
+  },
+  "periodAllTime": "Tout",
+  "@periodAllTime": {
+    "description": "Libellé court d'une période, dans la barre de contrôles : depuis la première donnée"
+  },
+  "periodCustom": "Perso",
+  "@periodCustom": {
+    "description": "Libellé court d'une période, dans la barre de contrôles : dates choisies à la main"
+  },
+  "metricTypePages": "Chemins",
+  "@metricTypePages": {
+    "description": "Dimension de données d'un site, dans le sélecteur d'une section du détail : chemins des pages"
+  },
+  "metricTypeEntry": "Entrée",
+  "@metricTypeEntry": {
+    "description": "Dimension de données d'un site, dans le sélecteur d'une section du détail : pages d'entrée"
+  },
+  "metricTypeExit": "Sortie",
+  "@metricTypeExit": {
+    "description": "Dimension de données d'un site, dans le sélecteur d'une section du détail : pages de sortie"
+  },
+  "metricTypeTitle": "Titre",
+  "@metricTypeTitle": {
+    "description": "Dimension de données d'un site, dans le sélecteur d'une section du détail : titres des pages"
+  },
+  "metricTypeReferrers": "Référents",
+  "@metricTypeReferrers": {
+    "description": "Dimension de données d'un site, dans le sélecteur d'une section du détail"
+  },
+  "metricTypeChannels": "Canaux",
+  "@metricTypeChannels": {
+    "description": "Dimension de données d'un site, dans le sélecteur d'une section du détail : canaux d'acquisition"
+  },
+  "metricTypeQueries": "Requêtes",
+  "@metricTypeQueries": {
+    "description": "Dimension de données d'un site, dans le sélecteur d'une section du détail : requêtes de recherche"
+  },
+  "metricTypeBrowsers": "Navigateurs",
+  "@metricTypeBrowsers": {
+    "description": "Dimension de données d'un site, dans le sélecteur d'une section du détail"
+  },
+  "metricTypeOs": "OS",
+  "@metricTypeOs": {
+    "description": "Dimension de données d'un site, dans le sélecteur d'une section du détail : systèmes d'exploitation"
+  },
+  "metricTypeDevices": "Appareils",
+  "@metricTypeDevices": {
+    "description": "Dimension de données d'un site, dans le sélecteur d'une section du détail"
+  },
+  "metricTypeScreens": "Écrans",
+  "@metricTypeScreens": {
+    "description": "Dimension de données d'un site, dans le sélecteur d'une section du détail : résolutions d'écran"
+  },
+  "metricTypeCountries": "Pays",
+  "@metricTypeCountries": {
+    "description": "Dimension de données d'un site, dans le sélecteur d'une section du détail"
+  },
+  "metricTypeRegions": "Régions",
+  "@metricTypeRegions": {
+    "description": "Dimension de données d'un site, dans le sélecteur d'une section du détail"
+  },
+  "metricTypeCities": "Villes",
+  "@metricTypeCities": {
+    "description": "Dimension de données d'un site, dans le sélecteur d'une section du détail"
+  },
+  "metricTypeLanguages": "Langues",
+  "@metricTypeLanguages": {
+    "description": "Dimension de données d'un site, dans le sélecteur d'une section du détail"
+  },
+  "metricTypeEvents": "Événements",
+  "@metricTypeEvents": {
+    "description": "Dimension de données d'un site, dans le sélecteur d'une section du détail"
+  },
+  "metricSectionPages": "Pages",
+  "@metricSectionPages": {
+    "description": "Titre d'un des quatre panneaux de données du détail d'un site"
+  },
+  "metricSectionSources": "Sources",
+  "@metricSectionSources": {
+    "description": "Titre d'un des quatre panneaux de données du détail d'un site : d'où viennent les visiteurs"
+  },
+  "metricSectionEnvironment": "Environnement",
+  "@metricSectionEnvironment": {
+    "description": "Titre d'un des quatre panneaux de données du détail d'un site : navigateur, système, appareil"
+  },
+  "metricSectionLocation": "Emplacement",
+  "@metricSectionLocation": {
+    "description": "Titre d'un des quatre panneaux de données du détail d'un site : pays, régions, villes, langues"
+  },
+  "filterOpContains": "contient",
+  "@filterOpContains": {
+    "description": "Opérateur de filtre, lu dans « propriété contient valeur »"
+  },
+  "filterOpNotContains": "ne contient pas",
+  "@filterOpNotContains": {
+    "description": "Opérateur de filtre, lu dans « propriété ne contient pas valeur »"
+  },
+  "entityUnknown": "Inconnu",
+  "@entityUnknown": {
+    "description": "Valeur absente (navigateur, appareil, langue…)"
+  },
+  "entityReferrerDirect": "Accès direct",
+  "@entityReferrerDirect": {
+    "description": "Source d'une visite sans référent"
+  },
+  "entityBrowserSearchBot": "Robot d'indexation",
+  "@entityBrowserSearchBot": {
+    "description": "Navigateur : robot des moteurs de recherche"
+  },
+  "entityDeviceDesktop": "Ordinateur",
+  "@entityDeviceDesktop": {
+    "description": "Type d'appareil"
+  },
+  "entityDeviceLaptop": "Portable",
+  "@entityDeviceLaptop": {
+    "description": "Type d'appareil"
+  },
+  "entityDeviceTablet": "Tablette",
+  "@entityDeviceTablet": {
+    "description": "Type d'appareil"
+  },
+  "entityDeviceMobile": "Mobile",
+  "@entityDeviceMobile": {
+    "description": "Type d'appareil"
+  },
+  "entityDeviceWearable": "Montre",
+  "@entityDeviceWearable": {
+    "description": "Type d'appareil"
+  },
+  "entityDeviceConsole": "Console",
+  "@entityDeviceConsole": {
+    "description": "Type d'appareil"
+  },
+  "entityDeviceTv": "Téléviseur",
+  "@entityDeviceTv": {
+    "description": "Type d'appareil"
+  },
+  "channelDirect": "Direct",
+  "@channelDirect": {
+    "description": "Canal d'acquisition de trafic : visite sans référent"
+  },
+  "channelReferral": "Référent",
+  "@channelReferral": {
+    "description": "Canal d'acquisition de trafic : lien depuis un autre site"
+  },
+  "channelAffiliate": "Affiliation",
+  "@channelAffiliate": {
+    "description": "Canal d'acquisition de trafic"
+  },
+  "channelEmail": "E-mail",
+  "@channelEmail": {
+    "description": "Canal d'acquisition de trafic"
+  },
+  "channelOrganicSearch": "Recherche organique",
+  "@channelOrganicSearch": {
+    "description": "Canal d'acquisition de trafic"
+  },
+  "channelOrganicSocial": "Réseaux sociaux",
+  "@channelOrganicSocial": {
+    "description": "Canal d'acquisition de trafic"
+  },
+  "channelOrganicShopping": "Achat organique",
+  "@channelOrganicShopping": {
+    "description": "Canal d'acquisition de trafic"
+  },
+  "channelOrganicVideo": "Vidéo organique",
+  "@channelOrganicVideo": {
+    "description": "Canal d'acquisition de trafic"
+  },
+  "channelPaidAds": "Publicité payante",
+  "@channelPaidAds": {
+    "description": "Canal d'acquisition de trafic"
+  },
+  "channelPaidSearch": "Recherche payante",
+  "@channelPaidSearch": {
+    "description": "Canal d'acquisition de trafic"
+  },
+  "channelPaidSocial": "Réseaux sociaux payants",
+  "@channelPaidSocial": {
+    "description": "Canal d'acquisition de trafic"
+  },
+  "channelPaidShopping": "Achat payant",
+  "@channelPaidShopping": {
+    "description": "Canal d'acquisition de trafic"
+  },
+  "channelPaidVideo": "Vidéo payante",
+  "@channelPaidVideo": {
+    "description": "Canal d'acquisition de trafic"
+  },
+  "credInstanceUrl": "URL de l'instance",
+  "credUmamiUrlPlaceholder": "analytics.mondomaine.fr",
+  "@credUmamiUrlPlaceholder": {
+    "description": "Exemple d'adresse d'instance Umami"
+  },
+  "credUsername": "Nom d'utilisateur",
+  "credPassword": "Mot de passe",
+  "credApiKey": "Clé API",
+  "credEmailOptional": "Email du compte (facultatif)",
+  "credEmailPlaceholder": "vous@exemple.fr",
+  "@credEmailPlaceholder": {
+    "description": "Exemple d'adresse e-mail"
+  },
+  "credEmailHint": "Email + mot de passe : Glance liste vos sites automatiquement. Sinon, laissez vide et renseignez un domaine ci-dessous.",
+  "credPasswordOptional": "Mot de passe (facultatif)",
+  "credDomainFallback": "Domaine (si pas d'email/mot de passe)",
+  "credDomainPlaceholder": "mondomaine.fr",
+  "@credDomainPlaceholder": {
+    "description": "Exemple de nom de domaine"
+  }
+}

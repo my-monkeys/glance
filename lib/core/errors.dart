@@ -1,26 +1,33 @@
 import 'package:dio/dio.dart';
 
+import '../l10n/l10n.dart';
+
+/// Erreur dont le texte est choisi à l'affichage, dans la langue de l'app :
+/// l'exception ne porte que ses données (code, opérateur…), jamais de phrase.
+abstract interface class LocalizedError implements Exception {
+  String message(AppLocalizations l10n);
+}
+
 /// Message court et lisible pour l'utilisateur à partir d'une exception réseau.
-String friendlyError(Object e) {
-  if (e is UnimplementedError) {
-    return e.message ?? 'Fonctionnalité indisponible.';
-  }
-  if (e is StateError) return e.message; // messages métier (ex. verify)
+String friendlyError(AppLocalizations l10n, Object e) {
+  if (e is LocalizedError) return e.message(l10n);
   if (e is DioException) {
     final code = e.response?.statusCode;
-    if (code == 401 || code == 403) return 'Identifiants refusés.';
-    if (code == 400) return 'Requête refusée par le serveur.';
-    if (code == 404) return 'Instance ou API introuvable.';
+    if (code == 401 || code == 403) return l10n.errorsAuthRefused;
+    if (code == 400) return l10n.errorsRequestRefused;
+    if (code == 404) return l10n.errorsNotFound;
     switch (e.type) {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.receiveTimeout:
       case DioExceptionType.sendTimeout:
-        return 'Délai dépassé — instance lente ou injoignable.';
+        return l10n.errorsTimeout;
       case DioExceptionType.connectionError:
-        return 'Instance injoignable. Vérifie l\'URL.';
+        return l10n.errorsUnreachable;
       default:
-        return code != null ? 'Erreur $code du serveur.' : 'Connexion impossible.';
+        return code != null
+            ? l10n.errorsServerCode(code)
+            : l10n.errorsConnectionFailed;
     }
   }
-  return 'Erreur : $e';
+  return l10n.errorsGeneric('$e');
 }

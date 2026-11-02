@@ -52,6 +52,7 @@ class WidgetPublisher {
     HomeData data,
     String periodLabel,
     DateWindow window,
+    String? locale,
   ) async {
     if (!_supported) return;
 
@@ -67,6 +68,7 @@ class WidgetPublisher {
     final values = <String, Object?>{};
     values['updated_at'] = DateTime.now().millisecondsSinceEpoch;
     values['period_label'] = periodLabel;
+    values['locale'] = locale; // langue de l'app : les widgets natifs s'en servent
     values['total_visitors'] = data.totalVisitors;
     values['total_pageviews'] = data.totalPageviews;
     values['total_visits'] = data.totalVisits;

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/site_search.dart';
 import '../../data/models/models.dart';
+import '../../l10n/l10n.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
 import '../widgets/common.dart';
@@ -117,19 +118,21 @@ class _SitePickerScreenState extends State<SitePickerScreen> {
     Navigator.of(context).pop<SiteChoice>(choice);
   }
 
-  String get _confirmLabel {
+  String _confirmLabel(AppLocalizations l10n) {
     final n = widget.sites.where((s) => _checked.contains(s.id)).length;
-    final sites = '$n site${n > 1 ? 's' : ''}';
     if (_followNew) {
-      return _allChecked ? 'Suivre tous les sites' : 'Suivre $sites et les nouveaux';
+      return _allChecked
+          ? l10n.sitePickerFollowAll
+          : l10n.sitePickerFollowAndNew(n);
     }
     // Zéro site est un choix valide (masquer ce compte).
-    return n == 0 ? 'N\'afficher aucun site' : 'Suivre $sites';
+    return n == 0 ? l10n.sitePickerShowNone : l10n.sitePickerFollow(n);
   }
 
   @override
   Widget build(BuildContext context) {
     final p = context.glance;
+    final l10n = context.l10n;
     final sites = widget.sites;
     final shown = _shown;
 
@@ -151,10 +154,11 @@ class _SitePickerScreenState extends State<SitePickerScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Choix des sites', style: GT.display(26, color: p.fg)),
+                        Text(l10n.sitePickerTitle,
+            style: GT.display(26, color: p.fg)),
                         const SizedBox(height: 2),
                         Text(
-                          '${widget.providerName} · ${sites.length} site${sites.length > 1 ? 's' : ''} détecté${sites.length > 1 ? 's' : ''}',
+                          l10n.sitePickerDetected(widget.providerName, sites.length),
                           style: GT.body(13, color: p.fg2),
                         ),
                       ],
@@ -185,12 +189,12 @@ class _SitePickerScreenState extends State<SitePickerScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Afficher les nouveaux sites',
+                                l10n.sitePickerFollowNew,
                                 style: GT.body(15, weight: 500, color: p.fg),
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                'Un site créé plus tard apparaît tout seul',
+                                l10n.sitePickerFollowNewHint,
                                 style: GT.body(12, color: p.fg2),
                               ),
                             ],
@@ -214,15 +218,17 @@ class _SitePickerScreenState extends State<SitePickerScreen> {
                       children: [
                         Expanded(
                           child: SectionLabel(shown.length == sites.length
-                              ? 'Sites actuels'
-                              : '${shown.length} sur ${sites.length}'),
+                              ? l10n.sitePickerCurrent
+                              : l10n.sitePickerShownOf(shown.length, sites.length)),
                         ),
                         if (shown.isNotEmpty)
                           GestureDetector(
                             behavior: HitTestBehavior.opaque,
                             onTap: _toggleAll,
                             child: Text(
-                              _allShownChecked ? 'Tout décocher' : 'Tout cocher',
+                              _allShownChecked
+                                  ? l10n.sitePickerUncheckAll
+                                  : l10n.sitePickerCheckAll,
                               style: GT.body(13, weight: 500, color: p.accent),
                             ),
                           ),
@@ -282,7 +288,7 @@ class _SitePickerScreenState extends State<SitePickerScreen> {
                 MediaQuery.of(context).padding.bottom + 12,
               ),
               child: GlanceButton(
-                label: _confirmLabel,
+                label: _confirmLabel(l10n),
                 onTap: _confirm,
               ),
             ),

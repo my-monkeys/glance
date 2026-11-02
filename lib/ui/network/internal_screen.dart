@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/format.dart';
 import '../../core/internal_traffic.dart';
 import '../../data/models/period.dart';
+import '../../l10n/l10n.dart';
 import '../../state/internal_traffic.dart';
 import '../../state/period_state.dart';
 import '../../theme/palette.dart';
@@ -41,7 +42,7 @@ class InternalTrafficScreen extends ConsumerWidget {
                 ),
                 const SizedBox(width: 4),
                 Expanded(
-                  child: Text('Entre vos sites',
+                  child: Text(context.l10n.homeInternalTitle,
                       style: GT.display(24, color: p.fg)),
                 ),
               ],
@@ -52,7 +53,7 @@ class InternalTrafficScreen extends ConsumerWidget {
                 for (final per in Period.values)
                   if (per != Period.custom)
                     GlanceChip(
-                      label: per.label,
+                      label: per.label(context.l10n),
                       selected: periodState.period == per,
                       onTap: () => ref.read(periodProvider.notifier).set(per),
                     ),
@@ -64,7 +65,8 @@ class InternalTrafficScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SectionLabel('Visiteurs échangés · ${periodState.period.label}'),
+                  SectionLabel(
+                      context.l10n.networkExchanged(periodState.period.label(context.l10n))),
                   const SizedBox(height: 6),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
@@ -75,7 +77,7 @@ class InternalTrafficScreen extends ConsumerWidget {
                         Padding(
                           padding: const EdgeInsets.only(bottom: 8),
                           child: Text(
-                            '${state?.pending ?? 0} site(s) en cours…',
+                            context.l10n.networkPending(state?.pending ?? 0),
                             style: GT.mono(10, color: p.fg3),
                           ),
                         ),
@@ -83,7 +85,7 @@ class InternalTrafficScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Visiteurs arrivés sur un de vos sites depuis un autre de vos sites.',
+                    context.l10n.networkExplainer,
                     style: GT.body(12.5, color: p.fg2),
                   ),
                 ],
@@ -93,7 +95,7 @@ class InternalTrafficScreen extends ConsumerWidget {
               const SizedBox(height: 26),
               Center(
                 child: Text(
-                  'Aucune navigation interne sur cette période.',
+                  context.l10n.networkEmpty,
                   style: GT.body(13, color: p.fg3),
                 ),
               ),
@@ -101,13 +103,13 @@ class InternalTrafficScreen extends ConsumerWidget {
             if (t.flows.isNotEmpty) ...[
               const SizedBox(height: 14),
               _PeerCard(
-                title: 'Qui envoie',
+                title: context.l10n.networkSenders,
                 peers: t.sources,
                 arrow: '→',
               ),
               const SizedBox(height: 14),
               _PeerCard(
-                title: 'Qui reçoit',
+                title: context.l10n.networkReceivers,
                 peers: t.destinations,
                 arrow: '←',
               ),
@@ -117,7 +119,7 @@ class InternalTrafficScreen extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SectionLabel('Flux'),
+                    SectionLabel(context.l10n.networkFlows),
                     const SizedBox(height: 10),
                     MetricBars(
                       mono: true,

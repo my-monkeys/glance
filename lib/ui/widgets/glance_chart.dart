@@ -5,6 +5,7 @@ import '../../core/format.dart';
 import '../../core/predict.dart';
 import '../../data/models/models.dart';
 import '../../data/models/period.dart';
+import '../../l10n/l10n.dart';
 import '../../state/settings.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
@@ -115,14 +116,14 @@ class GlanceChart extends StatelessWidget {
               if (visitorsTotal != null)
                 _LegendItem(
                   color: p.accent,
-                  label: 'Visiteurs',
+                  label: context.l10n.commonVisitors,
                   value: visitorsTotal,
                   on: !hidden.contains(kVisitors),
                   onTap: onToggle == null ? null : () => onToggle!(kVisitors),
                 ),
               _LegendItem(
                 color: p.fg2,
-                label: 'Pages vues',
+                label: context.l10n.commonPageviews,
                 value: pageviewsTotal,
                 on: !hidden.contains(kPageviews),
                 onTap: onToggle == null ? null : () => onToggle!(kPageviews),
@@ -130,7 +131,7 @@ class GlanceChart extends StatelessWidget {
               if (model.hasForecast)
                 _LegendItem(
                   color: p.forecast,
-                  label: 'Prévision',
+                  label: context.l10n.chartLegendForecast,
                   value: projected,
                   approx: true,
                   on: !hidden.contains(kForecast),
@@ -139,7 +140,7 @@ class GlanceChart extends StatelessWidget {
               if (onToggleCompare != null)
                 _LegendItem(
                   color: p.fg3,
-                  label: 'Période précédente',
+                  label: context.l10n.chartLegendPrevious,
                   on: compareOn,
                   onTap: onToggleCompare,
                 ),
@@ -152,12 +153,21 @@ class GlanceChart extends StatelessWidget {
   }
 }
 
+String _tooltipLabel(AppLocalizations l10n, ChartSeriesRole role) =>
+    switch (role) {
+      ChartSeriesRole.visitors => l10n.chartTooltipVisitors,
+      ChartSeriesRole.pageviews => l10n.chartTooltipPageviews,
+      ChartSeriesRole.forecast => l10n.chartTooltipForecast,
+      ChartSeriesRole.compare => l10n.chartTooltipPrevious,
+    };
+
 /// Contenu du tooltip, partagé par les deux moteurs : une date en entête, puis
 /// une ligne par série visible à cette position.
 ///
 /// [visible] est dans l'ordre de tracé, celui des index que les deux moteurs
 /// donnent à leurs séries.
 List<TextSpan> _tooltipLines({
+  required AppLocalizations l10n,
   required ChartModel model,
   required int x,
   required GlancePalette p,
@@ -176,7 +186,7 @@ List<TextSpan> _tooltipLines({
       style: GT.stat(14, color: fc ? p.forecast : p.bg),
     ));
     spans.add(TextSpan(
-      text: '${s.label}\n',
+      text: '${_tooltipLabel(l10n, s.role)}\n',
       style: GT.mono(9, color: p.fg3),
     ));
   }
@@ -260,7 +270,7 @@ class _CurveBody extends StatelessWidget {
         maxY: m.maxY,
         gridData: buildChartGrid(m, p),
         borderData: FlBorderData(show: false),
-        titlesData: buildChartTitles(m, p),
+        titlesData: buildChartTitles(context.l10n, m, p),
         lineTouchData: LineTouchData(
           touchTooltipData: LineTouchTooltipData(
             getTooltipColor: (_) => p.fg,
@@ -273,14 +283,14 @@ class _CurveBody extends StatelessWidget {
             getTooltipItems: (touched) {
               if (touched.isEmpty) return const [];
               final x = touched.first.x.round().clamp(0, m.xCount - 1);
-              final date = chartTooltipDate(m.timeAt(x), m.unit);
+              final date = chartTooltipDate(context.l10n, m.timeAt(x), m.unit);
               // Un seul item porte tout le contenu : fl_chart en dessine un par
               // point touché, et n lignes identiques se superposeraient.
               return [
                 LineTooltipItem(
                   '$date\n',
                   GT.mono(10, color: p.fg3),
-                  children: _tooltipLines(model: m, x: x, p: p),
+                  children: _tooltipLines(l10n: context.l10n, model: m, x: x, p: p),
                 ),
                 for (var i = 1; i < touched.length; i++) null,
               ];
@@ -367,7 +377,7 @@ class _BarsBody extends StatelessWidget {
             minY: 0,
             gridData: buildChartGrid(m, p),
             borderData: FlBorderData(show: false),
-            titlesData: buildChartTitles(m, p),
+            titlesData: buildChartTitles(context.l10n, m, p),
             barTouchData: BarTouchData(
               touchTooltipData: BarTouchTooltipData(
                 getTooltipColor: (_) => p.fg,
@@ -380,9 +390,9 @@ class _BarsBody extends StatelessWidget {
                 // La signature ne donne qu'une barre à la fois ; on reconstruit
                 // tout le bucket pour garder le même tooltip qu'en courbes.
                 getTooltipItem: (group, gi, rod, ri) => BarTooltipItem(
-                  '${chartTooltipDate(m.timeAt(group.x), m.unit)}\n',
+                  '${chartTooltipDate(context.l10n, m.timeAt(group.x), m.unit)}\n',
                   GT.mono(10, color: p.fg3),
-                  children: _tooltipLines(model: m, x: group.x, p: p),
+                  children: _tooltipLines(l10n: context.l10n, model: m, x: group.x, p: p),
                 ),
               ),
             ),

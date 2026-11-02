@@ -1,13 +1,12 @@
 import 'package:dio/dio.dart';
 import 'package:intl/intl.dart';
 
-import '../../core/countries.dart';
-import '../../core/entities.dart';
 import '../models/indicator.dart';
 import '../models/models.dart';
 import '../models/period.dart';
 import 'analytics_provider.dart';
 import 'buckets.dart';
+import 'provider_errors.dart';
 
 /// Client Plausible (Stats API v2 — `POST /api/v2/query`, via clé API). La Stats
 /// API ne liste pas les sites, et en Community Edition la Sites API Bearer
@@ -66,8 +65,7 @@ class PlausibleProvider extends AnalyticsProvider {
     // listé, sinon le domaine saisi.
     final probe = listed.isNotEmpty ? listed.first.id : _configuredSite;
     if (probe.isEmpty) {
-      throw StateError('Renseignez un domaine, ou email + mot de passe pour '
-          'lister vos sites automatiquement.');
+      throw const PlausibleNeedsSite();
     }
     // Valide la clé API : un 401 ici = clé refusée (même si le listing a marché).
     await _query({'site_id': probe, 'metrics': ['visitors'], 'date_range': '7d'});
@@ -328,19 +326,11 @@ class PlausibleProvider extends AnalyticsProvider {
     final rows = _rows(res).map((r) {
       final label = (r['dimensions'] as List).first.toString();
       final value = ((r['metrics'] as List).first as num).round();
-      return switch (type) {
-        MetricType.countries =>
-          MetricRow(label: countryName(label), value: value, code: label),
-        MetricType.channels =>
-          MetricRow(label: channelName(label), value: value, code: label),
-        MetricType.devices =>
-          MetricRow(label: deviceName(label), value: value, code: label),
-        _ => MetricRow(
-            label: label.isEmpty ? '/' : label,
-            value: value,
-            code: label,
-          ),
-      };
+      return MetricRow(
+        label: label.isEmpty ? '/' : label,
+        value: value,
+        code: label,
+      );
     }).toList();
     if (type == MetricType.events) {
       // « pageview » n'est pas un événement personnalisé.
@@ -423,10 +413,7 @@ class PlausibleProvider extends AnalyticsProvider {
         FilterOp.neq => 'is_not',
         FilterOp.contains => 'contains',
         FilterOp.notContains => 'contains_not',
-        _ => throw ArgumentError(
-            "Opérateur « ${f.op.label} » indisponible chez Plausible "
-            '(propriétés en texte seulement)',
-          ),
+        _ => throw OperatorUnavailable(f.op, umamiFunnel: false),
       };
       return [op, 'event:props:${f.property}', [f.value]];
     }
@@ -495,7 +482,7 @@ class PlausibleProvider extends AnalyticsProvider {
     return _rows(res).map((r) {
       final v = ((r['dimensions'] as List).first).toString();
       final n = ((r['metrics'] as List).first as num).round();
-      return MetricRow(label: v.isEmpty ? 'Inconnu' : v, value: n, code: v);
+      return MetricRow(label: v, value: n, code: v);
     }).toList(growable: false);
   }
 }
