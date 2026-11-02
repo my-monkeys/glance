@@ -1,17 +1,17 @@
 import 'dart:convert';
 
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/account.dart';
+import 'secret_vault.dart';
 
 /// Persiste la liste des comptes (métadonnées non sensibles en SharedPreferences)
 /// et leurs identifiants (chiffrés via le Keychain iOS).
 class AccountsRepository {
-  AccountsRepository(this._prefs, this._secure);
+  AccountsRepository(this._prefs, this._vault);
 
   final SharedPreferences _prefs;
-  final FlutterSecureStorage _secure;
+  final SecretVault _vault;
 
   static const _kAccounts = 'glance.accounts';
   static const _credPrefix = 'glance.creds.';
@@ -27,7 +27,7 @@ class AccountsRepository {
       ..removeWhere((a) => a.id == account.id)
       ..add(account);
     await _saveList(list);
-    await _secure.write(key: _credPrefix + account.id, value: jsonEncode(creds));
+    await _vault.write(_credPrefix + account.id, jsonEncode(creds));
   }
 
   Future<void> updateAccount(Account account) async {
@@ -38,7 +38,7 @@ class AccountsRepository {
   }
 
   Future<Map<String, String>> credentials(String accountId) async {
-    final raw = await _secure.read(key: _credPrefix + accountId);
+    final raw = await _vault.read(_credPrefix + accountId);
     if (raw == null || raw.isEmpty) return {};
     final map = jsonDecode(raw) as Map<String, dynamic>;
     return map.map((k, v) => MapEntry(k, v.toString()));
@@ -47,7 +47,7 @@ class AccountsRepository {
   Future<void> removeAccount(String accountId) async {
     final list = loadAccounts().where((a) => a.id != accountId).toList();
     await _saveList(list);
-    await _secure.delete(key: _credPrefix + accountId);
+    await _vault.delete(_credPrefix + accountId);
   }
 
   /// Génère un identifiant de compte simple et unique.

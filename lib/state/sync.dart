@@ -59,7 +59,7 @@ class SyncState {
 }
 
 final syncApiProvider = Provider<SyncApi>(
-  (ref) => SyncApi(SecureTokenStore(ref.watch(secureStorageProvider))),
+  (ref) => SyncApi(SecureTokenStore(ref.watch(secretVaultProvider))),
 );
 
 final purchasesProvider = Provider<PurchasesService>((_) => PurchasesService());
@@ -95,7 +95,7 @@ class SyncController extends Notifier<SyncState> {
   }
 
   Future<String?> _password() =>
-      ref.read(secureStorageProvider).read(key: _kPassword);
+      ref.read(secretVaultProvider).read(_kPassword);
 
   Future<void> _restore() async {
     try {
@@ -144,7 +144,7 @@ class SyncController extends Notifier<SyncState> {
     state = state.copyWith(busy: true, clearError: true);
     try {
       final user = await call();
-      await ref.read(secureStorageProvider).write(key: _kPassword, value: password);
+      await ref.read(secretVaultProvider).write(_kPassword, password);
       state = state.copyWith(
         status: SyncStatus.signedIn,
         email: user.email,
@@ -166,7 +166,7 @@ class SyncController extends Notifier<SyncState> {
   Future<void> signOut() async {
     await _api.signOut();
     await _purchases.reset();
-    await ref.read(secureStorageProvider).delete(key: _kPassword);
+    await ref.read(secretVaultProvider).delete(_kPassword);
     state = const SyncState(status: SyncStatus.signedOut);
   }
 
@@ -188,7 +188,7 @@ class SyncController extends Notifier<SyncState> {
       return false;
     }
     await _purchases.reset();
-    await ref.read(secureStorageProvider).delete(key: _kPassword);
+    await ref.read(secretVaultProvider).delete(_kPassword);
     state = const SyncState(status: SyncStatus.signedOut);
     return true;
   }

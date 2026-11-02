@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -39,10 +41,9 @@ void main() {
     expect(c.read(siteHasMetricsSourceProvider(_site)), isTrue);
     expect(await n.tokenFor(_ref), 'sekret');
     expect(prefs.getString('glance.metricsSources'), isNot(contains('sekret')));
-    expect(
-      await const FlutterSecureStorage().read(key: _tokenKey),
-      'sekret',
-    );
+    final vault = await const FlutterSecureStorage().read(key: 'glance.vault');
+    expect((jsonDecode(vault!) as Map)[_tokenKey], 'sekret');
+    expect(await const FlutterSecureStorage().read(key: _tokenKey), isNull);
   });
 
   test('set sur un site déjà configuré remplace, sans doublon', () async {
@@ -84,7 +85,7 @@ void main() {
     final (c, _) = await _container();
     final n = c.read(metricsSourcesProvider.notifier);
     await n.set(_site, 'https://x.eu/', 't');
-    await const FlutterSecureStorage().delete(key: _tokenKey);
+    await c.read(secretVaultProvider).delete(_tokenKey);
 
     expect(await n.withTokens(), isEmpty);
   });

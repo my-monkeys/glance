@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+import '../repository/secret_vault.dart';
 
 /// Stockage du token de session. Abstrait pour être remplaçable en test (le
 /// secure storage exige une plateforme).
@@ -9,17 +10,17 @@ abstract class TokenStore {
   Future<void> clear();
 }
 
-/// Implémentation par défaut : Keychain via flutter_secure_storage.
+/// Implémentation par défaut : coffre de secrets (trousseau).
 class SecureTokenStore implements TokenStore {
   SecureTokenStore(this._s);
-  final FlutterSecureStorage _s;
+  final SecretVault _s;
   static const _k = 'glance.sync.token';
   @override
-  Future<String?> read() => _s.read(key: _k);
+  Future<String?> read() => _s.read(_k);
   @override
-  Future<void> write(String token) => _s.write(key: _k, value: token);
+  Future<void> write(String token) => _s.write(_k, token);
   @override
-  Future<void> clear() => _s.delete(key: _k);
+  Future<void> clear() => _s.delete(_k);
 }
 
 /// Utilisateur de sync (compte Glance Sync).
