@@ -33,4 +33,20 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://glance-analytics.com/privacy.html"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://glance-analytics.com/en/privacy.html"/>
   </url>
+  <url>
+    <loc>https://glance-analytics.com/docs/source-de-metriques.html</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://glance-analytics.com/docs/source-de-metriques.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://glance-analytics.com/en/docs/metrics-source.html"/>
+  </url>
+  <url>
+    <loc>https://glance-analytics.com/en/docs/metrics-source.html</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://glance-analytics.com/docs/source-de-metriques.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://glance-analytics.com/en/docs/metrics-source.html"/>
+  </url>
 </urlset>
