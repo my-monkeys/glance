@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/errors.dart';
 import '../../data/models/account.dart';
-import '../../state/account_test.dart';
+import '../../state/account_connection.dart';
 import '../../state/providers.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
