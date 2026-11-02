@@ -5,7 +5,6 @@ import 'package:glance/core/format.dart';
 import 'package:glance/l10n/app_localizations_en.dart';
 import 'package:glance/l10n/app_localizations_fr.dart';
 import 'package:glance/state/providers.dart';
-import 'package:glance/state/settings.dart';
 import 'package:glance/theme/theme.dart';
 import 'package:glance/ui/settings/settings_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
