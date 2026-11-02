@@ -1,0 +1,72 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Glance — événements</title>
+<link rel="stylesheet" href="commun.css">
+<style>
+  .grand { flex: 1 1 auto; min-height: calc(560 * var(--u)); }
+  .compteur { display: grid; grid-template-columns: 1fr 42%; column-gap: calc(30 * var(--u)); align-items: end; margin-top: calc(22 * var(--u)); }
+  .compteur .spark { height: calc(150 * var(--u)); position: relative; }
+  .compteur .spark svg { position: absolute; inset: 0; }
+  .filtres { display: flex; flex-wrap: wrap; gap: calc(14 * var(--u)); margin-top: calc(28 * var(--u)); }
+  .filtre { font-family: "JetBrains Mono"; font-weight: 500; font-size: calc(29 * var(--u)); padding: calc(14 * var(--u)) calc(26 * var(--u));
+    border-radius: calc(18 * var(--u)); border: calc(3 * var(--u)) solid var(--line); color: var(--fg); white-space: nowrap; }
+  .filtre b { color: var(--accent); font-weight: 600; }
+  .rep { display: grid; grid-template-columns: calc(150 * var(--u)) 1fr auto; align-items: center; column-gap: calc(24 * var(--u)); margin-top: calc(26 * var(--u)); }
+  .rep .mono { font-size: calc(30 * var(--u)); }
+  .rep .barre { height: calc(22 * var(--u)); }
+</style>
+</head>
+<body class="fond-sable clair">
+  <header class="entete">
+    <div class="marque"></div>
+    <h1 class="titre" data-t="titre"></h1>
+    <p class="appui" data-t="appui"></p>
+  </header>
+  <main class="scene deux">
+    <section class="carte grand">
+      <span class="label" data-t="etiquette"></span>
+      <div class="pastilles" id="legende" style="margin: calc(26 * var(--u)) 0 calc(14 * var(--u))"></div>
+      <div class="graphe" id="g"></div>
+    </section>
+    <section class="carte">
+      <span class="label"><span data-t="compteur"></span> · purchase</span>
+      <div class="compteur">
+        <div><div class="stat" id="stat"></div><div class="delta" id="delta" style="margin-top: calc(14 * var(--u))"></div></div>
+        <div class="spark" id="spark"></div>
+      </div>
+      <div class="filtres"><span class="filtre">plan <b>=</b> pro</span><span class="filtre">amount <b>≥</b> 20</span></div>
+    </section>
+    <section class="carte" id="rep">
+      <span class="label"><span data-t="repartition"></span></span>
+    </section>
+  </main>
+<script src="commun.js"></script>
+<script>
+monter("v3", async () => {
+  const n = 14;
+  const evts = [
+    { nom: "signup", c: "#3B7A5A", total: 1084, v: serie(n, { base: 80, amp: 14, f: 2, pente: 10, bruit: 5, graine: 21 }), aire: true },
+    { nom: "trial_start", c: "#C97F44", total: 702, v: serie(n, { base: 50, amp: 9, f: 1.5, phase: .3, pente: 6, bruit: 4, graine: 22 }) },
+    { nom: "purchase", c: "#4A6FA5", total: 312, v: serie(n, { base: 22, amp: 6, f: 2.5, pente: 4, bruit: 3, graine: 23 }) },
+    { nom: "share", c: "#9A5BA6", total: 489, v: serie(n, { base: 35, amp: 8, f: 1, phase: .6, pente: -4, bruit: 4, graine: 24 }) },
+    { nom: "invite", c: "#3E9188", total: 96, off: true, v: [] },
+  ];
+  document.getElementById("legende").innerHTML = evts.map((e) =>
+    `<span class="pastille${e.off ? " off" : ""}" style="--c:${e.c}"><i></i>${e.nom} <span class="mono">${nb(e.total)}</span></span>`).join("");
+  graphe(document.getElementById("g"), {
+    series: evts.filter((e) => !e.off).map((e) => ({ v: e.v, couleur: e.c, epaisseur: 7, aire: e.aire })).reverse(),
+    max: 120, ticks: [0, 40, 80, 120], gauche: 76, bas: 44,
+    xlabels: [[0, "1"], [4, "5"], [9, "10"], [13, "14"]],
+  });
+  document.getElementById("stat").textContent = nb(312);
+  document.getElementById("delta").textContent = signe(18.5, 1);
+  spark(document.getElementById("spark"), serie(n, { base: 22, amp: 6, f: 2.5, pente: 4, bruit: 3, graine: 23 }), "#4A6FA5", { aire: true });
+  const rep = [["pro", 62, "#3B7A5A"], ["team", 24, "#C97F44"], ["solo", 14, "#4A6FA5"]];
+  document.getElementById("rep").insertAdjacentHTML("beforeend", rep.map(([nom, p, c]) =>
+    `<div class="rep"><span class="mono">${nom}</span><div class="barre"><b style="--w:${p}%;--c:${c}"></b></div><span class="mono">${pct(p)}</span></div>`).join(""));
+});
+</script>
+</body>
+</html>

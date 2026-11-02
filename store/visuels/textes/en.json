@@ -1,0 +1,101 @@
+{
+  "commun": {
+    "marque": "Glance",
+    "mini_titre": "All sites"
+  },
+  "v1": {
+    "titre": "All your sites, at a glance",
+    "appui": "Umami and Plausible in one clear, fast app.",
+    "p1": "Umami",
+    "p2": "Plausible",
+    "p3": "Nothing is collected"
+  },
+  "v2": {
+    "titre": "Compare your sites",
+    "appui": "Several sites side by side, and where their visitors come from.",
+    "etiquette": "Dashboard · Sites · 30 days",
+    "total": "Visitors · total of the rows",
+    "f_tous": "All visitors",
+    "f_venus": "Coming from",
+    "f_sauf": "Excluding visitors from",
+    "part": "of total",
+    "editeur": "Row 3 · referrer filter",
+    "seg_tous": "All",
+    "seg_venus": "From",
+    "seg_sauf": "Not from",
+    "domaine": "Domain"
+  },
+  "v3": {
+    "titre": "Track every event",
+    "appui": "One curve and one color per event, filterable by property.",
+    "etiquette": "Events · 14 days",
+    "compteur": "Counter",
+    "filtres": "Property filters",
+    "sur": "over the period",
+    "repartition": "Breakdown · plan"
+  },
+  "v4": {
+    "titre": "See where they drop off",
+    "appui": "A four-step funnel, with the drop-off at every step.",
+    "etiquette": "Funnel · 30 days",
+    "visiteurs": "visitors",
+    "perte": "lost",
+    "fenetre": "60 min between steps",
+    "fin": "make it to the end"
+  },
+  "v5": {
+    "titre": "Measure retention",
+    "appui": "D1, D7 and D30, computed on your own database and plugged into Glance.",
+    "source": "Metrics source",
+    "jeton": "Token",
+    "tester": "Test",
+    "resultat": "3 metrics",
+    "metrique": "Site metric",
+    "j1": "D1 retention",
+    "j7": "D7 retention",
+    "j30": "D30 retention",
+    "cohortes": "Measured on the Oct 8 to 14 cohorts",
+    "votre_base": "Computed on your database"
+  },
+  "v6": {
+    "titre": "Forecast your month",
+    "appui": "Your curve continues as an orange dotted line, with the expected total.",
+    "etiquette": "Visitors · this month",
+    "visiteurs": "Visitors",
+    "prevision": "Forecast",
+    "projete": "Projected total",
+    "ajd": "Today",
+    "a_ce_jour": "so far",
+    "vs": "vs last month",
+    "methode": "Last 7 days’ level × weekly rhythm"
+  },
+  "v7": {
+    "titre": "Live, right on your home screen",
+    "appui": "Who is on your sites right now, plus iOS and Android widgets.",
+    "etiquette": "Live",
+    "en_ligne": "online",
+    "w_titre": "All sites",
+    "w_periode": "7 days",
+    "w_pages": "page views",
+    "ios": "iOS",
+    "android": "Android"
+  },
+  "v8": {
+    "titre": "On all your devices",
+    "appui": "iPhone, Android, Mac and Windows: your setup follows you.",
+    "iphone": "iPhone",
+    "android": "Android",
+    "mac": "Mac",
+    "windows": "Windows",
+    "synchro": "End-to-end encrypted sync",
+    "synchro_sous": "The server only ever sees encrypted data."
+  },
+  "presentation": {
+    "titre": "Your web stats, at a glance",
+    "appui": "Umami and Plausible: dashboards, events, forecast.",
+    "etiquette": "Visitors · this month",
+    "prevision": "Forecast",
+    "etiquette_v": "Visitors",
+    "w_titre": "All sites"
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "commun": {
+    "marque": "Glance",
+    "mini_titre": "Todos los sitios"
+  },
+  "v1": {
+    "titre": "Tus sitios, de un vistazo",
+    "appui": "Umami y Plausible reunidos en una sola app, clara y rápida.",
+    "p1": "Umami",
+    "p2": "Plausible",
+    "p3": "No se recopila nada"
+  },
+  "v2": {
+    "titre": "Cruza tus sitios",
+    "appui": "Varios sitios codo con codo y de dónde vienen sus visitantes.",
+    "etiquette": "Panel · Sitios · 30 días",
+    "total": "Visitantes · total de las líneas",
+    "f_tous": "Todos los visitantes",
+    "f_venus": "Desde",
+    "f_sauf": "Salvo desde",
+    "part": "del total",
+    "editeur": "Línea 3 · filtro de referencia",
+    "seg_tous": "Todos",
+    "seg_venus": "Desde",
+    "seg_sauf": "Salvo desde",
+    "domaine": "Dominio"
+  },
+  "v3": {
+    "titre": "Sigue cada evento",
+    "appui": "Una curva y un color por evento, filtrables por propiedad.",
+    "etiquette": "Eventos · 14 días",
+    "compteur": "Contador",
+    "filtres": "Filtros de propiedad",
+    "sur": "en el periodo",
+    "repartition": "Desglose · plan"
+  },
+  "v4": {
+    "titre": "Mira dónde abandonan",
+    "appui": "Un embudo de cuatro pasos, con la pérdida en cada paso.",
+    "etiquette": "Embudo · 30 días",
+    "visiteurs": "visitantes",
+    "perte": "perdidos",
+    "fenetre": "60 min entre dos pasos",
+    "fin": "llegan hasta el final"
+  },
+  "v5": {
+    "titre": "Mide la retención",
+    "appui": "D1, D7 y D30, calculados sobre tu propia base de datos y conectados a Glance.",
+    "source": "Fuente de métricas",
+    "jeton": "Token",
+    "tester": "Probar",
+    "resultat": "3 indicadores",
+    "metrique": "Métrica del sitio",
+    "j1": "Retención D1",
+    "j7": "Retención D7",
+    "j30": "Retención D30",
+    "cohortes": "Medido en las cohortes del 8 al 14 oct.",
+    "votre_base": "Calculado sobre tu base de datos"
+  },
+  "v6": {
+    "titre": "Anticipa el fin de mes",
+    "appui": "La curva se prolonga en línea punteada naranja, con el total previsto.",
+    "etiquette": "Visitantes · este mes",
+    "visiteurs": "Visitantes",
+    "prevision": "Previsión",
+    "projete": "Total proyectado",
+    "ajd": "Hoy",
+    "a_ce_jour": "hasta hoy",
+    "vs": "vs. mes anterior",
+    "methode": "Nivel de los últimos 7 días × ritmo de la semana"
+  },
+  "v7": {
+    "titre": "En vivo en tu pantalla",
+    "appui": "Los visitantes presentes ahora, y widgets para iOS y Android.",
+    "etiquette": "En vivo",
+    "en_ligne": "en línea",
+    "w_titre": "Todos los sitios",
+    "w_periode": "7 días",
+    "w_pages": "vistas",
+    "ios": "iOS",
+    "android": "Android"
+  },
+  "v8": {
+    "titre": "En todos tus dispositivos",
+    "appui": "iPhone, Android, Mac y Windows: tu configuración te acompaña.",
+    "iphone": "iPhone",
+    "android": "Android",
+    "mac": "Mac",
+    "windows": "Windows",
+    "synchro": "Sincronización cifrada de extremo a extremo",
+    "synchro_sous": "El servidor solo ve datos cifrados."
+  },
+  "presentation": {
+    "titre": "Tus estadísticas, de un vistazo",
+    "appui": "Umami y Plausible: paneles, eventos, previsión.",
+    "etiquette": "Visitantes · este mes",
+    "prevision": "Previsión",
+    "etiquette_v": "Visitantes",
+    "w_titre": "Todos los sitios"
+  }
+}

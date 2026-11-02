@@ -1,0 +1,86 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Glance — croisez vos sites</title>
+<link rel="stylesheet" href="commun.css">
+<style>
+  .ligne { display: grid; grid-template-columns: auto 1fr auto; column-gap: calc(24 * var(--u)); align-items: center; padding: calc(20 * var(--u)) 0; }
+  .ligne + .ligne { border-top: calc(2 * var(--u)) solid var(--line); }
+  .ligne .pt { width: calc(26 * var(--u)); height: calc(26 * var(--u)); border-radius: 50%; background: var(--c); }
+  .ligne .nom { font-weight: 600; font-size: calc(40 * var(--u)); line-height: 1.15; }
+  .ligne .filtre { font-family: "JetBrains Mono"; font-size: calc(26 * var(--u)); color: var(--fg2); margin-top: calc(6 * var(--u)); letter-spacing: .02em; }
+  .ligne .filtre b { color: var(--c); font-weight: 600; }
+  .ligne .val { text-align: right; }
+  .ligne .val .stat { font-size: calc(54 * var(--u)); }
+  .ligne .val .mono { font-size: calc(26 * var(--u)); color: var(--fg2); display: block; margin-top: calc(4 * var(--u)); }
+  .ligne .barre { grid-column: 2 / 4; margin-top: calc(14 * var(--u)); height: calc(12 * var(--u)); }
+
+  .segments { display: flex; background: var(--chip); border-radius: 999px; padding: calc(8 * var(--u)); margin-top: calc(26 * var(--u)); }
+  .segments span { flex: 1; text-align: center; padding: calc(18 * var(--u)) calc(10 * var(--u)); border-radius: 999px; font-weight: 500; font-size: calc(30 * var(--u)); color: var(--fg2); white-space: nowrap; }
+  .segments span.actif { background: var(--accent); color: #fff; font-weight: 600; }
+  .champ { margin-top: calc(22 * var(--u)); display: flex; align-items: center; justify-content: space-between; gap: calc(20 * var(--u));
+    border: calc(3 * var(--u)) solid var(--accent); border-radius: calc(26 * var(--u)); padding: calc(22 * var(--u)) calc(30 * var(--u)); }
+  .champ .mono { font-size: calc(36 * var(--u)); font-weight: 500; }
+  .grand { flex: 1 1 auto; min-height: calc(560 * var(--u)); }
+  .ligne { padding: calc(16 * var(--u)) 0; }
+</style>
+</head>
+<body class="fond-foret clair">
+  <header class="entete">
+    <div class="marque"></div>
+    <h1 class="titre" data-t="titre"></h1>
+    <p class="appui" data-t="appui"></p>
+  </header>
+  <main class="scene deux">
+    <section class="carte grand">
+      <div class="rangee"><span class="label" data-t="etiquette"></span></div>
+      <div class="rangee" style="margin-top: calc(26 * var(--u)); align-items: flex-end; justify-content: flex-start; gap: calc(28 * var(--u));">
+        <span class="stat" id="total"></span><span class="delta" id="delta" style="margin-bottom: calc(12 * var(--u))"></span>
+      </div>
+      <div class="label" style="margin: calc(8 * var(--u)) 0 calc(26 * var(--u)); text-transform: none; letter-spacing: .02em; font-size: calc(28 * var(--u));" data-t="total"></div>
+      <div class="graphe" id="g"></div>
+    </section>
+    <section class="carte" id="lignes" style="padding-top: calc(30 * var(--u)); padding-bottom: calc(30 * var(--u));"></section>
+    <section class="carte">
+      <span class="label" data-t="editeur"></span>
+      <div class="segments"><span data-t="seg_tous"></span><span class="actif" data-t="seg_venus"></span><span data-t="seg_sauf"></span></div>
+      <div class="champ"><span class="mono">atelier-lune.fr</span><span class="mono" style="color: var(--fg3); font-size: calc(26 * var(--u));" data-t="domaine"></span></div>
+    </section>
+  </main>
+<script src="commun.js"></script>
+<script>
+monter("v2", async () => {
+  const n = 30;
+  const COUL = ["#3B7A5A", "#C97F44", "#4A6FA5", "#9A5BA6"];
+  const lignes = [
+    { site: "atelier-lune.fr", f: "tous", total: 2140, v: serie(n, { base: 71, amp: 10, f: 2, pente: 6, bruit: 4, graine: 3 }) },
+    { site: "carnet.app", f: "tous", total: 1190, v: serie(n, { base: 38, amp: 7, f: 1.5, phase: .2, pente: 3, bruit: 3, graine: 5 }) },
+    { site: "carnet.app", f: "venus", dom: "atelier-lune.fr", total: 410, v: serie(n, { base: 13, amp: 4, f: 2.5, pente: 2, bruit: 2, graine: 8 }) },
+    { site: "studio-nord.com", f: "sauf", dom: "carnet.app", total: 1072, v: serie(n, { base: 35, amp: 6, f: 1, phase: .5, pente: -2, bruit: 3, graine: 11 }) },
+  ];
+  const somme = lignes.reduce((s, l) => s + l.total, 0);
+  document.getElementById("total").textContent = nb(somme);
+  document.getElementById("delta").textContent = signe(12.4, 1);
+  document.getElementById("lignes").innerHTML = lignes.map((l, i) => {
+    const filtre = l.f === "tous" ? T("f_tous") : `${T(l.f === "venus" ? "f_venus" : "f_sauf")} <b>${l.dom}</b>`;
+    const part = l.total / somme * 100;
+    return `<div class="ligne" style="--c:${COUL[i]}"><i class="pt"></i>
+      <div><div class="nom">${l.site}</div><div class="filtre">${filtre}</div></div>
+      <div class="val"><span class="stat">${nb(l.total)}</span><span class="mono">${pct(part)} ${T("part")}</span></div>
+      <div class="barre"><b style="--w:${part * 2.2}%"></b></div></div>`;
+  }).join("");
+  const total = lignes[0].v.map((_, i) => lignes.reduce((s, l) => s + l.v[i], 0));
+  const max = 200;
+  graphe(document.getElementById("g"), {
+    series: [
+      ...lignes.map((l, i) => ({ v: l.v, couleur: COUL[i], epaisseur: 5, opacite: .85 })),
+      { v: total, couleur: "#3B7A5A", aire: true, epaisseur: 8, point: 11 },
+    ],
+    max, ticks: [0, 100, 200], gauche: 76, bas: 44,
+    xlabels: [[0, "1"], [9, "10"], [19, "20"], [n - 1, "30"]],
+  });
+});
+</script>
+</body>
+</html>

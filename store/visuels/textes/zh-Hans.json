@@ -1,0 +1,101 @@
+{
+  "commun": {
+    "marque": "Glance",
+    "mini_titre": "所有站点"
+  },
+  "v1": {
+    "titre": "所有站点，一眼尽览",
+    "appui": "Umami 和 Plausible 汇于一个应用，清晰又快速。",
+    "p1": "Umami",
+    "p2": "Plausible",
+    "p3": "不收集任何数据"
+  },
+  "v2": {
+    "titre": "站点交叉对比",
+    "appui": "多个站点并排查看，还能看到访客从哪里来。",
+    "etiquette": "仪表盘 · 站点 · 30 天",
+    "total": "访客 · 各行合计",
+    "f_tous": "所有访客",
+    "f_venus": "来自",
+    "f_sauf": "不含来自",
+    "part": "占总数",
+    "editeur": "第 3 行 · 来源筛选",
+    "seg_tous": "全部",
+    "seg_venus": "来自",
+    "seg_sauf": "不含来自",
+    "domaine": "域名"
+  },
+  "v3": {
+    "titre": "追踪每个事件",
+    "appui": "每个事件一条曲线、一种颜色，可按属性筛选。",
+    "etiquette": "事件 · 14 天",
+    "compteur": "计数",
+    "filtres": "属性筛选",
+    "sur": "此时段内",
+    "repartition": "分布 · 套餐"
+  },
+  "v4": {
+    "titre": "看清用户在哪流失",
+    "appui": "四步漏斗，每一步的流失一目了然。",
+    "etiquette": "漏斗 · 30 天",
+    "visiteurs": "访客",
+    "perte": "流失",
+    "fenetre": "两步之间最长 60 分钟",
+    "fin": "走完全程"
+  },
+  "v5": {
+    "titre": "衡量用户留存",
+    "appui": "次日、7 日、30 日留存，基于您自己的数据库计算并接入 Glance。",
+    "source": "指标数据源",
+    "jeton": "令牌",
+    "tester": "测试",
+    "resultat": "3 个指标",
+    "metrique": "站点指标",
+    "j1": "次日留存",
+    "j7": "7 日留存",
+    "j30": "30 日留存",
+    "cohortes": "按 10 月 8 日至 14 日的同期群测得",
+    "votre_base": "基于您的数据库计算"
+  },
+  "v6": {
+    "titre": "预见月底数据",
+    "appui": "曲线以橙色虚线延伸，并给出预计总数。",
+    "etiquette": "访客 · 本月",
+    "visiteurs": "访客",
+    "prevision": "预测",
+    "projete": "预计总数",
+    "ajd": "今天",
+    "a_ce_jour": "截至目前",
+    "vs": "较上月",
+    "methode": "近 7 天水平 × 每周规律"
+  },
+  "v7": {
+    "titre": "主屏幕上的实时数据",
+    "appui": "此刻在线的访客，还有 iOS 和 Android 小组件。",
+    "etiquette": "实时",
+    "en_ligne": "人在线",
+    "w_titre": "所有站点",
+    "w_periode": "7 天",
+    "w_pages": "浏览量",
+    "ios": "iOS",
+    "android": "Android"
+  },
+  "v8": {
+    "titre": "所有设备，同步随行",
+    "appui": "iPhone、Android、Mac 和 Windows：您的配置随您而行。",
+    "iphone": "iPhone",
+    "android": "Android",
+    "mac": "Mac",
+    "windows": "Windows",
+    "synchro": "端到端加密同步",
+    "synchro_sous": "服务器只能看到加密后的数据。"
+  },
+  "presentation": {
+    "titre": "网站数据，一眼尽览",
+    "appui": "Umami 和 Plausible：仪表盘、事件、预测。",
+    "etiquette": "访客 · 本月",
+    "prevision": "预测",
+    "etiquette_v": "访客",
+    "w_titre": "所有站点"
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "commun": {
+    "marque": "Glance",
+    "mini_titre": "Alle Websites"
+  },
+  "v1": {
+    "titre": "Alle Websites auf einen Blick",
+    "appui": "Umami und Plausible vereint in einer klaren, schnellen App.",
+    "p1": "Umami",
+    "p2": "Plausible",
+    "p3": "Nichts wird erfasst"
+  },
+  "v2": {
+    "titre": "Websites im Vergleich",
+    "appui": "Mehrere Websites nebeneinander, samt Herkunft ihrer Besucher.",
+    "etiquette": "Dashboard · Sites · 30 Tage",
+    "total": "Besucher · Summe der Zeilen",
+    "f_tous": "Alle Besucher",
+    "f_venus": "Von",
+    "f_sauf": "Außer von",
+    "part": "der Summe",
+    "editeur": "Zeile 3 · Referrer-Filter",
+    "seg_tous": "Alle",
+    "seg_venus": "Von",
+    "seg_sauf": "Außer von",
+    "domaine": "Domain"
+  },
+  "v3": {
+    "titre": "Jedes Ereignis im Blick",
+    "appui": "Eine Kurve und eine Farbe pro Ereignis, filterbar nach Eigenschaft.",
+    "etiquette": "Ereignisse · 14 Tage",
+    "compteur": "Zähler",
+    "filtres": "Eigenschaftsfilter",
+    "sur": "im Zeitraum",
+    "repartition": "Aufschlüsselung · Tarif"
+  },
+  "v4": {
+    "titre": "Sehen, wo sie abspringen",
+    "appui": "Ein Funnel in vier Schritten, mit dem Verlust bei jedem Übergang.",
+    "etiquette": "Funnel · 30 Tage",
+    "visiteurs": "Besucher",
+    "perte": "verloren",
+    "fenetre": "60 Min. zwischen zwei Schritten",
+    "fin": "kommen bis zum Ende"
+  },
+  "v5": {
+    "titre": "Nutzerbindung messen",
+    "appui": "D1, D7 und D30, aus Ihrer eigenen Datenbank berechnet und an Glance angebunden.",
+    "source": "Metrikquelle",
+    "jeton": "Token",
+    "tester": "Testen",
+    "resultat": "3 Kennzahlen",
+    "metrique": "Website-Metrik",
+    "j1": "Bindung D1",
+    "j7": "Bindung D7",
+    "j30": "Bindung D30",
+    "cohortes": "Gemessen an den Kohorten vom 8. bis 14. Okt.",
+    "votre_base": "Aus Ihrer Datenbank berechnet"
+  },
+  "v6": {
+    "titre": "Monatsende vorhersehen",
+    "appui": "Die Kurve setzt sich orange gestrichelt fort, mit der erwarteten Summe.",
+    "etiquette": "Besucher · dieser Monat",
+    "visiteurs": "Besucher",
+    "prevision": "Prognose",
+    "projete": "Prognostizierte Summe",
+    "ajd": "Heute",
+    "a_ce_jour": "bisher",
+    "vs": "ggü. Vormonat",
+    "methode": "Niveau der letzten 7 Tage × Wochenrhythmus"
+  },
+  "v7": {
+    "titre": "Live auf dem Home-Bildschirm",
+    "appui": "Die aktuellen Besucher, dazu Widgets für iOS und Android.",
+    "etiquette": "Live",
+    "en_ligne": "online",
+    "w_titre": "Alle Websites",
+    "w_periode": "7 Tage",
+    "w_pages": "Seitenaufrufe",
+    "ios": "iOS",
+    "android": "Android"
+  },
+  "v8": {
+    "titre": "Auf allen Ihren Geräten",
+    "appui": "iPhone, Android, Mac und Windows: Ihre Konfiguration begleitet Sie.",
+    "iphone": "iPhone",
+    "android": "Android",
+    "mac": "Mac",
+    "windows": "Windows",
+    "synchro": "Ende-zu-Ende-verschlüsselte Synchronisierung",
+    "synchro_sous": "Der Server sieht nur verschlüsselte Daten."
+  },
+  "presentation": {
+    "titre": "Ihre Web-Statistiken auf einen Blick",
+    "appui": "Umami und Plausible: Dashboards, Ereignisse, Prognose.",
+    "etiquette": "Besucher · dieser Monat",
+    "prevision": "Prognose",
+    "etiquette_v": "Besucher",
+    "w_titre": "Alle Websites"
+  }
+}
