@@ -11,6 +11,7 @@ import 'detail/detail_screen.dart';
 import 'direct/direct_screen.dart';
 import 'home/home_screen.dart';
 import 'settings/settings_screen.dart';
+import 'widgets/adaptive_sheet.dart';
 import 'widgets/motion.dart';
 import 'widgets/tab_bar.dart';
 
@@ -38,8 +39,7 @@ Future<T?> showGlanceModal<T>(
   Widget child, {
   bool fullscreenDialog = true,
 }) {
-  final desktop = MediaQuery.of(context).size.width >= kDesktopBreakpoint;
-  if (!desktop) {
+  if (!isDesktopWidth(context)) {
     return Navigator.of(context).push<T>(
       MaterialPageRoute(fullscreenDialog: fullscreenDialog, builder: (_) => child),
     );
@@ -54,16 +54,7 @@ Future<T?> showGlanceModal<T>(
     barrierLabel: 'Fermer',
     barrierColor: Colors.black.withValues(alpha: nested ? 0.15 : 0.62),
     transitionDuration: kMotionSlow,
-    transitionBuilder: (_, anim, _, child) {
-      final t = CurvedAnimation(parent: anim, curve: kCurveOutCubic);
-      return FadeTransition(
-        opacity: t,
-        child: ScaleTransition(
-          scale: Tween(begin: 0.96, end: 1.0).animate(t),
-          child: child,
-        ),
-      );
-    },
+    transitionBuilder: glanceDialogTransition,
     pageBuilder: (_, _, _) => Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 420, maxHeight: 680),

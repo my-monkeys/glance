@@ -6,10 +6,10 @@ import '../../data/models/models.dart';
 import '../../state/indicators.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
+import '../widgets/adaptive_sheet.dart';
 import '../widgets/toast.dart';
 import 'editor/confirm_button.dart';
 import 'editor/indicator_editor.dart';
-import 'editor/pickers.dart';
 
 enum _Action { edit, delete }
 
