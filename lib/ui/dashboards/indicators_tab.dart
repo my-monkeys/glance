@@ -6,6 +6,7 @@ import '../../core/indicator_math.dart';
 import '../../data/models/indicator.dart';
 import '../../data/models/models.dart';
 import '../../data/models/period.dart';
+import '../../l10n/l10n.dart';
 import '../../state/indicators.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
@@ -103,7 +104,7 @@ class _IndicatorsTabState extends ConsumerState<IndicatorsTab> {
             ),
           const SizedBox(height: 18),
           GlanceButtonOutline(
-            label: 'Nouveau tableau',
+            label: context.l10n.dashboardsNew,
             leading: Icon(Icons.add_rounded, size: 18, color: context.glance.fg),
             onTap: create,
           ),
@@ -122,7 +123,7 @@ class _AllHidden extends StatelessWidget {
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.symmetric(vertical: 30),
         child: Text(
-          'Aucun tableau n\'a de données sur cette période',
+          context.l10n.dashboardsAllHidden,
           textAlign: TextAlign.center,
           style: GT.body(14, color: context.glance.fg2),
         ),
@@ -138,7 +139,6 @@ class _HiddenLink extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = context.glance;
-    final what = count == 1 ? '1 tableau sans données' : '$count tableaux sans données';
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -148,9 +148,9 @@ class _HiddenLink extends StatelessWidget {
           TextSpan(
             style: GT.body(12.5, color: p.fg3),
             children: [
-              TextSpan(text: '$what sur cette période · '),
+              TextSpan(text: '${context.l10n.dashboardsHiddenCount(count)} · '),
               TextSpan(
-                text: 'Afficher',
+                text: context.l10n.dashboardsShow,
                 style: GT.body(12.5, weight: 600, color: p.accent),
               ),
             ],
@@ -184,8 +184,7 @@ class _ArrangeBar extends StatelessWidget {
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  'Maintenez une carte pour la déplacer, tirez son coin pour la '
-                  'redimensionner.',
+                  context.l10n.dashboardsArrangeHint,
                   style: GT.body(12.5, color: p.fg3),
                 ),
               ),
@@ -209,7 +208,9 @@ class _ArrangeBar extends StatelessWidget {
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    editing ? 'Terminé' : 'Organiser',
+                    editing
+                        ? context.l10n.dashboardsArrangeDone
+                        : context.l10n.dashboardsArrange,
                     style: GT.body(13, weight: 600, color: color),
                   ),
                 ],
@@ -334,17 +335,17 @@ class _EmptyState extends StatelessWidget {
         children: [
           Icon(Icons.dashboard_outlined, size: 34, color: p.fg3),
           const SizedBox(height: 12),
-          Text('Aucun tableau', style: GT.body(15, color: p.fg2)),
+          Text(context.l10n.dashboardsEmptyTitle, style: GT.body(15, color: p.fg2)),
           const SizedBox(height: 6),
           Text(
-            'Suivez un taux, un entonnoir ou une répartition construits sur vos événements.',
+            context.l10n.dashboardsEmptyBody,
             textAlign: TextAlign.center,
             style: GT.body(13, color: p.fg3),
           ),
           const SizedBox(height: 22),
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 280),
-            child: GlanceButton(label: 'Créer un tableau', onTap: onCreate),
+            child: GlanceButton(label: context.l10n.dashboardsCreate, onTap: onCreate),
           ),
           const SizedBox(height: 16),
           _SourceLink(onTap: onSource),
@@ -372,7 +373,7 @@ class _SourceLink extends StatelessWidget {
           children: [
             Icon(Icons.hub_outlined, size: 16, color: p.fg2),
             const SizedBox(width: 8),
-            Text('Source de métriques',
+            Text(context.l10n.dashboardsMetricsSource,
                 style: GT.body(13, weight: 600, color: p.fg2)),
           ],
         ),

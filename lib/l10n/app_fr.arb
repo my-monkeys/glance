@@ -223,5 +223,209 @@
   "networkFlows": "Flux",
   "@networkFlows": {
     "description": "Carte : liste des paires site source → site destination"
+  },
+  "commonEdit": "Modifier",
+  "commonDelete": "Supprimer",
+  "commonSave": "Enregistrer",
+  "dashboardsKindCounter": "Compteur",
+  "@dashboardsKindCounter": {
+    "description": "Genre d'une carte de tableau, en petites capitales dans l'en-tête"
+  },
+  "dashboardsKindRatio": "Taux",
+  "@dashboardsKindRatio": {
+    "description": "Genre d'une carte de tableau : deux compteurs divisés"
+  },
+  "dashboardsKindFunnel": "Entonnoir",
+  "@dashboardsKindFunnel": {
+    "description": "Genre d'une carte de tableau"
+  },
+  "dashboardsKindBreakdown": "Répartition",
+  "@dashboardsKindBreakdown": {
+    "description": "Genre d'une carte de tableau : les valeurs d'une propriété"
+  },
+  "dashboardsKindExternal": "Métrique",
+  "@dashboardsKindExternal": {
+    "description": "Genre d'une carte de tableau : indicateur fourni par la source de métriques du site"
+  },
+  "dashboardsKindSites": "Sites",
+  "@dashboardsKindSites": {
+    "description": "Genre d'une carte de tableau : plusieurs sites côte à côte"
+  },
+  "dashboardsMoveCard": "Déplacer le tableau",
+  "@dashboardsMoveCard": {
+    "description": "Libellé d'accessibilité de la poignée de déplacement d'une carte"
+  },
+  "dashboardsCardOptions": "Options du tableau",
+  "@dashboardsCardOptions": {
+    "description": "Libellé d'accessibilité du menu ⋯ d'une carte"
+  },
+  "dashboardsResizeCard": "Redimensionner le tableau",
+  "@dashboardsResizeCard": {
+    "description": "Libellé d'accessibilité du coin de redimensionnement d'une carte"
+  },
+  "dashboardsLoadFailed": "Chargement impossible.",
+  "dashboardsNoData": "Aucune donnée sur la période",
+  "dashboardsNoEvents": "Aucun événement sur la période",
+  "dashboardsUnpublished": "Pas encore publiées : données jusqu'au {date}",
+  "@dashboardsUnpublished": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardsPendingNow": "Pas encore mesurable sur cette période",
+  "dashboardsPendingDelay": "{count, plural, =1{Pas encore mesurable : il faut 1 jour de recul} other{Pas encore mesurable : il faut {count} jours de recul}}",
+  "@dashboardsPendingDelay": {
+    "description": "Métrique à délai (J1, J7…) : la cohorte n'est pas encore terminée",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardsCohortOne": "Mesurée sur la cohorte du {date}",
+  "@dashboardsCohortOne": {
+    "description": "Note sous le chiffre d'une métrique à délai",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardsCohortRange": "Mesurée sur les cohortes {range}",
+  "@dashboardsCohortRange": {
+    "description": "{range} est une plage de jours déjà formatée (« du 8 au 14 oct. »)",
+    "placeholders": {
+      "range": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardsFamilyMember": "{member} · s'ajuste à la période",
+  "@dashboardsFamilyMember": {
+    "description": "Famille de métriques : {member} est le membre retenu (J1, J7, J30)",
+    "placeholders": {
+      "member": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardsDataUntil": "Données jusqu'au {date}",
+  "@dashboardsDataUntil": {
+    "description": "Dernier jour publié par la source",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardsFunnelVisitors": "{last} / {first} visiteurs",
+  "@dashboardsFunnelVisitors": {
+    "description": "Entonnoir : visiteurs de la dernière étape sur ceux de la première",
+    "placeholders": {
+      "last": {
+        "type": "String"
+      },
+      "first": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardsCohortTooltip": "{date} · cohorte du {cohort}",
+  "@dashboardsCohortTooltip": {
+    "description": "Infobulle du graphique d'une métrique à délai ; {date} est la date de mesure",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "cohort": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardsTotal": "Total",
+  "@dashboardsTotal": {
+    "description": "Légende : la courbe de la somme des parts d'un compteur découpé"
+  },
+  "dashboardsSegmentEstimated": "{label} · estimé",
+  "@dashboardsSegmentEstimated": {
+    "description": "Part (plateforme) dont la valeur est une estimation",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardsDeleted": "Tableau supprimé",
+  "dashboardsConfirmDelete": "Confirmer la suppression",
+  "dashboardsAllHidden": "Aucun tableau n'a de données sur cette période",
+  "dashboardsHiddenCount": "{count, plural, =1{1 tableau sans données sur cette période} other{{count} tableaux sans données sur cette période}}",
+  "@dashboardsHiddenCount": {
+    "description": "Suivi d'un « · Afficher »",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardsShow": "Afficher",
+  "@dashboardsShow": {
+    "description": "Lien qui réaffiche les tableaux sans données"
+  },
+  "dashboardsArrangeHint": "Maintenez une carte pour la déplacer, tirez son coin pour la redimensionner.",
+  "dashboardsArrange": "Organiser",
+  "@dashboardsArrange": {
+    "description": "Bouton qui passe la grille en mode déplacement/redimensionnement"
+  },
+  "dashboardsArrangeDone": "Terminé",
+  "@dashboardsArrangeDone": {
+    "description": "Bouton qui quitte le mode Organiser"
+  },
+  "dashboardsNew": "Nouveau tableau",
+  "dashboardsEmptyTitle": "Aucun tableau",
+  "dashboardsEmptyBody": "Suivez un taux, un entonnoir ou une répartition construits sur vos événements.",
+  "dashboardsCreate": "Créer un tableau",
+  "dashboardsMetricsSource": "Source de métriques",
+  "dashboardsMetricsIntro": "Une petite API de votre site qui fournit des indicateurs calculés sur sa base (rétention, comptes…) : un catalogue et des séries, protégés par un jeton.",
+  "dashboardsMetricsHowItWorks": "Comment ça marche ?",
+  "@dashboardsMetricsHowItWorks": {
+    "description": "Lien vers la documentation de la source de métriques"
+  },
+  "dashboardsMetricsUrlLabel": "Adresse de l'API",
+  "dashboardsMetricsUrlHint": "https://exemple.fr/api/interne/metriques/",
+  "@dashboardsMetricsUrlHint": {
+    "description": "Exemple d'adresse, en placeholder"
+  },
+  "dashboardsMetricsToken": "Jeton",
+  "dashboardsMetricsTest": "Tester",
+  "dashboardsMetricsAvailable": "{count, plural, =1{1 indicateur disponible} other{{count} indicateurs disponibles}}",
+  "@dashboardsMetricsAvailable": {
+    "description": "Résultat positif du test de la source",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardsMetricsSaved": "Source enregistrée",
+  "dashboardsMetricsRemove": "Retirer la source",
+  "dashboardsMetricsRemoveWithCards": "Retirer la source et {count, plural, =1{1 tableau} other{{count} tableaux}}",
+  "@dashboardsMetricsRemoveWithCards": {
+    "description": "Confirmation : les cartes « Métrique » partent avec la source",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardsMetricsRemoved": "Source retirée",
+  "dashboardsMetricsRemovedWithCards": "Source retirée, {count, plural, =1{1 tableau supprimé} other{{count} tableaux supprimés}}",
+  "@dashboardsMetricsRemovedWithCards": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

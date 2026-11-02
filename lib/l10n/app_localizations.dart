@@ -553,6 +553,312 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Flux'**
   String get networkFlows;
+
+  /// No description provided for @commonEdit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier'**
+  String get commonEdit;
+
+  /// No description provided for @commonDelete.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer'**
+  String get commonDelete;
+
+  /// No description provided for @commonSave.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer'**
+  String get commonSave;
+
+  /// Genre d'une carte de tableau, en petites capitales dans l'en-tête
+  ///
+  /// In fr, this message translates to:
+  /// **'Compteur'**
+  String get dashboardsKindCounter;
+
+  /// Genre d'une carte de tableau : deux compteurs divisés
+  ///
+  /// In fr, this message translates to:
+  /// **'Taux'**
+  String get dashboardsKindRatio;
+
+  /// Genre d'une carte de tableau
+  ///
+  /// In fr, this message translates to:
+  /// **'Entonnoir'**
+  String get dashboardsKindFunnel;
+
+  /// Genre d'une carte de tableau : les valeurs d'une propriété
+  ///
+  /// In fr, this message translates to:
+  /// **'Répartition'**
+  String get dashboardsKindBreakdown;
+
+  /// Genre d'une carte de tableau : indicateur fourni par la source de métriques du site
+  ///
+  /// In fr, this message translates to:
+  /// **'Métrique'**
+  String get dashboardsKindExternal;
+
+  /// Genre d'une carte de tableau : plusieurs sites côte à côte
+  ///
+  /// In fr, this message translates to:
+  /// **'Sites'**
+  String get dashboardsKindSites;
+
+  /// Libellé d'accessibilité de la poignée de déplacement d'une carte
+  ///
+  /// In fr, this message translates to:
+  /// **'Déplacer le tableau'**
+  String get dashboardsMoveCard;
+
+  /// Libellé d'accessibilité du menu ⋯ d'une carte
+  ///
+  /// In fr, this message translates to:
+  /// **'Options du tableau'**
+  String get dashboardsCardOptions;
+
+  /// Libellé d'accessibilité du coin de redimensionnement d'une carte
+  ///
+  /// In fr, this message translates to:
+  /// **'Redimensionner le tableau'**
+  String get dashboardsResizeCard;
+
+  /// No description provided for @dashboardsLoadFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chargement impossible.'**
+  String get dashboardsLoadFailed;
+
+  /// No description provided for @dashboardsNoData.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune donnée sur la période'**
+  String get dashboardsNoData;
+
+  /// No description provided for @dashboardsNoEvents.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun événement sur la période'**
+  String get dashboardsNoEvents;
+
+  /// No description provided for @dashboardsUnpublished.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas encore publiées : données jusqu\'au {date}'**
+  String dashboardsUnpublished(String date);
+
+  /// No description provided for @dashboardsPendingNow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas encore mesurable sur cette période'**
+  String get dashboardsPendingNow;
+
+  /// Métrique à délai (J1, J7…) : la cohorte n'est pas encore terminée
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Pas encore mesurable : il faut 1 jour de recul} other{Pas encore mesurable : il faut {count} jours de recul}}'**
+  String dashboardsPendingDelay(int count);
+
+  /// Note sous le chiffre d'une métrique à délai
+  ///
+  /// In fr, this message translates to:
+  /// **'Mesurée sur la cohorte du {date}'**
+  String dashboardsCohortOne(String date);
+
+  /// {range} est une plage de jours déjà formatée (« du 8 au 14 oct. »)
+  ///
+  /// In fr, this message translates to:
+  /// **'Mesurée sur les cohortes {range}'**
+  String dashboardsCohortRange(String range);
+
+  /// Famille de métriques : {member} est le membre retenu (J1, J7, J30)
+  ///
+  /// In fr, this message translates to:
+  /// **'{member} · s\'ajuste à la période'**
+  String dashboardsFamilyMember(String member);
+
+  /// Dernier jour publié par la source
+  ///
+  /// In fr, this message translates to:
+  /// **'Données jusqu\'au {date}'**
+  String dashboardsDataUntil(String date);
+
+  /// Entonnoir : visiteurs de la dernière étape sur ceux de la première
+  ///
+  /// In fr, this message translates to:
+  /// **'{last} / {first} visiteurs'**
+  String dashboardsFunnelVisitors(String last, String first);
+
+  /// Infobulle du graphique d'une métrique à délai ; {date} est la date de mesure
+  ///
+  /// In fr, this message translates to:
+  /// **'{date} · cohorte du {cohort}'**
+  String dashboardsCohortTooltip(String date, String cohort);
+
+  /// Légende : la courbe de la somme des parts d'un compteur découpé
+  ///
+  /// In fr, this message translates to:
+  /// **'Total'**
+  String get dashboardsTotal;
+
+  /// Part (plateforme) dont la valeur est une estimation
+  ///
+  /// In fr, this message translates to:
+  /// **'{label} · estimé'**
+  String dashboardsSegmentEstimated(String label);
+
+  /// No description provided for @dashboardsDeleted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tableau supprimé'**
+  String get dashboardsDeleted;
+
+  /// No description provided for @dashboardsConfirmDelete.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer la suppression'**
+  String get dashboardsConfirmDelete;
+
+  /// No description provided for @dashboardsAllHidden.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun tableau n\'a de données sur cette période'**
+  String get dashboardsAllHidden;
+
+  /// Suivi d'un « · Afficher »
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 tableau sans données sur cette période} other{{count} tableaux sans données sur cette période}}'**
+  String dashboardsHiddenCount(int count);
+
+  /// Lien qui réaffiche les tableaux sans données
+  ///
+  /// In fr, this message translates to:
+  /// **'Afficher'**
+  String get dashboardsShow;
+
+  /// No description provided for @dashboardsArrangeHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Maintenez une carte pour la déplacer, tirez son coin pour la redimensionner.'**
+  String get dashboardsArrangeHint;
+
+  /// Bouton qui passe la grille en mode déplacement/redimensionnement
+  ///
+  /// In fr, this message translates to:
+  /// **'Organiser'**
+  String get dashboardsArrange;
+
+  /// Bouton qui quitte le mode Organiser
+  ///
+  /// In fr, this message translates to:
+  /// **'Terminé'**
+  String get dashboardsArrangeDone;
+
+  /// No description provided for @dashboardsNew.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau tableau'**
+  String get dashboardsNew;
+
+  /// No description provided for @dashboardsEmptyTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun tableau'**
+  String get dashboardsEmptyTitle;
+
+  /// No description provided for @dashboardsEmptyBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suivez un taux, un entonnoir ou une répartition construits sur vos événements.'**
+  String get dashboardsEmptyBody;
+
+  /// No description provided for @dashboardsCreate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer un tableau'**
+  String get dashboardsCreate;
+
+  /// No description provided for @dashboardsMetricsSource.
+  ///
+  /// In fr, this message translates to:
+  /// **'Source de métriques'**
+  String get dashboardsMetricsSource;
+
+  /// No description provided for @dashboardsMetricsIntro.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une petite API de votre site qui fournit des indicateurs calculés sur sa base (rétention, comptes…) : un catalogue et des séries, protégés par un jeton.'**
+  String get dashboardsMetricsIntro;
+
+  /// Lien vers la documentation de la source de métriques
+  ///
+  /// In fr, this message translates to:
+  /// **'Comment ça marche ?'**
+  String get dashboardsMetricsHowItWorks;
+
+  /// No description provided for @dashboardsMetricsUrlLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse de l\'API'**
+  String get dashboardsMetricsUrlLabel;
+
+  /// Exemple d'adresse, en placeholder
+  ///
+  /// In fr, this message translates to:
+  /// **'https://exemple.fr/api/interne/metriques/'**
+  String get dashboardsMetricsUrlHint;
+
+  /// No description provided for @dashboardsMetricsToken.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jeton'**
+  String get dashboardsMetricsToken;
+
+  /// No description provided for @dashboardsMetricsTest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tester'**
+  String get dashboardsMetricsTest;
+
+  /// Résultat positif du test de la source
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 indicateur disponible} other{{count} indicateurs disponibles}}'**
+  String dashboardsMetricsAvailable(int count);
+
+  /// No description provided for @dashboardsMetricsSaved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Source enregistrée'**
+  String get dashboardsMetricsSaved;
+
+  /// No description provided for @dashboardsMetricsRemove.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer la source'**
+  String get dashboardsMetricsRemove;
+
+  /// Confirmation : les cartes « Métrique » partent avec la source
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer la source et {count, plural, =1{1 tableau} other{{count} tableaux}}'**
+  String dashboardsMetricsRemoveWithCards(int count);
+
+  /// No description provided for @dashboardsMetricsRemoved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Source retirée'**
+  String get dashboardsMetricsRemoved;
+
+  /// No description provided for @dashboardsMetricsRemovedWithCards.
+  ///
+  /// In fr, this message translates to:
+  /// **'Source retirée, {count, plural, =1{1 tableau supprimé} other{{count} tableaux supprimés}}'**
+  String dashboardsMetricsRemovedWithCards(int count);
 }
 
 class _AppLocalizationsDelegate

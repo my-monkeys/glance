@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/format.dart';
 import '../../data/models/period.dart';
+import '../../l10n/l10n.dart';
 import '../../theme/motion.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
@@ -49,15 +50,16 @@ class IndicatorChart extends StatelessWidget {
 
   /// « mar. 20 oct.\n », ou « 20 oct. · cohorte du 13 oct. · » en une ligne
   /// pour une métrique à délai.
-  String _tooltipHead(IndicatorPoint pt) => pt.cohort == null
+  String _tooltipHead(AppLocalizations l10n, IndicatorPoint pt) => pt.cohort == null
       ? '${chartTooltipDate(pt.t, unit)}\n'
-      : '${fmtDay(pt.t)} · cohorte du ${fmtDay(pt.cohort!)} · ';
+      : '${l10n.dashboardsCohortTooltip(fmtDay(pt.t), fmtDay(pt.cohort!))} · ';
 
   String _fmt(double v) => percent ? fmtPct(v) : fmtInt(v);
 
   @override
   Widget build(BuildContext context) {
     final p = context.glance;
+    final l10n = context.l10n;
     final len = points.length;
     final rawMax = points.fold<double>(0, (m, e) => math.max(m, e.value ?? 0));
     final maxY = percent ? percentAxisMax(rawMax) : chartNiceMax(rawMax);
@@ -153,7 +155,7 @@ class IndicatorChart extends StatelessWidget {
               getTooltipItems: (touched) => [
                 for (final s in touched)
                   LineTooltipItem(
-                    _tooltipHead(points[s.x.round().clamp(0, len - 1)]),
+                    _tooltipHead(l10n, points[s.x.round().clamp(0, len - 1)]),
                     GT.mono(10, color: p.fg3),
                     children: [
                       TextSpan(

@@ -289,4 +289,218 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get networkFlows => 'Flux';
+
+  @override
+  String get commonEdit => 'Modifier';
+
+  @override
+  String get commonDelete => 'Supprimer';
+
+  @override
+  String get commonSave => 'Enregistrer';
+
+  @override
+  String get dashboardsKindCounter => 'Compteur';
+
+  @override
+  String get dashboardsKindRatio => 'Taux';
+
+  @override
+  String get dashboardsKindFunnel => 'Entonnoir';
+
+  @override
+  String get dashboardsKindBreakdown => 'Répartition';
+
+  @override
+  String get dashboardsKindExternal => 'Métrique';
+
+  @override
+  String get dashboardsKindSites => 'Sites';
+
+  @override
+  String get dashboardsMoveCard => 'Déplacer le tableau';
+
+  @override
+  String get dashboardsCardOptions => 'Options du tableau';
+
+  @override
+  String get dashboardsResizeCard => 'Redimensionner le tableau';
+
+  @override
+  String get dashboardsLoadFailed => 'Chargement impossible.';
+
+  @override
+  String get dashboardsNoData => 'Aucune donnée sur la période';
+
+  @override
+  String get dashboardsNoEvents => 'Aucun événement sur la période';
+
+  @override
+  String dashboardsUnpublished(String date) {
+    return 'Pas encore publiées : données jusqu\'au $date';
+  }
+
+  @override
+  String get dashboardsPendingNow => 'Pas encore mesurable sur cette période';
+
+  @override
+  String dashboardsPendingDelay(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Pas encore mesurable : il faut $count jours de recul',
+      one: 'Pas encore mesurable : il faut 1 jour de recul',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dashboardsCohortOne(String date) {
+    return 'Mesurée sur la cohorte du $date';
+  }
+
+  @override
+  String dashboardsCohortRange(String range) {
+    return 'Mesurée sur les cohortes $range';
+  }
+
+  @override
+  String dashboardsFamilyMember(String member) {
+    return '$member · s\'ajuste à la période';
+  }
+
+  @override
+  String dashboardsDataUntil(String date) {
+    return 'Données jusqu\'au $date';
+  }
+
+  @override
+  String dashboardsFunnelVisitors(String last, String first) {
+    return '$last / $first visiteurs';
+  }
+
+  @override
+  String dashboardsCohortTooltip(String date, String cohort) {
+    return '$date · cohorte du $cohort';
+  }
+
+  @override
+  String get dashboardsTotal => 'Total';
+
+  @override
+  String dashboardsSegmentEstimated(String label) {
+    return '$label · estimé';
+  }
+
+  @override
+  String get dashboardsDeleted => 'Tableau supprimé';
+
+  @override
+  String get dashboardsConfirmDelete => 'Confirmer la suppression';
+
+  @override
+  String get dashboardsAllHidden =>
+      'Aucun tableau n\'a de données sur cette période';
+
+  @override
+  String dashboardsHiddenCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tableaux sans données sur cette période',
+      one: '1 tableau sans données sur cette période',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dashboardsShow => 'Afficher';
+
+  @override
+  String get dashboardsArrangeHint =>
+      'Maintenez une carte pour la déplacer, tirez son coin pour la redimensionner.';
+
+  @override
+  String get dashboardsArrange => 'Organiser';
+
+  @override
+  String get dashboardsArrangeDone => 'Terminé';
+
+  @override
+  String get dashboardsNew => 'Nouveau tableau';
+
+  @override
+  String get dashboardsEmptyTitle => 'Aucun tableau';
+
+  @override
+  String get dashboardsEmptyBody =>
+      'Suivez un taux, un entonnoir ou une répartition construits sur vos événements.';
+
+  @override
+  String get dashboardsCreate => 'Créer un tableau';
+
+  @override
+  String get dashboardsMetricsSource => 'Source de métriques';
+
+  @override
+  String get dashboardsMetricsIntro =>
+      'Une petite API de votre site qui fournit des indicateurs calculés sur sa base (rétention, comptes…) : un catalogue et des séries, protégés par un jeton.';
+
+  @override
+  String get dashboardsMetricsHowItWorks => 'Comment ça marche ?';
+
+  @override
+  String get dashboardsMetricsUrlLabel => 'Adresse de l\'API';
+
+  @override
+  String get dashboardsMetricsUrlHint =>
+      'https://exemple.fr/api/interne/metriques/';
+
+  @override
+  String get dashboardsMetricsToken => 'Jeton';
+
+  @override
+  String get dashboardsMetricsTest => 'Tester';
+
+  @override
+  String dashboardsMetricsAvailable(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count indicateurs disponibles',
+      one: '1 indicateur disponible',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dashboardsMetricsSaved => 'Source enregistrée';
+
+  @override
+  String get dashboardsMetricsRemove => 'Retirer la source';
+
+  @override
+  String dashboardsMetricsRemoveWithCards(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tableaux',
+      one: '1 tableau',
+    );
+    return 'Retirer la source et $_temp0';
+  }
+
+  @override
+  String get dashboardsMetricsRemoved => 'Source retirée';
+
+  @override
+  String dashboardsMetricsRemovedWithCards(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tableaux supprimés',
+      one: '1 tableau supprimé',
+    );
+    return 'Source retirée, $_temp0';
+  }
 }

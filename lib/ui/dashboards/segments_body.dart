@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../data/models/indicator_result.dart';
 import '../../data/models/models.dart';
 import '../../data/models/period.dart';
+import '../../l10n/l10n.dart';
 import '../widgets/common.dart';
 import '../widgets/events_chart.dart';
 import 'breakdown_body.dart';
@@ -29,10 +30,8 @@ class SegmentsBody extends StatelessWidget {
   final List<double?> totals;
   final TimeUnit unit;
 
-  static const _totalLabel = 'Total';
-
-  static String _label(CounterSegment s) =>
-      s.estimated ? '${s.label} · estimé' : s.label;
+  static String _label(AppLocalizations l10n, CounterSegment s) =>
+      s.estimated ? l10n.dashboardsSegmentEstimated(s.label) : s.label;
 
   static EventSeries _series(
     String name,
@@ -51,6 +50,7 @@ class SegmentsBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final times = [for (final p in data.points) p.t];
     final segments = data.segments;
     // Les parts se lisent sur les totaux distincts de la période : leur somme
@@ -59,9 +59,9 @@ class SegmentsBody extends StatelessWidget {
     return BreakdownBody(
       unit: unit,
       series: [
-        _series(_totalLabel, times, totals, data.total),
+        _series(l10n.dashboardsTotal, times, totals, data.total),
         for (final s in segments)
-          _series(_label(s), times, s.values, s.periodTotal ?? 0),
+          _series(_label(l10n, s), times, s.values, s.periodTotal ?? 0),
       ],
       bars: sum == 0
           ? const SizedBox.shrink()
@@ -73,7 +73,7 @@ class SegmentsBody extends StatelessWidget {
                 for (final (i, s) in segments.indexed)
                   if (s.periodTotal != null)
                     MetricBarRow(
-                      label: _label(s),
+                      label: _label(l10n, s),
                       value: s.periodTotal!,
                       // Le total prend la 1re couleur des courbes.
                       color: eventColorAt(i + 1),

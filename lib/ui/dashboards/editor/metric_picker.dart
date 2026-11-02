@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/models/metrics_source.dart';
 import '../../../data/models/models.dart';
+import '../../../l10n/l10n.dart';
 import '../../../state/metrics_sources.dart';
 import '../../../theme/palette.dart';
 import '../../../theme/type.dart';
@@ -54,7 +55,7 @@ class _MetricSheet extends ConsumerWidget {
                     ),
                   ),
                 ),
-                error: (e, _) => _Note(metricsErrorMessage(e)),
+                error: (e, _) => _Note(metricsErrorMessage(context.l10n, e)),
                 data: (defs) => defs.isEmpty
                     ? const _Note('Cette source ne propose aucun indicateur.')
                     : ListView(
