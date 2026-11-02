@@ -962,5 +962,88 @@
       }
     }
   },
-  "sitePickerShowNone": "N'afficher aucun site"
+  "sitePickerShowNone": "N'afficher aucun site",
+  "commonVisitors": "Visiteurs",
+  "commonPageviews": "Pages vues",
+  "commonNoData": "Aucune donnée",
+  "desktopSitesHeader": "Sites ({count})",
+  "@desktopSitesHeader": {
+    "description": "En-tête de la liste de sites de la barre latérale ; count = nombre de sites",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "desktopHiddenCount": "{count, plural, =1{{count} masqué} other{{count} masqués}}",
+  "@desktopHiddenCount": {
+    "description": "À côté de l'en-tête de la liste : sites masqués car sans visiteur",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "desktopShowAllSites": "Afficher tous les sites",
+  "@desktopShowAllSites": {
+    "description": "Infobulle de l'interrupteur « ≠ 0 » quand les sites sans visiteur sont masqués"
+  },
+  "desktopHideEmptySites": "Masquer les sites sans visiteur",
+  "@desktopHideEmptySites": {
+    "description": "Infobulle de l'interrupteur « ≠ 0 »"
+  },
+  "desktopLiveNobody": "Personne en ce moment.",
+  "desktopKpiSites": "Sites",
+  "@desktopKpiSites": {
+    "description": "Carte KPI de la vue d'ensemble : nombre de sites"
+  },
+  "desktopNoSitesGroupBody": "« {name} » ne contient aucun site. Choisissez ceux qui en font partie.",
+  "@desktopNoSitesGroupBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "desktopNoSitesBody": "Vos comptes ne suivent aucun site pour le moment. Choisissez les sites à afficher depuis les réglages.",
+  "chartLegendForecast": "Prévision",
+  "chartLegendPrevious": "Période précédente",
+  "chartTooltipVisitors": "visiteurs",
+  "chartTooltipPageviews": "pages vues",
+  "chartTooltipForecast": "prévision",
+  "chartTooltipPrevious": "période précédente",
+  "chartNoSeries": "Aucune série sélectionnée",
+  "chartHour": "{hour}h",
+  "@chartHour": {
+    "description": "Heure d'un point de série, sur l'axe ou dans l'infobulle ; hour = « 14 » (deux chiffres, 24 h)",
+    "placeholders": {
+      "hour": {
+        "type": "String"
+      }
+    }
+  },
+  "periodControlsDisplay": "Affichage",
+  "@periodControlsDisplay": {
+    "description": "Bouton qui ouvre le menu de réglages du graphique (découpage et style)"
+  },
+  "periodControlsSplit": "Découpage",
+  "@periodControlsSplit": {
+    "description": "Titre de section du menu Affichage : granularité heure / jour / mois"
+  },
+  "periodControlsChart": "Graphique",
+  "@periodControlsChart": {
+    "description": "Titre de section du menu Affichage : courbe ou barres"
+  },
+  "periodUnitHour": "Heure",
+  "@periodUnitHour": {
+    "description": "Granularité du graphique, libellé de puce très court"
+  },
+  "periodUnitDay": "Jour",
+  "@periodUnitDay": {
+    "description": "Granularité du graphique, libellé de puce très court"
+  },
+  "periodUnitMonth": "Mois",
+  "@periodUnitMonth": {
+    "description": "Granularité du graphique, libellé de puce très court"
+  }
 }

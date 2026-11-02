@@ -45,8 +45,8 @@ String fmtDayRange(AppLocalizations l10n, DateTime a, DateTime b) {
 /// Date d'axe selon la granularité. Le switch est exhaustif à dessein : un
 /// repli silencieux sur « jour » ferait afficher un axe faux au lieu de faire
 /// échouer la compilation.
-String fmtAxis(DateTime t, TimeUnit unit) => switch (unit) {
-  TimeUnit.hour => '${DateFormat('HH').format(t)}h',
+String fmtAxis(AppLocalizations l10n, DateTime t, TimeUnit unit) => switch (unit) {
+  TimeUnit.hour => l10n.chartHour(DateFormat('HH').format(t)),
   TimeUnit.day => DateFormat.d().format(t),
   TimeUnit.month => DateFormat.MMM().format(t),
 };

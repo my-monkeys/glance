@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:intl/intl.dart';
 
 import '../../data/models/period.dart';
+import '../../l10n/l10n.dart';
 
 /// Paliers d'une décade, en dixièmes de la puissance de 10 : 1 · 1,2 · 1,6 · 2 ·
 /// 2,4 · 3,2 · 4 · 4,8 · 6 · 8. Plus fin que {1, 2, 4, 5, 8}, dont le saut 2 → 4
@@ -38,8 +39,10 @@ double chartNiceMax(double m) {
 }
 
 /// Date d'entête de tooltip selon la granularité.
-String chartTooltipDate(DateTime t, TimeUnit unit) => switch (unit) {
-  TimeUnit.hour => '${DateFormat.MMMd().format(t)} · ${DateFormat('HH').format(t)}h',
+String chartTooltipDate(AppLocalizations l10n, DateTime t, TimeUnit unit) =>
+    switch (unit) {
+  TimeUnit.hour =>
+    '${DateFormat.MMMd().format(t)} · ${l10n.chartHour(DateFormat('HH').format(t))}',
   TimeUnit.day => DateFormat.MMMEd().format(t),
   TimeUnit.month => DateFormat.yMMMM().format(t),
 };

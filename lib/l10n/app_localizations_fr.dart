@@ -1337,4 +1337,94 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get sitePickerShowNone => 'N\'afficher aucun site';
+
+  @override
+  String get commonVisitors => 'Visiteurs';
+
+  @override
+  String get commonPageviews => 'Pages vues';
+
+  @override
+  String get commonNoData => 'Aucune donnée';
+
+  @override
+  String desktopSitesHeader(int count) {
+    return 'Sites ($count)';
+  }
+
+  @override
+  String desktopHiddenCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count masqués',
+      one: '$count masqué',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get desktopShowAllSites => 'Afficher tous les sites';
+
+  @override
+  String get desktopHideEmptySites => 'Masquer les sites sans visiteur';
+
+  @override
+  String get desktopLiveNobody => 'Personne en ce moment.';
+
+  @override
+  String get desktopKpiSites => 'Sites';
+
+  @override
+  String desktopNoSitesGroupBody(String name) {
+    return '« $name » ne contient aucun site. Choisissez ceux qui en font partie.';
+  }
+
+  @override
+  String get desktopNoSitesBody =>
+      'Vos comptes ne suivent aucun site pour le moment. Choisissez les sites à afficher depuis les réglages.';
+
+  @override
+  String get chartLegendForecast => 'Prévision';
+
+  @override
+  String get chartLegendPrevious => 'Période précédente';
+
+  @override
+  String get chartTooltipVisitors => 'visiteurs';
+
+  @override
+  String get chartTooltipPageviews => 'pages vues';
+
+  @override
+  String get chartTooltipForecast => 'prévision';
+
+  @override
+  String get chartTooltipPrevious => 'période précédente';
+
+  @override
+  String get chartNoSeries => 'Aucune série sélectionnée';
+
+  @override
+  String chartHour(String hour) {
+    return '${hour}h';
+  }
+
+  @override
+  String get periodControlsDisplay => 'Affichage';
+
+  @override
+  String get periodControlsSplit => 'Découpage';
+
+  @override
+  String get periodControlsChart => 'Graphique';
+
+  @override
+  String get periodUnitHour => 'Heure';
+
+  @override
+  String get periodUnitDay => 'Jour';
+
+  @override
+  String get periodUnitMonth => 'Mois';
 }

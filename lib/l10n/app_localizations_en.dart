@@ -1326,4 +1326,88 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sitePickerShowNone => 'Show no sites';
+
+  @override
+  String get commonVisitors => 'Visitors';
+
+  @override
+  String get commonPageviews => 'Pageviews';
+
+  @override
+  String get commonNoData => 'No data';
+
+  @override
+  String desktopSitesHeader(int count) {
+    return 'Sites ($count)';
+  }
+
+  @override
+  String desktopHiddenCount(int count) {
+    return '$count hidden';
+  }
+
+  @override
+  String get desktopShowAllSites => 'Show all sites';
+
+  @override
+  String get desktopHideEmptySites => 'Hide sites with no visitors';
+
+  @override
+  String get desktopLiveNobody => 'Nobody right now.';
+
+  @override
+  String get desktopKpiSites => 'Sites';
+
+  @override
+  String desktopNoSitesGroupBody(String name) {
+    return '\"$name\" has no sites. Choose which ones belong to it.';
+  }
+
+  @override
+  String get desktopNoSitesBody =>
+      'Your accounts aren\'t tracking any sites yet. Pick the sites to show from settings.';
+
+  @override
+  String get chartLegendForecast => 'Forecast';
+
+  @override
+  String get chartLegendPrevious => 'Previous period';
+
+  @override
+  String get chartTooltipVisitors => 'visitors';
+
+  @override
+  String get chartTooltipPageviews => 'pageviews';
+
+  @override
+  String get chartTooltipForecast => 'forecast';
+
+  @override
+  String get chartTooltipPrevious => 'previous period';
+
+  @override
+  String get chartNoSeries => 'No series selected';
+
+  @override
+  String chartHour(String hour) {
+    return '$hour:00';
+  }
+
+  @override
+  String get periodControlsDisplay => 'Display';
+
+  @override
+  String get periodControlsSplit => 'Group by';
+
+  @override
+  String get periodControlsChart => 'Chart';
+
+  @override
+  String get periodUnitHour => 'Hour';
+
+  @override
+  String get periodUnitDay => 'Day';
+
+  @override
+  String get periodUnitMonth => 'Month';
 }

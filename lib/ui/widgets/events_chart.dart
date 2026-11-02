@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../../core/format.dart';
 import '../../data/models/models.dart';
 import '../../data/models/period.dart';
+import '../../l10n/l10n.dart';
 import '../../theme/motion.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
@@ -55,7 +56,7 @@ class EventsChart extends StatelessWidget {
       return SizedBox(
         height: height,
         child: Center(
-          child: Text('Aucune série sélectionnée',
+          child: Text(context.l10n.chartNoSeries,
               style: GT.body(13, color: p.fg3)),
         ),
       );
@@ -123,7 +124,7 @@ class EventsChart extends StatelessWidget {
                   }
                   return Padding(
                     padding: const EdgeInsets.only(top: 8),
-                    child: Text(fmtAxis(times[i], unit),
+                    child: Text(fmtAxis(context.l10n, times[i], unit),
                         style: GT.mono(9.5, color: p.fg3)),
                   );
                 },
@@ -143,7 +144,7 @@ class EventsChart extends StatelessWidget {
                 final i = touched.isEmpty
                     ? 0
                     : touched.first.x.round().clamp(0, len - 1);
-                final date = chartTooltipDate(times[i], unit);
+                final date = chartTooltipDate(context.l10n, times[i], unit);
                 return [
                   for (var k = 0; k < touched.length; k++)
                     LineTooltipItem(

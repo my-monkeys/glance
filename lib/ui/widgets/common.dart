@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/format.dart';
 import '../../data/models/dimension.dart';
+import '../../l10n/l10n.dart';
 import '../../theme/motion.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
@@ -239,7 +240,7 @@ class MetricBars extends StatelessWidget {
         height: reserveRows > 0 ? math.min(reserveRows, 3) * kMetricRowHeight : null,
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 10),
-          child: Text('Aucune donnée', style: GT.body(13, color: p.fg3)),
+          child: Text(context.l10n.commonNoData, style: GT.body(13, color: p.fg3)),
         ),
       );
     }

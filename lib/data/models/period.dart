@@ -15,13 +15,6 @@ extension TimeUnitApi on TimeUnit {
     TimeUnit.month => 'month',
   };
 
-  /// Libellé du sélecteur de granularité.
-  String get label => switch (this) {
-    TimeUnit.hour => 'Heure',
-    TimeUnit.day => 'Jour',
-    TimeUnit.month => 'Mois',
-  };
-
   /// Durée indicative d'un bucket, pour estimer leur nombre.
   Duration get nominal => switch (this) {
     TimeUnit.hour => const Duration(hours: 1),

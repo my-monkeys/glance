@@ -2245,6 +2245,156 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'N\'afficher aucun site'**
   String get sitePickerShowNone;
+
+  /// No description provided for @commonVisitors.
+  ///
+  /// In fr, this message translates to:
+  /// **'Visiteurs'**
+  String get commonVisitors;
+
+  /// No description provided for @commonPageviews.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pages vues'**
+  String get commonPageviews;
+
+  /// No description provided for @commonNoData.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune donnée'**
+  String get commonNoData;
+
+  /// En-tête de la liste de sites de la barre latérale ; count = nombre de sites
+  ///
+  /// In fr, this message translates to:
+  /// **'Sites ({count})'**
+  String desktopSitesHeader(int count);
+
+  /// À côté de l'en-tête de la liste : sites masqués car sans visiteur
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{{count} masqué} other{{count} masqués}}'**
+  String desktopHiddenCount(int count);
+
+  /// Infobulle de l'interrupteur « ≠ 0 » quand les sites sans visiteur sont masqués
+  ///
+  /// In fr, this message translates to:
+  /// **'Afficher tous les sites'**
+  String get desktopShowAllSites;
+
+  /// Infobulle de l'interrupteur « ≠ 0 »
+  ///
+  /// In fr, this message translates to:
+  /// **'Masquer les sites sans visiteur'**
+  String get desktopHideEmptySites;
+
+  /// No description provided for @desktopLiveNobody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Personne en ce moment.'**
+  String get desktopLiveNobody;
+
+  /// Carte KPI de la vue d'ensemble : nombre de sites
+  ///
+  /// In fr, this message translates to:
+  /// **'Sites'**
+  String get desktopKpiSites;
+
+  /// No description provided for @desktopNoSitesGroupBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'« {name} » ne contient aucun site. Choisissez ceux qui en font partie.'**
+  String desktopNoSitesGroupBody(String name);
+
+  /// No description provided for @desktopNoSitesBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos comptes ne suivent aucun site pour le moment. Choisissez les sites à afficher depuis les réglages.'**
+  String get desktopNoSitesBody;
+
+  /// No description provided for @chartLegendForecast.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prévision'**
+  String get chartLegendForecast;
+
+  /// No description provided for @chartLegendPrevious.
+  ///
+  /// In fr, this message translates to:
+  /// **'Période précédente'**
+  String get chartLegendPrevious;
+
+  /// No description provided for @chartTooltipVisitors.
+  ///
+  /// In fr, this message translates to:
+  /// **'visiteurs'**
+  String get chartTooltipVisitors;
+
+  /// No description provided for @chartTooltipPageviews.
+  ///
+  /// In fr, this message translates to:
+  /// **'pages vues'**
+  String get chartTooltipPageviews;
+
+  /// No description provided for @chartTooltipForecast.
+  ///
+  /// In fr, this message translates to:
+  /// **'prévision'**
+  String get chartTooltipForecast;
+
+  /// No description provided for @chartTooltipPrevious.
+  ///
+  /// In fr, this message translates to:
+  /// **'période précédente'**
+  String get chartTooltipPrevious;
+
+  /// No description provided for @chartNoSeries.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune série sélectionnée'**
+  String get chartNoSeries;
+
+  /// Heure d'un point de série, sur l'axe ou dans l'infobulle ; hour = « 14 » (deux chiffres, 24 h)
+  ///
+  /// In fr, this message translates to:
+  /// **'{hour}h'**
+  String chartHour(String hour);
+
+  /// Bouton qui ouvre le menu de réglages du graphique (découpage et style)
+  ///
+  /// In fr, this message translates to:
+  /// **'Affichage'**
+  String get periodControlsDisplay;
+
+  /// Titre de section du menu Affichage : granularité heure / jour / mois
+  ///
+  /// In fr, this message translates to:
+  /// **'Découpage'**
+  String get periodControlsSplit;
+
+  /// Titre de section du menu Affichage : courbe ou barres
+  ///
+  /// In fr, this message translates to:
+  /// **'Graphique'**
+  String get periodControlsChart;
+
+  /// Granularité du graphique, libellé de puce très court
+  ///
+  /// In fr, this message translates to:
+  /// **'Heure'**
+  String get periodUnitHour;
+
+  /// Granularité du graphique, libellé de puce très court
+  ///
+  /// In fr, this message translates to:
+  /// **'Jour'**
+  String get periodUnitDay;
+
+  /// Granularité du graphique, libellé de puce très court
+  ///
+  /// In fr, this message translates to:
+  /// **'Mois'**
+  String get periodUnitMonth;
 }
 
 class _AppLocalizationsDelegate
