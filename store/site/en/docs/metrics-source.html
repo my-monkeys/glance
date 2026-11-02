@@ -125,7 +125,7 @@ Accept: application/json</code></pre>
 
 <h3 id="catalogue">GET catalogue</h3>
 <p>No parameters. Returns the list of indicators Glance can offer.</p>
-<div class="codehead"><span>Response · catalogue (every field)</span><button class="cp" type="button" data-copy>Copy</button></div><pre><code>{
+<div class="codehead"><span>Response · catalogue (segments: see Examples)</span><button class="cp" type="button" data-copy>Copy</button></div><pre><code>{
   <span class="tk-k">"version"</span>: <span class="tk-n">1</span>,
   <span class="tk-k">"indicateurs"</span>: [
     {
@@ -137,8 +137,7 @@ Accept: application/json</code></pre>
       <span class="tk-k">"delai_jours"</span>: <span class="tk-n">1</span>,
       <span class="tk-k">"famille"</span>: <span class="tk-s">"retention"</span>,
       <span class="tk-k">"libelle_famille"</span>: <span class="tk-s">"Retention"</span>,
-      <span class="tk-k">"donnees_jusqu_au"</span>: <span class="tk-s">"2026-10-18"</span>,
-      <span class="tk-k">"segments"</span>: [{ <span class="tk-k">"id"</span>: <span class="tk-s">"site"</span>, <span class="tk-k">"libelle"</span>: <span class="tk-s">"Website"</span>, <span class="tk-k">"estime"</span>: <span class="tk-n">false</span> }]
+      <span class="tk-k">"donnees_jusqu_au"</span>: <span class="tk-s">"2026-10-18"</span>
     }
   ]
 }</code></pre>
@@ -172,7 +171,7 @@ Authorization: Bearer &lt;your token&gt;</code></pre>
 <tr><td><code>granularite</code></td><td data-l="Value"><code>jour</code>, <code>mois</code> or <code>heure</code></td><td data-l="Role">The size of a point (day, month, hour). <code>heure</code> is only requested under the conditions described below. Glance never asks for weeks.</td></tr>
 <tr><td><code>tz</code></td><td data-l="Value">IANA time zone</td><td data-l="Role">The device's (<code>Europe/Paris</code>), <code>UTC</code> if it does not provide one. This is the zone in which you cut your days.</td></tr>
 </tbody></table></div>
-<div class="codehead"><span>Response · series (every field)</span><button class="cp" type="button" data-copy>Copy</button></div><pre><code>{
+<div class="codehead"><span>Response · series (segments: see Examples)</span><button class="cp" type="button" data-copy>Copy</button></div><pre><code>{
   <span class="tk-k">"version"</span>: <span class="tk-n">1</span>,
   <span class="tk-k">"series"</span>: [
     {
@@ -182,11 +181,9 @@ Authorization: Bearer &lt;your token&gt;</code></pre>
           <span class="tk-k">"t"</span>: <span class="tk-s">"2026-10-12"</span>,
           <span class="tk-k">"valeur"</span>: <span class="tk-n">14.3</span>,
           <span class="tk-k">"numerateur"</span>: <span class="tk-n">21</span>,
-          <span class="tk-k">"denominateur"</span>: <span class="tk-n">147</span>,
-          <span class="tk-k">"segments"</span>: { <span class="tk-k">"site"</span>: <span class="tk-n">9</span>, <span class="tk-k">"appli"</span>: <span class="tk-n">12</span> }
+          <span class="tk-k">"denominateur"</span>: <span class="tk-n">147</span>
         }
-      ],
-      <span class="tk-k">"totaux"</span>: { <span class="tk-k">"site"</span>: <span class="tk-n">31</span>, <span class="tk-k">"appli"</span>: <span class="tk-n">40</span> }
+      ]
     }
   ]
 }</code></pre>

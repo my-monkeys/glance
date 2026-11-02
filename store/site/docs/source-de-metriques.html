@@ -124,7 +124,7 @@ Accept: application/json</code></pre>
 
 <h3 id="catalogue">GET catalogue</h3>
 <p>Sans paramètre. Renvoie la liste des indicateurs que Glance peut proposer.</p>
-<div class="codehead"><span>Réponse · catalogue (tous les champs)</span><button class="cp" type="button" data-copy>Copier</button></div><pre><code>{
+<div class="codehead"><span>Réponse · catalogue (segments : voir Exemples)</span><button class="cp" type="button" data-copy>Copier</button></div><pre><code>{
   <span class="tk-k">"version"</span>: <span class="tk-n">1</span>,
   <span class="tk-k">"indicateurs"</span>: [
     {
@@ -136,8 +136,7 @@ Accept: application/json</code></pre>
       <span class="tk-k">"delai_jours"</span>: <span class="tk-n">1</span>,
       <span class="tk-k">"famille"</span>: <span class="tk-s">"retention"</span>,
       <span class="tk-k">"libelle_famille"</span>: <span class="tk-s">"Rétention"</span>,
-      <span class="tk-k">"donnees_jusqu_au"</span>: <span class="tk-s">"2026-10-18"</span>,
-      <span class="tk-k">"segments"</span>: [{ <span class="tk-k">"id"</span>: <span class="tk-s">"site"</span>, <span class="tk-k">"libelle"</span>: <span class="tk-s">"Site"</span>, <span class="tk-k">"estime"</span>: <span class="tk-n">false</span> }]
+      <span class="tk-k">"donnees_jusqu_au"</span>: <span class="tk-s">"2026-10-18"</span>
     }
   ]
 }</code></pre>
@@ -171,7 +170,7 @@ Authorization: Bearer &lt;votre jeton&gt;</code></pre>
 <tr><td><code>granularite</code></td><td data-l="Valeur"><code>jour</code>, <code>mois</code> ou <code>heure</code></td><td data-l="Rôle">La taille d'un point. <code>heure</code> n'est demandée que dans les conditions décrites plus bas. Glance ne demande jamais de semaine.</td></tr>
 <tr><td><code>tz</code></td><td data-l="Valeur">fuseau IANA</td><td data-l="Rôle">Celui de l'appareil (<code>Europe/Paris</code>), <code>UTC</code> s'il ne le donne pas. C'est dans ce fuseau que vous découpez les jours.</td></tr>
 </tbody></table></div>
-<div class="codehead"><span>Réponse · series (tous les champs)</span><button class="cp" type="button" data-copy>Copier</button></div><pre><code>{
+<div class="codehead"><span>Réponse · series (segments : voir Exemples)</span><button class="cp" type="button" data-copy>Copier</button></div><pre><code>{
   <span class="tk-k">"version"</span>: <span class="tk-n">1</span>,
   <span class="tk-k">"series"</span>: [
     {
@@ -181,11 +180,9 @@ Authorization: Bearer &lt;votre jeton&gt;</code></pre>
           <span class="tk-k">"t"</span>: <span class="tk-s">"2026-10-12"</span>,
           <span class="tk-k">"valeur"</span>: <span class="tk-n">14.3</span>,
           <span class="tk-k">"numerateur"</span>: <span class="tk-n">21</span>,
-          <span class="tk-k">"denominateur"</span>: <span class="tk-n">147</span>,
-          <span class="tk-k">"segments"</span>: { <span class="tk-k">"site"</span>: <span class="tk-n">9</span>, <span class="tk-k">"appli"</span>: <span class="tk-n">12</span> }
+          <span class="tk-k">"denominateur"</span>: <span class="tk-n">147</span>
         }
-      ],
-      <span class="tk-k">"totaux"</span>: { <span class="tk-k">"site"</span>: <span class="tk-n">31</span>, <span class="tk-k">"appli"</span>: <span class="tk-n">40</span> }
+      ]
     }
   ]
 }</code></pre>
