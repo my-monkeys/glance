@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="glance_widget_description">所有站点的访客数，以及热门站点。</string>
+    <string name="glance_site_widget_description">您所选站点的访客数。</string>
+    <string name="site_config_title">选择站点</string>
+    <string name="site_config_empty">请先打开 Glance 并加载主屏幕，以同步您的站点。</string>
+    <string name="widget_chart_description">访客图表</string>
+    <string name="widget_pageviews">浏览量</string>
+    <string name="widget_open_app">打开 Glance</string>
+    <string name="widget_all_sites">所有站点</string>
+</resources>

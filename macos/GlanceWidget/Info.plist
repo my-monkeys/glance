@@ -6,6 +6,10 @@
 	<array>
 		<string>fr</string>
 		<string>en</string>
+		<string>de</string>
+		<string>es</string>
+		<string>pt-BR</string>
+		<string>zh-Hans</string>
 	</array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>

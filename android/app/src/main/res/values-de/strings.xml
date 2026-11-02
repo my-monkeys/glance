@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="glance_widget_description">Besucher aller Ihrer Websites und Ihre Top-Websites.</string>
+    <string name="glance_site_widget_description">Die Besucher einer Website Ihrer Wahl.</string>
+    <string name="site_config_title">Website wählen</string>
+    <string name="site_config_empty">Öffnen Sie zuerst Glance und laden Sie den Startbildschirm, um Ihre Websites zu synchronisieren.</string>
+    <string name="widget_chart_description">Besucherdiagramm</string>
+    <string name="widget_pageviews">Seitenaufrufe</string>
+    <string name="widget_open_app">Glance öffnen</string>
+    <string name="widget_all_sites">Alle Websites</string>
+</resources>

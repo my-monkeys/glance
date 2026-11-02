@@ -15,6 +15,30 @@
             "state": "translated",
             "value": "Site"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Website"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sitio"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Site"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "站点"
+          }
         }
       }
     },
@@ -30,6 +54,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "Choose the site to display."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Website zur Anzeige wählen."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elige el sitio que mostrar."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escolha o site a exibir."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择要显示的站点。"
           }
         }
       }
@@ -47,6 +95,30 @@
             "state": "translated",
             "value": "pageviews"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seitenaufrufe"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "vistas"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "visualizações"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "浏览量"
+          }
         }
       }
     },
@@ -62,6 +134,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "All sites"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle Websites"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todos los sitios"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todos os sites"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "所有站点"
           }
         }
       }
@@ -79,6 +175,30 @@
             "state": "translated",
             "value": "Open Glance"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Glance öffnen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abre Glance"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abra o Glance"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打开 Glance"
+          }
         }
       }
     },
@@ -94,6 +214,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "Glance — Overview"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Glance — Übersicht"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Glance — Resumen"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Glance — Resumo"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Glance — 概览"
           }
         }
       }
@@ -111,6 +255,30 @@
             "state": "translated",
             "value": "Glance — Site"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Glance — Website"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Glance — Sitio"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Glance — Site"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Glance — 站点"
+          }
         }
       }
     },
@@ -126,6 +294,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "Visitors of all your sites and your top sites."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Besucher aller Ihrer Websites und die Top-Websites."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visitantes de todos tus sitios y tus sitios principales."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visitantes de todos os seus sites e dos principais sites."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "所有站点的访客数，以及热门站点。"
           }
         }
       }
@@ -143,6 +335,30 @@
             "state": "translated",
             "value": "The visitors of a site you choose."
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Besucher einer Website Ihrer Wahl."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los visitantes de un sitio que elijas."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Os visitantes de um site à sua escolha."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "您所选站点的访客数。"
+          }
         }
       }
     },
@@ -158,6 +374,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "7 days"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "7 Tage"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "7 días"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "7 dias"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "7 天"
           }
         }
       }

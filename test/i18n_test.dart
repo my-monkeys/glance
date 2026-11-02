@@ -87,4 +87,38 @@ void main() {
     expect(resolveGlanceLocale([const Locale('ja')], supported), const Locale('en'));
     expect(resolveGlanceLocale(null, supported), const Locale('en'));
   });
+
+  test('chaque langue de l\'app a son nom dans sa propre langue', () {
+    expect(
+      {
+        for (final l in AppLocalizations.supportedLocales)
+          l.languageCode: nativeLanguageName(l),
+      },
+      {
+        'de': 'Deutsch',
+        'en': 'English',
+        'es': 'Español',
+        'fr': 'Français',
+        'pt': 'Português',
+        'zh': '中文',
+      },
+    );
+  });
+
+  for (final locale in AppLocalizations.supportedLocales) {
+    testWidgets('réglages sans débordement sur téléphone : $locale',
+        (tester) async {
+      tester.view.physicalSize = const Size(390, 2400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      SharedPreferences.setMockInitialValues({});
+      final prefs = await SharedPreferences.getInstance();
+      await tester.pumpWidget(ProviderScope(
+        overrides: [sharedPrefsProvider.overrideWithValue(prefs)],
+        child: _app(locale, const Scaffold(body: SettingsScreen())),
+      ));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    });
+  }
 }

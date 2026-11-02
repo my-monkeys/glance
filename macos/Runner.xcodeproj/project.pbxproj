@@ -393,6 +393,10 @@
 			knownRegions = (
 				en,
 				fr,
+				de,
+				es,
+				"pt-BR",
+				"zh-Hans",
 				Base,
 			);
 			mainGroup = 33CC10E42044A3C60003C045;

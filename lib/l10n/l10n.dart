@@ -93,7 +93,13 @@ Locale? parseLocaleTag(String? tag) {
 /// Nom d'une langue de l'app dans cette même langue (« Français », « English »).
 String nativeLanguageName(Locale l) {
   final tag = localeTag(l);
-  final name = kLanguageNames[tag]?[tag] ?? kLanguageNames[tag]?[l.languageCode];
+  // L'app dit `pt` et `zh`, les tables CLDR `pt-BR` et `zh-Hans`.
+  final table = kLanguageNames[tag] ??
+      kLanguageNames.entries
+          .where((e) => e.key.startsWith('${l.languageCode}-'))
+          .firstOrNull
+          ?.value;
+  final name = table?[tag] ?? table?[l.languageCode];
   return toBeginningOfSentenceCase(name ?? tag, tag) ?? tag;
 }
 
