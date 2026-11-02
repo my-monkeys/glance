@@ -9,7 +9,7 @@ import '../data/providers/metrics_api.dart';
 import 'providers.dart';
 
 /// Les sources d'agrégats par site. Les URL sont persistées en clair ; le
-/// jeton, lui, ne quitte jamais le secure storage.
+/// jeton, lui, ne quitte jamais le coffre.
 class MetricsSourcesNotifier extends Notifier<List<MetricsSource>> {
   static const _key = 'glance.metricsSources';
   static const _tokenPrefix = 'glance.metricsToken.';
@@ -35,21 +35,21 @@ class MetricsSourcesNotifier extends Notifier<List<MetricsSource>> {
   }
 
   Future<String?> tokenFor(SiteRef site) =>
-      ref.read(secureStorageProvider).read(key: _tokenKey(site));
+      ref.read(secretVaultProvider).read(_tokenKey(site));
 
   /// Crée ou remplace la source d'un site. Le jeton est écrit avant la liste :
   /// une source sans jeton ne doit jamais être visible.
   Future<void> set(Site site, String baseUrl, String token) async {
     final src = MetricsSource(site: SiteRef.of(site), baseUrl: baseUrl.trim());
     await ref
-        .read(secureStorageProvider)
-        .write(key: _tokenKey(src.site), value: token.trim());
+        .read(secretVaultProvider)
+        .write(_tokenKey(src.site), token.trim());
     await _save([...state.where((s) => s.site != src.site), src]);
   }
 
   Future<void> remove(Site site) async {
     final target = SiteRef.of(site);
-    await ref.read(secureStorageProvider).delete(key: _tokenKey(target));
+    await ref.read(secretVaultProvider).delete(_tokenKey(target));
     await _save(state.where((s) => s.site != target).toList());
   }
 
@@ -57,9 +57,9 @@ class MetricsSourcesNotifier extends Notifier<List<MetricsSource>> {
   /// gagne. Une suppression ne se propage pas (comme les tableaux).
   Future<void> upsertAll(List<SyncedMetricsSource> incoming) async {
     if (incoming.isEmpty) return;
-    final secure = ref.read(secureStorageProvider);
+    final vault = ref.read(secretVaultProvider);
     for (final i in incoming) {
-      await secure.write(key: _tokenKey(i.source.site), value: i.token);
+      await vault.write(_tokenKey(i.source.site), i.token);
     }
     final sites = {for (final i in incoming) i.source.site};
     await _save([

@@ -13,6 +13,7 @@ import '../data/providers/analytics_provider.dart';
 import '../data/providers/provider_factory.dart';
 import '../data/providers/umami_provider.dart';
 import '../data/repository/accounts_repository.dart';
+import '../data/repository/secret_vault.dart';
 import '../data/favicon_cache.dart';
 import '../data/stats_cache.dart';
 import '../core/predict.dart';
@@ -64,6 +65,16 @@ final secureStorageProvider = Provider<FlutterSecureStorage>(
     ),
   ),
 );
+
+/// Les secrets de l'app, regroupés en un seul élément du trousseau (une seule
+/// invite de mot de passe sur macOS). Seul le coffre touche `secureStorageProvider`.
+final secretVaultProvider = Provider<SecretVault>((ref) {
+  final prefs = ref.watch(sharedPrefsProvider);
+  return SecretVault(
+    ref.watch(secureStorageProvider),
+    legacyKeys: () => legacySecretKeys(prefs),
+  );
+});
 
 /// Cache disque des stats (résumé/série/métriques) pour un affichage instantané
 /// au démarrage à froid. Une seule instance pour l'app.
@@ -135,7 +146,7 @@ final instanceBaseProvider = Provider.family<String?, String>((ref, accountId) {
 final accountsRepoProvider = Provider<AccountsRepository>(
   (ref) => AccountsRepository(
     ref.watch(sharedPrefsProvider),
-    ref.watch(secureStorageProvider),
+    ref.watch(secretVaultProvider),
   ),
 );
 
