@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>document.documentElement.className+=" js";</script>
+<script src="/js/langue.js"></script>
+<title>Glance — Cliente de Umami y Plausible para Mac, iOS y Android · Gratis y de código abierto</title>
+<meta name="description" content="Glance: un cliente móvil y de escritorio claro para tus analíticas de Umami y Plausible. Todos tus sitios en iOS, Android, macOS y Windows — código abierto, sin servidor de terceros.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml">
+<link rel="canonical" href="https://glance-analytics.com/es/">
+<link rel="alternate" hreflang="fr" href="https://glance-analytics.com/">
+<link rel="alternate" hreflang="en" href="https://glance-analytics.com/en/">
+<link rel="alternate" hreflang="de" href="https://glance-analytics.com/de/">
+<link rel="alternate" hreflang="es" href="https://glance-analytics.com/es/">
+<link rel="alternate" hreflang="pt-BR" href="https://glance-analytics.com/pt/">
+<link rel="alternate" hreflang="zh-Hans" href="https://glance-analytics.com/zh/">
+<link rel="alternate" hreflang="x-default" href="https://glance-analytics.com/en/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Glance">
+<meta property="og:locale" content="es_ES">
+<meta property="og:title" content="Glance — Tus estadísticas web, de un vistazo.">
+<meta property="og:description" content="Un cliente claro y legible sobre Umami y Plausible. Todos tus sitios, en iOS, Android, macOS y Windows.">
+<meta property="og:url" content="https://glance-analytics.com/es/">
+<meta property="og:image" content="https://glance-analytics.com/img/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Glance en macOS — lista de sitios y vista general">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://glance-analytics.com/img/og.jpg">
+<link rel="preload" as="image" href="/img/scenes/1-accueil.webp" fetchpriority="high">
+<script defer src="https://uuu.my-monkey.fr/u.js" data-website-id="0d62b5ee-a8e2-4b05-959c-9e8b5a41c0dc"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/site.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "@id": "https://my-monkey.fr/#organization",
+  "name": "My-Monkey",
+  "url": "https://my-monkey.fr",
+  "sameAs": [
+    "https://github.com/my-monkeys",
+    "https://www.linkedin.com/company/my-monkey"
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "@id": "https://glance-analytics.com/#website",
+  "name": "Glance",
+  "url": "https://glance-analytics.com",
+  "inLanguage": "es-ES",
+  "publisher": {
+    "@id": "https://my-monkey.fr/#organization"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "@id": "https://glance-analytics.com/#app",
+  "name": "Glance",
+  "description": "Glance: un cliente móvil y de escritorio claro para tus analíticas de Umami y Plausible. Todos tus sitios en iOS, Android, macOS y Windows — código abierto, sin servidor de terceros.",
+  "url": "https://glance-analytics.com",
+  "image": "https://glance-analytics.com/img/og.jpg",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "iOS, Android, macOS, Windows",
+  "inLanguage": "es-ES",
+  "isAccessibleForFree": true,
+  "license": "https://github.com/my-monkeys/glance/blob/main/LICENSE",
+  "downloadUrl": "https://github.com/my-monkeys/glance/releases/download/v1.13.0/Glance-1.13.0.dmg",
+  "softwareHelp": "https://github.com/my-monkeys/glance",
+  "screenshot": [
+    "https://glance-analytics.com/img/scenes/es/2-sites.webp",
+    "https://glance-analytics.com/img/scenes/es/3-evenements.webp",
+    "https://glance-analytics.com/img/scenes/es/4-entonnoir.webp",
+    "https://glance-analytics.com/img/scenes/es/5-retention.webp",
+    "https://glance-analytics.com/img/scenes/1-accueil.webp"
+  ],
+  "featureList": [
+    "Cliente unificado de Umami y Plausible",
+    "Curvas suavizadas de visitantes y páginas vistas en 8 periodos",
+    "Previsión de tráfico del periodo en curso (día, mes, año)",
+    "Tiempo real en varios sitios",
+    "Tráfico interno: los visitantes que tus sitios se envían entre sí",
+    "Grupos de sitios (ámbitos de lectura)",
+    "Widgets de pantalla de inicio para iOS y Android",
+    "Credenciales cifradas en el llavero, acceso de solo lectura",
+    "Copia cifrada de extremo a extremo opcional (Glance Sync)",
+    "Paneles sobre tus eventos: contadores, tasas, desgloses, embudos (Umami)",
+    "Retención D1, D7 y D30 calculada sobre tu propia base de datos, mediante una fuente de métricas"
+  ],
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "EUR"
+  },
+  "publisher": {
+    "@id": "https://my-monkey.fr/#organization"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "¿Qué es Glance?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Glance es un cliente móvil y de escritorio, gratuito y de código abierto, que muestra tus estadísticas de Umami y Plausible. Reúne todos tus sitios en una sola app clara — curvas suavizadas, tiempo real y widgets — sin salir nunca de tu instancia de analítica."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Glance es gratuito?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sí: la app es gratuita y de código abierto (licencia MIT), sin cuenta, sin suscripción y sin límite de sitios. Una sola cosa es de pago, y es opcional — Glance Sync, la copia cifrada de tu configuración — con compra única."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Qué herramientas de analítica son compatibles?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Glance se conecta hoy a Umami y Plausible, también autoalojados. Fathom está previsto. Puedes seguir varias cuentas y proveedores a la vez, reunidos en una vista común."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿En qué plataformas está disponible Glance?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Glance está disponible en iOS (App Store), Android (Google Play), macOS (Homebrew o DMG) y Windows. La app está desarrollada con Flutter, así que es realmente multiplataforma."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Se envían mis datos a un tercero?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Glance habla directamente con tu instancia de Umami o Plausible, en solo lectura, sin servidor intermedio ni rastreo. Tus credenciales se quedan cifradas en el llavero de tu dispositivo."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Qué es Glance Sync?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Una opción de pago (compra única) que guarda tus cuentas y tus grupos y los recupera en tus otros dispositivos. Tu configuración se cifra en el dispositivo antes de enviarse: el servidor solo almacena un bloque ilegible. Sin ella, Glance funciona por completo en local, y la transferencia por QR sigue siendo gratuita."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Puedo separar mis sitios por cliente o por proyecto?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sí, con los grupos. Un grupo es un ámbito de lectura: los totales, la curva y la vista en vivo solo cuentan sus sitios. Cambias de un grupo a otro desde la pantalla de inicio."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Glance funciona con una instancia autoalojada?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sí. Tanto si tu instancia de Umami o Plausible está autoalojada como en la nube, Glance se conecta directamente con tu URL y tu clave de API. No hace falta ninguna configuración en el servidor."
+      }
+    }
+  ],
+  "inLanguage": "es-ES"
+}
+</script>
+</head>
+<body>
+<!-- Ajouter une langue : copier ce fichier dans <code>/index.html, traduire les textes, changer <html lang>,
+     <title>, la description, canonical, og:locale, og:url, "inLanguage" et les liens internes, puis ajouter la langue à
+     la liste LANGUES de js/langue.js, aux hreflang de TOUTES les pages d'accueil, au sélecteur de langue et au sitemap.
+     Les scènes viennent de `python3 -I store/visuels/rendre.py --langue <code visuels> --site` (écrit img/scenes/<code visuels>/). -->
+<header class="haut">
+  <div class="wrap">
+    <a class="marque" href="/es/"><img src="/favicon.svg?v=2" width="38" height="38" alt="">Glance</a>
+    <nav><a href="/en/docs/metrics-source.html" hreflang="en">Documentación</a><a href="/en/privacy.html" hreflang="en">Privacidad</a><a href="https://github.com/my-monkeys/glance">GitHub</a><details class="langues"><summary aria-label="Idioma : Español"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.7 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.7-3.8-9s1.3-6.4 3.8-9z"/></svg><span>Español</span></summary><ul><li><a href="/" lang="fr" hreflang="fr" data-lang="fr">Français</a></li><li><a href="/en/" lang="en" hreflang="en" data-lang="en">English</a></li><li><a href="/de/" lang="de" hreflang="de" data-lang="de">Deutsch</a></li><li><a href="/es/" lang="es" hreflang="es" data-lang="es" aria-current="true">Español</a></li><li><a href="/pt/" lang="pt-BR" hreflang="pt-BR" data-lang="pt">Português</a></li><li><a href="/zh/" lang="zh-Hans" hreflang="zh-Hans" data-lang="zh">简体中文</a></li></ul></details></nav>
+  </div>
+</header>
+<main>
+<section class="hero">
+  <svg class="courbe" viewBox="0 0 72 72" aria-hidden="true"><path d="M14 48C21 48 24 30 31 30C37 30 37 41 43 41C49 41 50 24 55 24"/><circle cx="55" cy="24" r="1.7"/></svg>
+  <div class="wrap">
+    <div class="texte">
+      <p class="surtitre" data-entree>Gratis · código abierto</p>
+      <h1 data-entree>Tus estadísticas web,<br>de un vistazo.</h1>
+      <p class="accroche" data-entree>Glance es el cliente móvil y de escritorio de Umami y Plausible. Todos tus sitios de un vistazo y paneles de verdad para entender lo que pasa en ellos.</p>
+      <div class="badges" data-entree>
+      <a class="badge premier" href="https://apps.apple.com/app/glance-umami-plausible/id6789938289"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 12.5c0-2 1.1-3.3 1.6-3.7-.9-1.3-2.3-1.5-2.8-1.5-1.2-.1-2.3.7-2.9.7-.6 0-1.5-.7-2.5-.7-1.3 0-2.5.8-3.1 1.9-1.4 2.3-.4 5.8.9 7.7.6.9 1.4 2 2.4 1.9.9 0 1.3-.6 2.4-.6s1.4.6 2.4.6c1 0 1.6-.9 2.2-1.8.5-.7.8-1.5 1-2.1-1.2-.5-2-1.6-2-2.6zM15 5.9c.5-.6.9-1.5.8-2.4-.8 0-1.7.5-2.2 1.2-.5.5-.9 1.4-.8 2.3.9 0 1.7-.5 2.2-1.1z"/></svg><span><small>iPhone y iPad</small><b>App Store</b></span></a>
+      <a class="badge" href="https://play.google.com/store/apps/details?id=fr.mymonkey.glance"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 2.8v18.4c0 .5.5.8.9.5L20 12.7c.4-.3.4-.9 0-1.2L5.4 2.3c-.4-.3-.9 0-.9.5z"/></svg><span><small>Android</small><b>Google Play</b></span></a>
+      <a class="badge" href="https://github.com/my-monkeys/glance/releases/download/v1.13.0/Glance-1.13.0.dmg"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 12.5c0-2 1.1-3.3 1.6-3.7-.9-1.3-2.3-1.5-2.8-1.5-1.2-.1-2.3.7-2.9.7-.6 0-1.5-.7-2.5-.7-1.3 0-2.5.8-3.1 1.9-1.4 2.3-.4 5.8.9 7.7.6.9 1.4 2 2.4 1.9.9 0 1.3-.6 2.4-.6s1.4.6 2.4.6c1 0 1.6-.9 2.2-1.8.5-.7.8-1.5 1-2.1-1.2-.5-2-1.6-2-2.6zM15 5.9c.5-.6.9-1.5.8-2.4-.8 0-1.7.5-2.2 1.2-.5.5-.9 1.4-.8 2.3.9 0 1.7-.5 2.2-1.1z"/></svg><span><small>macOS · .dmg</small><b>Mac</b></span></a>
+      <a class="badge" href="https://github.com/my-monkeys/glance/releases/download/windows-v1.13.0/glance-windows-x64.zip"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="2" width="9.3" height="9.3"/><rect x="12.7" y="2" width="9.3" height="9.3"/><rect x="2" y="12.7" width="9.3" height="9.3"/><rect x="12.7" y="12.7" width="9.3" height="9.3"/></svg><span><small>Windows · .zip</small><b>Windows</b></span></a>
+      </div>
+    </div>
+    <div class="telephone" data-entree><img src="/img/scenes/1-accueil.webp" width="1320" height="1900" alt="La pantalla de inicio de Glance en iPhone: la lista de sitios, el total de visitantes y la curva" fetchpriority="high"></div>
+  </div>
+</section>
+<section class="idee etroit" id="sites">
+  <div class="wrap">
+    <div class="texte">
+      <p class="surtitre">Comparar sitios</p>
+      <h2>Cruza tus sitios</h2>
+      <p>Varios sitios codo con codo: una curva por sitio, más el total. De 1 a 6 filas, de una o varias cuentas de Umami.</p><p>Añade un filtro «desde» o «salvo desde» un dominio para ver qué se envían tus sitios entre sí. Una vista aparte suma los visitantes que se intercambian.</p>
+      
+    </div>
+    <figure class="scene"><img src="/img/scenes/es/2-sites.webp" width="1320" height="1832" alt="La comparación de sitios de Glance: cuatro sitios codo con codo, una curva por fila y el filtro «desde»" loading="lazy" decoding="async"></figure>
+  </div>
+</section>
+<section class="idee inverse" id="evenements">
+  <div class="wrap">
+    <div class="texte">
+      <p class="surtitre">Eventos</p>
+      <h2>Sigue cada evento</h2>
+      <p>Una curva y un color por evento, filtrables por propiedad: plan = pro, importe ≥ 20.</p><p>Cuenta, calcula una tasa y mira el desglose de los valores de una propiedad y su evolución en el tiempo.</p>
+      
+    </div>
+    <figure class="scene"><img src="/img/scenes/es/3-evenements.webp" width="1320" height="1546" alt="Los eventos en Glance: una curva y un color por evento, un contador filtrado por propiedad, un desglose" loading="lazy" decoding="async"></figure>
+  </div>
+</section>
+<section class="idee" id="entonnoir">
+  <div class="wrap">
+    <div class="texte">
+      <p class="surtitre">Embudo</p>
+      <h2>Mira dónde abandonan</h2>
+      <p>De 2 a 8 pasos, con el número de visitantes y la tasa de pérdida en cada paso.</p><p>Tú eliges el plazo entre dos pasos. Solo en Umami.</p>
+      
+    </div>
+    <figure class="scene"><img src="/img/scenes/es/4-entonnoir.webp" width="1320" height="1397" alt="Un embudo de cuatro pasos en Glance, con el número de visitantes y la pérdida en cada paso" loading="lazy" decoding="async"></figure>
+  </div>
+</section>
+<section class="idee inverse etroit" id="retention">
+  <div class="wrap">
+    <div class="texte">
+      <p class="surtitre">Retención</p>
+      <h2>Mide la retención</h2>
+      <p>Conecta una fuente de métricas: una pequeña API en tu sitio, protegida con un token.</p><p>Glance muestra entonces la retención D1, D7 y D30, las cuentas creadas y cualquier indicador que tu sitio ofrezca. El cálculo se queda en tu propia base de datos.</p>
+      <a class="lien" href="/en/docs/metrics-source.html" hreflang="en">Leer la documentación de la fuente de métricas (en inglés)</a>
+    </div>
+    <figure class="scene"><img src="/img/scenes/es/5-retention.webp" width="1320" height="1876" alt="Tres tarjetas de retención D1, D7 y D30 y la pantalla «Fuente de métricas» de Glance" loading="lazy" decoding="async"></figure>
+  </div>
+</section>
+<section class="idee prevision" id="prevision">
+  <div class="wrap">
+    <div class="texte">
+      <p class="surtitre">Previsión</p>
+      <h2>Anticipa el fin de mes</h2>
+      <p>En «este mes» y «este año», la curva se prolonga con una línea punteada naranja, con el total previsto.</p><p>La previsión parte del nivel de los últimos 7 días y del ritmo de la semana.</p>
+      
+    </div>
+    <figure class="scene"><img src="/img/scenes/es/6-prevision.webp" width="1320" height="1208" alt="La curva de visitantes de Glance prolongada con una previsión punteada naranja y el total previsto del mes" loading="lazy" decoding="async"></figure>
+  </div>
+</section>
+<section class="idee inverse etroit" id="direct">
+  <div class="wrap">
+    <div class="texte">
+      <p class="surtitre">En vivo y widgets</p>
+      <h2>En vivo, hasta en la pantalla de inicio</h2>
+      <p>Los visitantes presentes ahora mismo en cada sitio, ordenados por actividad.</p><p>Widgets para iOS y Android, para tus totales o para un sitio concreto.</p>
+      
+    </div>
+    <figure class="scene"><img src="/img/scenes/es/7-direct.webp" width="1320" height="2301" alt="Los visitantes en vivo en Glance y los widgets de iOS y Android en la pantalla de inicio" loading="lazy" decoding="async"></figure>
+  </div>
+</section>
+<section class="idee" id="appareils">
+  <div class="wrap">
+    <div class="texte">
+      <p class="surtitre">Todos los dispositivos</p>
+      <h2>En todos tus dispositivos</h2>
+      <p>iPhone, iPad, Android, Mac y Windows, en claro y en oscuro. En Mac y Windows, la lista de sitios queda a la izquierda y el detalle a la derecha.</p><p>Un código QR cifrado para recuperar tu configuración con un solo escaneo, o una sincronización cifrada de extremo a extremo entre tus dispositivos (opcional, compra única).</p>
+      
+    </div>
+    <figure class="scene"><img src="/img/scenes/es/8-appareils.webp" width="1320" height="1591" alt="Glance en iPhone, Android, Mac y Windows, con sincronización cifrada de extremo a extremo" loading="lazy" decoding="async"></figure>
+  </div>
+</section>
+<section class="bande" id="outils">
+  <div class="wrap">
+    <div class="texte"><p class="surtitre">Herramientas compatibles</p><h2>Tu herramienta, tu instancia.</h2></div>
+    <ul class="outils"><li class=""><h3>Umami</h3><span class="etat">disponible</span><p>Autoalojado. Paneles, embudos, fuente de métricas: todo Glance.</p></li><li class=""><h3>Plausible</h3><span class="etat">disponible</span><p>Cloud o autoalojado. Contadores, tasas y desgloses.</p></li><li class="bientot"><h3>Fathom</h3><span class="etat">próximamente</span><p>La interfaz está lista, el proveedor llega pronto.</p></li></ul>
+  </div>
+</section>
+<section class="prive" id="vie-privee">
+  <div class="wrap">
+    <div class="titre-bloc"><p class="surtitre">Privacidad</p><h2>No se recopila nada.</h2></div>
+    <ul><li><h3>Ningún servidor entre tú y tus estadísticas</h3><p>Glance habla directamente con tus instancias de Umami y Plausible.</p></li><li><h3>Credenciales en el llavero</h3><p>Se quedan cifradas en el llavero del dispositivo, en ningún otro sitio.</p></li><li><h3>Solo lectura</h3><p>Glance muestra tus estadísticas y no modifica nada. Sin publicidad, sin rastreo.</p></li></ul>
+    <p class="note">Los detalles están en la <a href="/en/privacy.html">política de privacidad (en inglés)</a>.</p>
+  </div>
+</section>
+<section class="telecharger" id="telecharger">
+  <div class="wrap">
+    <div class="texte"><p class="surtitre">Descargar</p><h2>Gratis, en todas tus pantallas.</h2><p>Glance es gratuito y de código abierto (licencia MIT). En macOS, lo más rápido es Homebrew:</p></div>
+    <div class="badges">
+      <a class="badge premier" href="https://apps.apple.com/app/glance-umami-plausible/id6789938289"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 12.5c0-2 1.1-3.3 1.6-3.7-.9-1.3-2.3-1.5-2.8-1.5-1.2-.1-2.3.7-2.9.7-.6 0-1.5-.7-2.5-.7-1.3 0-2.5.8-3.1 1.9-1.4 2.3-.4 5.8.9 7.7.6.9 1.4 2 2.4 1.9.9 0 1.3-.6 2.4-.6s1.4.6 2.4.6c1 0 1.6-.9 2.2-1.8.5-.7.8-1.5 1-2.1-1.2-.5-2-1.6-2-2.6zM15 5.9c.5-.6.9-1.5.8-2.4-.8 0-1.7.5-2.2 1.2-.5.5-.9 1.4-.8 2.3.9 0 1.7-.5 2.2-1.1z"/></svg><span><small>iPhone y iPad</small><b>App Store</b></span></a>
+      <a class="badge" href="https://play.google.com/store/apps/details?id=fr.mymonkey.glance"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 2.8v18.4c0 .5.5.8.9.5L20 12.7c.4-.3.4-.9 0-1.2L5.4 2.3c-.4-.3-.9 0-.9.5z"/></svg><span><small>Android</small><b>Google Play</b></span></a>
+      <a class="badge" href="https://github.com/my-monkeys/glance/releases/download/v1.13.0/Glance-1.13.0.dmg"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 12.5c0-2 1.1-3.3 1.6-3.7-.9-1.3-2.3-1.5-2.8-1.5-1.2-.1-2.3.7-2.9.7-.6 0-1.5-.7-2.5-.7-1.3 0-2.5.8-3.1 1.9-1.4 2.3-.4 5.8.9 7.7.6.9 1.4 2 2.4 1.9.9 0 1.3-.6 2.4-.6s1.4.6 2.4.6c1 0 1.6-.9 2.2-1.8.5-.7.8-1.5 1-2.1-1.2-.5-2-1.6-2-2.6zM15 5.9c.5-.6.9-1.5.8-2.4-.8 0-1.7.5-2.2 1.2-.5.5-.9 1.4-.8 2.3.9 0 1.7-.5 2.2-1.1z"/></svg><span><small>macOS · .dmg</small><b>Mac</b></span></a>
+      <a class="badge" href="https://github.com/my-monkeys/glance/releases/download/windows-v1.13.0/glance-windows-x64.zip"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="2" width="9.3" height="9.3"/><rect x="12.7" y="2" width="9.3" height="9.3"/><rect x="2" y="12.7" width="9.3" height="9.3"/><rect x="12.7" y="12.7" width="9.3" height="9.3"/></svg><span><small>Windows · .zip</small><b>Windows</b></span></a>
+    </div>
+    <div class="brew"><code><i>$</i> brew install --cask my-monkeys/tap/glance</code><a href="https://github.com/my-monkeys/glance">Ver el código en GitHub</a></div>
+  </div>
+</section>
+<section class="faq" id="faq">
+  <div class="wrap">
+    <h2>Preguntas frecuentes</h2>
+    <div class="liste"><details><summary>¿Qué es Glance?</summary><p>Glance es un cliente móvil y de escritorio, gratuito y de código abierto, que muestra tus estadísticas de Umami y Plausible. Reúne todos tus sitios en una sola app clara — curvas suavizadas, tiempo real y widgets — sin salir nunca de tu instancia de analítica.</p></details><details><summary>¿Glance es gratuito?</summary><p>Sí: la app es gratuita y de código abierto (licencia MIT), sin cuenta, sin suscripción y sin límite de sitios. Una sola cosa es de pago, y es opcional — Glance Sync, la copia cifrada de tu configuración — con compra única.</p></details><details><summary>¿Qué herramientas de analítica son compatibles?</summary><p>Glance se conecta hoy a Umami y Plausible, también autoalojados. Fathom está previsto. Puedes seguir varias cuentas y proveedores a la vez, reunidos en una vista común.</p></details><details><summary>¿En qué plataformas está disponible Glance?</summary><p>Glance está disponible en iOS (App Store), Android (Google Play), macOS (Homebrew o DMG) y Windows. La app está desarrollada con Flutter, así que es realmente multiplataforma.</p></details><details><summary>¿Se envían mis datos a un tercero?</summary><p>No. Glance habla directamente con tu instancia de Umami o Plausible, en solo lectura, sin servidor intermedio ni rastreo. Tus credenciales se quedan cifradas en el llavero de tu dispositivo.</p></details><details><summary>¿Qué es Glance Sync?</summary><p>Una opción de pago (compra única) que guarda tus cuentas y tus grupos y los recupera en tus otros dispositivos. Tu configuración se cifra en el dispositivo antes de enviarse: el servidor solo almacena un bloque ilegible. Sin ella, Glance funciona por completo en local, y la transferencia por QR sigue siendo gratuita.</p></details><details><summary>¿Puedo separar mis sitios por cliente o por proyecto?</summary><p>Sí, con los grupos. Un grupo es un ámbito de lectura: los totales, la curva y la vista en vivo solo cuentan sus sitios. Cambias de un grupo a otro desde la pantalla de inicio.</p></details><details><summary>¿Glance funciona con una instancia autoalojada?</summary><p>Sí. Tanto si tu instancia de Umami o Plausible está autoalojada como en la nube, Glance se conecta directamente con tu URL y tu clave de API. No hace falta ninguna configuración en el servidor.</p></details></div>
+  </div>
+</section>
+</main>
+<footer class="pied">
+  <div class="wrap">
+    <div><a class="marque" href="/es/"><img src="/favicon.svg?v=2" width="38" height="38" alt="">Glance</a><p>Un proyecto del colectivo My-Monkey.</p></div>
+    <ul><li><a href="/en/docs/metrics-source.html">Documentación</a></li><li><a href="/en/privacy.html">Privacidad</a></li><li><a href="https://github.com/my-monkeys/glance">GitHub</a></li></ul>
+    <ul class="pied-langues"><li><a href="/" lang="fr" hreflang="fr" data-lang="fr">Français</a></li><li><a href="/en/" lang="en" hreflang="en" data-lang="en">English</a></li><li><a href="/de/" lang="de" hreflang="de" data-lang="de">Deutsch</a></li><li><a href="/es/" lang="es" hreflang="es" data-lang="es">Español</a></li><li><a href="/pt/" lang="pt-BR" hreflang="pt-BR" data-lang="pt">Português</a></li><li><a href="/zh/" lang="zh-Hans" hreflang="zh-Hans" data-lang="zh">简体中文</a></li></ul>
+    <p class="droits">© 2026 My-Monkey · Licencia MIT</p>
+  </div>
+</footer>
+<button class="fab" type="button" aria-label="Enviar comentarios" title="Enviar comentarios"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 01-9 8.4 8.9 8.9 0 01-3.9-.9L3 20l1-4.9a8.4 8.4 0 015-11.7 8.4 8.4 0 0112 8.1z"/></svg></button>
+<div class="fbk-ov" hidden><div class="fbk" role="dialog" aria-modal="true" aria-labelledby="fbk-titre">
+<div data-f="form"><h3 id="fbk-titre">¿Un comentario, un fallo?</h3><p class="sub">Cuéntanos qué funciona y qué no — cada mensaje cuenta.</p>
+<textarea maxlength="4000" placeholder="Tu mensaje…" aria-label="Tu mensaje…"></textarea>
+<input type="email" autocomplete="email" placeholder="Correo (opcional, para poder responderte)" aria-label="Correo (opcional, para poder responderte)">
+<p class="err" hidden>No se pudo enviar. Inténtalo de nuevo en un momento.</p>
+<div class="row"><button type="button" class="btn" data-f="cancel">Cancelar</button><button type="button" class="btn primaire" data-f="send">Enviar</button></div></div>
+<div data-f="done" hidden><h3>Gracias</h3><p class="sub">Tu mensaje ha llegado bien.</p>
+<button type="button" class="btn primaire" data-f="close">Cerrar</button></div>
+</div></div>
+<script src="/js/retours.js"></script>
+<script src="/js/gsap.min.js"></script>
+<script src="/js/ScrollTrigger.min.js"></script>
+<script src="/js/anim.js"></script>
+</body>
+</html>

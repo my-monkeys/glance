@@ -8,6 +8,11 @@
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="fr" href="https://glance-analytics.com/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://glance-analytics.com/en/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://glance-analytics.com/de/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://glance-analytics.com/es/"/>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://glance-analytics.com/pt/"/>
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://glance-analytics.com/zh/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://glance-analytics.com/en/"/>
   </url>
   <url>
     <loc>https://glance-analytics.com/en/</loc>
@@ -16,6 +21,63 @@
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="fr" href="https://glance-analytics.com/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://glance-analytics.com/en/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://glance-analytics.com/de/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://glance-analytics.com/es/"/>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://glance-analytics.com/pt/"/>
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://glance-analytics.com/zh/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://glance-analytics.com/en/"/>
+  </url>
+  <url>
+    <loc>https://glance-analytics.com/de/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://glance-analytics.com/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://glance-analytics.com/en/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://glance-analytics.com/de/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://glance-analytics.com/es/"/>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://glance-analytics.com/pt/"/>
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://glance-analytics.com/zh/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://glance-analytics.com/en/"/>
+  </url>
+  <url>
+    <loc>https://glance-analytics.com/es/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://glance-analytics.com/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://glance-analytics.com/en/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://glance-analytics.com/de/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://glance-analytics.com/es/"/>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://glance-analytics.com/pt/"/>
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://glance-analytics.com/zh/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://glance-analytics.com/en/"/>
+  </url>
+  <url>
+    <loc>https://glance-analytics.com/pt/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://glance-analytics.com/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://glance-analytics.com/en/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://glance-analytics.com/de/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://glance-analytics.com/es/"/>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://glance-analytics.com/pt/"/>
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://glance-analytics.com/zh/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://glance-analytics.com/en/"/>
+  </url>
+  <url>
+    <loc>https://glance-analytics.com/zh/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://glance-analytics.com/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://glance-analytics.com/en/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://glance-analytics.com/de/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://glance-analytics.com/es/"/>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://glance-analytics.com/pt/"/>
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://glance-analytics.com/zh/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://glance-analytics.com/en/"/>
   </url>
   <url>
     <loc>https://glance-analytics.com/privacy.html</loc>
