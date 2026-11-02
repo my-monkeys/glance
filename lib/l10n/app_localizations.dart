@@ -367,6 +367,192 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Indisponible'**
   String get homeSiteUnavailable;
+
+  /// No description provided for @detailVisitorsUnique.
+  ///
+  /// In fr, this message translates to:
+  /// **'Visiteurs uniques'**
+  String get detailVisitorsUnique;
+
+  /// Carte KPI : nombre de visites
+  ///
+  /// In fr, this message translates to:
+  /// **'Visites'**
+  String get detailKpiVisits;
+
+  /// Carte KPI : durée moyenne d'une visite, libellé très court
+  ///
+  /// In fr, this message translates to:
+  /// **'Durée moy.'**
+  String get detailKpiAvgDuration;
+
+  /// Carte KPI : taux de rebond, libellé très court
+  ///
+  /// In fr, this message translates to:
+  /// **'Rebond'**
+  String get detailKpiBounce;
+
+  /// No description provided for @detailLiveNow.
+  ///
+  /// In fr, this message translates to:
+  /// **'En direct maintenant'**
+  String get detailLiveNow;
+
+  /// No description provided for @detailLiveNobody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Personne pour l\'instant.'**
+  String get detailLiveNobody;
+
+  /// Onglet du détail d'un site ; trois onglets partagent une ligne étroite
+  ///
+  /// In fr, this message translates to:
+  /// **'Vue d\'ensemble'**
+  String get detailTabOverview;
+
+  /// Onglet du détail d'un site
+  ///
+  /// In fr, this message translates to:
+  /// **'Événements'**
+  String get detailTabEvents;
+
+  /// Onglet du détail d'un site : indicateurs composés par l'utilisateur
+  ///
+  /// In fr, this message translates to:
+  /// **'Tableaux'**
+  String get detailTabDashboards;
+
+  /// No description provided for @detailEventsEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun événement sur cette période'**
+  String get detailEventsEmpty;
+
+  /// No description provided for @detailEventsTriggered.
+  ///
+  /// In fr, this message translates to:
+  /// **'Événements déclenchés'**
+  String get detailEventsTriggered;
+
+  /// No description provided for @detailEventsByEvent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Par événement'**
+  String get detailEventsByEvent;
+
+  /// No description provided for @detailSectionViewAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir les {count} lignes'**
+  String detailSectionViewAll(int count);
+
+  /// Badge sur un référent qui est l'un des sites suivis par l'utilisateur
+  ///
+  /// In fr, this message translates to:
+  /// **'INTERNE'**
+  String get detailBadgeInternal;
+
+  /// Petit titre au-dessus de « En direct »
+  ///
+  /// In fr, this message translates to:
+  /// **'Temps réel'**
+  String get directEyebrow;
+
+  /// No description provided for @directTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'En direct'**
+  String get directTitle;
+
+  /// Texte de la pastille live, à côté du nombre de visiteurs
+  ///
+  /// In fr, this message translates to:
+  /// **'en ce moment'**
+  String get directNow;
+
+  /// No description provided for @directVisitorsAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'visiteurs sur l\'ensemble de vos sites'**
+  String get directVisitorsAll;
+
+  /// No description provided for @directVisitorsGroup.
+  ///
+  /// In fr, this message translates to:
+  /// **'visiteurs sur le groupe « {name} »'**
+  String directVisitorsGroup(String name);
+
+  /// No description provided for @directBySite.
+  ///
+  /// In fr, this message translates to:
+  /// **'Par site'**
+  String get directBySite;
+
+  /// Interrupteur : masquer les sites sans visiteur en direct
+  ///
+  /// In fr, this message translates to:
+  /// **'Actifs seulement'**
+  String get directOnlyActive;
+
+  /// No description provided for @directNoneLive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun visiteur en direct pour l\'instant.'**
+  String get directNoneLive;
+
+  /// No description provided for @directNoSites.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun site.'**
+  String get directNoSites;
+
+  /// No description provided for @directHiddenSites.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 site sans visiteur masqué} other{{count} sites sans visiteur masqués}}'**
+  String directHiddenSites(int count);
+
+  /// No description provided for @networkExchanged.
+  ///
+  /// In fr, this message translates to:
+  /// **'Visiteurs échangés · {period}'**
+  String networkExchanged(String period);
+
+  /// No description provided for @networkPending.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 site en cours…} other{{count} sites en cours…}}'**
+  String networkPending(int count);
+
+  /// No description provided for @networkExplainer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Visiteurs arrivés sur un de vos sites depuis un autre de vos sites.'**
+  String get networkExplainer;
+
+  /// No description provided for @networkEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune navigation interne sur cette période.'**
+  String get networkEmpty;
+
+  /// Carte : sites qui envoient des visiteurs vers d'autres sites
+  ///
+  /// In fr, this message translates to:
+  /// **'Qui envoie'**
+  String get networkSenders;
+
+  /// Carte : sites qui reçoivent des visiteurs d'autres sites
+  ///
+  /// In fr, this message translates to:
+  /// **'Qui reçoit'**
+  String get networkReceivers;
+
+  /// Carte : liste des paires site source → site destination
+  ///
+  /// In fr, this message translates to:
+  /// **'Flux'**
+  String get networkFlows;
 }
 
 class _AppLocalizationsDelegate

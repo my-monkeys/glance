@@ -118,5 +118,110 @@
   "homeWelcomeBody": "Umami, Plausible… ajoutez une source puis choisissez les sites à suivre.",
   "homeWelcomeAddSource": "Ajouter une source",
   "homeWelcomeFootnote": "Clé en lecture seule · vos données restent chez vous",
-  "homeSiteUnavailable": "Indisponible"
+  "homeSiteUnavailable": "Indisponible",
+  "detailVisitorsUnique": "Visiteurs uniques",
+  "detailKpiVisits": "Visites",
+  "@detailKpiVisits": {
+    "description": "Carte KPI : nombre de visites"
+  },
+  "detailKpiAvgDuration": "Durée moy.",
+  "@detailKpiAvgDuration": {
+    "description": "Carte KPI : durée moyenne d'une visite, libellé très court"
+  },
+  "detailKpiBounce": "Rebond",
+  "@detailKpiBounce": {
+    "description": "Carte KPI : taux de rebond, libellé très court"
+  },
+  "detailLiveNow": "En direct maintenant",
+  "detailLiveNobody": "Personne pour l'instant.",
+  "detailTabOverview": "Vue d'ensemble",
+  "@detailTabOverview": {
+    "description": "Onglet du détail d'un site ; trois onglets partagent une ligne étroite"
+  },
+  "detailTabEvents": "Événements",
+  "@detailTabEvents": {
+    "description": "Onglet du détail d'un site"
+  },
+  "detailTabDashboards": "Tableaux",
+  "@detailTabDashboards": {
+    "description": "Onglet du détail d'un site : indicateurs composés par l'utilisateur"
+  },
+  "detailEventsEmpty": "Aucun événement sur cette période",
+  "detailEventsTriggered": "Événements déclenchés",
+  "detailEventsByEvent": "Par événement",
+  "detailSectionViewAll": "Voir les {count} lignes",
+  "@detailSectionViewAll": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "detailBadgeInternal": "INTERNE",
+  "@detailBadgeInternal": {
+    "description": "Badge sur un référent qui est l'un des sites suivis par l'utilisateur"
+  },
+  "directEyebrow": "Temps réel",
+  "@directEyebrow": {
+    "description": "Petit titre au-dessus de « En direct »"
+  },
+  "directTitle": "En direct",
+  "directNow": "en ce moment",
+  "@directNow": {
+    "description": "Texte de la pastille live, à côté du nombre de visiteurs"
+  },
+  "directVisitorsAll": "visiteurs sur l'ensemble de vos sites",
+  "directVisitorsGroup": "visiteurs sur le groupe « {name} »",
+  "@directVisitorsGroup": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "directBySite": "Par site",
+  "directOnlyActive": "Actifs seulement",
+  "@directOnlyActive": {
+    "description": "Interrupteur : masquer les sites sans visiteur en direct"
+  },
+  "directNoneLive": "Aucun visiteur en direct pour l'instant.",
+  "directNoSites": "Aucun site.",
+  "directHiddenSites": "{count, plural, =1{1 site sans visiteur masqué} other{{count} sites sans visiteur masqués}}",
+  "@directHiddenSites": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "networkExchanged": "Visiteurs échangés · {period}",
+  "@networkExchanged": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "networkPending": "{count, plural, =1{1 site en cours…} other{{count} sites en cours…}}",
+  "@networkPending": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "networkExplainer": "Visiteurs arrivés sur un de vos sites depuis un autre de vos sites.",
+  "networkEmpty": "Aucune navigation interne sur cette période.",
+  "networkSenders": "Qui envoie",
+  "@networkSenders": {
+    "description": "Carte : sites qui envoient des visiteurs vers d'autres sites"
+  },
+  "networkReceivers": "Qui reçoit",
+  "@networkReceivers": {
+    "description": "Carte : sites qui reçoivent des visiteurs d'autres sites"
+  },
+  "networkFlows": "Flux",
+  "@networkFlows": {
+    "description": "Carte : liste des paires site source → site destination"
+  }
 }

@@ -171,4 +171,120 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeSiteUnavailable => 'Unavailable';
+
+  @override
+  String get detailVisitorsUnique => 'Unique visitors';
+
+  @override
+  String get detailKpiVisits => 'Visits';
+
+  @override
+  String get detailKpiAvgDuration => 'Avg. time';
+
+  @override
+  String get detailKpiBounce => 'Bounce';
+
+  @override
+  String get detailLiveNow => 'Live now';
+
+  @override
+  String get detailLiveNobody => 'Nobody right now.';
+
+  @override
+  String get detailTabOverview => 'Overview';
+
+  @override
+  String get detailTabEvents => 'Events';
+
+  @override
+  String get detailTabDashboards => 'Dashboards';
+
+  @override
+  String get detailEventsEmpty => 'No events in this period';
+
+  @override
+  String get detailEventsTriggered => 'Events triggered';
+
+  @override
+  String get detailEventsByEvent => 'By event';
+
+  @override
+  String detailSectionViewAll(int count) {
+    return 'View all $count rows';
+  }
+
+  @override
+  String get detailBadgeInternal => 'INTERNAL';
+
+  @override
+  String get directEyebrow => 'Real time';
+
+  @override
+  String get directTitle => 'Live';
+
+  @override
+  String get directNow => 'right now';
+
+  @override
+  String get directVisitorsAll => 'visitors across all your sites';
+
+  @override
+  String directVisitorsGroup(String name) {
+    return 'visitors in the “$name” group';
+  }
+
+  @override
+  String get directBySite => 'By site';
+
+  @override
+  String get directOnlyActive => 'Active only';
+
+  @override
+  String get directNoneLive => 'No live visitors right now.';
+
+  @override
+  String get directNoSites => 'No sites.';
+
+  @override
+  String directHiddenSites(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sites with no visitors hidden',
+      one: '1 site with no visitors hidden',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String networkExchanged(String period) {
+    return 'Visitors exchanged · $period';
+  }
+
+  @override
+  String networkPending(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sites loading…',
+      one: '1 site loading…',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get networkExplainer =>
+      'Visitors who landed on one of your sites from another of your sites.';
+
+  @override
+  String get networkEmpty => 'No internal navigation in this period.';
+
+  @override
+  String get networkSenders => 'Who sends';
+
+  @override
+  String get networkReceivers => 'Who receives';
+
+  @override
+  String get networkFlows => 'Flows';
 }

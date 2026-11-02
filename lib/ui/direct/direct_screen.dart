@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/models/models.dart';
+import '../../l10n/l10n.dart';
 import '../../state/providers.dart';
 import '../../state/settings.dart';
 import '../../state/workspaces.dart';
@@ -97,9 +98,9 @@ class _DirectScreenState extends ConsumerState<DirectScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SectionLabel('Temps réel'),
+                        SectionLabel(context.l10n.directEyebrow),
                         const SizedBox(height: 9),
-                        Text('En direct', style: GT.display(34, color: p.fg)),
+                        Text(context.l10n.directTitle, style: GT.display(34, color: p.fg)),
                       ],
                     ),
                   ),
@@ -110,7 +111,7 @@ class _DirectScreenState extends ConsumerState<DirectScreen> {
               GlanceCard(
                 child: Column(
                   children: [
-                    LivePill(count: totalLive, text: 'en ce moment'),
+                    LivePill(count: totalLive, text: context.l10n.directNow),
                     const SizedBox(height: 14),
                     Text(
                       '$totalLive',
@@ -119,8 +120,8 @@ class _DirectScreenState extends ConsumerState<DirectScreen> {
                     const SizedBox(height: 4),
                     Text(
                       group == null
-                          ? "visiteurs sur l'ensemble de vos sites"
-                          : 'visiteurs sur le groupe « ${group.name} »',
+                          ? context.l10n.directVisitorsAll
+                          : context.l10n.directVisitorsGroup(group.name),
                       textAlign: TextAlign.center,
                       style: GT.body(13, color: p.fg2),
                     ),
@@ -132,8 +133,8 @@ class _DirectScreenState extends ConsumerState<DirectScreen> {
                 padding: const EdgeInsets.only(left: 4, right: 2, bottom: 10),
                 child: Row(
                   children: [
-                    Expanded(child: SectionLabel('Par site')),
-                    Text('Actifs seulement', style: GT.body(12, color: p.fg2)),
+                    Expanded(child: SectionLabel(context.l10n.directBySite)),
+                    Text(context.l10n.directOnlyActive, style: GT.body(12, color: p.fg2)),
                     const SizedBox(width: 8),
                     GlanceToggle(
                       value: onlyLive,
@@ -168,8 +169,8 @@ class _DirectScreenState extends ConsumerState<DirectScreen> {
                               child: Center(
                                 child: Text(
                                   onlyLive
-                                      ? 'Aucun visiteur en direct pour l\'instant.'
-                                      : 'Aucun site.',
+                                      ? context.l10n.directNoneLive
+                                      : context.l10n.directNoSites,
                                   style: GT.body(14, color: p.fg3),
                                 ),
                               ),
@@ -190,7 +191,7 @@ class _DirectScreenState extends ConsumerState<DirectScreen> {
                                   Padding(
                                     padding: const EdgeInsets.only(top: 4),
                                     child: Text(
-                                      '$hiddenCount site${hiddenCount > 1 ? 's' : ''} sans visiteur masqué${hiddenCount > 1 ? 's' : ''}',
+                                      context.l10n.directHiddenSites(hiddenCount),
                                       textAlign: TextAlign.center,
                                       style: GT.body(12, color: p.fg3),
                                     ),

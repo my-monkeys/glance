@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/format.dart';
 import '../../core/predict.dart';
+import '../../l10n/l10n.dart';
 import '../../data/models/models.dart';
 import '../../data/providers/analytics_provider.dart';
 import '../../data/models/period.dart';
@@ -329,7 +330,7 @@ class _DetailBody extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SectionLabel('Visiteurs uniques'),
+              SectionLabel(context.l10n.detailVisitorsUnique),
               const SizedBox(height: 8),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -370,12 +371,12 @@ class _DetailBody extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Row(
             children: [
-              _Kpi(label: 'Visites', value: fmtInt(s.visits)),
+              _Kpi(label: context.l10n.detailKpiVisits, value: fmtInt(s.visits)),
               const SizedBox(width: 10),
-              _Kpi(label: 'Durée moy.', value: fmtDuration(s.avgVisit)),
+              _Kpi(label: context.l10n.detailKpiAvgDuration, value: fmtDuration(s.avgVisit)),
               const SizedBox(width: 10),
               _Kpi(
-                label: 'Rebond',
+                label: context.l10n.detailKpiBounce,
                 value: fmtPct(s.bounceRatePct, decimals: 0),
               ),
             ],
@@ -393,7 +394,7 @@ class _DetailBody extends ConsumerWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    SectionLabel('En direct maintenant'),
+                    SectionLabel(context.l10n.detailLiveNow),
                     LivePill(count: live, text: '$live'),
                   ],
                 ),
@@ -402,7 +403,7 @@ class _DetailBody extends ConsumerWidget {
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: Text(
-                      'Personne pour l\'instant.',
+                      context.l10n.detailLiveNobody,
                       style: GT.body(13, color: p.fg3),
                     ),
                   )
@@ -471,7 +472,7 @@ class _LoadError extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
         child: Center(
           child: Text(
-            'Chargement impossible.',
+            context.l10n.homeLoadFailed,
             style: GT.body(15, color: context.glance.fg2),
           ),
         ),
@@ -564,9 +565,9 @@ class _SegTabs extends StatelessWidget {
       ),
       child: Row(
         children: [
-          seg(_DetailTab.overview, "Vue d'ensemble"),
-          if (showEvents) seg(_DetailTab.events, 'Événements'),
-          if (showIndicators) seg(_DetailTab.indicators, 'Tableaux'),
+          seg(_DetailTab.overview, context.l10n.detailTabOverview),
+          if (showEvents) seg(_DetailTab.events, context.l10n.detailTabEvents),
+          if (showIndicators) seg(_DetailTab.indicators, context.l10n.detailTabDashboards),
         ],
       ),
     );
@@ -608,7 +609,7 @@ class _EventsTabState extends ConsumerState<_EventsTab> {
           children: [
             Icon(Icons.bolt_outlined, size: 34, color: p.fg3),
             const SizedBox(height: 12),
-            Text('Aucun événement sur cette période',
+            Text(context.l10n.detailEventsEmpty,
                 style: GT.body(15, color: p.fg2)),
           ],
         ),
@@ -638,7 +639,7 @@ class _EventsTabState extends ConsumerState<_EventsTab> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SectionLabel('Événements déclenchés'),
+              SectionLabel(context.l10n.detailEventsTriggered),
               const SizedBox(height: 8),
               Text(fmtInt(data.total), style: GT.stat(54, color: p.fg)),
               const SizedBox(height: 16),
@@ -678,7 +679,7 @@ class _EventsTabState extends ConsumerState<_EventsTab> {
               children: [
                 Padding(
                   padding: const EdgeInsets.only(bottom: 4),
-                  child: SectionLabel('Par événement'),
+                  child: SectionLabel(context.l10n.detailEventsByEvent),
                 ),
                 MetricBars(
                   rows: data.breakdown
