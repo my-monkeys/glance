@@ -9,6 +9,17 @@
 @font-face { font-family: "Geist"; src: url("/assets/fonts/Geist.ttf"); font-weight: 100 900; }
 @font-face { font-family: "JetBrains Mono"; src: url("/assets/fonts/JetBrainsMono.ttf"); font-weight: 100 800; }
 
+/* Les trois polices n'ont pas les idéogrammes (chinois simplifié). Chaque famille reçoit une seconde
+   déclaration limitée aux caractères CJK et à la ponctuation pleine chasse, qui pointe vers
+   PingFang SC (puis Hiragino Sans GB, Noto Sans SC) : le latin et les chiffres gardent Fredoka,
+   Geist et JetBrains Mono, le chinois suit la police du système, titres compris (graisse semi-grasse). */
+@font-face { font-family: "Fredoka"; font-weight: 300 700; unicode-range: U+2E80-9FFF, U+F900-FAFF, U+FE30-FE4F, U+FF00-FFEF, U+3000-303F;
+  src: local("PingFangSC-Semibold"), local("PingFang SC Semibold"), local("PingFang SC"), local("Hiragino Sans GB"), local("Noto Sans SC"); }
+@font-face { font-family: "Geist"; font-weight: 100 900; unicode-range: U+2E80-9FFF, U+F900-FAFF, U+FE30-FE4F, U+FF00-FFEF, U+3000-303F;
+  src: local("PingFangSC-Regular"), local("PingFang SC"), local("Hiragino Sans GB"), local("Noto Sans SC"); }
+@font-face { font-family: "JetBrains Mono"; font-weight: 100 800; unicode-range: U+2E80-9FFF, U+F900-FAFF, U+FE30-FE4F, U+FF00-FFEF, U+3000-303F;
+  src: local("PingFangSC-Regular"), local("PingFang SC"), local("Hiragino Sans GB"), local("Noto Sans SC"); }
+
 :root {
   --creme: #F7F5F1;
   --sable: #E8E0CF;

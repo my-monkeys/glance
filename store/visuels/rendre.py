@@ -69,7 +69,7 @@ def capturer(page, url, largeur, hauteur, sortie):
     if erreur:
         raise RuntimeError(f"{url} : {erreur}")
     for probleme in page.evaluate("window.PROBLEMES || []"):
-        print(f"  ATTENTION {sortie.name} : {probleme}")
+        print(f"  ATTENTION {url.rsplit('/', 1)[-1]} : {probleme}")
     sortie.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.NamedTemporaryFile(suffix=".png") as brut:
         page.screenshot(path=brut.name, animations="disabled")

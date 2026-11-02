@@ -50,7 +50,7 @@ Ticket : #20. Le site viendra dans un autre lot (il reprendra les mêmes scènes
 | Google Play, présentation | `google-play/presentation-<langue>.png` | 1024 × 500 | 1 par langue ; texte dans la moitié gauche |
 
 PNG RGB 8 bits, **sans canal alpha** (le script aplatit chaque capture). `planche.png` les montre
-tous. Langues rendues : `fr` et `en`.
+tous. Langues rendues : `fr`, `en`, `de`, `es`, `pt-BR`, `zh-Hans`.
 
 ## Refaire les images
 
@@ -72,14 +72,26 @@ Pour voir un gabarit dans un navigateur : `python3 -m http.server` à la racine,
   plus `commun`. Les noms d'événements (`signup`, `purchase`…) et les domaines fictifs restent dans
   les gabarits : ce sont des données, pas des textes.
 
-## Ajouter une langue (allemand, espagnol, portugais du Brésil, chinois simplifié)
+## Ajouter une langue
 
-1. Copier `textes/en.json` en `textes/<langue>.json` (`de`, `es`, `pt-BR`, `zh-Hans`) et traduire.
-2. Relancer `rendre.py` : la langue est découverte toute seule, les nombres suivent la locale
-   (`LOCALE` dans `commun.js` pour un code à ajouter).
-3. Regarder la planche : un titre plus long peut passer à trois lignes (le bloc d'en-tête garde sa
-   hauteur, mais l'appui peut alors toucher la scène), et le chinois demande une police CJK
-   (Fredoka et Geist n'ont pas les idéogrammes : ajouter un `@font-face`).
+Six langues sont rendues : `fr`, `en`, `de`, `es`, `pt-BR`, `zh-Hans` (même fichier de textes par
+langue, rien à toucher dans les gabarits).
+
+1. Copier `textes/en.json` en `textes/<langue>.json` et traduire.
+2. Si le code n'est pas dans `LOCALE` (`commun.js`), l'y ajouter (`pt-BR` et `zh-Hans` y sont, et
+   passent à `Intl.NumberFormat`) ; relancer `rendre.py` : la langue est découverte toute seule.
+3. Regarder la planche : un titre plus long peut passer à trois lignes.
+4. Les fiches correspondantes vont dans `store/fiches/` (une section par langue), `store/compter.py`
+   les vérifie.
+
+**Chinois** : Fredoka, Geist et JetBrains Mono n'ont pas les idéogrammes. `commun.css` redéclare
+chaque famille pour les seuls caractères CJK (`unicode-range`) avec `PingFang SC` en tête, puis
+`Hiragino Sans GB` et `Noto Sans SC` : le latin et les chiffres gardent les polices de l'app, le
+chinois (titres compris, en semi-gras) suit la police système. Vérifié au rendu : PingFang SC, pas
+de carré ni de police à empattements. Sur une machine sans ces polices, installer Noto Sans SC.
+
+**Capture du visuel 1** : la vraie capture est en français (« Mes sites ») dans toutes les langues ;
+la refaire dans chaque langue quand l'app sera traduite (ticket #16).
 
 ## À valider
 

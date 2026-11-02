@@ -16,11 +16,14 @@
   .ret .nom { font-family: "Fredoka"; font-weight: 600; font-size: calc(46 * var(--u)); margin-top: calc(12 * var(--u)); }
   .ret .val { grid-row: 2; align-self: center; }
   .ret .ratio { font-family: "JetBrains Mono"; font-size: calc(30 * var(--u)); color: var(--fg2); margin-top: calc(10 * var(--u)); }
-  .ret .spark { grid-column: 2; grid-row: 1 / 4; position: relative; min-height: calc(180 * var(--u)); }
+  .ret .spark { grid-column: 2; grid-row: 1 / 3; position: relative; min-height: calc(180 * var(--u)); }
   .ret .spark svg { position: absolute; inset: 0; }
-  .ret .pied { grid-column: 1; font-size: calc(29 * var(--u)); color: var(--fg2); margin-top: calc(14 * var(--u)); }
+  .ret .pied { grid-column: 1 / 3; font-size: calc(29 * var(--u)); color: var(--fg2); margin-top: calc(14 * var(--u)); }
   .scene > .ret { flex-shrink: 1; padding: calc(40 * var(--u)) calc(50 * var(--u)); min-height: calc(250 * var(--u)); }
   .ret .stat { font-size: calc(92 * var(--u)); }
+  .f-play .ret .stat { font-size: calc(78 * var(--u)); }
+  .f-play .scene > .ret { padding-top: calc(30 * var(--u)); padding-bottom: calc(30 * var(--u)); }
+  .ret .pied { line-height: 1.2; }
   .ret .spark { min-height: calc(120 * var(--u)); }
   .f-ipad .scene { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: 1fr auto; }
   .f-ipad .source { grid-column: 1 / 4; grid-row: 2; padding: calc(40 * var(--u)) calc(50 * var(--u)); }
