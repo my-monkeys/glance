@@ -12,6 +12,7 @@ import sys
 from pathlib import Path
 
 ICI = Path(__file__).parent
+KEYWORDS_LIMITE = 100  # la seule limite de 100 est celle des mots-clés App Store, quelle que soit la langue
 LIMITE = re.compile(r"^\*\*(.+?)\*\*\s*\[(\d+)\]")
 
 
@@ -51,12 +52,12 @@ def main():
             ok = n <= limite
             trop |= not ok
             print(f"  {'ok ' if ok else 'TROP'} {n:5d}/{limite:<5d} {section} — {nom}")
-            if nom.lower().startswith(("mots-clés", "keywords")):
+            if limite == KEYWORDS_LIMITE:
                 mots = texte.split(",")
                 doublons = {m for m in mots if mots.count(m) > 1}
-                if doublons or " " in texte:
+                if doublons or ", " in texte or " ," in texte:
                     trop = True
-                    print(f"  ERREUR mots-clés : doublons {sorted(doublons)} ou espaces")
+                    print(f"  ERREUR mots-clés : doublons {sorted(doublons)} ou espace autour d'une virgule")
     sys.exit(1 if trop else 0)
 
 

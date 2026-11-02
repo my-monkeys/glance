@@ -1,0 +1,101 @@
+{
+  "commun": {
+    "marque": "Glance",
+    "mini_titre": "Todos os sites"
+  },
+  "v1": {
+    "titre": "Seus sites num relance",
+    "appui": "Umami e Plausible reunidos em um só app, claro e rápido.",
+    "p1": "Umami",
+    "p2": "Plausible",
+    "p3": "Nada é coletado"
+  },
+  "v2": {
+    "titre": "Compare seus sites",
+    "appui": "Vários sites lado a lado, e de onde vêm os visitantes deles.",
+    "etiquette": "Card · Sites · 30 dias",
+    "total": "Visitantes · total das linhas",
+    "f_tous": "Todos os visitantes",
+    "f_venus": "Vindos de",
+    "f_sauf": "Exceto vindos de",
+    "part": "do total",
+    "editeur": "Linha 3 · filtro de referência",
+    "seg_tous": "Todos",
+    "seg_venus": "Vindos de",
+    "seg_sauf": "Exceto vindos de",
+    "domaine": "Domínio"
+  },
+  "v3": {
+    "titre": "Acompanhe cada evento",
+    "appui": "Uma curva e uma cor por evento, filtráveis por propriedade.",
+    "etiquette": "Eventos · 14 dias",
+    "compteur": "Contador",
+    "filtres": "Filtros de propriedade",
+    "sur": "no período",
+    "repartition": "Detalhamento · plano"
+  },
+  "v4": {
+    "titre": "Veja onde eles desistem",
+    "appui": "Um funil em quatro etapas, com a perda em cada passagem.",
+    "etiquette": "Funil · 30 dias",
+    "visiteurs": "visitantes",
+    "perte": "perdidos",
+    "fenetre": "60 min entre duas etapas",
+    "fin": "chegam até o fim"
+  },
+  "v5": {
+    "titre": "Meça a retenção",
+    "appui": "D1, D7 e D30, calculados no seu próprio banco de dados e ligados ao Glance.",
+    "source": "Fonte de métricas",
+    "jeton": "Token",
+    "tester": "Testar",
+    "resultat": "3 indicadores",
+    "metrique": "Métrica do site",
+    "j1": "Retenção D1",
+    "j7": "Retenção D7",
+    "j30": "Retenção D30",
+    "cohortes": "Medida nas coortes de 8 a 14 out.",
+    "votre_base": "Calculado no seu banco de dados"
+  },
+  "v6": {
+    "titre": "Antecipe o fim do mês",
+    "appui": "A curva continua em pontilhado laranja, com o total esperado.",
+    "etiquette": "Visitantes · este mês",
+    "visiteurs": "Visitantes",
+    "prevision": "Previsão",
+    "projete": "Total projetado",
+    "ajd": "Hoje",
+    "a_ce_jour": "até agora",
+    "vs": "vs mês anterior",
+    "methode": "Nível dos últimos 7 dias × ritmo da semana"
+  },
+  "v7": {
+    "titre": "Ao vivo na tela inicial",
+    "appui": "Os visitantes online agora, e widgets para iOS e Android.",
+    "etiquette": "Ao vivo",
+    "en_ligne": "online",
+    "w_titre": "Todos os sites",
+    "w_periode": "7 dias",
+    "w_pages": "visualizações",
+    "ios": "iOS",
+    "android": "Android"
+  },
+  "v8": {
+    "titre": "Em todos os dispositivos",
+    "appui": "iPhone, Android, Mac e Windows: sua configuração vai com você.",
+    "iphone": "iPhone",
+    "android": "Android",
+    "mac": "Mac",
+    "windows": "Windows",
+    "synchro": "Sincronização criptografada de ponta a ponta",
+    "synchro_sous": "O servidor só vê dados criptografados."
+  },
+  "presentation": {
+    "titre": "Suas estatísticas web, num relance",
+    "appui": "Umami e Plausible: cards, eventos, previsão.",
+    "etiquette": "Visitantes · este mês",
+    "prevision": "Previsão",
+    "etiquette_v": "Visitantes",
+    "w_titre": "Todos os sites"
+  }
+}
