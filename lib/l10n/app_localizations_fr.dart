@@ -776,4 +776,565 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get editorLineRemove => 'Retirer la ligne';
+
+  @override
+  String commonSiteCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sites',
+      one: '1 site',
+      zero: '0 site',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsTitle => 'Réglages';
+
+  @override
+  String get settingsGroupAccount => 'Compte';
+
+  @override
+  String get settingsGroupSites => 'Sites';
+
+  @override
+  String get settingsGroupSync => 'Synchronisation';
+
+  @override
+  String get settingsGroupTransfer => 'Transfert';
+
+  @override
+  String get settingsGroupAppearance => 'Apparence';
+
+  @override
+  String get settingsGroupData => 'Données';
+
+  @override
+  String get settingsGroupApp => 'Application';
+
+  @override
+  String get settingsAccountBadAuth => 'Identifiants ou clé API refusés';
+
+  @override
+  String get settingsAccountUnreachable => 'Instance injoignable';
+
+  @override
+  String settingsAccountSubtitle(String provider, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sites',
+      one: '1 site',
+      zero: '0 site',
+    );
+    return '$provider · $_temp0';
+  }
+
+  @override
+  String get settingsAddSource => 'Ajouter une source';
+
+  @override
+  String get settingsGroupsTitle => 'Groupes';
+
+  @override
+  String get settingsGroupsHint => 'Lire une partie de vos sites à part';
+
+  @override
+  String get settingsSyncConnected => 'Connecté';
+
+  @override
+  String get settingsSyncPitch => 'Sauvegarder et synchroniser (chiffré)';
+
+  @override
+  String get settingsTransferShow => 'Afficher un QR de transfert';
+
+  @override
+  String get settingsTransferNone => 'Aucun compte à transférer';
+
+  @override
+  String get settingsTransferContents => 'Comptes, identifiants et groupes';
+
+  @override
+  String get settingsTransferImport => 'Importer depuis un autre appareil';
+
+  @override
+  String get settingsTransferScan => 'Scanner un QR de transfert';
+
+  @override
+  String get settingsThemeTitle => 'Thème';
+
+  @override
+  String get settingsThemeAuto => 'Auto';
+
+  @override
+  String get settingsThemeLight => 'Clair';
+
+  @override
+  String get settingsThemeDark => 'Sombre';
+
+  @override
+  String get settingsChartsTitle => 'Graphiques';
+
+  @override
+  String get settingsChartsHint => 'Courbe lissée ou barres';
+
+  @override
+  String get settingsChartCurve => 'Courbe';
+
+  @override
+  String get settingsChartBars => 'Barres';
+
+  @override
+  String get settingsDefaultPeriod => 'Période par défaut';
+
+  @override
+  String get settingsDefaultPeriodHint => 'À l\'ouverture de l\'application';
+
+  @override
+  String get settingsRefresh => 'Actualisation auto';
+
+  @override
+  String settingsRefreshSeconds(int count) {
+    return '$count s';
+  }
+
+  @override
+  String settingsRefreshMinutes(int count) {
+    return '$count min';
+  }
+
+  @override
+  String get settingsCheckUpdates => 'Rechercher des mises à jour';
+
+  @override
+  String get accountMenuConnectionOk => 'Connexion réussie';
+
+  @override
+  String accountMenuConnectionOkSites(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Connexion réussie · $count sites',
+      one: 'Connexion réussie · 1 site',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get accountMenuTest => 'Tester la connexion';
+
+  @override
+  String get accountMenuEdit => 'Modifier la source';
+
+  @override
+  String get accountMenuEditHint => 'URL, identifiants, clé API…';
+
+  @override
+  String get accountMenuChooseSites => 'Choisir les sites';
+
+  @override
+  String get accountMenuDelete => 'Supprimer ce compte';
+
+  @override
+  String get accountMenuDeleted => 'Source supprimée';
+
+  @override
+  String get accountMenuSelectionSaved => 'Sélection enregistrée';
+
+  @override
+  String get accountSelectionAll => 'tous les sites';
+
+  @override
+  String accountSelectionAllExcept(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'tous sauf $count sites',
+      one: 'tous sauf 1 site',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get accountSelectionNone => 'aucun site';
+
+  @override
+  String get syncSubtitle =>
+      'Vos comptes et groupes, synchronisés et chiffrés.';
+
+  @override
+  String get syncEmail => 'E-mail';
+
+  @override
+  String get syncEmailHint => 'vous@exemple.fr';
+
+  @override
+  String get syncPassword => 'Mot de passe';
+
+  @override
+  String syncPasswordHint(int count) {
+    return '$count caractères minimum';
+  }
+
+  @override
+  String get syncCreateAccount => 'Créer un compte';
+
+  @override
+  String get syncCreateAccountButton => 'Créer le compte';
+
+  @override
+  String get syncSignIn => 'Se connecter';
+
+  @override
+  String get syncHaveAccount => 'J\'ai déjà un compte';
+
+  @override
+  String get syncEncryptedNote =>
+      'Votre config est chiffrée sur l\'appareil avant l\'envoi : le serveur ne peut pas la lire. Mot de passe oublié = sync irrécupérable.';
+
+  @override
+  String get syncToastCreated => 'Compte créé';
+
+  @override
+  String get syncToastSignedIn => 'Connecté';
+
+  @override
+  String get syncToastSignedOut => 'Déconnecté';
+
+  @override
+  String get syncToastSynced => 'Synchronisé';
+
+  @override
+  String get syncToastDeleted => 'Compte supprimé';
+
+  @override
+  String get syncToastUnlocked => 'Glance Sync débloqué';
+
+  @override
+  String get syncToastRestored => 'Achat restauré';
+
+  @override
+  String get syncNever => 'Jamais synchronisé';
+
+  @override
+  String syncLastSync(String date) {
+    return 'Sync $date';
+  }
+
+  @override
+  String get syncNow => 'Synchroniser maintenant';
+
+  @override
+  String get syncSignOut => 'Se déconnecter';
+
+  @override
+  String get syncDeleteAccount => 'Supprimer mon compte';
+
+  @override
+  String get syncDeleteTitle => 'Supprimer le compte ?';
+
+  @override
+  String get syncDeleteBody =>
+      'Votre compte Glance Sync et toute la configuration synchronisée seront définitivement supprimés du serveur. Action irréversible. Vos sources analytics restent sur cet appareil.';
+
+  @override
+  String get syncUnlockTitle => 'Débloquez Glance Sync';
+
+  @override
+  String get syncUnlockBuy =>
+      'Sauvegardez et synchronisez vos comptes et groupes sur tous vos appareils. Achat unique.';
+
+  @override
+  String get syncUnlockElsewhere =>
+      'Achat unique depuis l\'app mobile (iOS/Android). Une fois débloqué, connectez-vous ici avec le même compte : la sync suit automatiquement.';
+
+  @override
+  String get syncUnlockButton => 'Débloquer';
+
+  @override
+  String get syncRestore => 'Restaurer un achat';
+
+  @override
+  String get syncSoon => 'Bientôt disponible';
+
+  @override
+  String get transferExportTitle => 'Transférer';
+
+  @override
+  String get transferExportSubtitle =>
+      'Scannez ce code depuis l\'autre appareil.';
+
+  @override
+  String transferExpiresIn(String time) {
+    return 'Expire dans $time';
+  }
+
+  @override
+  String get transferCodeLabel => 'Code à saisir sur l\'autre appareil';
+
+  @override
+  String get transferWarning =>
+      'Ce code contient vos identifiants. Ne le photographiez pas et ne le partagez pas : le QR seul ne suffit pas, mais avec le code à 4 chiffres il donne accès à vos comptes.';
+
+  @override
+  String get transferExpiredTitle => 'Code expiré';
+
+  @override
+  String get transferExpiredBody =>
+      'Un transfert ne reste valable que quelques minutes.';
+
+  @override
+  String get transferRegenerate => 'Régénérer';
+
+  @override
+  String get transferTooLargeTitle => 'Config trop grosse';
+
+  @override
+  String transferTooLargeBody(int size, int max) {
+    return 'Elle ne tient pas dans un QR code ($size caractères pour $max au maximum). Suivez « tous les sites » sur vos comptes plutôt qu\'une sélection, puis réessayez.';
+  }
+
+  @override
+  String get transferFailedTitle => 'Transfert impossible';
+
+  @override
+  String get transferFailedBody => 'Impossible de préparer le transfert.';
+
+  @override
+  String get transferImportTitle => 'Importer';
+
+  @override
+  String get transferImportScanHint =>
+      'Visez le QR affiché sur l\'autre appareil.';
+
+  @override
+  String get transferImportCodeHint =>
+      'Saisissez le code affiché à côté du QR.';
+
+  @override
+  String get transferScanned => 'Code scanné';
+
+  @override
+  String get transferCodeField => 'Code à 4 chiffres';
+
+  @override
+  String get transferImportButton => 'Importer';
+
+  @override
+  String get transferRescan => 'Scanner à nouveau';
+
+  @override
+  String transferImported(int accounts, int groups) {
+    String _temp0 = intl.Intl.pluralLogic(
+      accounts,
+      locale: localeName,
+      other: '$accounts comptes',
+      one: '1 compte',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      groups,
+      locale: localeName,
+      other: '$groups groupes',
+      one: '1 groupe',
+      zero: '0 groupe',
+    );
+    return '$_temp0 et $_temp1 importés';
+  }
+
+  @override
+  String get transferErrExpired =>
+      'Ce code a expiré. Régénérez-le sur l\'autre appareil.';
+
+  @override
+  String get transferErrBadCode => 'Code incorrect.';
+
+  @override
+  String get transferErrFailed => 'Import impossible.';
+
+  @override
+  String get transferCameraDenied => 'Caméra refusée';
+
+  @override
+  String get transferCameraUnavailable => 'Caméra indisponible';
+
+  @override
+  String get transferCameraDeniedBody =>
+      'Autorisez l\'accès à la caméra dans les réglages du système pour scanner un transfert.';
+
+  @override
+  String get transferCameraUnavailableBody =>
+      'Aucune caméra utilisable sur cet appareil.';
+
+  @override
+  String get groupsSubtitle =>
+      'Un périmètre de lecture : totaux et courbe ne comptent que ses sites.';
+
+  @override
+  String get groupsEmptyTitle => 'Aucun groupe';
+
+  @override
+  String get groupsEmptyBody =>
+      'Regroupez vos sites — par exemple « Jeux » ou « Clients » — pour lire leurs statistiques à part, sans le reste.';
+
+  @override
+  String get groupsCreate => 'Créer un groupe';
+
+  @override
+  String get groupEditEditTitle => 'Modifier le groupe';
+
+  @override
+  String get groupEditName => 'Nom';
+
+  @override
+  String get groupEditNameHint => 'Jeux, Clients, Perso…';
+
+  @override
+  String get groupEditSitesLabel => 'Sites du groupe';
+
+  @override
+  String get groupEditAddSourceHint => 'ses sites entrent ici';
+
+  @override
+  String get groupEditNoSites =>
+      'Aucun site suivi pour l\'instant — ajoutez une source ci-dessus pour remplir ce groupe.';
+
+  @override
+  String get groupEditCreateButton => 'Créer le groupe';
+
+  @override
+  String get groupEditCreated => 'Groupe créé';
+
+  @override
+  String get groupEditSaved => 'Groupe enregistré';
+
+  @override
+  String get groupEditDeleted => 'Groupe supprimé';
+
+  @override
+  String get groupEditDeleteTitle => 'Supprimer ce groupe ?';
+
+  @override
+  String get groupEditDeleteBody =>
+      'Les sites et leurs statistiques ne sont pas touchés — seul le regroupement disparaît.';
+
+  @override
+  String get addSourceNewTitle => 'Nouvelle source';
+
+  @override
+  String get addSourceProvider => 'FOURNISSEUR';
+
+  @override
+  String get addSourceName => 'Nom (optionnel)';
+
+  @override
+  String get addSourceNameHint => 'Mon domaine';
+
+  @override
+  String get addSourceTest => 'Tester la configuration';
+
+  @override
+  String get addSourceContinue => 'Continuer';
+
+  @override
+  String get addSourceMissingFields => 'Renseigne les champs obligatoires.';
+
+  @override
+  String get addSourceTestOk => 'Connexion réussie.';
+
+  @override
+  String addSourceTestOkSites(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Connexion réussie · $count sites détectés',
+      one: 'Connexion réussie · 1 site détecté',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get addSourceNoSitesPlausible =>
+      'Aucun site listé automatiquement : votre instance n\'expose pas l\'API de listing (Plausible Community Edition). Renseignez le domaine à suivre ci-dessus.';
+
+  @override
+  String get addSourceNoSites => 'Aucun site trouvé pour ce compte.';
+
+  @override
+  String get addSourceKeyRejected =>
+      'Clé API refusée (accès aux stats). Vérifiez la clé API.';
+
+  @override
+  String get addSourceCredsRejected => 'Identifiants refusés.';
+
+  @override
+  String get addSourceAdded => 'Source ajoutée';
+
+  @override
+  String get addSourceEdited => 'Source modifiée';
+
+  @override
+  String get sitePickerTitle => 'Choix des sites';
+
+  @override
+  String sitePickerDetected(String provider, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sites détectés',
+      one: '1 site détecté',
+    );
+    return '$provider · $_temp0';
+  }
+
+  @override
+  String get sitePickerFollowNew => 'Afficher les nouveaux sites';
+
+  @override
+  String get sitePickerFollowNewHint =>
+      'Un site créé plus tard apparaît tout seul';
+
+  @override
+  String get sitePickerCurrent => 'Sites actuels';
+
+  @override
+  String sitePickerShownOf(int shown, int total) {
+    return '$shown sur $total';
+  }
+
+  @override
+  String get sitePickerCheckAll => 'Tout cocher';
+
+  @override
+  String get sitePickerUncheckAll => 'Tout décocher';
+
+  @override
+  String get sitePickerFollowAll => 'Suivre tous les sites';
+
+  @override
+  String sitePickerFollowAndNew(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Suivre $count sites et les nouveaux',
+      one: 'Suivre 1 site et les nouveaux',
+      zero: 'Suivre 0 site et les nouveaux',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String sitePickerFollow(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Suivre $count sites',
+      one: 'Suivre 1 site',
+      zero: 'Suivre 0 site',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sitePickerShowNone => 'N\'afficher aucun site';
 }

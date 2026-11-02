@@ -8,12 +8,11 @@ import 'period_state.dart';
 import 'providers.dart';
 
 enum ThemeChoice {
-  auto('Auto', ThemeMode.system),
-  clair('Clair', ThemeMode.light),
-  sombre('Sombre', ThemeMode.dark);
+  auto(ThemeMode.system),
+  clair(ThemeMode.light),
+  sombre(ThemeMode.dark);
 
-  const ThemeChoice(this.label, this.mode);
-  final String label;
+  const ThemeChoice(this.mode);
   final ThemeMode mode;
 }
 
@@ -22,11 +21,8 @@ enum HomeViewMode { list, grid }
 
 /// Rendu des grands graphiques.
 enum ChartStyle {
-  curve('Courbe'),
-  bars('Barres');
-
-  const ChartStyle(this.label);
-  final String label;
+  curve,
+  bars,
 }
 
 @immutable

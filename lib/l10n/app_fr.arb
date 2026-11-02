@@ -628,5 +628,339 @@
       }
     }
   },
-  "editorLineRemove": "Retirer la ligne"
+  "editorLineRemove": "Retirer la ligne",
+  "commonSiteCount": "{count, plural, =0{0 site} =1{1 site} other{{count} sites}}",
+  "@commonSiteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsTitle": "Réglages",
+  "@settingsTitle": {
+    "description": "Titre de l'écran Réglages"
+  },
+  "settingsGroupAccount": "Compte",
+  "@settingsGroupAccount": {
+    "description": "Intitulé de groupe dans Réglages : les sources analytics"
+  },
+  "settingsGroupSites": "Sites",
+  "@settingsGroupSites": {
+    "description": "Intitulé de groupe dans Réglages"
+  },
+  "settingsGroupSync": "Synchronisation",
+  "@settingsGroupSync": {
+    "description": "Intitulé de groupe dans Réglages"
+  },
+  "settingsGroupTransfer": "Transfert",
+  "@settingsGroupTransfer": {
+    "description": "Intitulé de groupe dans Réglages : transfert vers un autre appareil"
+  },
+  "settingsGroupAppearance": "Apparence",
+  "@settingsGroupAppearance": {
+    "description": "Intitulé de groupe dans Réglages"
+  },
+  "settingsGroupData": "Données",
+  "@settingsGroupData": {
+    "description": "Intitulé de groupe dans Réglages"
+  },
+  "settingsGroupApp": "Application",
+  "@settingsGroupApp": {
+    "description": "Intitulé de groupe dans Réglages (bureau uniquement)"
+  },
+  "settingsAccountBadAuth": "Identifiants ou clé API refusés",
+  "settingsAccountUnreachable": "Instance injoignable",
+  "settingsAccountSubtitle": "{provider} · {count, plural, =0{0 site} =1{1 site} other{{count} sites}}",
+  "@settingsAccountSubtitle": {
+    "description": "Sous-titre d'un compte : fournisseur (Umami…) puis nombre de sites",
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsAddSource": "Ajouter une source",
+  "settingsGroupsTitle": "Groupes",
+  "@settingsGroupsTitle": {
+    "description": "Ligne de Réglages et titre de l'écran des groupes de sites"
+  },
+  "settingsGroupsHint": "Lire une partie de vos sites à part",
+  "settingsSyncConnected": "Connecté",
+  "settingsSyncPitch": "Sauvegarder et synchroniser (chiffré)",
+  "settingsTransferShow": "Afficher un QR de transfert",
+  "settingsTransferNone": "Aucun compte à transférer",
+  "settingsTransferContents": "Comptes, identifiants et groupes",
+  "settingsTransferImport": "Importer depuis un autre appareil",
+  "settingsTransferScan": "Scanner un QR de transfert",
+  "settingsThemeTitle": "Thème",
+  "settingsThemeAuto": "Auto",
+  "@settingsThemeAuto": {
+    "description": "Thème de l'app : suit le système"
+  },
+  "settingsThemeLight": "Clair",
+  "settingsThemeDark": "Sombre",
+  "settingsChartsTitle": "Graphiques",
+  "settingsChartsHint": "Courbe lissée ou barres",
+  "settingsChartCurve": "Courbe",
+  "settingsChartBars": "Barres",
+  "settingsDefaultPeriod": "Période par défaut",
+  "settingsDefaultPeriodHint": "À l'ouverture de l'application",
+  "settingsRefresh": "Actualisation auto",
+  "settingsRefreshSeconds": "{count} s",
+  "@settingsRefreshSeconds": {
+    "description": "Durée d'actualisation en secondes",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsRefreshMinutes": "{count} min",
+  "@settingsRefreshMinutes": {
+    "description": "Durée d'actualisation en minutes",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsCheckUpdates": "Rechercher des mises à jour",
+  "accountMenuConnectionOk": "Connexion réussie",
+  "accountMenuConnectionOkSites": "{count, plural, =1{Connexion réussie · 1 site} other{Connexion réussie · {count} sites}}",
+  "@accountMenuConnectionOkSites": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "accountMenuTest": "Tester la connexion",
+  "accountMenuEdit": "Modifier la source",
+  "accountMenuEditHint": "URL, identifiants, clé API…",
+  "accountMenuChooseSites": "Choisir les sites",
+  "accountMenuDelete": "Supprimer ce compte",
+  "accountMenuDeleted": "Source supprimée",
+  "accountMenuSelectionSaved": "Sélection enregistrée",
+  "accountSelectionAll": "tous les sites",
+  "@accountSelectionAll": {
+    "description": "Résumé de la sélection de sites d'un compte, en minuscules après « Umami · »"
+  },
+  "accountSelectionAllExcept": "{count, plural, =1{tous sauf 1 site} other{tous sauf {count} sites}}",
+  "@accountSelectionAllExcept": {
+    "description": "Résumé de la sélection de sites d'un compte",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "accountSelectionNone": "aucun site",
+  "@accountSelectionNone": {
+    "description": "Résumé de la sélection de sites d'un compte"
+  },
+  "syncSubtitle": "Vos comptes et groupes, synchronisés et chiffrés.",
+  "syncEmail": "E-mail",
+  "syncEmailHint": "vous@exemple.fr",
+  "syncPassword": "Mot de passe",
+  "syncPasswordHint": "{count} caractères minimum",
+  "@syncPasswordHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncCreateAccount": "Créer un compte",
+  "syncCreateAccountButton": "Créer le compte",
+  "syncSignIn": "Se connecter",
+  "syncHaveAccount": "J'ai déjà un compte",
+  "syncEncryptedNote": "Votre config est chiffrée sur l'appareil avant l'envoi : le serveur ne peut pas la lire. Mot de passe oublié = sync irrécupérable.",
+  "syncToastCreated": "Compte créé",
+  "syncToastSignedIn": "Connecté",
+  "syncToastSignedOut": "Déconnecté",
+  "syncToastSynced": "Synchronisé",
+  "syncToastDeleted": "Compte supprimé",
+  "syncToastUnlocked": "Glance Sync débloqué",
+  "syncToastRestored": "Achat restauré",
+  "syncNever": "Jamais synchronisé",
+  "syncLastSync": "Sync {date}",
+  "@syncLastSync": {
+    "description": "Date et heure de la dernière synchronisation, déjà formatées",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "syncNow": "Synchroniser maintenant",
+  "syncSignOut": "Se déconnecter",
+  "syncDeleteAccount": "Supprimer mon compte",
+  "syncDeleteTitle": "Supprimer le compte ?",
+  "syncDeleteBody": "Votre compte Glance Sync et toute la configuration synchronisée seront définitivement supprimés du serveur. Action irréversible. Vos sources analytics restent sur cet appareil.",
+  "syncUnlockTitle": "Débloquez Glance Sync",
+  "syncUnlockBuy": "Sauvegardez et synchronisez vos comptes et groupes sur tous vos appareils. Achat unique.",
+  "syncUnlockElsewhere": "Achat unique depuis l'app mobile (iOS/Android). Une fois débloqué, connectez-vous ici avec le même compte : la sync suit automatiquement.",
+  "syncUnlockButton": "Débloquer",
+  "syncRestore": "Restaurer un achat",
+  "syncSoon": "Bientôt disponible",
+  "transferExportTitle": "Transférer",
+  "transferExportSubtitle": "Scannez ce code depuis l'autre appareil.",
+  "transferExpiresIn": "Expire dans {time}",
+  "@transferExpiresIn": {
+    "description": "Compte à rebours déjà formaté (m:ss)",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "transferCodeLabel": "Code à saisir sur l'autre appareil",
+  "@transferCodeLabel": {
+    "description": "Petit titre en majuscules au-dessus des 4 chiffres"
+  },
+  "transferWarning": "Ce code contient vos identifiants. Ne le photographiez pas et ne le partagez pas : le QR seul ne suffit pas, mais avec le code à 4 chiffres il donne accès à vos comptes.",
+  "transferExpiredTitle": "Code expiré",
+  "transferExpiredBody": "Un transfert ne reste valable que quelques minutes.",
+  "transferRegenerate": "Régénérer",
+  "transferTooLargeTitle": "Config trop grosse",
+  "transferTooLargeBody": "Elle ne tient pas dans un QR code ({size} caractères pour {max} au maximum). Suivez « tous les sites » sur vos comptes plutôt qu'une sélection, puis réessayez.",
+  "@transferTooLargeBody": {
+    "placeholders": {
+      "size": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "transferFailedTitle": "Transfert impossible",
+  "transferFailedBody": "Impossible de préparer le transfert.",
+  "transferImportTitle": "Importer",
+  "@transferImportTitle": {
+    "description": "Titre de l'écran d'import par QR"
+  },
+  "transferImportScanHint": "Visez le QR affiché sur l'autre appareil.",
+  "transferImportCodeHint": "Saisissez le code affiché à côté du QR.",
+  "transferScanned": "Code scanné",
+  "transferCodeField": "Code à 4 chiffres",
+  "transferImportButton": "Importer",
+  "@transferImportButton": {
+    "description": "Bouton de validation de l'import"
+  },
+  "transferRescan": "Scanner à nouveau",
+  "transferImported": "{accounts, plural, =1{1 compte} other{{accounts} comptes}} et {groups, plural, =0{0 groupe} =1{1 groupe} other{{groups} groupes}} importés",
+  "@transferImported": {
+    "description": "Toast après l'import d'une config",
+    "placeholders": {
+      "accounts": {
+        "type": "int"
+      },
+      "groups": {
+        "type": "int"
+      }
+    }
+  },
+  "transferErrExpired": "Ce code a expiré. Régénérez-le sur l'autre appareil.",
+  "transferErrBadCode": "Code incorrect.",
+  "transferErrFailed": "Import impossible.",
+  "transferCameraDenied": "Caméra refusée",
+  "transferCameraUnavailable": "Caméra indisponible",
+  "transferCameraDeniedBody": "Autorisez l'accès à la caméra dans les réglages du système pour scanner un transfert.",
+  "transferCameraUnavailableBody": "Aucune caméra utilisable sur cet appareil.",
+  "groupsSubtitle": "Un périmètre de lecture : totaux et courbe ne comptent que ses sites.",
+  "groupsEmptyTitle": "Aucun groupe",
+  "groupsEmptyBody": "Regroupez vos sites — par exemple « Jeux » ou « Clients » — pour lire leurs statistiques à part, sans le reste.",
+  "groupsCreate": "Créer un groupe",
+  "groupEditEditTitle": "Modifier le groupe",
+  "groupEditName": "Nom",
+  "groupEditNameHint": "Jeux, Clients, Perso…",
+  "groupEditSitesLabel": "Sites du groupe",
+  "groupEditAddSourceHint": "ses sites entrent ici",
+  "@groupEditAddSourceHint": {
+    "description": "Petit texte à droite de « Ajouter une source » dans l'éditeur de groupe"
+  },
+  "groupEditNoSites": "Aucun site suivi pour l'instant — ajoutez une source ci-dessus pour remplir ce groupe.",
+  "groupEditCreateButton": "Créer le groupe",
+  "groupEditCreated": "Groupe créé",
+  "groupEditSaved": "Groupe enregistré",
+  "groupEditDeleted": "Groupe supprimé",
+  "groupEditDeleteTitle": "Supprimer ce groupe ?",
+  "groupEditDeleteBody": "Les sites et leurs statistiques ne sont pas touchés — seul le regroupement disparaît.",
+  "addSourceNewTitle": "Nouvelle source",
+  "addSourceProvider": "FOURNISSEUR",
+  "@addSourceProvider": {
+    "description": "Petit titre en majuscules au-dessus du choix Umami / Plausible / Fathom"
+  },
+  "addSourceName": "Nom (optionnel)",
+  "addSourceNameHint": "Mon domaine",
+  "addSourceTest": "Tester la configuration",
+  "addSourceContinue": "Continuer",
+  "addSourceMissingFields": "Renseigne les champs obligatoires.",
+  "addSourceTestOk": "Connexion réussie.",
+  "addSourceTestOkSites": "{count, plural, =1{Connexion réussie · 1 site détecté} other{Connexion réussie · {count} sites détectés}}",
+  "@addSourceTestOkSites": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addSourceNoSitesPlausible": "Aucun site listé automatiquement : votre instance n'expose pas l'API de listing (Plausible Community Edition). Renseignez le domaine à suivre ci-dessus.",
+  "addSourceNoSites": "Aucun site trouvé pour ce compte.",
+  "addSourceKeyRejected": "Clé API refusée (accès aux stats). Vérifiez la clé API.",
+  "addSourceCredsRejected": "Identifiants refusés.",
+  "addSourceAdded": "Source ajoutée",
+  "addSourceEdited": "Source modifiée",
+  "sitePickerTitle": "Choix des sites",
+  "sitePickerDetected": "{provider} · {count, plural, =1{1 site détecté} other{{count} sites détectés}}",
+  "@sitePickerDetected": {
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sitePickerFollowNew": "Afficher les nouveaux sites",
+  "sitePickerFollowNewHint": "Un site créé plus tard apparaît tout seul",
+  "sitePickerCurrent": "Sites actuels",
+  "sitePickerShownOf": "{shown} sur {total}",
+  "@sitePickerShownOf": {
+    "description": "Recherche de sites : nombre de sites affichés sur le total",
+    "placeholders": {
+      "shown": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "sitePickerCheckAll": "Tout cocher",
+  "sitePickerUncheckAll": "Tout décocher",
+  "sitePickerFollowAll": "Suivre tous les sites",
+  "sitePickerFollowAndNew": "{count, plural, =0{Suivre 0 site et les nouveaux} =1{Suivre 1 site et les nouveaux} other{Suivre {count} sites et les nouveaux}}",
+  "@sitePickerFollowAndNew": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sitePickerFollow": "{count, plural, =0{Suivre 0 site} =1{Suivre 1 site} other{Suivre {count} sites}}",
+  "@sitePickerFollow": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sitePickerShowNone": "N'afficher aucun site"
 }

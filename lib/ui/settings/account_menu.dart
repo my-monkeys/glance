@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/errors.dart';
 import '../../data/models/account.dart';
+import '../../l10n/l10n.dart';
 import '../../state/account_connection.dart';
 import '../../state/providers.dart';
 import '../../theme/palette.dart';
@@ -43,6 +44,7 @@ class _AccountMenuState extends ConsumerState<AccountMenu> {
     // Pris avant l'attente : le menu peut être fermé pendant le test, et les
     // données du compte doivent être rechargées malgré tout.
     final container = ProviderScope.containerOf(context, listen: false);
+    final l10n = context.l10n;
     setState(() {
       _testing = true;
       _result = null;
@@ -52,8 +54,8 @@ class _AccountMenuState extends ConsumerState<AccountMenu> {
     try {
       final n = await testAccountConnection(container, _a.id);
       message = n > 0
-          ? 'Connexion réussie · $n site${n > 1 ? 's' : ''}'
-          : 'Connexion réussie';
+          ? l10n.accountMenuConnectionOkSites(n)
+          : l10n.accountMenuConnectionOk;
     } catch (e) {
       ok = false;
       message = friendlyError(e);
@@ -74,6 +76,7 @@ class _AccountMenuState extends ConsumerState<AccountMenu> {
   @override
   Widget build(BuildContext context) {
     final p = context.glance;
+    final l10n = context.l10n;
     return SafeArea(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -81,7 +84,7 @@ class _AccountMenuState extends ConsumerState<AccountMenu> {
           const SizedBox(height: 16),
           Text(_a.title, style: GT.body(16, weight: 600, color: p.fg)),
           Text(
-            '${_a.kind.displayName} · ${selectionLabel(_a)}',
+            '${_a.kind.displayName} · ${selectionLabel(l10n, _a)}',
             style: GT.body(13, color: p.fg2),
           ),
           const SizedBox(height: 8),
@@ -102,7 +105,7 @@ class _AccountMenuState extends ConsumerState<AccountMenu> {
                     ),
                   )
                 : Icon(Icons.wifi_tethering_rounded, color: p.fg),
-            title: Text('Tester la connexion', style: GT.body(16, color: p.fg)),
+            title: Text(l10n.accountMenuTest, style: GT.body(16, color: p.fg)),
             subtitle: _result == null
                 ? null
                 : Text(
@@ -113,24 +116,25 @@ class _AccountMenuState extends ConsumerState<AccountMenu> {
           ),
           ListTile(
             leading: Icon(Icons.tune_rounded, color: p.fg),
-            title: Text('Modifier la source', style: GT.body(16, color: p.fg)),
+            title: Text(l10n.accountMenuEdit, style: GT.body(16, color: p.fg)),
             subtitle: Text(
-              'URL, identifiants, clé API…',
+              l10n.accountMenuEditHint,
               style: GT.body(12.5, color: p.fg3),
             ),
             onTap: () => _close(_editSource),
           ),
           ListTile(
             leading: Icon(Icons.checklist_rounded, color: p.fg),
-            title: Text('Choisir les sites', style: GT.body(16, color: p.fg)),
+            title: Text(l10n.accountMenuChooseSites, style: GT.body(16, color: p.fg)),
             onTap: () => _close(_editSites),
           ),
           ListTile(
             leading: Icon(Icons.delete_outline_rounded, color: p.neg),
-            title: Text('Supprimer ce compte', style: GT.body(16, color: p.neg)),
+            title: Text(l10n.accountMenuDelete, style: GT.body(16, color: p.neg)),
             onTap: () {
               ref.read(accountsProvider.notifier).remove(_a.id);
-              showGlanceToast(context, 'Source supprimée', kind: ToastKind.info);
+              showGlanceToast(context, l10n.accountMenuDeleted,
+                  kind: ToastKind.info);
               Navigator.of(context).pop();
             },
           ),
@@ -169,16 +173,19 @@ class _AccountMenuState extends ConsumerState<AccountMenu> {
     await ref
         .read(accountsProvider.notifier)
         .updateSites(_a.id, choice.sites, excluded: choice.excluded);
-    if (host.mounted) showGlanceToast(host, 'Sélection enregistrée');
+    if (host.mounted) showGlanceToast(host, host.l10n.accountMenuSelectionSaved);
   }
 }
 
-String selectionLabel(Account a) {
-  String n(int c) => '$c site${c > 1 ? 's' : ''}';
+String selectionLabel(AppLocalizations l10n, Account a) {
   final sites = a.sites;
   if (sites == null) {
     final x = a.excludedSites.length;
-    return x == 0 ? 'tous les sites' : 'tous sauf ${n(x)}';
+    return x == 0
+        ? l10n.accountSelectionAll
+        : l10n.accountSelectionAllExcept(x);
   }
-  return sites.isEmpty ? 'aucun site' : n(sites.length);
+  return sites.isEmpty
+      ? l10n.accountSelectionNone
+      : l10n.commonSiteCount(sites.length);
 }

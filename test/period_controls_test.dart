@@ -6,6 +6,7 @@ import 'package:glance/state/period_state.dart';
 import 'package:glance/state/providers.dart';
 import 'package:glance/state/settings.dart';
 import 'package:glance/theme/theme.dart';
+import 'package:glance/ui/settings/settings_labels.dart';
 import 'package:glance/ui/widgets/period_controls.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'helpers/l10n.dart';
@@ -93,7 +94,7 @@ void main() {
 
     final other = ChartStyle.values
         .firstWhere((s) => s != container.read(settingsProvider).chartStyle);
-    await tester.tap(find.text(other.label));
+    await tester.tap(find.text(other.localized(lookupAppLocalizations(testLocale))));
     await tester.pumpAndSettle();
     expect(container.read(settingsProvider).chartStyle, other);
     expect(find.text('GRAPHIQUE'), findsOneWidget);

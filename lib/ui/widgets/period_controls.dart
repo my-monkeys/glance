@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/models/period.dart';
+import '../../l10n/l10n.dart';
 import '../../state/period_state.dart';
 import '../../state/settings.dart';
 import '../../theme/motion.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
+import '../settings/settings_labels.dart';
 import 'chip.dart';
 
 /// Barre de contrôles sous le titre : les périodes, et un bouton « Affichage »
@@ -269,7 +271,7 @@ class _DisplayPanel extends ConsumerWidget {
         labels.fold<double>(0, (w, l) => w + GlanceChip.widthOf(context, l)) +
         _chipGap * (labels.length - 1);
     final rows = [
-      row(ChartStyle.values.map((s) => s.label)),
+      row(ChartStyle.values.map((s) => s.localized(context.l10n))),
       if (units.length > 1) row(units.map((u) => u.label)),
     ];
     return 2 * _pad + rows.reduce((a, b) => a > b ? a : b);
@@ -319,7 +321,7 @@ class _DisplayPanel extends ConsumerWidget {
             section('Graphique', [
               for (final s in ChartStyle.values)
                 GlanceChip(
-                  label: s.label,
+                  label: s.localized(context.l10n),
                   selected: s == style,
                   onTap: () =>
                       ref.read(settingsProvider.notifier).setChartStyle(s),

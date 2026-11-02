@@ -1357,6 +1357,894 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Retirer la ligne'**
   String get editorLineRemove;
+
+  /// No description provided for @commonSiteCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{0 site} =1{1 site} other{{count} sites}}'**
+  String commonSiteCount(int count);
+
+  /// Titre de l'écran Réglages
+  ///
+  /// In fr, this message translates to:
+  /// **'Réglages'**
+  String get settingsTitle;
+
+  /// Intitulé de groupe dans Réglages : les sources analytics
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte'**
+  String get settingsGroupAccount;
+
+  /// Intitulé de groupe dans Réglages
+  ///
+  /// In fr, this message translates to:
+  /// **'Sites'**
+  String get settingsGroupSites;
+
+  /// Intitulé de groupe dans Réglages
+  ///
+  /// In fr, this message translates to:
+  /// **'Synchronisation'**
+  String get settingsGroupSync;
+
+  /// Intitulé de groupe dans Réglages : transfert vers un autre appareil
+  ///
+  /// In fr, this message translates to:
+  /// **'Transfert'**
+  String get settingsGroupTransfer;
+
+  /// Intitulé de groupe dans Réglages
+  ///
+  /// In fr, this message translates to:
+  /// **'Apparence'**
+  String get settingsGroupAppearance;
+
+  /// Intitulé de groupe dans Réglages
+  ///
+  /// In fr, this message translates to:
+  /// **'Données'**
+  String get settingsGroupData;
+
+  /// Intitulé de groupe dans Réglages (bureau uniquement)
+  ///
+  /// In fr, this message translates to:
+  /// **'Application'**
+  String get settingsGroupApp;
+
+  /// No description provided for @settingsAccountBadAuth.
+  ///
+  /// In fr, this message translates to:
+  /// **'Identifiants ou clé API refusés'**
+  String get settingsAccountBadAuth;
+
+  /// No description provided for @settingsAccountUnreachable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Instance injoignable'**
+  String get settingsAccountUnreachable;
+
+  /// Sous-titre d'un compte : fournisseur (Umami…) puis nombre de sites
+  ///
+  /// In fr, this message translates to:
+  /// **'{provider} · {count, plural, =0{0 site} =1{1 site} other{{count} sites}}'**
+  String settingsAccountSubtitle(String provider, int count);
+
+  /// No description provided for @settingsAddSource.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter une source'**
+  String get settingsAddSource;
+
+  /// Ligne de Réglages et titre de l'écran des groupes de sites
+  ///
+  /// In fr, this message translates to:
+  /// **'Groupes'**
+  String get settingsGroupsTitle;
+
+  /// No description provided for @settingsGroupsHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lire une partie de vos sites à part'**
+  String get settingsGroupsHint;
+
+  /// No description provided for @settingsSyncConnected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Connecté'**
+  String get settingsSyncConnected;
+
+  /// No description provided for @settingsSyncPitch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sauvegarder et synchroniser (chiffré)'**
+  String get settingsSyncPitch;
+
+  /// No description provided for @settingsTransferShow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Afficher un QR de transfert'**
+  String get settingsTransferShow;
+
+  /// No description provided for @settingsTransferNone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun compte à transférer'**
+  String get settingsTransferNone;
+
+  /// No description provided for @settingsTransferContents.
+  ///
+  /// In fr, this message translates to:
+  /// **'Comptes, identifiants et groupes'**
+  String get settingsTransferContents;
+
+  /// No description provided for @settingsTransferImport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Importer depuis un autre appareil'**
+  String get settingsTransferImport;
+
+  /// No description provided for @settingsTransferScan.
+  ///
+  /// In fr, this message translates to:
+  /// **'Scanner un QR de transfert'**
+  String get settingsTransferScan;
+
+  /// No description provided for @settingsThemeTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Thème'**
+  String get settingsThemeTitle;
+
+  /// Thème de l'app : suit le système
+  ///
+  /// In fr, this message translates to:
+  /// **'Auto'**
+  String get settingsThemeAuto;
+
+  /// No description provided for @settingsThemeLight.
+  ///
+  /// In fr, this message translates to:
+  /// **'Clair'**
+  String get settingsThemeLight;
+
+  /// No description provided for @settingsThemeDark.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sombre'**
+  String get settingsThemeDark;
+
+  /// No description provided for @settingsChartsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Graphiques'**
+  String get settingsChartsTitle;
+
+  /// No description provided for @settingsChartsHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Courbe lissée ou barres'**
+  String get settingsChartsHint;
+
+  /// No description provided for @settingsChartCurve.
+  ///
+  /// In fr, this message translates to:
+  /// **'Courbe'**
+  String get settingsChartCurve;
+
+  /// No description provided for @settingsChartBars.
+  ///
+  /// In fr, this message translates to:
+  /// **'Barres'**
+  String get settingsChartBars;
+
+  /// No description provided for @settingsDefaultPeriod.
+  ///
+  /// In fr, this message translates to:
+  /// **'Période par défaut'**
+  String get settingsDefaultPeriod;
+
+  /// No description provided for @settingsDefaultPeriodHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'À l\'ouverture de l\'application'**
+  String get settingsDefaultPeriodHint;
+
+  /// No description provided for @settingsRefresh.
+  ///
+  /// In fr, this message translates to:
+  /// **'Actualisation auto'**
+  String get settingsRefresh;
+
+  /// Durée d'actualisation en secondes
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} s'**
+  String settingsRefreshSeconds(int count);
+
+  /// Durée d'actualisation en minutes
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} min'**
+  String settingsRefreshMinutes(int count);
+
+  /// No description provided for @settingsCheckUpdates.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher des mises à jour'**
+  String get settingsCheckUpdates;
+
+  /// No description provided for @accountMenuConnectionOk.
+  ///
+  /// In fr, this message translates to:
+  /// **'Connexion réussie'**
+  String get accountMenuConnectionOk;
+
+  /// No description provided for @accountMenuConnectionOkSites.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Connexion réussie · 1 site} other{Connexion réussie · {count} sites}}'**
+  String accountMenuConnectionOkSites(int count);
+
+  /// No description provided for @accountMenuTest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tester la connexion'**
+  String get accountMenuTest;
+
+  /// No description provided for @accountMenuEdit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier la source'**
+  String get accountMenuEdit;
+
+  /// No description provided for @accountMenuEditHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'URL, identifiants, clé API…'**
+  String get accountMenuEditHint;
+
+  /// No description provided for @accountMenuChooseSites.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir les sites'**
+  String get accountMenuChooseSites;
+
+  /// No description provided for @accountMenuDelete.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer ce compte'**
+  String get accountMenuDelete;
+
+  /// No description provided for @accountMenuDeleted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Source supprimée'**
+  String get accountMenuDeleted;
+
+  /// No description provided for @accountMenuSelectionSaved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sélection enregistrée'**
+  String get accountMenuSelectionSaved;
+
+  /// Résumé de la sélection de sites d'un compte, en minuscules après « Umami · »
+  ///
+  /// In fr, this message translates to:
+  /// **'tous les sites'**
+  String get accountSelectionAll;
+
+  /// Résumé de la sélection de sites d'un compte
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{tous sauf 1 site} other{tous sauf {count} sites}}'**
+  String accountSelectionAllExcept(int count);
+
+  /// Résumé de la sélection de sites d'un compte
+  ///
+  /// In fr, this message translates to:
+  /// **'aucun site'**
+  String get accountSelectionNone;
+
+  /// No description provided for @syncSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos comptes et groupes, synchronisés et chiffrés.'**
+  String get syncSubtitle;
+
+  /// No description provided for @syncEmail.
+  ///
+  /// In fr, this message translates to:
+  /// **'E-mail'**
+  String get syncEmail;
+
+  /// No description provided for @syncEmailHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'vous@exemple.fr'**
+  String get syncEmailHint;
+
+  /// No description provided for @syncPassword.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe'**
+  String get syncPassword;
+
+  /// No description provided for @syncPasswordHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} caractères minimum'**
+  String syncPasswordHint(int count);
+
+  /// No description provided for @syncCreateAccount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer un compte'**
+  String get syncCreateAccount;
+
+  /// No description provided for @syncCreateAccountButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer le compte'**
+  String get syncCreateAccountButton;
+
+  /// No description provided for @syncSignIn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Se connecter'**
+  String get syncSignIn;
+
+  /// No description provided for @syncHaveAccount.
+  ///
+  /// In fr, this message translates to:
+  /// **'J\'ai déjà un compte'**
+  String get syncHaveAccount;
+
+  /// No description provided for @syncEncryptedNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre config est chiffrée sur l\'appareil avant l\'envoi : le serveur ne peut pas la lire. Mot de passe oublié = sync irrécupérable.'**
+  String get syncEncryptedNote;
+
+  /// No description provided for @syncToastCreated.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte créé'**
+  String get syncToastCreated;
+
+  /// No description provided for @syncToastSignedIn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Connecté'**
+  String get syncToastSignedIn;
+
+  /// No description provided for @syncToastSignedOut.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déconnecté'**
+  String get syncToastSignedOut;
+
+  /// No description provided for @syncToastSynced.
+  ///
+  /// In fr, this message translates to:
+  /// **'Synchronisé'**
+  String get syncToastSynced;
+
+  /// No description provided for @syncToastDeleted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte supprimé'**
+  String get syncToastDeleted;
+
+  /// No description provided for @syncToastUnlocked.
+  ///
+  /// In fr, this message translates to:
+  /// **'Glance Sync débloqué'**
+  String get syncToastUnlocked;
+
+  /// No description provided for @syncToastRestored.
+  ///
+  /// In fr, this message translates to:
+  /// **'Achat restauré'**
+  String get syncToastRestored;
+
+  /// No description provided for @syncNever.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jamais synchronisé'**
+  String get syncNever;
+
+  /// Date et heure de la dernière synchronisation, déjà formatées
+  ///
+  /// In fr, this message translates to:
+  /// **'Sync {date}'**
+  String syncLastSync(String date);
+
+  /// No description provided for @syncNow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Synchroniser maintenant'**
+  String get syncNow;
+
+  /// No description provided for @syncSignOut.
+  ///
+  /// In fr, this message translates to:
+  /// **'Se déconnecter'**
+  String get syncSignOut;
+
+  /// No description provided for @syncDeleteAccount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer mon compte'**
+  String get syncDeleteAccount;
+
+  /// No description provided for @syncDeleteTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer le compte ?'**
+  String get syncDeleteTitle;
+
+  /// No description provided for @syncDeleteBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre compte Glance Sync et toute la configuration synchronisée seront définitivement supprimés du serveur. Action irréversible. Vos sources analytics restent sur cet appareil.'**
+  String get syncDeleteBody;
+
+  /// No description provided for @syncUnlockTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Débloquez Glance Sync'**
+  String get syncUnlockTitle;
+
+  /// No description provided for @syncUnlockBuy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sauvegardez et synchronisez vos comptes et groupes sur tous vos appareils. Achat unique.'**
+  String get syncUnlockBuy;
+
+  /// No description provided for @syncUnlockElsewhere.
+  ///
+  /// In fr, this message translates to:
+  /// **'Achat unique depuis l\'app mobile (iOS/Android). Une fois débloqué, connectez-vous ici avec le même compte : la sync suit automatiquement.'**
+  String get syncUnlockElsewhere;
+
+  /// No description provided for @syncUnlockButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Débloquer'**
+  String get syncUnlockButton;
+
+  /// No description provided for @syncRestore.
+  ///
+  /// In fr, this message translates to:
+  /// **'Restaurer un achat'**
+  String get syncRestore;
+
+  /// No description provided for @syncSoon.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bientôt disponible'**
+  String get syncSoon;
+
+  /// No description provided for @transferExportTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Transférer'**
+  String get transferExportTitle;
+
+  /// No description provided for @transferExportSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Scannez ce code depuis l\'autre appareil.'**
+  String get transferExportSubtitle;
+
+  /// Compte à rebours déjà formaté (m:ss)
+  ///
+  /// In fr, this message translates to:
+  /// **'Expire dans {time}'**
+  String transferExpiresIn(String time);
+
+  /// Petit titre en majuscules au-dessus des 4 chiffres
+  ///
+  /// In fr, this message translates to:
+  /// **'Code à saisir sur l\'autre appareil'**
+  String get transferCodeLabel;
+
+  /// No description provided for @transferWarning.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce code contient vos identifiants. Ne le photographiez pas et ne le partagez pas : le QR seul ne suffit pas, mais avec le code à 4 chiffres il donne accès à vos comptes.'**
+  String get transferWarning;
+
+  /// No description provided for @transferExpiredTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code expiré'**
+  String get transferExpiredTitle;
+
+  /// No description provided for @transferExpiredBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un transfert ne reste valable que quelques minutes.'**
+  String get transferExpiredBody;
+
+  /// No description provided for @transferRegenerate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Régénérer'**
+  String get transferRegenerate;
+
+  /// No description provided for @transferTooLargeTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Config trop grosse'**
+  String get transferTooLargeTitle;
+
+  /// No description provided for @transferTooLargeBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Elle ne tient pas dans un QR code ({size} caractères pour {max} au maximum). Suivez « tous les sites » sur vos comptes plutôt qu\'une sélection, puis réessayez.'**
+  String transferTooLargeBody(int size, int max);
+
+  /// No description provided for @transferFailedTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Transfert impossible'**
+  String get transferFailedTitle;
+
+  /// No description provided for @transferFailedBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de préparer le transfert.'**
+  String get transferFailedBody;
+
+  /// Titre de l'écran d'import par QR
+  ///
+  /// In fr, this message translates to:
+  /// **'Importer'**
+  String get transferImportTitle;
+
+  /// No description provided for @transferImportScanHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Visez le QR affiché sur l\'autre appareil.'**
+  String get transferImportScanHint;
+
+  /// No description provided for @transferImportCodeHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez le code affiché à côté du QR.'**
+  String get transferImportCodeHint;
+
+  /// No description provided for @transferScanned.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code scanné'**
+  String get transferScanned;
+
+  /// No description provided for @transferCodeField.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code à 4 chiffres'**
+  String get transferCodeField;
+
+  /// Bouton de validation de l'import
+  ///
+  /// In fr, this message translates to:
+  /// **'Importer'**
+  String get transferImportButton;
+
+  /// No description provided for @transferRescan.
+  ///
+  /// In fr, this message translates to:
+  /// **'Scanner à nouveau'**
+  String get transferRescan;
+
+  /// Toast après l'import d'une config
+  ///
+  /// In fr, this message translates to:
+  /// **'{accounts, plural, =1{1 compte} other{{accounts} comptes}} et {groups, plural, =0{0 groupe} =1{1 groupe} other{{groups} groupes}} importés'**
+  String transferImported(int accounts, int groups);
+
+  /// No description provided for @transferErrExpired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce code a expiré. Régénérez-le sur l\'autre appareil.'**
+  String get transferErrExpired;
+
+  /// No description provided for @transferErrBadCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code incorrect.'**
+  String get transferErrBadCode;
+
+  /// No description provided for @transferErrFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Import impossible.'**
+  String get transferErrFailed;
+
+  /// No description provided for @transferCameraDenied.
+  ///
+  /// In fr, this message translates to:
+  /// **'Caméra refusée'**
+  String get transferCameraDenied;
+
+  /// No description provided for @transferCameraUnavailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Caméra indisponible'**
+  String get transferCameraUnavailable;
+
+  /// No description provided for @transferCameraDeniedBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autorisez l\'accès à la caméra dans les réglages du système pour scanner un transfert.'**
+  String get transferCameraDeniedBody;
+
+  /// No description provided for @transferCameraUnavailableBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune caméra utilisable sur cet appareil.'**
+  String get transferCameraUnavailableBody;
+
+  /// No description provided for @groupsSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un périmètre de lecture : totaux et courbe ne comptent que ses sites.'**
+  String get groupsSubtitle;
+
+  /// No description provided for @groupsEmptyTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun groupe'**
+  String get groupsEmptyTitle;
+
+  /// No description provided for @groupsEmptyBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Regroupez vos sites — par exemple « Jeux » ou « Clients » — pour lire leurs statistiques à part, sans le reste.'**
+  String get groupsEmptyBody;
+
+  /// No description provided for @groupsCreate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer un groupe'**
+  String get groupsCreate;
+
+  /// No description provided for @groupEditEditTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier le groupe'**
+  String get groupEditEditTitle;
+
+  /// No description provided for @groupEditName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom'**
+  String get groupEditName;
+
+  /// No description provided for @groupEditNameHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jeux, Clients, Perso…'**
+  String get groupEditNameHint;
+
+  /// No description provided for @groupEditSitesLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sites du groupe'**
+  String get groupEditSitesLabel;
+
+  /// Petit texte à droite de « Ajouter une source » dans l'éditeur de groupe
+  ///
+  /// In fr, this message translates to:
+  /// **'ses sites entrent ici'**
+  String get groupEditAddSourceHint;
+
+  /// No description provided for @groupEditNoSites.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun site suivi pour l\'instant — ajoutez une source ci-dessus pour remplir ce groupe.'**
+  String get groupEditNoSites;
+
+  /// No description provided for @groupEditCreateButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer le groupe'**
+  String get groupEditCreateButton;
+
+  /// No description provided for @groupEditCreated.
+  ///
+  /// In fr, this message translates to:
+  /// **'Groupe créé'**
+  String get groupEditCreated;
+
+  /// No description provided for @groupEditSaved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Groupe enregistré'**
+  String get groupEditSaved;
+
+  /// No description provided for @groupEditDeleted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Groupe supprimé'**
+  String get groupEditDeleted;
+
+  /// No description provided for @groupEditDeleteTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer ce groupe ?'**
+  String get groupEditDeleteTitle;
+
+  /// No description provided for @groupEditDeleteBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les sites et leurs statistiques ne sont pas touchés — seul le regroupement disparaît.'**
+  String get groupEditDeleteBody;
+
+  /// No description provided for @addSourceNewTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle source'**
+  String get addSourceNewTitle;
+
+  /// Petit titre en majuscules au-dessus du choix Umami / Plausible / Fathom
+  ///
+  /// In fr, this message translates to:
+  /// **'FOURNISSEUR'**
+  String get addSourceProvider;
+
+  /// No description provided for @addSourceName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom (optionnel)'**
+  String get addSourceName;
+
+  /// No description provided for @addSourceNameHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mon domaine'**
+  String get addSourceNameHint;
+
+  /// No description provided for @addSourceTest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tester la configuration'**
+  String get addSourceTest;
+
+  /// No description provided for @addSourceContinue.
+  ///
+  /// In fr, this message translates to:
+  /// **'Continuer'**
+  String get addSourceContinue;
+
+  /// No description provided for @addSourceMissingFields.
+  ///
+  /// In fr, this message translates to:
+  /// **'Renseigne les champs obligatoires.'**
+  String get addSourceMissingFields;
+
+  /// No description provided for @addSourceTestOk.
+  ///
+  /// In fr, this message translates to:
+  /// **'Connexion réussie.'**
+  String get addSourceTestOk;
+
+  /// No description provided for @addSourceTestOkSites.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Connexion réussie · 1 site détecté} other{Connexion réussie · {count} sites détectés}}'**
+  String addSourceTestOkSites(int count);
+
+  /// No description provided for @addSourceNoSitesPlausible.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun site listé automatiquement : votre instance n\'expose pas l\'API de listing (Plausible Community Edition). Renseignez le domaine à suivre ci-dessus.'**
+  String get addSourceNoSitesPlausible;
+
+  /// No description provided for @addSourceNoSites.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun site trouvé pour ce compte.'**
+  String get addSourceNoSites;
+
+  /// No description provided for @addSourceKeyRejected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Clé API refusée (accès aux stats). Vérifiez la clé API.'**
+  String get addSourceKeyRejected;
+
+  /// No description provided for @addSourceCredsRejected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Identifiants refusés.'**
+  String get addSourceCredsRejected;
+
+  /// No description provided for @addSourceAdded.
+  ///
+  /// In fr, this message translates to:
+  /// **'Source ajoutée'**
+  String get addSourceAdded;
+
+  /// No description provided for @addSourceEdited.
+  ///
+  /// In fr, this message translates to:
+  /// **'Source modifiée'**
+  String get addSourceEdited;
+
+  /// No description provided for @sitePickerTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choix des sites'**
+  String get sitePickerTitle;
+
+  /// No description provided for @sitePickerDetected.
+  ///
+  /// In fr, this message translates to:
+  /// **'{provider} · {count, plural, =1{1 site détecté} other{{count} sites détectés}}'**
+  String sitePickerDetected(String provider, int count);
+
+  /// No description provided for @sitePickerFollowNew.
+  ///
+  /// In fr, this message translates to:
+  /// **'Afficher les nouveaux sites'**
+  String get sitePickerFollowNew;
+
+  /// No description provided for @sitePickerFollowNewHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un site créé plus tard apparaît tout seul'**
+  String get sitePickerFollowNewHint;
+
+  /// No description provided for @sitePickerCurrent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sites actuels'**
+  String get sitePickerCurrent;
+
+  /// Recherche de sites : nombre de sites affichés sur le total
+  ///
+  /// In fr, this message translates to:
+  /// **'{shown} sur {total}'**
+  String sitePickerShownOf(int shown, int total);
+
+  /// No description provided for @sitePickerCheckAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout cocher'**
+  String get sitePickerCheckAll;
+
+  /// No description provided for @sitePickerUncheckAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout décocher'**
+  String get sitePickerUncheckAll;
+
+  /// No description provided for @sitePickerFollowAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suivre tous les sites'**
+  String get sitePickerFollowAll;
+
+  /// No description provided for @sitePickerFollowAndNew.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Suivre 0 site et les nouveaux} =1{Suivre 1 site et les nouveaux} other{Suivre {count} sites et les nouveaux}}'**
+  String sitePickerFollowAndNew(int count);
+
+  /// No description provided for @sitePickerFollow.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Suivre 0 site} =1{Suivre 1 site} other{Suivre {count} sites}}'**
+  String sitePickerFollow(int count);
+
+  /// No description provided for @sitePickerShowNone.
+  ///
+  /// In fr, this message translates to:
+  /// **'N\'afficher aucun site'**
+  String get sitePickerShowNone;
 }
 
 class _AppLocalizationsDelegate
