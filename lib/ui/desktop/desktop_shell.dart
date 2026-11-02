@@ -22,6 +22,7 @@ import '../detail/detail_screen.dart';
 import '../root_scaffold.dart';
 import '../settings/settings_screen.dart';
 import '../settings/workspaces_screen.dart';
+import '../widgets/custom_range_picker.dart';
 import '../widgets/common.dart';
 import '../widgets/glance_chart.dart';
 import '../widgets/motion.dart';
@@ -655,21 +656,6 @@ class _OverviewState extends ConsumerState<_Overview> {
     super.dispose();
   }
 
-  Future<void> _pickCustom() async {
-    final now = DateTime.now();
-    final range = await showDateRangePicker(
-      context: context,
-      firstDate: DateTime(now.year - 3),
-      lastDate: now,
-    );
-    if (range != null) {
-      ref.read(periodProvider.notifier).setCustom(
-            range.start,
-            range.end.add(const Duration(hours: 23, minutes: 59)),
-          );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final p = context.glance;
@@ -731,7 +717,7 @@ class _OverviewState extends ConsumerState<_Overview> {
               ],
             ),
             const SizedBox(height: 16),
-            PeriodControls(onPickCustom: _pickCustom),
+            PeriodControls(onPickCustom: () => pickCustomPeriod(context, ref)),
             const SizedBox(height: 20),
             GlanceCard(
               padding: const EdgeInsets.all(20),

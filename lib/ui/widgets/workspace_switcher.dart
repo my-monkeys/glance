@@ -8,6 +8,7 @@ import '../../state/workspaces.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
 import '../settings/workspaces_screen.dart';
+import 'adaptive_sheet.dart';
 
 /// Pastille d'un groupe : son icône dans sa couleur. [group] à `null` = « tous
 /// les sites », rendu en neutre.
@@ -54,15 +55,7 @@ class WorkspaceSwitcher extends ConsumerWidget {
   }
 
   void _showSheet(BuildContext context) {
-    final p = context.glance;
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: p.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(kRadius)),
-      ),
-      builder: (_) => const _WorkspaceSheet(),
-    );
+    showGlanceSheet<void>(context, (_) => const _WorkspaceSheet());
   }
 }
 
@@ -81,6 +74,7 @@ class _WorkspaceSheet extends ConsumerWidget {
       Navigator.of(context).pop();
     }
 
+    final popup = isDesktopWidth(context);
     return SafeArea(
       top: false,
       child: Column(
@@ -88,17 +82,19 @@ class _WorkspaceSheet extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const SizedBox(height: 14),
-          Center(
-            child: Container(
-              width: 38,
-              height: 4,
-              decoration: BoxDecoration(
-                color: p.line,
-                borderRadius: BorderRadius.circular(2),
+          if (!popup) ...[
+            Center(
+              child: Container(
+                width: 38,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: p.line,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 16),
+            const SizedBox(height: 16),
+          ],
           Padding(
             padding: const EdgeInsets.only(left: 20, bottom: 6),
             child: Text('Périmètre', style: GT.label(color: p.fg2)),

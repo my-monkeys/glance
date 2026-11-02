@@ -620,6 +620,9 @@ Umami `uuu.my-monkey.fr` (dev-cookie). Un utilisateur **service** dédié `glanc
 - **Widgets** (`ui/widgets/motion.dart`) : `GlanceSwap` (fondu+glissement entre sous-arbres, keyer l'enfant), `GlanceFadeIndexedStack` (onglets animés, état préservé), `GlanceReveal` (sections conditionnelles dépliées — les espacements conditionnels vivent DANS le child).
 - **Toasts** : `showGlanceToast(context, msg, {kind})` (`ui/widgets/toast.dart`) — overlay racine via `glanceNavKey`, appeler **avant** un éventuel `Navigator.pop`. Toute action qui réussit silencieusement doit en montrer un.
 - `showGlanceModal` : slide-up mobile par défaut, `fullscreenDialog: false` pour l'étape 2 d'un flux ; desktop = fade+scale, barrier atténué en modale-dans-modale.
+- **Feuille ou pop-up** : `showGlanceSheet` (`ui/widgets/adaptive_sheet.dart`) est le **seul** point d'entrée pour un menu ou un choix court — feuille du bas sur téléphone, pop-up centré (400 px, fondu+échelle comme `showGlanceModal`) à partir de `kDesktopBreakpoint`. Jamais de `showModalBottomSheet` ailleurs. Le contenu ne pose pas de poignée de feuille quand `isDesktopWidth(context)`, et rend une colonne qui se contente de sa hauteur.
+- **Période « Perso »** : `pickCustomPeriod` (`ui/widgets/custom_range_picker.dart`), un seul helper pour accueil, détail et bureau. `showDateRangePicker` prend la taille de `MediaQuery` en mode calendrier (donc plein écran) : le `builder` lui fait croire que la fenêtre fait 400×600 (moins 16 px de marge) et l'habille de la palette.
+- **Tester la connexion** (menu d'un compte, `ui/settings/account_menu.dart`) : repart d'un fournisseur neuf (`ProviderRegistry.fresh`) puis recharge santé, sites et statistiques du compte (`state/account_connection.dart`). `ProviderRegistry.forAccount` ne garde **jamais** un `Future` en échec : sinon un Keychain refusé ou un réseau coupé au lancement laissait le compte en erreur toute la session.
 
 ## Gotchas rencontrés
 

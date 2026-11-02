@@ -21,6 +21,7 @@ import '../../theme/type.dart';
 import '../network/internal_screen.dart';
 import '../root_scaffold.dart';
 import '../settings/workspaces_screen.dart';
+import '../widgets/custom_range_picker.dart';
 import '../widgets/common.dart';
 import '../widgets/day_nav.dart';
 import '../widgets/site_avatar.dart';
@@ -45,25 +46,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Timer? _timer;
   final _search = TextEditingController();
   String _query = '';
-
-  Future<void> _pickCustom() async {
-    final now = DateTime.now();
-    final range = await showDateRangePicker(
-      context: context,
-      firstDate: DateTime(now.year - 3),
-      lastDate: now,
-      initialDateRange: DateTimeRange(
-        start: now.subtract(const Duration(days: 29)),
-        end: now,
-      ),
-    );
-    if (range != null) {
-      ref.read(periodProvider.notifier).setCustom(
-            range.start,
-            range.end.add(const Duration(hours: 23, minutes: 59)),
-          );
-    }
-  }
 
   @override
   void initState() {
@@ -161,7 +143,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 period: periodState.period,
                 now: now,
                 viewMode: viewMode,
-                onPickCustom: _pickCustom,
+                onPickCustom: () => pickCustomPeriod(context, ref),
                 onViewMode: (v) =>
                     ref.read(settingsProvider.notifier).setHomeView(v),
                 onNewGroup: () => openWorkspaceEditor(context, null),

@@ -201,18 +201,36 @@ final accountsProvider =
 /// Cache les instances de provider par compte (le token Umami y est réutilisé).
 /// Rebuild à chaque changement de la liste de comptes → cache remis à neuf.
 class ProviderRegistry {
-  ProviderRegistry(this._repo, this._accounts);
+  ProviderRegistry(this._repo, this._accounts, {this.build = buildProvider});
 
   final AccountsRepository _repo;
   final List<Account> _accounts;
+  final AnalyticsProvider Function(Account, Map<String, String>) build;
   final Map<String, Future<AnalyticsProvider>> _cache = {};
 
   Future<AnalyticsProvider> forAccount(String id) {
-    return _cache.putIfAbsent(id, () async {
-      final account = _accounts.firstWhere((a) => a.id == id);
-      final creds = await _repo.credentials(id);
-      return buildProvider(account, creds);
+    final cached = _cache[id];
+    if (cached != null) return cached;
+    final future = _create(id);
+    _cache[id] = future;
+    // Un échec (Keychain refusé, réseau coupé au lancement) ne reste pas en
+    // cache : sinon le compte serait en erreur toute la session.
+    future.then<void>((_) {}, onError: (_) {
+      if (identical(_cache[id], future)) _cache.remove(id);
     });
+    return future;
+  }
+
+  /// Écarte le fournisseur en cache et en reconstruit un (test de connexion).
+  Future<AnalyticsProvider> fresh(String id) {
+    _cache.remove(id);
+    return forAccount(id);
+  }
+
+  Future<AnalyticsProvider> _create(String id) async {
+    final account = _accounts.firstWhere((a) => a.id == id);
+    final creds = await _repo.credentials(id);
+    return build(account, creds);
   }
 }
 

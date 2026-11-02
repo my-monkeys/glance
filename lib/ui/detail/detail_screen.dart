@@ -19,6 +19,7 @@ import '../../theme/motion.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
 import '../dashboards/indicators_tab.dart';
+import '../widgets/custom_range_picker.dart';
 import '../widgets/common.dart';
 import '../widgets/day_nav.dart';
 import '../widgets/events_chart.dart';
@@ -99,25 +100,6 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
   void dispose() {
     _timer?.cancel();
     super.dispose();
-  }
-
-  Future<void> _pickCustom() async {
-    final now = DateTime.now();
-    final range = await showDateRangePicker(
-      context: context,
-      firstDate: DateTime(now.year - 3),
-      lastDate: now,
-      initialDateRange: DateTimeRange(
-        start: now.subtract(const Duration(days: 29)),
-        end: now,
-      ),
-    );
-    if (range != null) {
-      ref.read(periodProvider.notifier).setCustom(
-            range.start,
-            range.end.add(const Duration(hours: 23, minutes: 59)),
-          );
-    }
   }
 
   @override
@@ -221,7 +203,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                PeriodControls(onPickCustom: _pickCustom),
+                PeriodControls(onPickCustom: () => pickCustomPeriod(context, ref)),
                 GlanceReveal(
                   show: periodState.canNavigateDays,
                   child: const Padding(
