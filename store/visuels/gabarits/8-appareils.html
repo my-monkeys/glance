@@ -1,0 +1,93 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Glance — appareils</title>
+<link rel="stylesheet" href="commun.css">
+<style>
+  .grille { flex: 1 1 auto; display: grid; grid-template-columns: 1fr 1fr; gap: calc(30 * var(--u)); min-height: 0; }
+  .tuile { --d: calc(var(--u) * var(--k, 1)); padding: calc(34 * var(--u)) calc(30 * var(--u)) calc(34 * var(--u)); align-items: center; justify-content: space-between; flex-shrink: 1; }
+  .tuile.p { --k: 1.35; } .tuile.m { --k: .95; } .tuile.w { --k: 1.1; }
+  .f-ipad .tuile.p { --k: 1.45; } .f-ipad .tuile.m { --k: 1.2; } .f-ipad .tuile.w { --k: 1.3; }
+  .scene > .tuile { flex-shrink: 1; }
+  .piece { flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; }
+  .nom-app { font-family: "Fredoka"; font-weight: 600; font-size: calc(44 * var(--u)); margin-top: calc(14 * var(--u)); }
+
+  /* Les appareils, dessinés : tailles en --d */
+  .tel { width: calc(190 * var(--d)); height: calc(390 * var(--d)); background: #3A362C; padding: calc(8 * var(--d)); border-radius: calc(44 * var(--d)); position: relative; }
+  .tel.android { border-radius: calc(30 * var(--d)); }
+  .tel .ec { width: 100%; height: 100%; border-radius: calc(36 * var(--d)); background: #F7F5F1; overflow: hidden; position: relative; }
+  .tel.android .ec { border-radius: calc(23 * var(--d)); }
+  .tel .ilot { position: absolute; z-index: 2; left: 50%; top: calc(20 * var(--d)); transform: translateX(-50%); width: calc(58 * var(--d)); height: calc(16 * var(--d)); border-radius: 99px; background: #16140F; }
+  .tel.android .ilot { width: calc(14 * var(--d)); height: calc(14 * var(--d)); border-radius: 50%; top: calc(18 * var(--d)); }
+  .mac, .win { display: flex; flex-direction: column; align-items: center; }
+  .moniteur { width: calc(400 * var(--d)); height: calc(250 * var(--d)); background: #3A362C; padding: calc(9 * var(--d)); border-radius: calc(16 * var(--d)); position: relative; }
+  .win .moniteur { border-radius: calc(10 * var(--d)); padding: calc(7 * var(--d)); }
+  .moniteur .ec { width: 100%; height: 100%; border-radius: calc(8 * var(--d)); background: #F7F5F1; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+  .mac .encoche { position: absolute; z-index: 2; left: 50%; top: calc(9 * var(--d)); transform: translateX(-50%); width: calc(54 * var(--d)); height: calc(10 * var(--d)); background: #16140F; border-radius: 0 0 calc(6 * var(--d)) calc(6 * var(--d)); }
+  .mac .base { width: calc(480 * var(--d)); height: calc(14 * var(--d)); background: #CFC9BC; border-radius: 0 0 calc(14 * var(--d)) calc(14 * var(--d)); margin-top: -1px; position: relative; }
+  .mac .base::after { content: ""; position: absolute; left: 50%; top: 0; transform: translateX(-50%); width: calc(70 * var(--d)); height: calc(5 * var(--d)); background: #A9A294; border-radius: 0 0 calc(8 * var(--d)) calc(8 * var(--d)); }
+  .win .cou { width: calc(54 * var(--d)); height: calc(30 * var(--d)); background: #CFC9BC; }
+  .win .pied { width: calc(150 * var(--d)); height: calc(10 * var(--d)); background: #CFC9BC; border-radius: calc(6 * var(--d)); }
+  .barre-t { height: calc(22 * var(--d)); background: #E9E4DA; display: flex; align-items: center; justify-content: center; gap: calc(7 * var(--d)); flex: none; }
+  .barre-t i { width: calc(11 * var(--d)); height: calc(11 * var(--d)); border-radius: calc(3 * var(--d)); background: #B4ADA1; display: block; }
+  .barre-t i.g { background: #3B7A5A; }
+
+  /* Ce que montrent les écrans : l'accueil de Glance, en miniature */
+  .mini { padding: calc(40 * var(--d)) calc(16 * var(--d)) calc(16 * var(--d)); color: #211E19; height: 100%; display: flex; flex-direction: column; }
+  .tel .mini { padding-top: calc(52 * var(--d)); }
+  .mini .e { font-family: "JetBrains Mono"; font-size: calc(10.5 * var(--d)); letter-spacing: .14em; text-transform: uppercase; color: #8C857A; }
+  .mini .n { font-family: "Fredoka"; font-weight: 600; font-size: calc(46 * var(--d)); line-height: 1; margin-top: calc(8 * var(--d)); letter-spacing: -.02em; }
+  .mini .dl { font-family: "JetBrains Mono"; font-weight: 600; font-size: calc(13 * var(--d)); color: #3B7A5A; margin-top: calc(6 * var(--d)); }
+  .mini .gr { flex: 1; position: relative; margin-top: calc(12 * var(--d)); min-height: 0; }
+  .mini .gr svg { position: absolute; inset: 0; }
+  .mini .lg { height: calc(34 * var(--d)); border-radius: calc(12 * var(--d)); background: #fff; box-shadow: 0 1px 3px rgba(40, 35, 25, .08); margin-top: calc(8 * var(--d)); flex: none; display: flex; align-items: center; padding: 0 calc(10 * var(--d)); gap: calc(8 * var(--d)); font-size: calc(11 * var(--d)); font-weight: 600; }
+  .mini .lg i { width: calc(18 * var(--d)); height: calc(18 * var(--d)); border-radius: 22%; background: #F0EDE7; display: block; }
+  .mini .lg span { flex: 1; }
+  .bureau { display: flex; height: 100%; padding-top: calc(34 * var(--d)); }
+  .win .bureau { padding-top: 0; }
+  .bureau .lat { width: 30%; background: #F0EDE7; padding: calc(36 * var(--d)) calc(14 * var(--d)) calc(14 * var(--d)); display: flex; flex-direction: column; gap: calc(8 * var(--d)); }
+  .win .bureau .lat { padding-top: calc(16 * var(--d)); }
+  .bureau .lat i { height: calc(26 * var(--d)); border-radius: calc(9 * var(--d)); background: #fff; display: block; }
+  .bureau .lat i:first-child { background: #3B7A5A; opacity: .9; }
+  .bureau .mini { flex: 1; padding: calc(16 * var(--d)); }
+  .bureau .mini .n { font-size: calc(38 * var(--d)); }
+
+  .synchro { flex-direction: row; align-items: center; gap: calc(34 * var(--u)); flex-shrink: 0; }
+  .synchro .rond { width: calc(112 * var(--u)); height: calc(112 * var(--u)); border-radius: 50%; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; font-size: calc(54 * var(--u)); flex: none; }
+  .synchro .t { font-family: "Fredoka"; font-weight: 600; font-size: calc(46 * var(--u)); line-height: 1.1; }
+  .synchro .s { font-size: calc(32 * var(--u)); color: var(--fg2); margin-top: calc(10 * var(--u)); line-height: 1.3; }
+</style>
+</head>
+<body class="fond-sombre sombre">
+  <header class="entete">
+    <div class="marque"></div>
+    <h1 class="titre" data-t="titre"></h1>
+    <p class="appui" data-t="appui"></p>
+  </header>
+  <main class="scene">
+    <div class="grille">
+      <section class="carte tuile p"><div class="piece"><div class="tel" id="iphone"><div class="ilot"></div><div class="ec" data-mini="tel"></div></div></div><div class="nom-app" data-t="iphone"></div></section>
+      <section class="carte tuile p"><div class="piece"><div class="tel android" id="android"><div class="ilot"></div><div class="ec" data-mini="tel"></div></div></div><div class="nom-app" data-t="android"></div></section>
+      <section class="carte tuile m"><div class="piece"><div class="mac"><div class="moniteur"><div class="encoche"></div><div class="ec" data-mini="bureau"></div></div><div class="base"></div></div></div><div class="nom-app" data-t="mac"></div></section>
+      <section class="carte tuile w"><div class="piece"><div class="win"><div class="moniteur"><div class="ec"><div style="flex:1;min-height:0" data-mini="bureau"></div><div class="barre-t"><i class="g"></i><i></i><i></i><i></i></div></div></div><div class="cou"></div><div class="pied"></div></div></div><div class="nom-app" data-t="windows"></div></section>
+    </div>
+    <section class="carte synchro">
+      <div class="rond" data-icone="lock"></div>
+      <div><div class="t" data-t="synchro"></div><div class="s" data-t="synchro_sous"></div></div>
+    </section>
+  </main>
+<script src="commun.js"></script>
+<script>
+monter("v8", async () => {
+  const contenu = `<div class="mini"><div class="e">${T("mini_titre")}</div><div class="n">${nb(2104)}</div><div class="dl">${signe(14)}</div><div class="gr"></div>
+    <div class="lg"><i></i><span>atelier-lune.fr</span>${nb(1240)}</div><div class="lg"><i></i><span>carnet.app</span>${nb(402)}</div></div>`;
+  for (const el of document.querySelectorAll("[data-mini]")) {
+    el.insertAdjacentHTML("beforeend", el.dataset.mini === "tel" ? contenu
+      : `<div class="bureau"><div class="lat"><i></i><i></i><i></i><i></i></div>${contenu.replace(/<div class="lg">.*<\/div><\/div>$/s, "</div>")}</div>`);
+  }
+  document.querySelectorAll(".gr").forEach((el, i) => spark(el, serie(14, { base: 100, amp: 25, f: 1, phase: i * .1, pente: 12, bruit: 4, graine: 80 + i }), "#3B7A5A", { aire: true, epaisseur: 5 }));
+});
+</script>
+</body>
+</html>

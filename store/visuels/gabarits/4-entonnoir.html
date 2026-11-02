@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Glance — entonnoir</title>
+<link rel="stylesheet" href="commun.css">
+<style>
+  .grand { flex: 1 1 auto; justify-content: space-between; }
+  .etape .tete { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: calc(16 * var(--u)); }
+  .etape .nom { font-family: "JetBrains Mono"; font-weight: 500; font-size: calc(36 * var(--u)); }
+  .etape .nb { font-family: "Fredoka"; font-weight: 600; font-size: calc(62 * var(--u)); letter-spacing: -.01em; }
+  .etape .nb small { font-family: "Geist"; font-size: calc(30 * var(--u)); font-weight: 400; color: var(--fg2); margin-left: calc(10 * var(--u)); }
+  .piste { height: calc(58 * var(--u)); border-radius: calc(20 * var(--u)); background: var(--chip); overflow: hidden; }
+  .piste b { display: flex; align-items: center; justify-content: flex-end; height: 100%; border-radius: calc(20 * var(--u)); background: var(--accent);
+    width: var(--w); padding-right: calc(22 * var(--u)); font-family: "JetBrains Mono"; font-weight: 600; font-size: calc(28 * var(--u)); color: #0E1A12; }
+  .perte { display: flex; align-items: center; gap: calc(16 * var(--u)); margin: calc(12 * var(--u)) 0 calc(12 * var(--u)) calc(14 * var(--u)); color: var(--neg);
+    font-family: "JetBrains Mono"; font-weight: 600; font-size: calc(32 * var(--u)); }
+  .perte::before { content: ""; width: calc(4 * var(--u)); height: calc(46 * var(--u)); background: var(--neg); border-radius: 4px; opacity: .6; }
+  .perte span { font-family: "Geist"; font-weight: 400; color: var(--fg2); font-size: calc(30 * var(--u)); }
+  .fin { flex-direction: row; align-items: center; gap: calc(30 * var(--u)); }
+  .f-ipad .fin { flex-direction: column; align-items: flex-start; }
+  #etapes { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+  .fin .stat { color: var(--accent); }
+  .fin p { font-size: calc(36 * var(--u)); line-height: 1.3; color: var(--fg2); }
+  .puce { align-self: flex-start; font-family: "JetBrains Mono"; font-size: calc(26 * var(--u)); color: var(--fg2); background: var(--chip); padding: calc(10 * var(--u)) calc(22 * var(--u)); border-radius: 999px; }
+</style>
+</head>
+<body class="fond-sombre sombre">
+  <header class="entete">
+    <div class="marque"></div>
+    <h1 class="titre" data-t="titre"></h1>
+    <p class="appui" data-t="appui"></p>
+  </header>
+  <main class="scene deux">
+    <section class="carte grand">
+      <div class="rangee"><span class="label" data-t="etiquette"></span><span class="puce" data-t="fenetre"></span></div>
+      <div id="etapes" style="margin-top: calc(24 * var(--u))"></div>
+    </section>
+    <section class="carte fin">
+      <span class="stat" id="fin"></span>
+      <p><span data-t="fin"></span></p>
+    </section>
+  </main>
+<script src="commun.js"></script>
+<script>
+monter("v4", async () => {
+  const etapes = [["/pricing", 3200], ["signup_start", 1480], ["signup_done", 910], ["purchase", 312]];
+  const html = etapes.map(([nom, v], i) => {
+    const prec = i ? etapes[i - 1][1] : null;
+    const perte = prec ? `<div class="perte">▼ −${pct((1 - v / prec) * 100)}<span>${T("perte")}</span></div>` : "";
+    return `${perte}<div class="etape"><div class="tete"><span class="nom">${nom}</span><span class="nb">${nb(v)}<small>${T("visiteurs")}</small></span></div>
+      <div class="piste"><b style="--w:${Math.max(v / etapes[0][1] * 100, 14)}%">${pct(v / etapes[0][1] * 100)}</b></div></div>`;
+  }).join("");
+  document.getElementById("etapes").innerHTML = html;
+  document.getElementById("fin").textContent = pct(312 / 3200 * 100, 1);
+});
+</script>
+</body>
+</html>

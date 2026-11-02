@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Glance — accueil</title>
+<link rel="stylesheet" href="commun.css">
+<style>
+  .pastilles { gap: calc(20 * var(--u)); }
+  .pastille { background: var(--surface); box-shadow: var(--ombre-carte); font-size: calc(40 * var(--u)); padding: calc(20 * var(--u)) calc(38 * var(--u)); font-weight: 600; }
+  .pastille .icone { color: var(--accent); font-size: calc(40 * var(--u)); }
+  .pastille.accent { background: var(--accent); color: #fff; }
+  .pastille.accent .icone { color: #fff; }
+
+  .telephone { position: absolute; left: 50%; transform: translateX(-50%); top: calc(190 * var(--u)); width: calc(960 * var(--u));
+    background: #211E19; padding: calc(20 * var(--u)); border-radius: calc(118 * var(--u));
+    box-shadow: 0 calc(40 * var(--u)) calc(90 * var(--u)) rgba(33, 30, 25, .22); }
+  .telephone .ecran { border-radius: calc(98 * var(--u)); overflow: hidden; background: var(--creme); }
+  .telephone img { display: block; width: 100%; }
+  .f-ipad .telephone { width: calc(1000 * var(--u)); }
+</style>
+</head>
+<body class="fond-creme clair">
+  <header class="entete">
+    <div class="marque"></div>
+    <h1 class="titre" data-t="titre"></h1>
+    <p class="appui" data-t="appui"></p>
+  </header>
+  <main class="scene">
+    <div class="pastilles">
+      <span class="pastille"><i style="--c:#3B7A5A"></i><span data-t="p1"></span></span>
+      <span class="pastille"><i style="--c:#C98A2E"></i><span data-t="p2"></span></span>
+      <span class="pastille accent"><span data-icone="lock"></span><span data-t="p3"></span></span>
+    </div>
+    <div class="telephone coupe-bas"><div class="ecran"><img src="../sources/cap-accueil.png" alt=""></div></div>
+  </main>
+<script src="commun.js"></script>
+<script>monter("v1");</script>
+</body>
+</html>

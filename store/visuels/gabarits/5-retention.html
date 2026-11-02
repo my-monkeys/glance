@@ -1,0 +1,73 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Glance — rétention</title>
+<link rel="stylesheet" href="commun.css">
+<style>
+  .source .url { margin-top: calc(24 * var(--u)); font-family: "JetBrains Mono"; font-weight: 500; font-size: calc(31 * var(--u)); padding: calc(22 * var(--u)) calc(28 * var(--u));
+    border-radius: calc(24 * var(--u)); border: calc(3 * var(--u)) solid var(--line); white-space: nowrap; overflow: hidden; }
+  .source .ligne2 { display: flex; align-items: center; justify-content: space-between; gap: calc(20 * var(--u)); margin-top: calc(18 * var(--u)); }
+  .source .jeton { flex: 1; font-family: "JetBrains Mono"; font-size: calc(31 * var(--u)); padding: calc(22 * var(--u)) calc(28 * var(--u)); border-radius: calc(24 * var(--u)); border: calc(3 * var(--u)) solid var(--line); color: var(--fg2); white-space: nowrap; }
+  .source .jeton b { color: var(--fg); letter-spacing: .12em; font-weight: 600; margin-left: calc(14 * var(--u)); }
+  .bouton { background: var(--accent); color: #fff; font-weight: 600; font-size: calc(34 * var(--u)); padding: calc(24 * var(--u)) calc(44 * var(--u)); border-radius: 999px; }
+  .source .ok { margin-top: calc(18 * var(--u)); display: flex; align-items: center; gap: calc(14 * var(--u)); color: var(--accent); font-weight: 600; font-size: calc(34 * var(--u)); }
+  .ret { flex: 1 1 auto; min-height: calc(300 * var(--u)); display: grid; grid-template-columns: 1fr 44%; grid-template-rows: auto 1fr auto; column-gap: calc(34 * var(--u)); }
+  .ret .nom { font-family: "Fredoka"; font-weight: 600; font-size: calc(46 * var(--u)); margin-top: calc(12 * var(--u)); }
+  .ret .val { grid-row: 2; align-self: center; }
+  .ret .ratio { font-family: "JetBrains Mono"; font-size: calc(30 * var(--u)); color: var(--fg2); margin-top: calc(10 * var(--u)); }
+  .ret .spark { grid-column: 2; grid-row: 1 / 4; position: relative; min-height: calc(180 * var(--u)); }
+  .ret .spark svg { position: absolute; inset: 0; }
+  .ret .pied { grid-column: 1; font-size: calc(29 * var(--u)); color: var(--fg2); margin-top: calc(14 * var(--u)); }
+  .scene > .ret { flex-shrink: 1; padding: calc(40 * var(--u)) calc(50 * var(--u)); min-height: calc(250 * var(--u)); }
+  .ret .stat { font-size: calc(92 * var(--u)); }
+  .ret .spark { min-height: calc(120 * var(--u)); }
+  .f-ipad .scene { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: 1fr auto; }
+  .f-ipad .source { grid-column: 1 / 4; grid-row: 2; padding: calc(40 * var(--u)) calc(50 * var(--u)); }
+  .f-ipad .ret { padding: calc(50 * var(--u)); }
+  .f-ipad .ret .stat { font-size: calc(110 * var(--u)); }
+  .f-ipad .ret { grid-row: 1; grid-template-columns: 1fr; grid-template-rows: auto auto 1fr auto; }
+  .f-ipad .ret .spark { grid-column: 1; grid-row: 3; margin-top: calc(24 * var(--u)); }
+  .f-ipad .ret .val { grid-row: 2; }
+  .f-ipad .ret .pied { grid-row: 4; }
+  .f-ipad .source { display: grid; grid-template-columns: 1fr 1fr; column-gap: calc(40 * var(--u)); align-content: center; }
+  .f-ipad .source > .rangee { grid-column: 1 / 3; }
+  .f-ipad .source .ligne2, .f-ipad .source .ok { grid-column: 2; }
+  .f-ipad .source .url { grid-column: 1; font-size: calc(26 * var(--u)); }
+</style>
+</head>
+<body class="fond-chip clair">
+  <header class="entete">
+    <div class="marque"></div>
+    <h1 class="titre" data-t="titre"></h1>
+    <p class="appui" data-t="appui"></p>
+  </header>
+  <main class="scene" id="scene">
+    <section class="carte source">
+      <div class="rangee"><span class="label" data-t="source"></span><span class="pastille accent" data-t="votre_base"></span></div>
+      <div class="url">https://atelier-lune.fr/api/glance/</div>
+      <div class="ligne2"><div class="jeton"><span data-t="jeton"></span><b>••••••••••</b></div><span class="bouton" data-t="tester"></span></div>
+      <div class="ok"><span data-icone="check" style="font-size: calc(38 * var(--u))"></span><span data-t="resultat"></span></div>
+    </section>
+  </main>
+<script src="commun.js"></script>
+<script>
+monter("v5", async () => {
+  const jours = [
+    { cle: "j1", v: 31.4, num: 412, den: 1312, graine: 41 },
+    { cle: "j7", v: 14.2, num: 168, den: 1184, graine: 42 },
+    { cle: "j30", v: 6.3, num: 61, den: 968, graine: 43 },
+  ];
+  const scene = document.getElementById("scene");
+  const cartes = jours.map((j, i) => `<section class="carte ret">
+      <span class="label">${T("metrique")}</span>
+      <div class="val"><div class="nom">${T(j.cle)}</div><div class="stat" style="margin-top: calc(14 * var(--u))">${pct(j.v, 1)}</div><div class="ratio">${nb(j.num)} / ${nb(j.den)}</div></div>
+      <div class="spark" id="s${i}"></div>
+      <div class="pied">${T("cohortes")}</div></section>`).join("");
+  scene.insertAdjacentHTML("afterbegin", cartes);
+  jours.forEach((j, i) => spark(document.getElementById(`s${i}`),
+    serie(21, { base: j.v, amp: j.v * .12, f: 2.2, phase: i * .2, pente: j.v * .08, bruit: j.v * .05, graine: j.graine }), "#3B7A5A", { aire: true, epaisseur: 7, plage: [0, j.v * 1.7] }));
+});
+</script>
+</body>
+</html>

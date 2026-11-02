@@ -1,0 +1,62 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Glance — image de présentation</title>
+<link rel="stylesheet" href="commun.css">
+<style>
+  /* 1024 × 500 : 1 u = 1 px. Google rogne parfois les bords et pose un bouton de lecture au centre
+     si une vidéo est liée : le texte reste dans la moitié gauche, loin des bords. */
+  .f-presentation .carte { position: absolute; border-radius: calc(26 * var(--u)); padding: calc(22 * var(--u)); }
+  .f-presentation .label { font-size: calc(12 * var(--u)); }
+  .a { left: calc(548 * var(--u)); top: calc(46 * var(--u)); width: calc(420 * var(--u)); height: calc(250 * var(--u)); z-index: 2; }
+  .a .graphe { margin-top: calc(10 * var(--u)); min-height: 0; }
+  .b { left: calc(676 * var(--u)); top: calc(282 * var(--u)); width: calc(292 * var(--u)); height: calc(150 * var(--u)); z-index: 3; }
+  .b .stat { font-size: calc(54 * var(--u)); margin-top: calc(10 * var(--u)); }
+  .b .delta { font-size: calc(16 * var(--u)); margin-top: calc(8 * var(--u)); }
+  .b .spark { position: absolute; right: calc(20 * var(--u)); bottom: calc(24 * var(--u)); width: calc(110 * var(--u)); height: calc(60 * var(--u)); }
+  .c { left: calc(548 * var(--u)); top: calc(318 * var(--u)); width: calc(112 * var(--u)); height: calc(150 * var(--u)); z-index: 1; display: flex; flex-direction: column; justify-content: flex-end; gap: calc(8 * var(--u)); }
+  .c i { display: block; height: calc(14 * var(--u)); border-radius: 99px; background: var(--accent); }
+  .pastille { font-size: calc(12 * var(--u)); padding: calc(5 * var(--u)) calc(11 * var(--u)); }
+  .pastille.prevision i { width: calc(16 * var(--u)); }
+  .pastille i { width: calc(9 * var(--u)); height: calc(9 * var(--u)); }
+</style>
+</head>
+<body class="fond-foret clair">
+  <header class="entete">
+    <div class="marque"></div>
+    <h1 class="titre" data-t="titre"></h1>
+    <p class="appui" data-t="appui"></p>
+  </header>
+  <section class="carte a">
+    <span class="label" data-t="etiquette"></span>
+    <div class="pastilles" style="margin-top: calc(10 * var(--u))">
+      <span class="pastille" style="--c:#3B7A5A"><i></i><span data-t="etiquette_v"></span></span>
+      <span class="pastille prevision"><i></i><span data-t="prevision"></span></span>
+    </div>
+    <div class="graphe" id="g"></div>
+  </section>
+  <section class="carte b">
+    <span class="label" data-t="w_titre"></span>
+    <div class="stat">2 104</div>
+    <div class="delta" id="d"></div>
+    <div class="spark" id="s"></div>
+  </section>
+<script src="commun.js"></script>
+<script>
+monter("presentation", async () => {
+  document.getElementById("d").textContent = signe(14);
+  const n = 30, aj = 18;
+  const tout = serie(n, { base: 130, amp: 26, f: n / 7, phase: .1, pente: 14, bruit: 3, graine: 61 });
+  graphe(document.getElementById("g"), {
+    series: [
+      { v: tout.map((v, i) => (i >= aj ? v : null)), couleur: "#C98A2E", pointille: true, epaisseur: 5 },
+      { v: tout.map((v, i) => (i <= aj ? v : null)), couleur: "#3B7A5A", aire: true, epaisseur: 5, point: 6 },
+    ],
+    max: 200, haut: 8,
+  });
+  spark(document.getElementById("s"), serie(14, { base: 100, amp: 25, f: 1, pente: 10, bruit: 4, graine: 71 }), "#3B7A5A", { epaisseur: 4 });
+});
+</script>
+</body>
+</html>

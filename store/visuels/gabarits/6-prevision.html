@@ -1,0 +1,73 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Glance — prévision</title>
+<link rel="stylesheet" href="commun.css">
+<style>
+  .grand { flex: 1 1 auto; min-height: calc(520 * var(--u)); }
+  .projete { display: flex; flex-direction: row; align-items: flex-end; justify-content: space-between; gap: calc(30 * var(--u)); }
+  .projete .stat { color: var(--forecast); font-size: calc(132 * var(--u)); margin-top: calc(16 * var(--u)); }
+  .projete .droite { text-align: right; padding-bottom: calc(10 * var(--u)); }
+  .projete .droite .mono { display: block; font-size: calc(30 * var(--u)); color: var(--fg2); margin-top: calc(10 * var(--u)); }
+  .methode { flex-direction: row; align-items: center; gap: calc(36 * var(--u)); }
+  .methode p { font-size: calc(33 * var(--u)); line-height: 1.35; color: var(--fg2); }
+  .semaine { display: flex; align-items: flex-end; gap: calc(10 * var(--u)); height: calc(90 * var(--u)); flex: none; }
+  .semaine i { width: calc(18 * var(--u)); border-radius: calc(6 * var(--u)); background: var(--forecast); opacity: .75; display: block; }
+  .f-ipad .methode { flex-direction: column; align-items: flex-start; }
+</style>
+</head>
+<body class="fond-creme clair">
+  <header class="entete">
+    <div class="marque"></div>
+    <h1 class="titre" data-t="titre"></h1>
+    <p class="appui" data-t="appui"></p>
+  </header>
+  <main class="scene deux">
+    <section class="carte projete">
+      <div><span class="label" data-t="projete"></span><div class="stat" id="proj"></div></div>
+      <div class="droite"><span class="delta" id="delta"></span><span class="mono" id="jour"></span></div>
+    </section>
+    <section class="carte grand">
+      <span class="label" data-t="etiquette"></span>
+      <div class="pastilles" style="margin: calc(24 * var(--u)) 0 calc(14 * var(--u))">
+        <span class="pastille" style="--c:#3B7A5A"><i></i><span data-t="visiteurs"></span></span>
+        <span class="pastille prevision"><i></i><span data-t="prevision"></span></span>
+      </div>
+      <div class="graphe" id="g"></div>
+    </section>
+    <section class="carte methode">
+      <div class="semaine" id="sem"></div>
+      <p data-t="methode"></p>
+    </section>
+  </main>
+<script src="commun.js"></script>
+<script>
+monter("v6", async () => {
+  const n = 30, aujourdhui = 18; // le 19 du mois
+  const tout = serie(n, { base: 130, amp: 26, f: n / 7, phase: .1, pente: 14, bruit: 3, graine: 61 });
+  const observe = tout.map((v, i) => (i <= aujourdhui ? v : null));
+  const prevision = tout.map((v, i) => (i >= aujourdhui ? v : null));
+  const somme = (a) => Math.round(a.filter((v) => v != null).reduce((s, v) => s + v, 0) / 10) * 10;
+  document.getElementById("proj").textContent = nb(somme(tout));
+  document.getElementById("delta").textContent = signe(13, 0);
+  document.getElementById("jour").textContent = `${nb(somme(observe))} ${T("a_ce_jour")} · ${T("vs")}`;
+  const g = graphe(document.getElementById("g"), {
+    series: [
+      { v: prevision, couleur: "#C98A2E", pointille: true, epaisseur: 9 },
+      { v: observe, couleur: "#3B7A5A", aire: true, epaisseur: 8, point: 11 },
+    ],
+    max: 200, ticks: [0, 100, 200], gauche: 76, bas: 44, haut: 40,
+    xlabels: [[0, "1"], [7, "8"], [14, "15"], [21, "22"], [29, "30"]],
+  });
+  const x = g.X(aujourdhui);
+  document.querySelector("#g svg").insertAdjacentHTML("afterbegin",
+    `<rect x="${x}" y="${g.y0}" width="${g.x1 - x}" height="${g.y1 - g.y0}" fill="#C98A2E" opacity=".07"/>
+     <line x1="${x}" x2="${x}" y1="${g.y0 - 6 * U}" y2="${g.y1}" stroke="#C98A2E" stroke-width="${3 * U}" stroke-dasharray="${8 * U} ${8 * U}" opacity=".7"/>`);
+  document.querySelector("#g svg").insertAdjacentHTML("beforeend",
+    `<text x="${x - 14 * U}" y="${g.y0 - 8 * U}" text-anchor="end" font-family="JetBrains Mono" font-size="${28 * U}" font-weight="600" fill="#C98A2E">${T("ajd")}</text>`);
+  document.getElementById("sem").innerHTML = [.8, .95, 1, .9, .85, .55, .45].map((h) => `<i style="height:${h * 100}%"></i>`).join("");
+});
+</script>
+</body>
+</html>

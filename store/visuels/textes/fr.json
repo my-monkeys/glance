@@ -1,0 +1,101 @@
+{
+  "commun": {
+    "marque": "Glance",
+    "mini_titre": "Tous les sites"
+  },
+  "v1": {
+    "titre": "Tous vos sites, d’un coup d’œil",
+    "appui": "Umami et Plausible réunis dans une seule appli, claire et rapide.",
+    "p1": "Umami",
+    "p2": "Plausible",
+    "p3": "Rien n’est collecté"
+  },
+  "v2": {
+    "titre": "Croisez vos sites",
+    "appui": "Plusieurs sites côte à côte, et d’où viennent leurs visiteurs.",
+    "etiquette": "Tableau · Sites · 30 jours",
+    "total": "Visiteurs · total des lignes",
+    "f_tous": "Tous les visiteurs",
+    "f_venus": "Venus de",
+    "f_sauf": "Sauf venus de",
+    "part": "du total",
+    "editeur": "Ligne 3 · filtre de référent",
+    "seg_tous": "Tous",
+    "seg_venus": "Venus de",
+    "seg_sauf": "Sauf venus de",
+    "domaine": "Domaine"
+  },
+  "v3": {
+    "titre": "Suivez chaque événement",
+    "appui": "Une courbe et une couleur par événement, filtrables par propriété.",
+    "etiquette": "Événements · 14 jours",
+    "compteur": "Compteur",
+    "filtres": "Filtres de propriété",
+    "sur": "sur la période",
+    "repartition": "Répartition · plan"
+  },
+  "v4": {
+    "titre": "Voyez où ils décrochent",
+    "appui": "Un entonnoir en quatre étapes, avec la perte à chaque passage.",
+    "etiquette": "Entonnoir · 30 jours",
+    "visiteurs": "visiteurs",
+    "perte": "perdus",
+    "fenetre": "60 min entre deux étapes",
+    "fin": "vont jusqu’au bout"
+  },
+  "v5": {
+    "titre": "Mesurez la rétention",
+    "appui": "J1, J7 et J30, calculés sur votre propre base et branchés à Glance.",
+    "source": "Source de métriques",
+    "jeton": "Jeton",
+    "tester": "Tester",
+    "resultat": "3 indicateurs",
+    "metrique": "Métrique du site",
+    "j1": "Rétention J1",
+    "j7": "Rétention J7",
+    "j30": "Rétention J30",
+    "cohortes": "Mesurée sur les cohortes du 8 au 14 oct.",
+    "votre_base": "Calculé sur votre base"
+  },
+  "v6": {
+    "titre": "Anticipez la fin du mois",
+    "appui": "La courbe se prolonge en pointillé orange, avec le total attendu.",
+    "etiquette": "Visiteurs · ce mois-ci",
+    "visiteurs": "Visiteurs",
+    "prevision": "Prévision",
+    "projete": "Total projeté",
+    "ajd": "Aujourd’hui",
+    "a_ce_jour": "à ce jour",
+    "vs": "vs mois précédent",
+    "methode": "Niveau des 7 derniers jours × rythme de la semaine"
+  },
+  "v7": {
+    "titre": "En direct, jusque sur l’écran d’accueil",
+    "appui": "Les visiteurs présents maintenant, et des widgets iOS et Android.",
+    "etiquette": "En direct",
+    "en_ligne": "en ligne",
+    "w_titre": "Tous les sites",
+    "w_periode": "7 jours",
+    "w_pages": "pages vues",
+    "ios": "iOS",
+    "android": "Android"
+  },
+  "v8": {
+    "titre": "Sur tous vos appareils",
+    "appui": "iPhone, Android, Mac et Windows : votre configuration vous suit.",
+    "iphone": "iPhone",
+    "android": "Android",
+    "mac": "Mac",
+    "windows": "Windows",
+    "synchro": "Synchronisation chiffrée de bout en bout",
+    "synchro_sous": "Le serveur ne voit que des données chiffrées."
+  },
+  "presentation": {
+    "titre": "Vos stats web, d’un coup d’œil",
+    "appui": "Umami et Plausible : tableaux, événements, prévision.",
+    "etiquette": "Visiteurs · ce mois-ci",
+    "prevision": "Prévision",
+    "etiquette_v": "Visiteurs",
+    "w_titre": "Tous les sites"
+  }
+}
