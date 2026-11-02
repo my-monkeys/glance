@@ -8,7 +8,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Choisir un site"
+        android:text="@string/site_config_title"
         android:textSize="18sp"
         android:textStyle="bold"
         android:paddingBottom="12dp" />
@@ -17,7 +17,7 @@
         android:id="@+id/config_empty"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Ouvrez d'abord Glance et chargez l'accueil pour synchroniser vos sites."
+        android:text="@string/site_config_empty"
         android:textSize="14sp"
         android:paddingVertical="16dp"
         android:visibility="gone" />

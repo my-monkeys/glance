@@ -1,0 +1,166 @@
+{
+  "sourceLanguage": "fr",
+  "version": "1.0",
+  "strings": {
+    "Site": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Site"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Site"
+          }
+        }
+      }
+    },
+    "Choisir le site à afficher.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisir le site à afficher."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose the site to display."
+          }
+        }
+      }
+    },
+    "pages vues": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pages vues"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pageviews"
+          }
+        }
+      }
+    },
+    "Tous les sites": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tous les sites"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All sites"
+          }
+        }
+      }
+    },
+    "Ouvrez Glance": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvrez Glance"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Glance"
+          }
+        }
+      }
+    },
+    "Glance — Aperçu": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Glance — Aperçu"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Glance — Overview"
+          }
+        }
+      }
+    },
+    "Glance — Site": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Glance — Site"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Glance — Site"
+          }
+        }
+      }
+    },
+    "Visiteurs de tous vos sites et le top des sites.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visiteurs de tous vos sites et le top des sites."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visitors of all your sites and your top sites."
+          }
+        }
+      }
+    },
+    "Les visiteurs d'un site que vous choisissez.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les visiteurs d'un site que vous choisissez."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The visitors of a site you choose."
+          }
+        }
+      }
+    },
+    "7 jours": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "7 jours"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "7 days"
+          }
+        }
+      }
+    }
+  }
+}

@@ -77,6 +77,13 @@ struct GlanceData {
     static let appGroup = "group.fr.mymonkey.glance"
     #endif
 
+    /// Langue choisie dans l'app (clé `locale` publiée par Flutter), qui peut
+    /// différer de celle du système.
+    static var appLocale: Locale {
+        UserDefaults(suiteName: appGroup)?.string(forKey: "locale")
+            .map { Locale(identifier: $0) } ?? .current
+    }
+
     static func load() -> GlanceData {
         let d = UserDefaults(suiteName: appGroup)
         func spark(_ key: String) -> [Double] {
@@ -114,7 +121,7 @@ struct GlanceData {
     static let placeholder = GlanceData(
         totalVisitors: 2104, totalPageviews: 8908, totalDelta: 14.3,
         totalSpark: [12, 18, 26, 40, 52, 44, 30, 24, 22, 18, 14, 10],
-        periodLabel: "7 jours", updatedAt: Date(), siteCount: 3,
+        periodLabel: String(localized: "7 jours"), updatedAt: Date(), siteCount: 3,
         sites: [
             SiteStat(name: "opensuperwhisper.com", value: 770, delta: -28.4,
                      spark: [40, 52, 44, 30, 24, 20]),
@@ -210,11 +217,11 @@ struct Provider: TimelineProvider {
 
 /// Titre sur 2 lignes : nom + période (sans troncature).
 struct TitleLines: View {
-    var title: String = "Tous les sites"
+    var title: Text = Text("Tous les sites")
     let periodLabel: String
     var body: some View {
         VStack(alignment: .leading, spacing: 1) {
-            Text(title)
+            title
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundStyle(GT.fg).lineLimit(1).minimumScaleFactor(0.8)
             if !periodLabel.isEmpty {
@@ -239,7 +246,7 @@ struct EmptyStateView: View {
 
 /// En-tête sur 2 lignes (titre + période à gauche) avec les stats à droite.
 struct TitleStatsRow: View {
-    let title: String
+    let title: Text
     let periodLabel: String
     let value: Int
     let delta: Double?
@@ -249,7 +256,7 @@ struct TitleStatsRow: View {
     var body: some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 1) {
-                Text(title)
+                title
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(GT.fg).lineLimit(titleLines).minimumScaleFactor(0.8)
                 if showPeriod && !periodLabel.isEmpty {
@@ -276,7 +283,7 @@ struct SmallView: View {
             // Titre sur 2 lignes à gauche, stats à droite (période masquée ici,
             // gardée sur les grandes tailles).
             TitleStatsRow(
-                title: "Tous les sites", periodLabel: d.periodLabel,
+                title: Text("Tous les sites"), periodLabel: d.periodLabel,
                 value: d.totalVisitors, delta: d.totalDelta,
                 valueSize: 24, titleLines: 2, showPeriod: false
             )
@@ -363,7 +370,7 @@ struct LargeView: View {
         VStack(alignment: .leading, spacing: 10) {
             // Titre + stats en haut, courbe pleine largeur en dessous.
             TitleStatsRow(
-                title: "Tous les sites", periodLabel: d.periodLabel,
+                title: Text("Tous les sites"), periodLabel: d.periodLabel,
                 value: d.totalVisitors, delta: d.totalDelta, valueSize: 32
             )
             SparkView(points: d.totalSpark)
@@ -410,6 +417,7 @@ struct GlanceWidgetEntryView: View {
             }
         }
         .modifier(GlanceBackground())
+        .environment(\.locale, GlanceData.appLocale)
     }
 }
 

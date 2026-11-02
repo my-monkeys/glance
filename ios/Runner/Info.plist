@@ -11,6 +11,7 @@
 		<key>CFBundleLocalizations</key>
 		<array>
 			<string>fr</string>
+			<string>en</string>
 		</array>
 		<key>CFBundleDisplayName</key>
 		<string>Glance</string>

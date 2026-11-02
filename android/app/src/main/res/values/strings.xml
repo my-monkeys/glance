@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="glance_widget_description">Visiteurs de tous vos sites et le top des sites.</string>
-    <string name="glance_site_widget_description">Les visiteurs d\'un site que vous choisissez.</string>
+    <string name="glance_widget_description">Visitors of all your sites and your top sites.</string>
+    <string name="glance_site_widget_description">The visitors of a site you choose.</string>
+    <string name="site_config_title">Choose a site</string>
+    <string name="site_config_empty">Open Glance first and load the home screen to sync your sites.</string>
+    <string name="widget_chart_description">Visitors chart</string>
+    <string name="widget_pageviews">pageviews</string>
+    <string name="widget_open_app">Open Glance</string>
+    <string name="widget_all_sites">All sites</string>
 </resources>

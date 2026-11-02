@@ -29,6 +29,19 @@ lib/
 
 **Règle d'or** : la couche UI ne parle qu'à l'interface `AnalyticsProvider`. Ajouter un fournisseur = une classe qui l'implémente + une entrée dans `buildProvider` + les `credentialFieldsFor` (+ `supportedIndicatorsFor` s'il sait calculer des tableaux). Rien d'autre à toucher.
 
+## Traduction (i18n)
+
+Français (langue source) et anglais ; l'allemand, l'espagnol, le portugais (Brésil) et le chinois simplifié suivent (ticket n° 16).
+- **Où** : `lib/l10n/app_fr.arb` = **gabarit**, `app_en.arb`, `l10n.yaml`. Les fichiers générés (`app_localizations*.dart`) sont **commités** : `flutter gen-l10n` après chaque modification d'un ARB. Accès : `context.l10n.maClé` (`lib/l10n/l10n.dart`).
+- **Ajouter une langue en 3 étapes** : (1) écrire `lib/l10n/app_<code>.arb` (`app_pt_BR.arb`, `app_zh_Hans.arb`) avec **toutes** les clés du gabarit ; (2) ajouter l'étiquette (`pt-BR`, `zh-Hans`) à `LOCALES` de `tool/gen_display_names.mjs` et relancer `node tool/gen_display_names.mjs` (pays et langues) ; (3) ajouter la langue à `CFBundleLocalizations` (ios/macos `Info.plist`, widgets compris), `Localizable.xcstrings` (`ios/GlanceWidget`) et `android/app/src/main/res/values-<code>/strings.xml`. Le sélecteur « Langue » (Réglages) se construit sur `AppLocalizations.supportedLocales` : rien d'autre à toucher.
+- **Langue** : celle du système, sinon **anglais** (`resolveGlanceLocale`) ; réglage « Langue » persisté dans `state/settings` (`null` = automatique). Un délégué pose `Intl.defaultLocale` : `core/format.dart` et tous les `DateFormat`/`NumberFormat` s'écrivent **sans locale** (jamais `'fr_FR'`).
+- **Règle** : pas de texte en dur, **pas de concaténation** de morceaux traduits (l'ordre des mots change) : une phrase = une clé à placeholders, pluriels en ICU (`{count, plural, =1{…} other{…}}`). Clés camelCase préfixées par l'écran, `@description` si le contexte n'est pas évident.
+- **Hors widgets** : pas de `BuildContext` dans la logique. Les erreurs sont des `LocalizedError` (`core/errors.dart`, `message(l10n)`) ; les messages d'état sont des enums (`SyncMessage`) que l'UI traduit ; les fonctions pures de libellés (`Period.label(l10n)`, `deviceName(l10n, …)`) reçoivent un `AppLocalizations`.
+- **Pays et langues** : `lib/l10n/display_names.dart` est **généré** (CLDR via `Intl.DisplayNames` de Node), ne pas l'éditer. Navigateurs et OS sont des noms propres.
+- **Widgets natifs** : iOS/macOS `ios/GlanceWidget/Localizable.xcstrings` (clés = texte français, suit la langue de l'app grâce à la clé `locale` publiée par Flutter) ; Android `values/` (anglais) + `values-fr/` (suit la langue du système). Le libellé de période et `locale` sont publiés par `WidgetPublisher`.
+- **Tests** : rendent en français (`test/helpers/l10n.dart` : `locale: testLocale` + `glanceLocalizationsDelegates`). `test/i18n_test.dart` couvre l'anglais, le pluriel, les dates et le repli.
+- Lien « Comment ça marche ? » : `metricsDocUrl(Locale)` → page FR en français, page EN ailleurs.
+
 ## Flux produit
 
 1. **Accueil vide brandé** (aucun compte) → « Ajouter une source ».
