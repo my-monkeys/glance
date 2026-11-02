@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+import '../../l10n/l10n.dart';
 import '../../theme/motion.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
@@ -42,9 +43,9 @@ class GlanceTabBar extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _item(context, GlanceTab.sites, Icons.grid_view_rounded, 'Sites'),
-                _item(context, GlanceTab.direct, Icons.show_chart_rounded, 'Direct'),
-                _item(context, GlanceTab.settings, Icons.tune_rounded, 'Réglages'),
+                _item(context, GlanceTab.sites, Icons.grid_view_rounded, context.l10n.tabSites),
+                _item(context, GlanceTab.direct, Icons.show_chart_rounded, context.l10n.tabDirect),
+                _item(context, GlanceTab.settings, Icons.tune_rounded, context.l10n.tabSettings),
               ],
             ),
           ),

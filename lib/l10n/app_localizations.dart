@@ -115,6 +115,258 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'du {from} au {to}'**
   String dayRange(String from, String to);
+
+  /// No description provided for @commonClose.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fermer'**
+  String get commonClose;
+
+  /// No description provided for @commonClear.
+  ///
+  /// In fr, this message translates to:
+  /// **'Effacer'**
+  String get commonClear;
+
+  /// No description provided for @commonRetry.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get commonRetry;
+
+  /// Onglet de la barre du bas : la liste des sites
+  ///
+  /// In fr, this message translates to:
+  /// **'Sites'**
+  String get tabSites;
+
+  /// Onglet de la barre du bas : visiteurs en direct
+  ///
+  /// In fr, this message translates to:
+  /// **'Direct'**
+  String get tabDirect;
+
+  /// Onglet de la barre du bas
+  ///
+  /// In fr, this message translates to:
+  /// **'Réglages'**
+  String get tabSettings;
+
+  /// No description provided for @siteSearchHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher un site'**
+  String get siteSearchHint;
+
+  /// No description provided for @siteSearchNoMatch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun site ne correspond à « {query} ».'**
+  String siteSearchNoMatch(String query);
+
+  /// No description provided for @navToday.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aujourd\'hui'**
+  String get navToday;
+
+  /// No description provided for @navYesterday.
+  ///
+  /// In fr, this message translates to:
+  /// **'Hier'**
+  String get navYesterday;
+
+  /// No description provided for @navDayBeforeYesterday.
+  ///
+  /// In fr, this message translates to:
+  /// **'Avant-hier'**
+  String get navDayBeforeYesterday;
+
+  /// No description provided for @navThisMonth.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce mois-ci'**
+  String get navThisMonth;
+
+  /// No description provided for @navLastMonth.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mois dernier'**
+  String get navLastMonth;
+
+  /// No description provided for @navThisYear.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette année'**
+  String get navThisYear;
+
+  /// No description provided for @navLastYear.
+  ///
+  /// In fr, this message translates to:
+  /// **'Année dernière'**
+  String get navLastYear;
+
+  /// Titre de la feuille qui liste les groupes de sites ; le périmètre = les sites affichés
+  ///
+  /// In fr, this message translates to:
+  /// **'Périmètre'**
+  String get workspaceSheetTitle;
+
+  /// No description provided for @workspaceAllSites.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tous les sites'**
+  String get workspaceAllSites;
+
+  /// No description provided for @workspaceTrackedSites.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{0 site suivi} =1{1 site suivi} other{{count} sites suivis}}'**
+  String workspaceTrackedSites(int count);
+
+  /// No description provided for @workspaceSiteCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucun site} =1{1 site} other{{count} sites}}'**
+  String workspaceSiteCount(int count);
+
+  /// No description provided for @workspaceNewGroup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau groupe'**
+  String get workspaceNewGroup;
+
+  /// No description provided for @workspaceManageGroups.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gérer les groupes'**
+  String get workspaceManageGroups;
+
+  /// Titre de l'accueil quand aucun groupe n'est actif
+  ///
+  /// In fr, this message translates to:
+  /// **'Mes sites'**
+  String get homeTitleDefault;
+
+  /// No description provided for @homeLoadFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chargement impossible.'**
+  String get homeLoadFailed;
+
+  /// Carte : visiteurs que les sites suivis s'envoient entre eux
+  ///
+  /// In fr, this message translates to:
+  /// **'Entre vos sites'**
+  String get homeInternalTitle;
+
+  /// No description provided for @homeTotalVisitors.
+  ///
+  /// In fr, this message translates to:
+  /// **'Visiteurs · {name}'**
+  String homeTotalVisitors(String name);
+
+  /// No description provided for @homeTotalVisitorsAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Visiteurs · tous les sites'**
+  String get homeTotalVisitorsAll;
+
+  /// No description provided for @homeVsPrevious.
+  ///
+  /// In fr, this message translates to:
+  /// **'vs période préc.'**
+  String get homeVsPrevious;
+
+  /// No description provided for @homeLiveCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} live'**
+  String homeLiveCount(int count);
+
+  /// No description provided for @homeEmptyTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun site affiché'**
+  String get homeEmptyTitle;
+
+  /// No description provided for @homeEmptyBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun site suivi pour le moment. Choisis ceux à afficher.'**
+  String get homeEmptyBody;
+
+  /// No description provided for @homeEmptyChooseSites.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir les sites'**
+  String get homeEmptyChooseSites;
+
+  /// No description provided for @homeEmptyAddSource.
+  ///
+  /// In fr, this message translates to:
+  /// **'+ Ajouter une source'**
+  String get homeEmptyAddSource;
+
+  /// No description provided for @homeEmptyGroupTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Groupe vide'**
+  String get homeEmptyGroupTitle;
+
+  /// No description provided for @homeEmptyGroupBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'« {name} » ne contient aucun site.'**
+  String homeEmptyGroupBody(String name);
+
+  /// No description provided for @homeEmptyGroupChoose.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir ses sites'**
+  String get homeEmptyGroupChoose;
+
+  /// No description provided for @homeEmptyGroupSeeAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir tous les sites'**
+  String get homeEmptyGroupSeeAll;
+
+  /// No description provided for @homeWelcomeTagline.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos statistiques, en un clin d\'œil.'**
+  String get homeWelcomeTagline;
+
+  /// No description provided for @homeWelcomeTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Connectez votre premier outil'**
+  String get homeWelcomeTitle;
+
+  /// No description provided for @homeWelcomeBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Umami, Plausible… ajoutez une source puis choisissez les sites à suivre.'**
+  String get homeWelcomeBody;
+
+  /// No description provided for @homeWelcomeAddSource.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter une source'**
+  String get homeWelcomeAddSource;
+
+  /// No description provided for @homeWelcomeFootnote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Clé en lecture seule · vos données restent chez vous'**
+  String get homeWelcomeFootnote;
+
+  /// No description provided for @homeSiteUnavailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indisponible'**
+  String get homeSiteUnavailable;
 }
 
 class _AppLocalizationsDelegate

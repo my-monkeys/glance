@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../l10n/l10n.dart';
 import '../../state/period_state.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
@@ -76,21 +77,21 @@ class DayNav extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final offset = ref.watch(periodProvider.select((s) => s.dayOffset));
     return _NavRow(
-      label: _label(offset),
+      label: _label(context.l10n, offset),
       canGoForward: offset < 0,
       onPrev: () => ref.read(periodProvider.notifier).shiftDay(-1),
       onNext: () => ref.read(periodProvider.notifier).shiftDay(1),
     );
   }
 
-  static String _label(int offset) {
+  static String _label(AppLocalizations l10n, int offset) {
     switch (offset) {
       case 0:
-        return "Aujourd'hui";
+        return l10n.navToday;
       case -1:
-        return 'Hier';
+        return l10n.navYesterday;
       case -2:
-        return 'Avant-hier';
+        return l10n.navDayBeforeYesterday;
       default:
         final day = DateTime.now().add(Duration(days: offset));
         return DateFormat.MMMMEEEEd().format(day);
@@ -108,19 +109,19 @@ class MonthNav extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final offset = ref.watch(periodProvider.select((s) => s.monthOffset));
     return _NavRow(
-      label: _label(offset),
+      label: _label(context.l10n, offset),
       canGoForward: offset < 0,
       onPrev: () => ref.read(periodProvider.notifier).shiftMonth(-1),
       onNext: () => ref.read(periodProvider.notifier).shiftMonth(1),
     );
   }
 
-  static String _label(int offset) {
+  static String _label(AppLocalizations l10n, int offset) {
     switch (offset) {
       case 0:
-        return 'Ce mois-ci';
+        return l10n.navThisMonth;
       case -1:
-        return 'Mois dernier';
+        return l10n.navLastMonth;
       default:
         final now = DateTime.now();
         final month = DateTime(now.year, now.month + offset, 1);
@@ -139,19 +140,19 @@ class YearNav extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final offset = ref.watch(periodProvider.select((s) => s.yearOffset));
     return _NavRow(
-      label: _label(offset),
+      label: _label(context.l10n, offset),
       canGoForward: offset < 0,
       onPrev: () => ref.read(periodProvider.notifier).shiftYear(-1),
       onNext: () => ref.read(periodProvider.notifier).shiftYear(1),
     );
   }
 
-  static String _label(int offset) {
+  static String _label(AppLocalizations l10n, int offset) {
     switch (offset) {
       case 0:
-        return 'Cette année';
+        return l10n.navThisYear;
       case -1:
-        return 'Année dernière';
+        return l10n.navLastYear;
       default:
         return '${DateTime.now().year + offset}';
     }

@@ -18,4 +18,157 @@ class AppLocalizationsEn extends AppLocalizations {
   String dayRange(String from, String to) {
     return '$from – $to';
   }
+
+  @override
+  String get commonClose => 'Close';
+
+  @override
+  String get commonClear => 'Clear';
+
+  @override
+  String get commonRetry => 'Retry';
+
+  @override
+  String get tabSites => 'Sites';
+
+  @override
+  String get tabDirect => 'Live';
+
+  @override
+  String get tabSettings => 'Settings';
+
+  @override
+  String get siteSearchHint => 'Search sites';
+
+  @override
+  String siteSearchNoMatch(String query) {
+    return 'No site matches \"$query\".';
+  }
+
+  @override
+  String get navToday => 'Today';
+
+  @override
+  String get navYesterday => 'Yesterday';
+
+  @override
+  String get navDayBeforeYesterday => '2 days ago';
+
+  @override
+  String get navThisMonth => 'This month';
+
+  @override
+  String get navLastMonth => 'Last month';
+
+  @override
+  String get navThisYear => 'This year';
+
+  @override
+  String get navLastYear => 'Last year';
+
+  @override
+  String get workspaceSheetTitle => 'Scope';
+
+  @override
+  String get workspaceAllSites => 'All sites';
+
+  @override
+  String workspaceTrackedSites(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sites tracked',
+      one: '1 site tracked',
+      zero: '0 sites tracked',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String workspaceSiteCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sites',
+      one: '1 site',
+      zero: 'No sites',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get workspaceNewGroup => 'New group';
+
+  @override
+  String get workspaceManageGroups => 'Manage groups';
+
+  @override
+  String get homeTitleDefault => 'My sites';
+
+  @override
+  String get homeLoadFailed => 'Couldn\'t load.';
+
+  @override
+  String get homeInternalTitle => 'Between your sites';
+
+  @override
+  String homeTotalVisitors(String name) {
+    return 'Visitors · $name';
+  }
+
+  @override
+  String get homeTotalVisitorsAll => 'Visitors · all sites';
+
+  @override
+  String get homeVsPrevious => 'vs prev. period';
+
+  @override
+  String homeLiveCount(int count) {
+    return '$count live';
+  }
+
+  @override
+  String get homeEmptyTitle => 'No sites shown';
+
+  @override
+  String get homeEmptyBody => 'No sites tracked yet. Pick the ones to show.';
+
+  @override
+  String get homeEmptyChooseSites => 'Choose sites';
+
+  @override
+  String get homeEmptyAddSource => '+ Add a source';
+
+  @override
+  String get homeEmptyGroupTitle => 'Empty group';
+
+  @override
+  String homeEmptyGroupBody(String name) {
+    return '\"$name\" has no sites.';
+  }
+
+  @override
+  String get homeEmptyGroupChoose => 'Choose its sites';
+
+  @override
+  String get homeEmptyGroupSeeAll => 'See all sites';
+
+  @override
+  String get homeWelcomeTagline => 'Your stats, at a glance.';
+
+  @override
+  String get homeWelcomeTitle => 'Connect your first tool';
+
+  @override
+  String get homeWelcomeBody =>
+      'Umami, Plausible… add a source, then pick the sites to track.';
+
+  @override
+  String get homeWelcomeAddSource => 'Add a source';
+
+  @override
+  String get homeWelcomeFootnote => 'Read-only key · your data stays with you';
+
+  @override
+  String get homeSiteUnavailable => 'Unavailable';
 }

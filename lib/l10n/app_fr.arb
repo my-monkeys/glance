@@ -16,5 +16,107 @@
         "type": "String"
       }
     }
-  }
+  },
+  "commonClose": "Fermer",
+  "commonClear": "Effacer",
+  "commonRetry": "Réessayer",
+  "tabSites": "Sites",
+  "@tabSites": {
+    "description": "Onglet de la barre du bas : la liste des sites"
+  },
+  "tabDirect": "Direct",
+  "@tabDirect": {
+    "description": "Onglet de la barre du bas : visiteurs en direct"
+  },
+  "tabSettings": "Réglages",
+  "@tabSettings": {
+    "description": "Onglet de la barre du bas"
+  },
+  "siteSearchHint": "Rechercher un site",
+  "siteSearchNoMatch": "Aucun site ne correspond à « {query} ».",
+  "@siteSearchNoMatch": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "navToday": "Aujourd'hui",
+  "navYesterday": "Hier",
+  "navDayBeforeYesterday": "Avant-hier",
+  "navThisMonth": "Ce mois-ci",
+  "navLastMonth": "Mois dernier",
+  "navThisYear": "Cette année",
+  "navLastYear": "Année dernière",
+  "workspaceSheetTitle": "Périmètre",
+  "@workspaceSheetTitle": {
+    "description": "Titre de la feuille qui liste les groupes de sites ; le périmètre = les sites affichés"
+  },
+  "workspaceAllSites": "Tous les sites",
+  "workspaceTrackedSites": "{count, plural, =0{0 site suivi} =1{1 site suivi} other{{count} sites suivis}}",
+  "@workspaceTrackedSites": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "workspaceSiteCount": "{count, plural, =0{Aucun site} =1{1 site} other{{count} sites}}",
+  "@workspaceSiteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "workspaceNewGroup": "Nouveau groupe",
+  "workspaceManageGroups": "Gérer les groupes",
+  "homeTitleDefault": "Mes sites",
+  "@homeTitleDefault": {
+    "description": "Titre de l'accueil quand aucun groupe n'est actif"
+  },
+  "homeLoadFailed": "Chargement impossible.",
+  "homeInternalTitle": "Entre vos sites",
+  "@homeInternalTitle": {
+    "description": "Carte : visiteurs que les sites suivis s'envoient entre eux"
+  },
+  "homeTotalVisitors": "Visiteurs · {name}",
+  "@homeTotalVisitors": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeTotalVisitorsAll": "Visiteurs · tous les sites",
+  "homeVsPrevious": "vs période préc.",
+  "homeLiveCount": "{count} live",
+  "@homeLiveCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeEmptyTitle": "Aucun site affiché",
+  "homeEmptyBody": "Aucun site suivi pour le moment. Choisis ceux à afficher.",
+  "homeEmptyChooseSites": "Choisir les sites",
+  "homeEmptyAddSource": "+ Ajouter une source",
+  "homeEmptyGroupTitle": "Groupe vide",
+  "homeEmptyGroupBody": "« {name} » ne contient aucun site.",
+  "@homeEmptyGroupBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeEmptyGroupChoose": "Choisir ses sites",
+  "homeEmptyGroupSeeAll": "Voir tous les sites",
+  "homeWelcomeTagline": "Vos statistiques, en un clin d'œil.",
+  "homeWelcomeTitle": "Connectez votre premier outil",
+  "homeWelcomeBody": "Umami, Plausible… ajoutez une source puis choisissez les sites à suivre.",
+  "homeWelcomeAddSource": "Ajouter une source",
+  "homeWelcomeFootnote": "Clé en lecture seule · vos données restent chez vous",
+  "homeSiteUnavailable": "Indisponible"
 }

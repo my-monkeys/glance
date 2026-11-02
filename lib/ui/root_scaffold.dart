@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/models/models.dart';
+import '../l10n/l10n.dart';
 import '../theme/motion.dart';
 import '../theme/palette.dart';
 import 'add/add_source_screen.dart';
@@ -51,7 +52,7 @@ Future<T?> showGlanceModal<T>(
   return showGeneralDialog<T>(
     context: context,
     barrierDismissible: true,
-    barrierLabel: 'Fermer',
+    barrierLabel: context.l10n.commonClose,
     barrierColor: Colors.black.withValues(alpha: nested ? 0.15 : 0.62),
     transitionDuration: kMotionSlow,
     transitionBuilder: glanceDialogTransition,
