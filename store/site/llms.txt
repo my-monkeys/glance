@@ -13,20 +13,20 @@ Glance n'est pas un outil d'analytics : c'est un client (une interface de lectur
 - Dépôt : https://github.com/my-monkeys/glance
 - Site officiel : https://glance-analytics.com
 - Outils d'analytics supportés : Umami (disponible), Plausible (disponible), Fathom (à venir)
-- Plateformes disponibles maintenant : macOS (via Homebrew : `brew install --cask my-monkeys/tap/glance`)
-- Plateformes à venir : iOS, Android, Windows
+- Plateformes : iOS et iPad (App Store), Android (Google Play), macOS (DMG ou Homebrew : `brew install --cask my-monkeys/tap/glance`), Windows (archive .zip)
 - Technologie : application Flutter (multiplateforme)
 - Confidentialité : aucun serveur tiers, aucun tracking, accès en lecture seule, identifiants chiffrés dans le Keychain de l'appareil
 
 ## Ce que fait Glance
 
-- Regroupe tous vos sites Umami/Plausible dans une seule vue, avec un total de visiteurs cross-comptes.
-- Courbes lissées des visiteurs et pages vues sur 6 périodes (aujourd'hui, 24 h, 7 jours, 30 jours, 12 mois, sur mesure).
-- Temps réel : compteur global et par site des visiteurs en direct.
-- Détail par site : top pages, sources, pays et événements personnalisés (une couleur par événement).
-- Multi-comptes et multi-fournisseurs simultanés.
-- Widgets iOS (aperçu tous sites + widget par site configurable).
-- Vue master-détail native sur macOS et Windows.
+- Regroupe tous vos sites Umami et Plausible dans une seule liste, avec un total et une courbe lissée, sur 8 périodes (aujourd'hui, 24 h, 7 jours, 30 jours, ce mois-ci, 12 mois, cette année, plage libre) avec comparaison à la période précédente.
+- Croise vos sites : plusieurs sites côte à côte, une courbe par site plus le total, avec un filtre « venus de » ou « sauf venus de » un domaine (Umami).
+- Suit chaque événement : une courbe et une couleur par événement, filtrable par propriété ; compteurs, taux et répartitions (Umami et Plausible).
+- Entonnoir de 2 à 8 étapes avec la perte à chaque passage (Umami).
+- Rétention J1, J7 et J30 calculée sur votre propre base, via une source de métriques (API d'agrégats que votre site expose, protégée par un jeton).
+- Prévision en pointillé orange sur « ce mois-ci » et « cette année » : niveau des 7 derniers jours et rythme de la semaine.
+- Visiteurs en direct sur chaque site, et widgets iOS et Android pour l'écran d'accueil.
+- Multi-appareils : iPhone, iPad, Android, Mac et Windows, en clair et en sombre ; QR code chiffré de transfert ou synchronisation chiffrée de bout en bout (option, achat unique).
 
 ## Questions fréquentes
 
@@ -34,7 +34,7 @@ Glance n'est pas un outil d'analytics : c'est un client (une interface de lectur
 - Est-ce gratuit ? Oui, Glance est entièrement gratuit.
 - Est-ce open source ? Oui, sous licence MIT, code sur https://github.com/my-monkeys/glance
 - Quels outils sont supportés ? Umami et Plausible aujourd'hui ; Fathom prévu.
-- Sur quelles plateformes ? macOS disponible ; iOS, Android et Windows à venir.
+- Sur quelles plateformes ? iOS, iPad, Android, macOS et Windows.
 - Mes données sont-elles envoyées à un tiers ? Non. Glance parle directement à votre instance, en lecture seule, sans serveur intermédiaire ni tracking.
 
 ## Liens
@@ -42,6 +42,7 @@ Glance n'est pas un outil d'analytics : c'est un client (une interface de lectur
 - Site : https://glance-analytics.com
 - Code source (GitHub) : https://github.com/my-monkeys/glance
 - Licence MIT : https://github.com/my-monkeys/glance/blob/main/LICENSE
+- Version anglaise : https://glance-analytics.com/en/
 - Dernières versions : https://github.com/my-monkeys/glance/releases/latest
 - Documentation de la source de métriques (API d'agrégats : indicateurs calculés sur votre base, contrat v1) : https://glance-analytics.com/docs/source-de-metriques.html (anglais : https://glance-analytics.com/en/docs/metrics-source.html)
 - Confidentialité : https://glance-analytics.com/privacy.html

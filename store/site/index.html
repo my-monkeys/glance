@@ -5,9 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script>document.documentElement.className+=" js";</script>
 <script>(function(){try{if(localStorage.getItem('glance-lang')==='en')location.replace('/en/')}catch(e){}})();</script>
-<title>Glance — Client Umami & Plausible pour Mac, iOS & Android · Gratuit et open source</title>
+<title>Glance — Client Umami &amp; Plausible pour Mac, iOS &amp; Android · Gratuit et open source</title>
 <meta name="description" content="Glance : un client mobile et desktop clair pour vos analytics Umami et Plausible. Tous vos sites sur iOS, Android, macOS et Windows — open source, sans serveur tiers.">
-<link rel="icon" href="favicon.svg?v=2" type="image/svg+xml">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml">
 <link rel="canonical" href="https://glance-analytics.com/">
 <link rel="alternate" hreflang="fr" href="https://glance-analytics.com/">
 <link rel="alternate" hreflang="en" href="https://glance-analytics.com/en/">
@@ -15,217 +16,21 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Glance">
 <meta property="og:locale" content="fr_FR">
-<meta property="og:title" content="Glance — Vos stats, réunies.">
+<meta property="og:title" content="Glance — Vos stats web, d'un coup d'œil.">
 <meta property="og:description" content="Un client clair et lisible par-dessus Umami et Plausible. Tous vos sites, sur iOS, Android, macOS et Windows.">
-<meta property="og:url" content="https://glance-analytics.com">
+<meta property="og:url" content="https://glance-analytics.com/">
 <meta property="og:image" content="https://glance-analytics.com/img/og.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Glance sur macOS — liste des sites et vue d'ensemble">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://glance-analytics.com/img/og.jpg">
-<link rel="preload" as="image" href="img/mobile-home.webp" fetchpriority="high">
+<link rel="preload" as="image" href="/img/scenes/1-accueil.webp" fetchpriority="high">
 <script defer src="https://uuu.my-monkey.fr/u.js" data-website-id="0d62b5ee-a8e2-4b05-959c-9e8b5a41c0dc"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{margin:0}
-.fx{display:flex}.ac{align-items:center}.jb{justify-content:space-between}.jc{justify-content:center}.col{flex-direction:column}
-.gap6{gap:6px}.gap8{gap:8px}.gap10{gap:10px}.gap12{gap:12px}.gap16{gap:16px}.gap24{gap:24px}.gap40{gap:40px}
-.fw6{font-weight:600}
-.board{background:#F7F5F1;font-family:'Geist',system-ui,sans-serif;color:#211E19;-webkit-font-smoothing:antialiased;overflow-x:clip}
-.page{max-width:1200px;margin:0 auto;background:#F7F5F1;position:relative}
-.mono{font-family:'JetBrains Mono',monospace}.fred{font-family:'Fredoka',sans-serif}
-.t2{color:#8C857A}.t3{color:#B4ADA1}.ta{color:#3B7A5A}
-a{color:#3B7A5A;text-decoration:none}a:hover{color:#2F6349}
-.kick{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:2.6px;text-transform:uppercase;font-weight:500;color:#3B7A5A}
-.kick.m{color:#B4ADA1}
-.h1{font-family:'Fredoka',sans-serif;font-weight:600;font-size:clamp(38px,6.4vw,66px);line-height:1;letter-spacing:-2px;color:#211E19}
-.h2{font-family:'Fredoka',sans-serif;font-weight:600;font-size:clamp(29px,4.6vw,44px);line-height:1.04;letter-spacing:-1.2px;color:#211E19}
-.h3{font-family:'Fredoka',sans-serif;font-weight:600;font-size:26px;letter-spacing:-.5px;color:#211E19}
-.lead{font-size:19px;line-height:1.62;color:#8C857A}
-.body{font-size:16px;line-height:1.62;color:#8C857A}
-.mark{width:40px;height:40px;border-radius:12px;background:#3B7A5A;display:grid;place-items:center;flex:none}
-.mark svg{width:100%;height:100%}
-.wordmark{font-family:'Fredoka',sans-serif;font-weight:600;font-size:23px;letter-spacing:-.5px}
-.nav{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:20px 60px;border-bottom:1px solid rgba(30,25,15,.08)}
-/* Le flou vit sur un pseudo-élément : un backdrop-filter porté par .nav ferait d'elle le
-   containing block de ses descendants position:fixed — la bulle de langue restait alors
-   collée sous la nav sur mobile, hors écran et infermable. */
-.nav::before{content:"";position:absolute;inset:0;z-index:-1;background:rgba(247,245,241,.82);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
-.navlinks{display:flex;gap:30px;font-size:15px;font-weight:500;color:#5c564d}
-.navlinks a{color:#5c564d}.navlinks a:hover{color:#211E19}
-.btn{display:inline-flex;align-items:center;gap:9px;padding:13px 21px;border-radius:13px;font-family:'Fredoka',sans-serif;font-weight:500;font-size:16px;cursor:pointer;border:1.5px solid transparent;white-space:nowrap;transition:transform .12s ease,background .15s ease,box-shadow .15s ease}
-.btn:active{transform:translateY(1px)}
-.btn-p{background:#3B7A5A;color:#fff;box-shadow:0 4px 14px rgba(59,122,90,.28)}
-.btn-p:hover{background:#336b4f;color:#fff;box-shadow:0 6px 20px rgba(59,122,90,.34)}
-.btn-g{background:#fff;color:#211E19;border-color:rgba(30,25,15,.14)}
-.btn-g:hover{border-color:rgba(30,25,15,.3);color:#211E19}
-.btn-d{background:#211E19;color:#F7F5F1}.btn-d:hover{background:#000;color:#F7F5F1}
-.btn-sm{padding:9px 15px;font-size:14px;border-radius:11px}
-.nav .btn-sm{min-width:104px;justify-content:center}
-.nav .lang{min-width:0;gap:7px}
-.langw{position:relative;display:inline-flex}
-.lang-tip{position:absolute;top:calc(100% + 14px);right:0;width:252px;background:#fff;border:1.5px solid rgba(30,25,15,.14);border-radius:14px;padding:14px 16px;box-shadow:0 12px 34px rgba(40,35,25,.16);z-index:60;animation:tipfloat 2.6s ease-in-out infinite}
-.lang-tip[hidden]{display:none}
-.lang-tip::before{content:"";position:absolute;top:-7px;right:26px;width:12px;height:12px;background:#fff;border-left:1.5px solid rgba(30,25,15,.14);border-top:1.5px solid rgba(30,25,15,.14);transform:rotate(45deg)}
-.lang-tip p{margin:0 0 10px;font-size:13.5px;line-height:1.45;color:#211E19;padding-right:16px}
-.lang-tip .go{display:block;width:100%;text-align:center;padding:9px 0;border-radius:10px;background:#3B7A5A;color:#fff;font-family:'Fredoka',sans-serif;font-weight:500;font-size:13.5px}
-.lang-tip .go:hover{background:#336b4f;color:#fff}
-.lang-tip .x{position:absolute;top:8px;right:8px;width:22px;height:22px;border:0;border-radius:7px;background:rgba(30,25,15,.06);color:#8C857A;font-size:11px;cursor:pointer;line-height:1}
-.lang-tip .x:hover{background:rgba(30,25,15,.12);color:#211E19}
-@keyframes tipfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
-/* Mobile : la bulle s'étale sous la nav (252px ne tiennent pas alignés au bouton),
-   et sa flèche est ramenée sous le sélecteur de langue par --tip-arrow (posé en JS). */
-@media (max-width:640px){
-.lang-tip{position:fixed;top:var(--tip-top,64px);bottom:auto;left:12px;right:12px;width:auto;animation:none}
-.lang-tip::before{right:auto;left:var(--tip-arrow,84%);transform:translateX(-50%) rotate(45deg)}
-.lang-tip p{padding-right:30px}
-.lang-tip .x{width:30px;height:30px;font-size:13px;top:9px;right:9px}
-}
-.fab{position:fixed;right:22px;bottom:22px;z-index:55;width:54px;height:54px;border-radius:50%;background:#3B7A5A;color:#fff;border:0;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(59,122,90,.38);transition:transform .15s ease,box-shadow .15s ease}
-.fab:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(59,122,90,.45)}
-.fbk-ov{position:fixed;inset:0;z-index:70;background:rgba(30,25,15,.38);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:18px}
-.fbk-ov[hidden]{display:none}
-.fbk{background:#fff;border-radius:20px;padding:26px 26px 22px;width:100%;max-width:400px;box-shadow:0 24px 60px rgba(30,25,15,.25)}
-.fbk h3{font-family:'Fredoka',sans-serif;font-weight:600;font-size:22px;letter-spacing:-.4px;margin:0 0 6px;color:#211E19}
-.fbk .sub{font-size:14px;color:#8C857A;margin:0 0 16px;line-height:1.5}
-.fbk textarea,.fbk input{width:100%;border:1.5px solid rgba(30,25,15,.14);border-radius:12px;padding:11px 13px;font-family:'Geist',system-ui,sans-serif;font-size:14px;color:#211E19;background:#fff;outline:none;resize:vertical}
-.fbk textarea:focus,.fbk input:focus{border-color:#3B7A5A}
-.fbk textarea{min-height:110px;margin-bottom:10px}
-.fbk input{margin-bottom:16px}
-.fbk .row{display:flex;gap:10px}
-.fbk .row .btn{flex:1;justify-content:center;border:1.5px solid transparent}
-.fbk .row .btn-g{border-color:rgba(30,25,15,.14)}
-.fbk .err{color:#B15A42;font-size:13px;margin:0 0 12px}
-.fbk .err[hidden]{display:none}
-.fbk [hidden]{display:none}
-
-
-.sec{padding:96px 76px}
-.chip{display:inline-flex;align-items:center;gap:8px;padding:9px 15px;border-radius:999px;background:#F0EDE7;color:#3f3a32;font-size:14px;font-weight:500}
-.chip .cd{width:8px;height:8px;border-radius:50%;background:#3B7A5A}
-.card{background:#fff;border:1px solid rgba(30,25,15,.07);border-radius:22px;box-shadow:0 1px 2px rgba(40,35,25,.03),0 12px 34px rgba(40,35,25,.05)}
-.halo{position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(59,122,90,.20),rgba(59,122,90,0) 70%);filter:blur(6px);z-index:0}
-.shot{overflow:hidden;box-shadow:0 24px 60px rgba(30,25,15,.16);flex:none;background:#EEEBE4;border:1px solid rgba(30,25,15,.06)}
-.shot img{display:block;width:100%;height:100%;object-fit:cover;object-position:top center}
-.feat{display:flex;align-items:center;gap:72px}
-.split{display:flex;flex-wrap:wrap;align-items:center;gap:40px}
-.split>*{flex:1 1 280px;min-width:0}
-.split>.wide{flex:1.3 1 340px}
-.pad-lg{padding:48px}.pad-md{padding:44px}
-.dl{justify-content:space-between;width:100%;flex-wrap:wrap;row-gap:2px}
-.featx.side{flex:0 0 300px}
-#os .fx.ac.gap12{flex-wrap:wrap;row-gap:12px}
-.featx{flex:1}
-.plat{display:flex;align-items:center;gap:12px;padding:16px 20px;border-radius:16px;background:#fff;border:1px solid rgba(30,25,15,.07);box-shadow:0 1px 2px rgba(40,35,25,.03),0 8px 20px rgba(40,35,25,.04)}
-.pico{width:38px;height:38px;border-radius:11px;background:#F0EDE7;display:grid;place-items:center;color:#3B7A5A;flex:none}
-.cmd{display:flex;align-items:center;gap:14px;background:#211E19;border-radius:14px;padding:15px 16px 15px 20px}
-.cmd .code{font-family:'JetBrains Mono',monospace;font-size:15px;color:#EDE9E1;font-weight:500;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cmd .code .pr{color:#5AA57E}
-.cbtn{width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.1);border:none;display:grid;place-items:center;cursor:pointer;flex:none;color:#EDE9E1}
-.cbtn:hover{background:rgba(255,255,255,.2)}
-.toast{position:absolute;top:-34px;right:0;background:#3B7A5A;color:#fff;font-size:12px;font-family:'JetBrains Mono';padding:5px 10px;border-radius:8px;opacity:0;transform:translateY(4px);transition:.18s;pointer-events:none}
-.toast.on{opacity:1;transform:translateY(0)}
-.priv{background:#211E19;border-radius:26px;color:#F3F0E9;padding:56px 56px}
-.privic{width:40px;height:40px;border-radius:12px;background:rgba(90,165,126,.18);color:#7ec49b;display:grid;place-items:center;flex:none}
-.footer{background:#211E19;color:#A69F91;padding:56px 60px 46px}
-.footer a{color:#C7C1B4}.footer a:hover{color:#fff}
-.osgrid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:36px;align-items:center}
-.term{background:#16140F;border-radius:16px;padding:22px;min-width:0;overflow-wrap:anywhere}
-.statpill{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;background:#F0EDE7;font-family:'JetBrains Mono';font-size:13px;font-weight:500;color:#3f3a32;white-space:nowrap;flex:none}
-.bento{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));grid-auto-rows:minmax(10px,auto);gap:22px}
-.s4{grid-column:span 4}.s3{grid-column:span 3}.s2{grid-column:span 2}
-.tri{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px}
-.bh1{min-height:290px}.bh2{min-height:230px}
-.bc{background:#fff;border:1px solid rgba(30,25,15,.07);border-radius:24px;box-shadow:0 1px 2px rgba(40,35,25,.03),0 12px 34px rgba(40,35,25,.05);overflow:hidden;position:relative}
-.hero2{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:40px;align-items:center}
-.stage{position:relative;display:flex;justify-content:center;align-items:center;min-height:660px}
-.pshot{width:300px;height:636px;border-radius:30px}
-.hhalo{width:460px;height:460px;left:50%;top:50%;transform:translate(-50%,-50%)}
-.cap{font-family:'JetBrains Mono';font-size:11px;letter-spacing:1.4px;color:#8C857A;font-weight:500}
-.mslider{position:relative}
-.mvp{overflow:hidden;touch-action:pan-y}
-.mtrack{display:flex;transform:translateX(0);transition:transform .55s cubic-bezier(.4,0,.1,1)}
-.mtrack>.mslide{flex:0 0 100%}
-.mtrack[data-i="1"]{transform:translateX(-100%)}
-.mtrack[data-i="2"]{transform:translateX(-200%)}
-.mslide{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:56px;align-items:center;padding:28px 12px}
-.mtitle{font-size:38px;margin-top:14px}
-.mctrl{display:flex;align-items:center;justify-content:center;gap:22px;margin-top:26px}
-.arw{width:46px;height:46px;border-radius:50%;background:#fff;border:1px solid rgba(30,25,15,.12);display:grid;place-items:center;cursor:pointer;color:#211E19;box-shadow:0 2px 8px rgba(40,35,25,.06);transition:.15s}
-.arw:hover{border-color:rgba(30,25,15,.28);transform:translateY(-1px)}
-.dots{display:flex;gap:9px;align-items:center}
-.dot{position:relative;width:9px;height:9px;border-radius:50%;background:#D9D3C8;border:none;cursor:pointer;padding:0;transition:.25s}
-.dot::after{content:"";position:absolute;inset:-12px}
-.dot.on{background:#3B7A5A;width:26px;border-radius:5px}
-.nav{transition:box-shadow .2s ease}
-/* Anti-FOUC : pré-masque le hero tant que GSAP n'a pas pris la main (.js retiré si pas de JS/GSAP ou mouvement réduit) */
-.js .hero2>div:first-child>*,.js .hero2 .shot,.js .hero2 .halo{opacity:0}
-@media (prefers-reduced-motion:reduce){.js .hero2>div:first-child>*,.js .hero2 .shot,.js .hero2 .halo{opacity:1}}
-/* Les liens de nav partent tôt : au-delà, logo + liens + trois boutons ne tiennent plus */
-@media (max-width:1040px){.navlinks{display:none}}
-@media (max-width:1000px){
-.sec{padding:72px 44px}
-.nav{padding:16px 32px}
-.hero2{grid-template-columns:minmax(0,1fr);gap:14px;text-align:center}
-.hero2 .fx{justify-content:center}
-.hero2 p{margin-left:auto;margin-right:auto}
-.stage{min-height:0;padding:14px 0 0}
-.bento{grid-template-columns:repeat(2,minmax(0,1fr))}
-.s4,.s3{grid-column:span 2}.s2{grid-column:span 1}
-.feat{flex-direction:column;gap:30px;align-items:stretch}
-.featx.side{flex:initial}
-.osgrid{grid-template-columns:minmax(0,1fr);gap:24px}
-.mslide{grid-template-columns:minmax(0,1fr);gap:20px;text-align:center}
-.mslide .fx{justify-content:center}
-.mslide p{margin-left:auto;margin-right:auto}
-}
-@media (max-width:760px){
-.priv{padding:40px 28px}
-.footer{padding:44px 28px 40px}
-.pad-lg,.pad-md{padding:32px 26px}
-.feat{gap:24px}
-}
-@media (max-width:620px){
-.bento{grid-template-columns:minmax(0,1fr);gap:16px}
-.s4>.fx.jb{flex-wrap:wrap;row-gap:10px}
-.s4,.s3,.s2{grid-column:auto}
-.bh1,.bh2{min-height:0}
-}
-@media (max-width:560px){
-.sec{padding:52px 20px}
-.nav{padding:12px 18px}
-.nav .btn-sm{min-width:0;padding:9px 13px}
-.nav .gh{display:none}
-.pshot{width:min(300px,78vw);height:auto;aspect-ratio:300/636}
-.hhalo{width:300px;height:300px}
-.h3{font-size:22px}
-.mtitle{font-size:30px}
-.pad-lg,.pad-md{padding:26px 20px}
-.priv{padding:32px 22px}
-.mslide{padding:20px 4px}
-.cmd{align-items:flex-start}
-.cmd .code{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;font-size:13px}
-.mctrl{gap:14px}
-.arw{width:42px;height:42px}
-.fbk{padding:22px 20px 18px}
-}
-@media (max-width:380px){
-.sec{padding:44px 15px}
-.stage .pshot{width:min(300px,72vw)}
-.hhalo{width:260px;height:260px}
-.priv{padding:28px 18px}
-.footer{padding:40px 18px 34px}
-.wordmark{font-size:20px}
-.mark{width:34px;height:34px;border-radius:10px}
-.btn{padding:12px 16px;font-size:15px}
-.chip{padding:8px 12px;font-size:13px}
-}
-</style>
+<link rel="stylesheet" href="/css/site.css">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -247,7 +52,9 @@ a{color:#3B7A5A;text-decoration:none}a:hover{color:#2F6349}
   "name": "Glance",
   "url": "https://glance-analytics.com",
   "inLanguage": "fr-FR",
-  "publisher": { "@id": "https://my-monkey.fr/#organization" }
+  "publisher": {
+    "@id": "https://my-monkey.fr/#organization"
+  }
 }
 </script>
 <script type="application/ld+json">
@@ -258,7 +65,7 @@ a{color:#3B7A5A;text-decoration:none}a:hover{color:#2F6349}
   "name": "Glance",
   "description": "Un client mobile et desktop clair pour vos analytics Umami et Plausible. Tous vos sites sur iOS, Android, macOS et Windows — open source, sans serveur tiers.",
   "url": "https://glance-analytics.com",
-  "image": "https://glance-analytics.com/img/desktop.png",
+  "image": "https://glance-analytics.com/img/og.jpg",
   "applicationCategory": "BusinessApplication",
   "operatingSystem": "iOS, Android, macOS, Windows",
   "inLanguage": "fr-FR",
@@ -267,11 +74,11 @@ a{color:#3B7A5A;text-decoration:none}a:hover{color:#2F6349}
   "downloadUrl": "https://github.com/my-monkeys/glance/releases/download/v1.13.0/Glance-1.13.0.dmg",
   "softwareHelp": "https://github.com/my-monkeys/glance",
   "screenshot": [
-    "https://glance-analytics.com/img/desktop.png",
-    "https://glance-analytics.com/img/mobile-home.png",
-    "https://glance-analytics.com/img/mobile-detail.png",
-    "https://glance-analytics.com/img/mobile-live.png",
-    "https://glance-analytics.com/img/widgets-android.png"
+    "https://glance-analytics.com/img/scenes/fr/2-sites.webp",
+    "https://glance-analytics.com/img/scenes/fr/3-evenements.webp",
+    "https://glance-analytics.com/img/scenes/fr/4-entonnoir.webp",
+    "https://glance-analytics.com/img/scenes/fr/5-retention.webp",
+    "https://glance-analytics.com/img/scenes/1-accueil.webp"
   ],
   "featureList": [
     "Client unifié Umami et Plausible",
@@ -282,14 +89,18 @@ a{color:#3B7A5A;text-decoration:none}a:hover{color:#2F6349}
     "Groupes de sites (périmètres de lecture)",
     "Widgets iOS et Android pour l'écran d'accueil",
     "Identifiants chiffrés dans le Keychain, accès en lecture seule",
-    "Sauvegarde chiffrée de bout en bout en option (Glance Sync)"
+    "Sauvegarde chiffrée de bout en bout en option (Glance Sync)",
+    "Tableaux sur vos événements : compteurs, taux, répartitions, entonnoirs (Umami)",
+    "Rétention J1, J7 et J30 calculée sur votre base, via une source de métriques"
   ],
   "offers": {
     "@type": "Offer",
     "price": "0",
     "priceCurrency": "EUR"
   },
-  "publisher": { "@id": "https://my-monkey.fr/#organization" }
+  "publisher": {
+    "@id": "https://my-monkey.fr/#organization"
+  }
 }
 </script>
 <script type="application/ld+json">
@@ -366,190 +177,153 @@ a{color:#3B7A5A;text-decoration:none}a:hover{color:#2F6349}
 </script>
 </head>
 <body>
-<div class="board"><div class="page">
-<nav class="nav"><div class="fx ac gap12"><span class="mark"><svg width="40" height="40" viewBox="0 0 72 72" fill="none"><path d="M14 48C21 48 24 30 31 30C37 30 37 41 43 41C49 41 50 24 55 24" stroke="#F7F5F1" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="55" cy="24" r="6" fill="#F7F5F1"/></svg></span><span class="wordmark">Glance</span></div><div class="navlinks"><a href="#feat">Fonctionnalités</a><a href="#desk">Bureau</a><a href="#priv">Confidentialité</a><a href="#faq">FAQ</a><a href="#os">Open source</a></div><div class="fx ac gap12"><span class="langw"><a class="btn btn-g btn-sm lang" href="/en/" data-lang="en" aria-label="Switch to English"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.7 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.7-3.8-9s1.3-6.4 3.8-9z"/></svg>EN</a><span class="lang-tip" hidden><p>This site is also available in English.</p><a class="go" href="/en/" data-lang="en">Switch to English</a><button class="x" aria-label="Dismiss">✕</button></span></span><a class="btn btn-g btn-sm gh" href="https://github.com/my-monkeys/glance"><svg width="17" height="17" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>Star</a><a class="btn btn-p btn-sm" href="#install">Installer</a></div></nav>
-
-<div class="sec" style="padding-top:64px;padding-bottom:56px"><div class="hero2">
-<div><div class="kick">Gratuit · Open source</div><h1 class="h1" style="margin-top:20px">Vos stats,<br><span class="ta">réunies.</span></h1><p class="lead" style="margin-top:22px;max-width:460px">Un client <strong style="font-weight:600;color:inherit">gratuit et open source</strong>, clair et lisible, par-dessus Umami et Plausible. Tous vos sites réunis, sur iOS, Android, macOS et Windows — sans jamais quitter votre instance.</p>
-<div class="fx ac gap12" style="margin-top:32px"><a class="btn btn-p" href="#install">Installer Glance</a><a class="btn btn-g" href="https://github.com/my-monkeys/glance"><svg width="17" height="17" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>GitHub</a></div>
-<div class="fx ac gap12" style="margin-top:30px;flex-wrap:wrap"><span class="mono t3" style="font-size:11px;letter-spacing:1.4px">FONCTIONNE AVEC</span><span class="chip"><span class="cd"></span>Umami</span><span class="chip"><span class="cd"></span>Plausible</span><span class="chip"><span class="cd" style="background:#B4ADA1"></span>Fathom</span></div></div>
-<div class="stage"><div class="halo hhalo"></div><div class="shot pshot" style="position:relative;z-index:2"><img src="img/mobile-home.webp" fetchpriority="high" alt="Glance sur iPhone — l'écran Mes sites avec le total de visiteurs et la liste des sites" width="600" height="1304"></div></div>
-</div></div>
-
-<div id="feat" class="sec" style="padding-top:24px;padding-bottom:64px">
-<div style="max-width:600px;margin-bottom:40px"><div class="kick">Fonctionnalités</div><h2 class="h2" style="margin-top:14px">Tout ce qu'il faut,<br>rien de superflu</h2></div>
-<div class="bento">
-<div class="bc s4 bh1" style="padding:26px 28px"><div class="fx ac jb"><div><div class="kick" style="font-size:11px">Courbes lissées</div><div class="h3" style="margin-top:8px">Visiteurs & pages vues</div></div><div class="fx ac gap16"><span class="fx ac gap8" style="font-size:13px"><span style="width:9px;height:9px;border-radius:50%;background:#3B7A5A"></span>Visiteurs</span><span class="fx ac gap8 t2" style="font-size:13px"><span style="width:9px;height:9px;border-radius:50%;background:#C7C2B8"></span>Pages vues</span></div></div>
-<svg viewBox="0 0 620 180" style="width:100%;height:180px;margin-top:14px;display:block"><defs><linearGradient id="bag" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3B7A5A" stop-opacity=".16"/><stop offset="1" stop-color="#3B7A5A" stop-opacity="0"/></linearGradient></defs><g stroke="rgba(30,25,15,.06)"><line x1="0" y1="20" x2="620" y2="20"/><line x1="0" y1="66" x2="620" y2="66"/><line x1="0" y1="112" x2="620" y2="112"/><line x1="0" y1="158" x2="620" y2="158"/></g><path d="M6,150 C70,148 100,146 140,138 C180,130 210,150 250,152 C300,155 320,40 360,38 C395,36 420,120 470,140 C520,160 570,150 614,150 L614,158 L6,158 Z" fill="url(#bag)"/><path d="M6,150 C70,148 100,146 140,138 C180,130 210,150 250,152 C300,155 320,40 360,38 C395,36 420,120 470,140 C520,160 570,150 614,150" fill="none" stroke="#3B7A5A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="614" cy="150" r="4.5" fill="#3B7A5A"/></svg></div>
-<div class="bc s2 bh1" style="padding:26px 24px"><div class="kick" style="font-size:11px">8 périodes</div><div class="h3" style="margin-top:8px">Toutes les fenêtres</div><div class="fx col gap8" style="margin-top:18px"><span class="chip" style="justify-content:center">Aujourd'hui</span><span class="chip" style="justify-content:center">24 heures</span><span class="chip" style="justify-content:center;background:#3B7A5A;color:#fff">7 jours</span><span class="chip" style="justify-content:center">30 jours · 12 mois</span><span class="chip" style="justify-content:center">Ce mois-ci · Cette année</span><span class="chip" style="justify-content:center">Sur mesure</span></div></div>
-<div class="bc s2 bh2" style="padding:26px 24px"><div class="kick" style="font-size:11px">Temps réel</div><div class="h3" style="margin-top:8px">En direct</div><div class="fx ac gap10" style="margin-top:18px"><span class="fred" style="font-size:52px;font-weight:600;color:#3B7A5A;line-height:1">0</span><div><div class="fx ac gap6"><span class="cd" style="width:8px;height:8px;border-radius:50%;background:#3B7A5A"></span><span class="mono" style="font-size:11px;letter-spacing:.5px">EN CE MOMENT</span></div><div class="t2" style="font-size:13px;margin-top:4px">sur tous vos sites</div></div></div></div>
-<div class="bc s2 bh2" style="padding:26px 24px"><div class="kick" style="font-size:11px">Événements</div><div class="h3" style="margin-top:8px">Une couleur chacun</div><div class="fx ac gap8" style="margin-top:16px;flex-wrap:wrap"><span class="statpill" style="background:rgba(59,122,90,.12);color:#3B7A5A">● play</span><span class="statpill" style="background:rgba(201,127,68,.14);color:#B06d32">● view</span><span class="statpill" style="background:rgba(74,111,165,.14);color:#4A6FA5">● loss</span><span class="statpill" style="background:rgba(154,91,166,.14);color:#8b4f96">● win</span></div><svg viewBox="0 0 300 46" style="width:100%;height:46px;margin-top:14px;display:block" fill="none" stroke-width="2.2" stroke-linecap="round"><path d="M4,38 C40,36 60,10 90,8 C130,5 150,34 190,36 C230,38 260,30 296,28" stroke="#3B7A5A"/><path d="M4,40 C40,39 70,30 110,30 C160,30 200,38 296,38" stroke="#C97F44"/><path d="M4,42 C60,41 120,36 200,40 C240,42 270,40 296,41" stroke="#4A6FA5"/></svg></div>
-<div class="bc s2 bh2" style="padding:26px 24px"><div class="kick" style="font-size:11px">Multi-fournisseurs</div><div class="h3" style="margin-top:8px">Plusieurs comptes</div><div class="fx col gap10" style="margin-top:16px"><div class="fx ac gap10"><span style="width:26px;height:26px;border-radius:8px;background:#E7EFE9;display:grid;place-items:center"><svg width="13" height="13" viewBox="0 0 40 40" fill="none"><path d="M6 27C13 27 16 15 22 15C27 15 28 21 34 15" stroke="#3B7A5A" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="34" cy="15" r="3" fill="#3B7A5A"/></svg></span><span class="fred fw6" style="font-size:14px;flex:1">Umami</span><span class="mono ta" style="font-size:11px">✓</span></div><div class="fx ac gap10"><span style="width:26px;height:26px;border-radius:8px;background:#E4EAF2;display:grid;place-items:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M3 18l4-6 4 3 5-9 5 6" stroke="#4A6FA5" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="fred fw6" style="font-size:14px;flex:1">Plausible</span><span class="mono ta" style="font-size:11px">✓</span></div><div class="fx ac gap10" style="opacity:.5"><span style="width:26px;height:26px;border-radius:8px;background:#F0EDE7;display:grid;place-items:center"><span class="mono t2" style="font-size:12px">F</span></span><span class="fred fw6" style="font-size:14px;flex:1">Fathom</span><span class="mono t3" style="font-size:10px">BIENTÔT</span></div></div></div>
-<div class="bc s3 bh2" style="padding:26px 24px"><div class="fx ac jb gap12"><div><div class="kick" style="font-size:11px">Prévision</div><div class="h3" style="margin-top:8px">La suite, en pointillé</div></div><span class="statpill" style="background:rgba(201,138,46,.14);color:#A8721F">● projeté</span></div><p class="body" style="margin-top:12px;font-size:14.5px">Sur une période en cours, la courbe se prolonge : où la journée, le mois ou l'année atterrissent au rythme observé.</p><svg viewBox="0 0 300 64" style="width:100%;height:64px;margin-top:2px;display:block" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4,52 C40,50 60,36 90,34 C120,32 142,42 168,38" stroke="#3B7A5A"/><path d="M168,38 C200,34 220,20 248,14 C268,10 282,8 296,6" stroke="#C98A2E" stroke-dasharray="5 6"/><circle cx="168" cy="38" r="3.6" fill="#3B7A5A"/><circle cx="296" cy="6" r="3.6" fill="#C98A2E"/></svg></div>
-<div class="bc s3 bh2" style="padding:26px 24px"><div class="kick" style="font-size:11px">Navigation interne</div><div class="h3" style="margin-top:8px">Entre vos sites</div><p class="body" style="margin-top:12px;font-size:14.5px">Les visiteurs que vos sites s'envoient les uns aux autres, recoupés tout seuls : qui envoie, qui reçoit, combien.</p><div class="fx col gap10" style="margin-top:14px"><div class="fx ac gap10"><span class="mono t2" style="font-size:12.5px">blog</span><svg width="26" height="8" viewBox="0 0 26 8" fill="none"><path d="M0 4h21M17 1l4 3-4 3" stroke="#3B7A5A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="mono" style="font-size:12.5px;flex:1">boutique</span><span class="statpill">128</span></div><div class="fx ac gap10"><span class="mono t2" style="font-size:12.5px">docs</span><svg width="26" height="8" viewBox="0 0 26 8" fill="none"><path d="M0 4h21M17 1l4 3-4 3" stroke="#3B7A5A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="mono" style="font-size:12.5px;flex:1">app</span><span class="statpill">46</span></div></div></div>
-</div>
-</div>
-
-<div id="desk" class="sec" style="padding-top:24px;padding-bottom:40px;background:#F1EFE9"><div class="feat"><div class="featx side"><div class="kick">macOS & Windows</div><h2 class="h2" style="margin-top:16px">Sur votre<br>bureau aussi</h2><p class="body" style="margin-top:16px">Vue master-détail native : la liste de vos sites à gauche, tout le détail à droite. La même app, en grand — en thème clair ou sombre.</p></div><div class="featx"><div class="shot" style="width:100%;aspect-ratio:16/10;border-radius:14px"><img src="img/desktop.png" alt="Glance sur macOS — la liste des sites à gauche, la vue d'ensemble avec graphique à droite" width="1440" height="990" loading="lazy"></div></div></div></div>
-
-<div class="sec" style="padding-top:56px;padding-bottom:76px"><div style="text-align:center"><div class="kick">Mobile & widgets</div><h2 class="h2" style="margin-top:14px">Dans votre poche,<br>sur votre écran d'accueil</h2></div>
-<div class="mslider" style="margin-top:34px"><div class="mvp"><div class="mtrack" data-i="0">
-<div class="mslide"><div class="fx jc"><div class="shot pshot"><img src="img/mobile-detail.webp" alt="Glance — le détail d'un site : visiteurs uniques, graphique, visites, durée et rebond" width="600" height="1304" loading="lazy"></div></div><div><div class="kick">Détail par site</div><h3 class="h2 mtitle">Chaque site,<br>dans le détail</h3><p class="body" style="margin-top:18px;max-width:420px">Des courbes lissées pour vos visiteurs et pages vues, sur huit périodes. Top pages, sources, pays, et vos événements personnalisés — une couleur chacun.</p><div class="fx ac gap12" style="margin-top:24px;flex-wrap:wrap"><span class="chip">Courbes lissées</span><span class="chip">8 périodes</span><span class="chip">Événements</span></div></div></div>
-<div class="mslide"><div class="fx jc"><div class="shot pshot"><img src="img/mobile-live.webp" alt="Glance — le temps réel : les visiteurs en direct sur l'ensemble de vos sites" width="600" height="1304" loading="lazy"></div></div><div><div class="kick">Temps réel</div><h3 class="h2 mtitle">Le trafic,<br>en direct</h3><p class="body" style="margin-top:18px;max-width:420px">Voyez qui est là, maintenant, sur chacun de vos sites. Un compteur global, le détail par site, et un filtre « actifs seulement » — le tout sans jamais rafraîchir.</p><div class="fx ac gap12" style="margin-top:24px;flex-wrap:wrap"><span class="chip">Compteur global</span><span class="chip">Détail par site</span></div></div></div>
-<div class="mslide"><div class="fx jc"><div class="shot pshot"><img src="img/widgets-android.webp" alt="Glance — les widgets sur l'écran d'accueil Android : l'aperçu de tous les sites et un widget par site" width="600" height="1333" loading="lazy"></div></div><div><div class="kick">Widgets iOS &amp; Android</div><h3 class="h2 mtitle">Sur votre<br>écran d'accueil</h3><p class="body" style="margin-top:18px;max-width:420px">Un widget « aperçu » pour l'ensemble de vos sites, et un widget « par site » configurable. Vos chiffres d'un coup d'œil, sans même ouvrir l'application.</p><div class="fx ac gap12" style="margin-top:24px;flex-wrap:wrap"><span class="chip">Aperçu tous sites</span><span class="chip">Par site configurable</span></div></div></div>
-</div></div>
-<div class="mctrl"><button class="arw" data-prev aria-label="Précédent"><svg width="10" height="16" viewBox="0 0 10 16" fill="none"><path d="M8 1L2 8l6 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="dots"><button class="dot on" aria-label="Diapositive 1"></button><button class="dot" aria-label="Diapositive 2"></button><button class="dot" aria-label="Diapositive 3"></button></div><button class="arw" data-next aria-label="Suivant"><svg width="10" height="16" viewBox="0 0 10 16" fill="none"><path d="M2 1l6 7-6 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
-</div>
-
-<div id="setup" class="sec" style="padding-top:8px;padding-bottom:60px"><div style="max-width:620px;margin-bottom:34px"><div class="kick">Organisation &amp; sauvegarde</div><h2 class="h2" style="margin-top:14px">Votre configuration<br>vous suit</h2></div>
-<div class="tri">
-<div class="card" style="padding:26px 24px"><div class="fx ac jb gap12"><span class="privic" style="background:rgba(59,122,90,.14);color:#3B7A5A"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></svg></span></div><div class="h3" style="margin-top:16px;font-size:21px">Groupes de sites</div><p class="body" style="margin-top:10px;font-size:14.5px">Un périmètre de lecture : les totaux et la courbe ne comptent que les sites du groupe. Un basculement, et vous passez d'un client à l'autre.</p></div>
-<div class="card" style="padding:26px 24px"><div class="fx ac jb gap12"><span class="privic" style="background:rgba(59,122,90,.14);color:#3B7A5A"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 01-13.7 5.6L4 15.4"/><path d="M4 12a8 8 0 0113.7-5.6L20 8.6"/><path d="M4 20v-4.6h4.6M20 4v4.6h-4.6"/></svg></span><span class="mono" style="font-size:10px;letter-spacing:1.2px;color:#8C857A;border:1px solid rgba(30,25,15,.14);border-radius:6px;padding:3px 7px">OPTION</span></div><div class="h3" style="margin-top:16px;font-size:21px">Glance Sync</div><p class="body" style="margin-top:10px;font-size:14.5px">Vos comptes et vos groupes, sauvegardés et retrouvés sur chaque appareil. Chiffrés sur l'appareil <em>avant</em> l'envoi : le serveur ne peut pas les lire. Achat unique, pas d'abonnement.</p></div>
-<div class="card" style="padding:26px 24px"><div class="fx ac jb gap12"><span class="privic" style="background:rgba(59,122,90,.14);color:#3B7A5A"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.4"/><rect x="14" y="3" width="7" height="7" rx="1.4"/><rect x="3" y="14" width="7" height="7" rx="1.4"/><path d="M14 14h3v3h-3zM20 14h1M14 20h3M20 18v3"/></svg></span></div><div class="h3" style="margin-top:16px;font-size:21px">Transfert par QR</div><p class="body" style="margin-top:10px;font-size:14.5px">Nouvel appareil ? Affichez un QR chiffré, scannez-le depuis l'autre : comptes, identifiants et groupes traversent. Gratuit, sans passer par le réseau.</p></div>
-</div></div>
-
-<div id="priv" class="sec" style="padding-top:24px;padding-bottom:32px"><div class="card pad-lg" style="background:rgba(59,122,90,.08);border-color:rgba(59,122,90,.16)"><div class="split"><div><div class="kick">Confidentialité</div><h2 class="h2" style="margin-top:14px">Vos données ne<br>bougent pas d'ici</h2><p class="body" style="margin-top:16px;max-width:400px;color:#5c564d">Vos identifiants restent chiffrés dans le trousseau de votre appareil. Glance parle directement à votre instance, en lecture seule — aucun serveur tiers, aucun tracking. Seule exception, si vous l'activez : Glance Sync chiffre votre configuration sur l'appareil avant l'envoi, le serveur ne peut pas la lire.</p></div>
-<div class="fx col gap12"><div class="fx ac gap12 card" style="padding:16px 18px;box-shadow:none"><span class="privic" style="background:rgba(59,122,90,.14);color:#3B7A5A"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="4" y="10" width="16" height="11" rx="2.5" stroke="currentColor" stroke-width="1.9"/><path d="M8 10V7a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg></span><span class="fred fw6" style="font-size:15px">Chiffré dans le Keychain</span></div><div class="fx ac gap12 card" style="padding:16px 18px;box-shadow:none"><span class="privic" style="background:rgba(59,122,90,.14);color:#3B7A5A"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6l7-3z" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></svg></span><span class="fred fw6" style="font-size:15px">Zéro serveur tiers</span></div><div class="fx ac gap12 card" style="padding:16px 18px;box-shadow:none"><span class="privic" style="background:rgba(59,122,90,.14);color:#3B7A5A"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.6" stroke="currentColor" stroke-width="1.9"/></svg></span><span class="fred fw6" style="font-size:15px">Accès en lecture seule</span></div></div></div></div></div>
-
-<div id="os" class="sec" style="padding-top:32px;padding-bottom:70px"><div class="priv"><div class="osgrid">
-<div><div class="kick" style="color:#7ec49b">Open source</div><h2 class="h2" style="color:#F3F0E9;margin-top:14px">Fait au grand jour</h2><p style="margin-top:16px;font-size:17px;line-height:1.6;color:#A69F91;max-width:420px">Glance est open source. Lisez le code, ouvrez une issue, hébergez-le vous-même. Un projet du collectif My-Monkey.</p>
-<div class="fx ac gap12" style="margin-top:26px"><a class="btn" style="background:#5AA57E;color:#0E1A12" href="https://github.com/my-monkeys/glance"><svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>Star sur GitHub</a><a class="statpill" style="background:rgba(255,255,255,.08);color:#C7C1B4" href="https://github.com/my-monkeys/glance/blob/main/LICENSE">Licence MIT</a></div></div>
-<div class="term"><div class="fx ac gap8" style="padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,.08)"><span style="width:11px;height:11px;border-radius:50%;background:#FF5F57"></span><span style="width:11px;height:11px;border-radius:50%;background:#FEBC2E"></span><span style="width:11px;height:11px;border-radius:50%;background:#28C840"></span><span class="mono" style="color:#6E685C;font-size:12px;margin-left:8px">glance ~ main</span></div><div class="mono" style="font-size:13px;line-height:1.9;margin-top:12px;color:#EDE9E1"><div><span style="color:#5AA57E">$</span> git clone github.com/my-monkeys/glance</div><div><span style="color:#5AA57E">$</span> flutter run</div><div style="color:#6E685C">→ compiling · connecting Umami…</div><div style="color:#7ec49b">✓ 6 sites · 562 visiteurs (7j)</div></div></div>
-</div></div></div>
-
-<div id="install" class="sec" style="padding-top:24px;padding-bottom:80px"><div class="card pad-md"><div class="split"><div class="wide"><div class="kick">Installer</div><h2 class="h2" style="margin-top:14px">Prêt en une minute</h2><p class="body" style="margin-top:14px;max-width:400px">Sur macOS, la façon la plus rapide, c'est Homebrew :</p><div style="position:relative;margin-top:18px"><div class="cmd"><span class="code"><span class="pr">$</span> brew install --cask my-monkeys/tap/glance</span><button class="cbtn" data-copy aria-label="Copier la commande"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 012-2h10"/></svg></button><span class="toast">Copié ✓</span></div></div></div>
-<div class="fx col gap12"><a class="btn btn-d dl" href="https://github.com/my-monkeys/glance/releases/download/v1.13.0/Glance-1.13.0.dmg"><span class="fx ac gap10"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M17 12.5c0-2 1.1-3.3 1.6-3.7-.9-1.3-2.3-1.5-2.8-1.5-1.2-.1-2.3.7-2.9.7-.6 0-1.5-.7-2.5-.7-1.3 0-2.5.8-3.1 1.9-1.4 2.3-.4 5.8.9 7.7.6.9 1.4 2 2.4 1.9.9 0 1.3-.6 2.4-.6s1.4.6 2.4.6c1 0 1.6-.9 2.2-1.8.5-.7.8-1.5 1-2.1-1.2-.5-2-1.6-2-2.6zM15 5.9c.5-.6.9-1.5.8-2.4-.8 0-1.7.5-2.2 1.2-.5.5-.9 1.4-.8 2.3.9 0 1.7-.5 2.2-1.1z"/></svg>Télécharger (macOS)</span><span class="mono meta">.dmg · Universel</span></a><a class="btn btn-p dl" href="https://github.com/my-monkeys/glance/releases/download/windows-v1.13.0/glance-windows-x64.zip"><span class="fx ac gap10"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><rect x="1" y="1" width="10" height="10" rx="1"/><rect x="13" y="1" width="10" height="10" rx="1"/><rect x="1" y="13" width="10" height="10" rx="1"/><rect x="13" y="13" width="10" height="10" rx="1"/></svg>Télécharger (Windows)</span><span class="mono meta">.zip · x64</span></a><a class="btn btn-g dl" href="https://play.google.com/store/apps/details?id=fr.mymonkey.glance"><span class="fx ac gap10"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18a1 1 0 001 1h1v3.5a1.5 1.5 0 003 0V19h2v3.5a1.5 1.5 0 003 0V19h1a1 1 0 001-1V9H6v9zM3.5 9A1.5 1.5 0 002 10.5v5a1.5 1.5 0 003 0v-5A1.5 1.5 0 003.5 9zm17 0a1.5 1.5 0 00-1.5 1.5v5a1.5 1.5 0 003 0v-5A1.5 1.5 0 0020.5 9zM15.6 3.9l1.3-1.3a.4.4 0 10-.6-.6l-1.5 1.5a5.6 5.6 0 00-4.6 0L8.7 2a.4.4 0 10-.6.6l1.3 1.3A5 5 0 006 8h12a5 5 0 00-2.4-4.1zM9.5 6.2a.8.8 0 110-1.6.8.8 0 010 1.6zm5 0a.8.8 0 110-1.6.8.8 0 010 1.6z"/></svg>Télécharger (Android)</span><span class="mono meta">Play Store</span></a><a class="btn btn-d dl" href="https://apps.apple.com/app/glance-analytics/id6789938289"><span class="fx ac gap10"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M17 12.5c0-2 1.1-3.3 1.6-3.7-.9-1.3-2.3-1.5-2.8-1.5-1.2-.1-2.3.7-2.9.7-.6 0-1.5-.7-2.5-.7-1.3 0-2.5.8-3.1 1.9-1.4 2.3-.4 5.8.9 7.7.6.9 1.4 2 2.4 1.9.9 0 1.3-.6 2.4-.6s1.4.6 2.4.6c1 0 1.6-.9 2.2-1.8.5-.7.8-1.5 1-2.1-1.2-.5-2-1.6-2-2.6zM15 5.9c.5-.6.9-1.5.8-2.4-.8 0-1.7.5-2.2 1.2-.5.5-.9 1.4-.8 2.3.9 0 1.7-.5 2.2-1.1z"/></svg>Télécharger (iOS)</span><span class="mono meta">App Store</span></a></div></div></div></div>
-
-<div id="faq" class="sec" style="padding-top:24px;padding-bottom:80px"><div style="max-width:760px;margin:0 auto">
-<div style="text-align:center;margin-bottom:36px"><div class="kick">FAQ</div><h2 class="h2" style="margin-top:14px">Questions fréquentes</h2></div>
-<div class="fx col gap12">
-<div class="card" style="padding:24px 26px"><h3 class="h3" style="font-size:18px">Qu'est-ce que Glance ?</h3><p class="body" style="margin-top:10px;color:#5c564d">Glance est un client mobile et desktop, gratuit et open source, qui affiche vos statistiques Umami et Plausible. Il réunit tous vos sites dans une seule application claire — courbes lissées, temps réel et widgets — sans jamais quitter votre instance analytics.</p></div>
-<div class="card" style="padding:24px 26px"><h3 class="h3" style="font-size:18px">Glance est-il gratuit ?</h3><p class="body" style="margin-top:10px;color:#5c564d">Oui : l'application est gratuite et open source (licence MIT), sans compte à créer, sans abonnement et sans limite de sites. Une seule chose est payante, et elle est facultative — Glance Sync, la sauvegarde chiffrée de votre configuration — en achat unique.</p></div>
-<div class="card" style="padding:24px 26px"><h3 class="h3" style="font-size:18px">Quels outils analytics sont supportés ?</h3><p class="body" style="margin-top:10px;color:#5c564d">Glance se connecte à Umami et Plausible aujourd'hui, y compris auto-hébergés. Le support de Fathom est prévu. Vous pouvez suivre plusieurs comptes et fournisseurs en même temps, réunis dans une vue commune.</p></div>
-<div class="card" style="padding:24px 26px"><h3 class="h3" style="font-size:18px">Sur quelles plateformes Glance est-il disponible ?</h3><p class="body" style="margin-top:10px;color:#5c564d">Glance est disponible sur iOS (App Store), Android (Play Store), macOS (Homebrew ou DMG) et Windows. L'application est développée en Flutter, donc réellement multiplateforme.</p></div>
-<div class="card" style="padding:24px 26px"><h3 class="h3" style="font-size:18px">Mes données sont-elles envoyées à un tiers ?</h3><p class="body" style="margin-top:10px;color:#5c564d">Non. Glance parle directement à votre instance Umami ou Plausible, en lecture seule, sans serveur intermédiaire ni tracking. Vos identifiants restent chiffrés dans le trousseau (Keychain) de votre appareil.</p></div>
-<div class="card" style="padding:24px 26px"><h3 class="h3" style="font-size:18px">Qu'est-ce que Glance Sync ?</h3><p class="body" style="margin-top:10px;color:#5c564d">Une option payante (achat unique) qui sauvegarde vos comptes et vos groupes et les retrouve sur vos autres appareils. Votre configuration est chiffrée sur l'appareil avant l'envoi : le serveur ne stocke qu'un bloc illisible. Sans elle, Glance fonctionne entièrement en local, et le transfert par QR reste gratuit.</p></div>
-<div class="card" style="padding:24px 26px"><h3 class="h3" style="font-size:18px">Puis-je séparer mes sites par client ou par projet ?</h3><p class="body" style="margin-top:10px;color:#5c564d">Oui, avec les groupes. Un groupe est un périmètre de lecture : les totaux, la courbe et le direct ne comptent que ses sites. On bascule d'un groupe à l'autre depuis l'accueil.</p></div>
-<div class="card" style="padding:24px 26px"><h3 class="h3" style="font-size:18px">Glance fonctionne-t-il avec une instance auto-hébergée ?</h3><p class="body" style="margin-top:10px;color:#5c564d">Oui. Que votre instance Umami ou Plausible soit auto-hébergée ou cloud, Glance s'y connecte directement avec votre URL et votre clé d'API. Aucune configuration côté serveur n'est nécessaire.</p></div>
-</div>
-</div></div>
-
-<div class="footer"><div class="fx jb" style="flex-wrap:wrap;gap:32px"><div style="max-width:320px"><div class="fx ac gap12"><span class="mark"><svg width="40" height="40" viewBox="0 0 72 72" fill="none"><path d="M14 48C21 48 24 30 31 30C37 30 37 41 43 41C49 41 50 24 55 24" stroke="#F7F5F1" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="55" cy="24" r="6" fill="#F7F5F1"/></svg></span><span class="wordmark" style="color:#F3F0E9">Glance</span></div><p style="margin-top:14px;font-size:14px;line-height:1.6;color:#8b8478">Vos statistiques web, mobile et desktop — d'un clin d'œil. Un projet open source du collectif My-Monkey.</p></div>
-<div class="fx gap24" style="flex-wrap:wrap"><div class="fx col gap10"><div class="mono" style="font-size:11px;letter-spacing:1.2px;color:#6E685C">PRODUIT</div><a href="#feat" style="font-size:14px">Fonctionnalités</a><a href="#install" style="font-size:14px">Installer</a><a href="#desk" style="font-size:14px">Bureau</a></div><div class="fx col gap10"><div class="mono" style="font-size:11px;letter-spacing:1.2px;color:#6E685C">PROJET</div><a href="https://github.com/my-monkeys/glance" style="font-size:14px">GitHub</a><a href="#os" style="font-size:14px">Contribuer</a><a href="privacy.html" style="font-size:14px">Confidentialité</a><a href="/docs/source-de-metriques.html" style="font-size:14px">Source de métriques</a><a href="/en/" data-lang="en" style="font-size:14px">English</a></div></div></div>
-<div class="fx jb" style="margin-top:40px;padding-top:24px;border-top:1px solid rgba(255,255,255,.09);flex-wrap:wrap;gap:12px"><div class="mono" style="font-size:12px;color:#6E685C">© 2026 My-Monkey · Tous droits réservés</div><div class="mono" style="font-size:12px;color:#6E685C">Umami · Plausible · Fathom bientôt</div></div></div>
-</div></div>
-<script src="js/gsap.min.js"></script>
-<script src="js/ScrollTrigger.min.js"></script>
-<script src="js/anim.js"></script>
-<script>
-(function () {
-  // Carrousel mobile
-  var track = document.querySelector('.mtrack');
-  var dots = Array.prototype.slice.call(document.querySelectorAll('.dot'));
-  var n = document.querySelectorAll('.mslide').length;
-  var i = 0;
-  function render() {
-    track.setAttribute('data-i', String(i));
-    dots.forEach(function (d, k) { d.classList.toggle('on', k === i); });
-  }
-  function go(k) { i = ((k % n) + n) % n; render(); }
-  var prev = document.querySelector('[data-prev]');
-  var next = document.querySelector('[data-next]');
-  if (prev) prev.addEventListener('click', function () { go(i - 1); });
-  if (next) next.addEventListener('click', function () { go(i + 1); });
-  dots.forEach(function (d, k) { d.addEventListener('click', function () { go(k); }); });
-
-  // Balayage tactile — le geste vertical reste au scroll de la page
-  var vp = document.querySelector('.mvp');
-  var x0 = null, y0 = null, axis = null;
-  if (vp) {
-    vp.addEventListener('touchstart', function (e) {
-      x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; axis = null;
-    }, { passive: true });
-    vp.addEventListener('touchmove', function (e) {
-      if (x0 === null || axis) return;
-      var dx = Math.abs(e.touches[0].clientX - x0), dy = Math.abs(e.touches[0].clientY - y0);
-      if (dx > 8 || dy > 8) axis = dx > dy ? 'x' : 'y';
-    }, { passive: true });
-    vp.addEventListener('touchend', function (e) {
-      if (axis === 'x') {
-        var dx = e.changedTouches[0].clientX - x0;
-        if (Math.abs(dx) > 40) go(i + (dx < 0 ? 1 : -1));
-      }
-      x0 = null; axis = null;
-    }, { passive: true });
-  }
-
-  // Copie de la commande brew
-  var copyBtn = document.querySelector('[data-copy]');
-  var toast = document.querySelector('.toast');
-  var t;
-  if (copyBtn) copyBtn.addEventListener('click', function () {
-    try { navigator.clipboard && navigator.clipboard.writeText('brew install --cask my-monkeys/tap/glance'); } catch (e) {}
-    if (toast) {
-      toast.classList.add('on');
-      clearTimeout(t);
-      t = setTimeout(function () { toast.classList.remove('on'); }, 1700);
-    }
-  });
-})();
-</script>
+<!-- Ajouter une langue (de, es, pt, zh) : copier ce fichier dans <code>/index.html, traduire les textes,
+     puis changer <html lang>, <title>, la description, canonical, og:locale, og:url, "inLanguage" et les liens internes
+     (/<code>/…), ajouter la langue aux hreflang de toutes les pages et au sitemap, et rendre les scènes avec
+     `python3 -I store/visuels/rendre.py --langue <code> --site` (écrit img/scenes/<code>/). -->
+<header class="haut">
+  <div class="wrap">
+    <a class="marque" href="/"><img src="/favicon.svg?v=2" width="38" height="38" alt="">Glance</a>
+    <nav><a href="/docs/source-de-metriques.html">Documentation</a><a href="/privacy.html">Confidentialité</a><a href="https://github.com/my-monkeys/glance">GitHub</a><a class="langue" href="/en/" data-lang="en" hreflang="en" lang="en" aria-label="Switch to English">English</a></nav>
+  </div>
+</header>
+<main>
+<section class="hero">
+  <svg class="courbe" viewBox="0 0 72 72" aria-hidden="true"><path d="M14 48C21 48 24 30 31 30C37 30 37 41 43 41C49 41 50 24 55 24"/><circle cx="55" cy="24" r="1.7"/></svg>
+  <div class="wrap">
+    <div class="texte">
+      <p class="surtitre" data-entree>Gratuit · open source</p>
+      <h1 data-entree>Vos stats web,<br>d’un coup d’œil.</h1>
+      <p class="accroche" data-entree>Glance est le client mobile et bureau d’Umami et de Plausible. Tous vos sites d’un coup d’œil, et de vrais tableaux pour comprendre ce qui s’y passe.</p>
+      <div class="badges" data-entree>
+      <a class="badge premier" href="https://apps.apple.com/app/glance-analytics/id6789938289"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 12.5c0-2 1.1-3.3 1.6-3.7-.9-1.3-2.3-1.5-2.8-1.5-1.2-.1-2.3.7-2.9.7-.6 0-1.5-.7-2.5-.7-1.3 0-2.5.8-3.1 1.9-1.4 2.3-.4 5.8.9 7.7.6.9 1.4 2 2.4 1.9.9 0 1.3-.6 2.4-.6s1.4.6 2.4.6c1 0 1.6-.9 2.2-1.8.5-.7.8-1.5 1-2.1-1.2-.5-2-1.6-2-2.6zM15 5.9c.5-.6.9-1.5.8-2.4-.8 0-1.7.5-2.2 1.2-.5.5-.9 1.4-.8 2.3.9 0 1.7-.5 2.2-1.1z"/></svg><span><small>iPhone et iPad</small><b>App Store</b></span></a>
+      <a class="badge" href="https://play.google.com/store/apps/details?id=fr.mymonkey.glance"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 2.8v18.4c0 .5.5.8.9.5L20 12.7c.4-.3.4-.9 0-1.2L5.4 2.3c-.4-.3-.9 0-.9.5z"/></svg><span><small>Android</small><b>Google Play</b></span></a>
+      <a class="badge" href="https://github.com/my-monkeys/glance/releases/download/v1.13.0/Glance-1.13.0.dmg"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 12.5c0-2 1.1-3.3 1.6-3.7-.9-1.3-2.3-1.5-2.8-1.5-1.2-.1-2.3.7-2.9.7-.6 0-1.5-.7-2.5-.7-1.3 0-2.5.8-3.1 1.9-1.4 2.3-.4 5.8.9 7.7.6.9 1.4 2 2.4 1.9.9 0 1.3-.6 2.4-.6s1.4.6 2.4.6c1 0 1.6-.9 2.2-1.8.5-.7.8-1.5 1-2.1-1.2-.5-2-1.6-2-2.6zM15 5.9c.5-.6.9-1.5.8-2.4-.8 0-1.7.5-2.2 1.2-.5.5-.9 1.4-.8 2.3.9 0 1.7-.5 2.2-1.1z"/></svg><span><small>macOS · .dmg</small><b>Mac</b></span></a>
+      <a class="badge" href="https://github.com/my-monkeys/glance/releases/download/windows-v1.13.0/glance-windows-x64.zip"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="2" width="9.3" height="9.3"/><rect x="12.7" y="2" width="9.3" height="9.3"/><rect x="2" y="12.7" width="9.3" height="9.3"/><rect x="12.7" y="12.7" width="9.3" height="9.3"/></svg><span><small>Windows · .zip</small><b>Windows</b></span></a>
+      </div>
+    </div>
+    <div class="telephone" data-entree><img src="/img/scenes/1-accueil.webp" width="1320" height="1900" alt="L’accueil de Glance sur iPhone : la liste des sites, le total de visiteurs et la courbe" fetchpriority="high"></div>
+  </div>
+</section>
+<section class="idee etroit" id="sites">
+  <div class="wrap">
+    <div class="texte">
+      <p class="surtitre">Croiser ses sites</p>
+      <h2>Croisez vos sites</h2>
+      <p>Plusieurs sites côte à côte : une courbe par site, plus le total. De 1 à 6 lignes, d’un ou de plusieurs comptes Umami.</p><p>Ajoutez un filtre « venus de » ou « sauf venus de » un domaine pour voir ce que vos sites s’envoient entre eux.</p>
+      
+    </div>
+    <figure class="scene"><img src="/img/scenes/fr/2-sites.webp" width="1320" height="1832" alt="Le tableau « Sites » de Glance : quatre lignes de sites côte à côte, une courbe par ligne, et le filtre « venus de »" loading="lazy" decoding="async"></figure>
+  </div>
+</section>
+<section class="idee inverse" id="evenements">
+  <div class="wrap">
+    <div class="texte">
+      <p class="surtitre">Événements</p>
+      <h2>Suivez chaque événement</h2>
+      <p>Une courbe et une couleur par événement, filtrables par propriété : plan = pro, montant ≥ 20.</p><p>Comptez, calculez un taux, et regardez la répartition des valeurs d’une propriété et son évolution dans le temps.</p>
+      
+    </div>
+    <figure class="scene"><img src="/img/scenes/fr/3-evenements.webp" width="1320" height="1546" alt="Les événements dans Glance : une courbe et une couleur par événement, un compteur filtré par propriété, une répartition" loading="lazy" decoding="async"></figure>
+  </div>
+</section>
+<section class="idee" id="entonnoir">
+  <div class="wrap">
+    <div class="texte">
+      <p class="surtitre">Entonnoir</p>
+      <h2>Voyez où ils décrochent</h2>
+      <p>De 2 à 8 étapes, avec le nombre de visiteurs et le taux de perte à chaque passage.</p><p>Vous choisissez le délai entre deux étapes. Propre à Umami.</p>
+      
+    </div>
+    <figure class="scene"><img src="/img/scenes/fr/4-entonnoir.webp" width="1320" height="1397" alt="Un entonnoir en quatre étapes dans Glance, avec le nombre de visiteurs et la perte à chaque passage" loading="lazy" decoding="async"></figure>
+  </div>
+</section>
+<section class="idee inverse etroit" id="retention">
+  <div class="wrap">
+    <div class="texte">
+      <p class="surtitre">Rétention</p>
+      <h2>Mesurez la rétention</h2>
+      <p>Branchez une source de métriques : une petite API sur votre site, protégée par un jeton.</p><p>Glance affiche alors la rétention J1, J7 et J30, les comptes créés, tout indicateur que votre site expose. Le calcul reste sur votre base.</p>
+      <a class="lien" href="/docs/source-de-metriques.html">Lire la documentation de la source de métriques</a>
+    </div>
+    <figure class="scene"><img src="/img/scenes/fr/5-retention.webp" width="1320" height="1885" alt="Trois cartes de rétention J1, J7 et J30 et l’écran « Source de métriques » de Glance" loading="lazy" decoding="async"></figure>
+  </div>
+</section>
+<section class="idee prevision" id="prevision">
+  <div class="wrap">
+    <div class="texte">
+      <p class="surtitre">Prévision</p>
+      <h2>Anticipez la fin du mois</h2>
+      <p>Sur « ce mois-ci » et « cette année », la courbe se prolonge en pointillé orange, avec le total attendu.</p><p>La prévision part du niveau des 7 derniers jours et du rythme de la semaine.</p>
+      
+    </div>
+    <figure class="scene"><img src="/img/scenes/fr/6-prevision.webp" width="1320" height="1208" alt="La courbe des visiteurs de Glance prolongée par une prévision en pointillé orange, avec le total projeté du mois" loading="lazy" decoding="async"></figure>
+  </div>
+</section>
+<section class="idee inverse etroit" id="direct">
+  <div class="wrap">
+    <div class="texte">
+      <p class="surtitre">En direct et widgets</p>
+      <h2>En direct, jusque sur l’écran d’accueil</h2>
+      <p>Les visiteurs présents maintenant sur chaque site, triés par activité.</p><p>Des widgets iOS et Android pour vos totaux ou pour un site précis.</p>
+      
+    </div>
+    <figure class="scene"><img src="/img/scenes/fr/7-direct.webp" width="1320" height="2301" alt="Les visiteurs en direct dans Glance, et les widgets iOS et Android sur l’écran d’accueil" loading="lazy" decoding="async"></figure>
+  </div>
+</section>
+<section class="idee" id="appareils">
+  <div class="wrap">
+    <div class="texte">
+      <p class="surtitre">Multi-appareils</p>
+      <h2>Sur tous vos appareils</h2>
+      <p>iPhone, iPad, Android, Mac et Windows, en clair comme en sombre.</p><p>Un QR code chiffré pour reprendre votre configuration en un scan, ou une synchronisation chiffrée de bout en bout entre vos appareils (option, achat unique).</p>
+      
+    </div>
+    <figure class="scene"><img src="/img/scenes/fr/8-appareils.webp" width="1320" height="1550" alt="Glance sur iPhone, Android, Mac et Windows, avec la synchronisation chiffrée de bout en bout" loading="lazy" decoding="async"></figure>
+  </div>
+</section>
+<section class="bande" id="outils">
+  <div class="wrap">
+    <div class="texte"><p class="surtitre">Outils pris en charge</p><h2>Votre outil, votre instance.</h2></div>
+    <ul class="outils"><li class=""><h3>Umami</h3><span class="etat">disponible</span><p>Auto-hébergé. Tableaux, entonnoirs, source de métriques : tout Glance.</p></li><li class=""><h3>Plausible</h3><span class="etat">disponible</span><p>Cloud ou auto-hébergé. Compteurs, taux et répartitions.</p></li><li class="bientot"><h3>Fathom</h3><span class="etat">bientôt</span><p>L’interface est prête, le fournisseur arrive.</p></li></ul>
+  </div>
+</section>
+<section class="prive" id="vie-privee">
+  <div class="wrap">
+    <div class="titre-bloc"><p class="surtitre">Vie privée</p><h2>Rien n’est collecté.</h2></div>
+    <ul><li><h3>Aucun serveur entre vous et vos stats</h3><p>Glance parle directement à vos instances Umami et Plausible.</p></li><li><h3>Identifiants dans le trousseau</h3><p>Ils restent chiffrés dans le trousseau de l’appareil, jamais ailleurs.</p></li><li><h3>Lecture seule</h3><p>Glance affiche vos statistiques, il ne modifie rien. Pas de publicité, pas de pistage.</p></li></ul>
+    <p class="note">Le détail est dans la <a href="/privacy.html">politique de confidentialité</a>.</p>
+  </div>
+</section>
+<section class="telecharger" id="telecharger">
+  <div class="wrap">
+    <div class="texte"><p class="surtitre">Télécharger</p><h2>Gratuit, sur tous vos écrans.</h2><p>Glance est gratuit et open source (licence MIT). Sur macOS, la voie rapide est Homebrew :</p></div>
+    <div class="badges">
+      <a class="badge premier" href="https://apps.apple.com/app/glance-analytics/id6789938289"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 12.5c0-2 1.1-3.3 1.6-3.7-.9-1.3-2.3-1.5-2.8-1.5-1.2-.1-2.3.7-2.9.7-.6 0-1.5-.7-2.5-.7-1.3 0-2.5.8-3.1 1.9-1.4 2.3-.4 5.8.9 7.7.6.9 1.4 2 2.4 1.9.9 0 1.3-.6 2.4-.6s1.4.6 2.4.6c1 0 1.6-.9 2.2-1.8.5-.7.8-1.5 1-2.1-1.2-.5-2-1.6-2-2.6zM15 5.9c.5-.6.9-1.5.8-2.4-.8 0-1.7.5-2.2 1.2-.5.5-.9 1.4-.8 2.3.9 0 1.7-.5 2.2-1.1z"/></svg><span><small>iPhone et iPad</small><b>App Store</b></span></a>
+      <a class="badge" href="https://play.google.com/store/apps/details?id=fr.mymonkey.glance"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 2.8v18.4c0 .5.5.8.9.5L20 12.7c.4-.3.4-.9 0-1.2L5.4 2.3c-.4-.3-.9 0-.9.5z"/></svg><span><small>Android</small><b>Google Play</b></span></a>
+      <a class="badge" href="https://github.com/my-monkeys/glance/releases/download/v1.13.0/Glance-1.13.0.dmg"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 12.5c0-2 1.1-3.3 1.6-3.7-.9-1.3-2.3-1.5-2.8-1.5-1.2-.1-2.3.7-2.9.7-.6 0-1.5-.7-2.5-.7-1.3 0-2.5.8-3.1 1.9-1.4 2.3-.4 5.8.9 7.7.6.9 1.4 2 2.4 1.9.9 0 1.3-.6 2.4-.6s1.4.6 2.4.6c1 0 1.6-.9 2.2-1.8.5-.7.8-1.5 1-2.1-1.2-.5-2-1.6-2-2.6zM15 5.9c.5-.6.9-1.5.8-2.4-.8 0-1.7.5-2.2 1.2-.5.5-.9 1.4-.8 2.3.9 0 1.7-.5 2.2-1.1z"/></svg><span><small>macOS · .dmg</small><b>Mac</b></span></a>
+      <a class="badge" href="https://github.com/my-monkeys/glance/releases/download/windows-v1.13.0/glance-windows-x64.zip"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="2" width="9.3" height="9.3"/><rect x="12.7" y="2" width="9.3" height="9.3"/><rect x="2" y="12.7" width="9.3" height="9.3"/><rect x="12.7" y="12.7" width="9.3" height="9.3"/></svg><span><small>Windows · .zip</small><b>Windows</b></span></a>
+    </div>
+    <div class="brew"><code><i>$</i> brew install --cask my-monkeys/tap/glance</code></div>
+  </div>
+</section>
+<section class="faq" id="faq">
+  <div class="wrap">
+    <h2>Questions fréquentes</h2>
+    <div class="liste"><details><summary>Qu'est-ce que Glance ?</summary><p>Glance est un client mobile et desktop, gratuit et open source, qui affiche vos statistiques Umami et Plausible. Il réunit tous vos sites dans une seule application claire — courbes lissées, temps réel et widgets — sans jamais quitter votre instance analytics.</p></details><details><summary>Glance est-il gratuit ?</summary><p>Oui : l'application est gratuite et open source (licence MIT), sans compte à créer, sans abonnement et sans limite de sites. Une seule chose est payante, et elle est facultative — Glance Sync, la sauvegarde chiffrée de votre configuration — en achat unique.</p></details><details><summary>Quels outils analytics sont supportés ?</summary><p>Glance se connecte à Umami et Plausible aujourd'hui, y compris auto-hébergés. Le support de Fathom est prévu. Vous pouvez suivre plusieurs comptes et fournisseurs en même temps, réunis dans une vue commune.</p></details><details><summary>Sur quelles plateformes Glance est-il disponible ?</summary><p>Glance est disponible sur iOS (App Store), Android (Play Store), macOS (Homebrew ou DMG) et Windows. L'application est développée en Flutter, donc réellement multiplateforme.</p></details><details><summary>Mes données sont-elles envoyées à un tiers ?</summary><p>Non. Glance parle directement à votre instance Umami ou Plausible, en lecture seule, sans serveur intermédiaire ni tracking. Vos identifiants restent chiffrés dans le trousseau (Keychain) de votre appareil.</p></details><details><summary>Qu'est-ce que Glance Sync ?</summary><p>Une option payante (achat unique) qui sauvegarde vos comptes et vos groupes et les retrouve sur vos autres appareils. Votre configuration est chiffrée sur l'appareil avant l'envoi : le serveur ne stocke qu'un bloc illisible. Sans elle, Glance fonctionne entièrement en local, et le transfert par QR reste gratuit.</p></details><details><summary>Puis-je séparer mes sites par client ou par projet ?</summary><p>Oui, avec les groupes. Un groupe est un périmètre de lecture : les totaux, la courbe et le direct ne comptent que ses sites. On bascule d'un groupe à l'autre depuis l'accueil.</p></details><details><summary>Glance fonctionne-t-il avec une instance auto-hébergée ?</summary><p>Oui. Que votre instance Umami ou Plausible soit auto-hébergée ou cloud, Glance s'y connecte directement avec votre URL et votre clé d'API. Aucune configuration côté serveur n'est nécessaire.</p></details></div>
+  </div>
+</section>
+</main>
+<footer class="pied">
+  <div class="wrap">
+    <div><a class="marque" href="/"><img src="/favicon.svg?v=2" width="38" height="38" alt="">Glance</a><p>Un projet du collectif My-Monkey.</p></div>
+    <ul><li><a href="/docs/source-de-metriques.html">Documentation</a></li><li><a href="/privacy.html">Confidentialité</a></li><li><a href="https://github.com/my-monkeys/glance">GitHub</a></li><li><a href="/en/" data-lang="en">English</a></li></ul>
+    <p class="droits">© 2026 My-Monkey · Licence MIT</p>
+  </div>
+</footer>
 <script>document.addEventListener('click',function(e){var a=e.target&&e.target.closest&&e.target.closest('[data-lang]');if(a){try{localStorage.setItem('glance-lang',a.getAttribute('data-lang'))}catch(_){}}});</script>
-<script>
-(function () {
-  var tip = document.querySelector('.lang-tip');
-  if (!tip) return;
-  try {
-    if (localStorage.getItem('glance-lang') || localStorage.getItem('glance-lang-tip')) return;
-    var wantsFr = /^fr/i.test(navigator.language || '');
-    if (wantsFr === (document.documentElement.lang === 'fr')) return;
-
-    var btn = document.querySelector('.langw .lang');
-    // Mobile : la bulle est fixée pleine largeur, donc sa flèche ne tombe plus
-    // d'elle-même sous le bouton de langue — on la replace à la main.
-    function place() {
-      if (!btn) return;
-      var b = btn.getBoundingClientRect();
-      tip.style.setProperty('--tip-top', Math.round(b.bottom + 10) + 'px');
-      tip.style.setProperty('--tip-arrow', Math.round(b.left + b.width / 2 - tip.getBoundingClientRect().left) + 'px');
-    }
-
-    tip.hidden = false;
-    place();
-    addEventListener('resize', place);
-    addEventListener('orientationchange', place);
-
-    tip.querySelector('.x').addEventListener('click', function () {
-      tip.hidden = true;
-      try { localStorage.setItem('glance-lang-tip', '1'); } catch (_) {}
-    });
-  } catch (e) {}
-})();
-</script>
-<button class="fab" aria-label="Donner votre avis" title="Donner votre avis"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 01-9 8.4 8.9 8.9 0 01-3.9-.9L3 20l1-4.9a8.4 8.4 0 015-11.7 8.4 8.4 0 0112 8.1z"/></svg></button>
-<div class="fbk-ov" hidden><div class="fbk">
-<div data-f="form"><h3>Un avis, un bug&nbsp;?</h3><p class="sub">Dites-nous ce qui va ou ce qui coince — chaque retour compte.</p>
-<textarea maxlength="4000" placeholder="Votre message…"></textarea>
-<input type="email" autocomplete="email" placeholder="Email (facultatif, pour vous répondre)">
-<p class="err" hidden>L'envoi a échoué. Réessayez dans un instant.</p>
-<div class="row"><button type="button" class="btn btn-g" data-f="cancel">Annuler</button><button type="button" class="btn btn-p" data-f="send">Envoyer</button></div></div>
-<div data-f="done" hidden style="text-align:center"><h3>Merci&nbsp;🙏</h3><p class="sub">Votre retour est bien arrivé.</p>
-<button type="button" class="btn btn-p" data-f="close" style="justify-content:center;width:100%">Fermer</button></div>
-</div></div>
-<script>(function(){var fab=document.querySelector('.fab'),ov=document.querySelector('.fbk-ov');if(!fab||!ov)return;
-var form=ov.querySelector('[data-f="form"]'),done=ov.querySelector('[data-f="done"]'),ta=ov.querySelector('textarea'),em=ov.querySelector('input'),err=ov.querySelector('.err'),send=ov.querySelector('[data-f="send"]');
-function show(){ov.hidden=false;form.hidden=false;done.hidden=true;err.hidden=true;setTimeout(function(){ta.focus()},60)}
-function hide(){ov.hidden=true}
-fab.addEventListener('click',show);
-ov.addEventListener('click',function(e){if(e.target===ov)hide()});
-ov.querySelector('[data-f="cancel"]').addEventListener('click',hide);
-ov.querySelector('[data-f="close"]').addEventListener('click',hide);
-document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!ov.hidden)hide()});
-send.addEventListener('click',function(){var msg=ta.value.trim();if(msg.length<2){ta.focus();return}
-send.disabled=true;err.hidden=true;
-fetch('https://git.my-monkey.fr/api/feedback',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({product:'glance',message:msg,email:em.value.trim()||undefined,context:'site · '+document.documentElement.lang})})
-.then(function(r){if(!r.ok)throw 0;form.hidden=true;done.hidden=false;ta.value='';em.value=''})
-.catch(function(){err.hidden=false})
-.finally(function(){send.disabled=false})});})();</script>
+<script src="/js/gsap.min.js"></script>
+<script src="/js/ScrollTrigger.min.js"></script>
+<script src="/js/anim.js"></script>
 </body>
 </html>
