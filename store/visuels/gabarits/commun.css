@@ -138,3 +138,14 @@ body {
 .f-presentation .marque img { width: calc(44 * var(--u)); height: calc(44 * var(--u)); }
 .f-presentation .titre { font-size: calc(58 * var(--u)); min-height: 0; max-width: none; }
 .f-presentation .appui { font-size: calc(21 * var(--u)); margin-top: calc(18 * var(--u)); min-height: 0; max-width: calc(430 * var(--u)); }
+
+/* ——— Scène seule pour le site : 1320 u de large, hauteur naturelle, sans en-tête ni motif ———
+   Le site pose ses propres titres en HTML ; l'image est la scène telle que les stores la montrent. */
+.f-site, .f-site body { height: auto; overflow: visible; }
+.f-site .entete, .f-site .motif { display: none; }
+.f-site .scene { flex: none; padding: calc(72 * var(--u)); }
+/* Visuel 1 : le téléphone seul, fond transparent, coupé en bas (le site le fond dans la page). */
+.f-site body:has(.telephone) { background: transparent; }
+.f-site .scene:has(.telephone) { height: calc(1900 * var(--u)); overflow: hidden; padding: calc(60 * var(--u)) 0 0; }
+.f-site .scene:has(.telephone) .pastilles { display: none; }
+.f-site .telephone { position: relative; left: auto; top: auto; transform: none; margin: 0 auto; }

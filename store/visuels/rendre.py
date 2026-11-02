@@ -5,6 +5,7 @@ exactes des stores.
     python3 -I store/visuels/rendre.py                 # tout
     python3 -I store/visuels/rendre.py 4-entonnoir     # un gabarit seulement (tous formats)
     python3 -I store/visuels/rendre.py --langue fr     # une seule langue
+    python3 -I store/visuels/rendre.py --site          # les scènes du site, seules (WebP)
 
 Prérequis : Playwright pour Python et Google Chrome (`channel="chrome"`), Pillow. Un petit serveur
 HTTP sert la racine du dépôt : les gabarits lisent les polices (`assets/fonts/`) et l'icône
@@ -16,6 +17,9 @@ Sortie dans store/visuels/ :
   google-play/telephone/<langue>/<n>-<nom>.png  1080 × 1920
   google-play/presentation-<langue>.png         1024 × 500
   planche.png                                   la planche de contrôle
+Avec --site, uniquement les scènes du site (sans l'en-tête marque + titre), dans store/site/img/scenes/ :
+  <langue>/<n>-<nom>.webp   scènes 2 à 8, 1320 px de large, hauteur naturelle, < 150 Ko
+  1-accueil.webp            le téléphone du visuel 1, commun à toutes les langues (la capture ne change pas)
 Tout en PNG RGB 8 bits, sans canal alpha (Apple le refuse).
 """
 import argparse
@@ -41,6 +45,9 @@ FORMATS = {
     "play": ("google-play/telephone", 1080, 1920),
 }
 PRESENTATION = (1024, 500)
+SITE = ICI.parent / "site/img/scenes"
+SITE_LARGEUR = 1320
+SITE_POIDS_MAX = 150_000
 
 
 def langues():
@@ -85,6 +92,30 @@ def enregistrer_rgb(image, sortie, taille):
     fond.save(sortie, optimize=True)
 
 
+def capturer_site(page, url, sortie):
+    """La scène seule, à sa hauteur naturelle, en WebP. Le visuel 1 garde un fond transparent."""
+    page.set_viewport_size({"width": SITE_LARGEUR, "height": 2400})
+    page.goto(url)
+    page.wait_for_function("window.PRET || window.ERREUR", timeout=30000)
+    erreur = page.evaluate("window.ERREUR")
+    if erreur:
+        raise RuntimeError(f"{url} : {erreur}")
+    sortie.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile(suffix=".png") as brut:
+        page.locator("body").screenshot(path=brut.name, animations="disabled", omit_background=True)
+        image = Image.open(brut.name)
+        enregistrer_webp(image if sortie.name.startswith("1-") else image.convert("RGB"), sortie)
+
+
+def enregistrer_webp(image, sortie):
+    """La meilleure qualité qui tient sous SITE_POIDS_MAX."""
+    for qualite in range(88, 40, -4):
+        image.save(sortie, quality=qualite, method=6)
+        if sortie.stat().st_size <= SITE_POIDS_MAX:
+            return
+    raise RuntimeError(f"{sortie.name} : {sortie.stat().st_size} octets, plus que {SITE_POIDS_MAX}")
+
+
 def planche(liste_langues):
     """Tous les visuels : une rangée par format et par langue, plus l'image de présentation."""
     hauteur_vignette = 560
@@ -119,10 +150,22 @@ def planche(liste_langues):
     feuille.save(ICI / "planche.png", optimize=True)
 
 
+def rendre_site(page, base, filtre, liste_langues):
+    for visuel in VISUELS:
+        if filtre and visuel not in filtre:
+            continue
+        # Le téléphone du visuel 1 ne porte aucun texte : une seule image pour toutes les langues.
+        for langue in liste_langues[:1] if visuel == VISUELS[0] else liste_langues:
+            sortie = SITE / ("" if visuel == VISUELS[0] else langue) / f"{visuel}.webp"
+            capturer_site(page, f"{base}/{visuel}.html?lang={langue}&format=site", sortie)
+            print(sortie.relative_to(SITE.parent.parent), sortie.stat().st_size // 1024, "Ko")
+
+
 def main():
     analyse = argparse.ArgumentParser()
     analyse.add_argument("gabarits", nargs="*")
     analyse.add_argument("--langue", action="append")
+    analyse.add_argument("--site", action="store_true", help="rendre les scènes du site au lieu des visuels des stores")
     args = analyse.parse_args()
     filtre = args.gabarits
     liste_langues = args.langue or langues()
@@ -131,6 +174,11 @@ def main():
     with sync_playwright() as p:
         navigateur = p.chromium.launch(channel="chrome")
         page = navigateur.new_page(device_scale_factor=1)
+        if args.site:
+            rendre_site(page, base, filtre, liste_langues)
+            navigateur.close()
+            httpd.shutdown()
+            return
         for visuel in VISUELS:
             if filtre and visuel not in filtre:
                 continue
