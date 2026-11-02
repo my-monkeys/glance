@@ -68,9 +68,13 @@ final secureStorageProvider = Provider<FlutterSecureStorage>(
 
 /// Les secrets de l'app, regroupés en un seul élément du trousseau (une seule
 /// invite de mot de passe sur macOS). Seul le coffre touche `secureStorageProvider`.
-final secretVaultProvider = Provider<SecretVault>(
-  (ref) => SecretVault(ref.watch(secureStorageProvider)),
-);
+final secretVaultProvider = Provider<SecretVault>((ref) {
+  final prefs = ref.watch(sharedPrefsProvider);
+  return SecretVault(
+    ref.watch(secureStorageProvider),
+    legacyKeys: () => legacySecretKeys(prefs),
+  );
+});
 
 /// Cache disque des stats (résumé/série/métriques) pour un affichage instantané
 /// au démarrage à froid. Une seule instance pour l'app.

@@ -2,6 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../models/account.dart';
+import '../models/metrics_source.dart';
 
 /// Tous les secrets de l'app dans UN seul élément du trousseau.
 ///
@@ -9,14 +13,13 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 /// propre invite de mot de passe, et les lectures concurrentes du démarrage les
 /// empilaient. Un seul élément = une seule invite par lancement.
 class SecretVault {
-  SecretVault(this._storage);
+  SecretVault(this._storage, {Iterable<String> Function()? legacyKeys})
+      : _legacyKeys = legacyKeys ?? (() => const []);
 
   final FlutterSecureStorage _storage;
+  final Iterable<String> Function() _legacyKeys;
 
   static const vaultKey = 'glance.vault';
-
-  /// Tout ce que l'app rangeait avant le coffre portait ce préfixe.
-  static const _legacyPrefix = 'glance.';
 
   Future<Map<String, String>>? _loading;
   Future<void> _writes = Future.value();
@@ -48,12 +51,16 @@ class SecretVault {
 
   /// Rapatrie les anciens éléments dans le coffre, et ne les supprime qu'une
   /// fois le coffre écrit : si l'écriture échoue, rien n'est perdu.
+  ///
+  /// Lus un par un, par leur nom : `readAll` répond errSecParam (-50) sur le
+  /// trousseau legacy de macOS (kSecMatchLimitAll + kSecReturnData), la
+  /// migration n'aboutirait jamais.
   Future<Map<String, String>> _migrate() async {
-    final legacy = {
-      for (final e in (await _storage.readAll()).entries)
-        if (e.key.startsWith(_legacyPrefix) && e.key != vaultKey)
-          e.key: e.value,
-    };
+    final legacy = <String, String>{};
+    for (final key in _legacyKeys().toSet()) {
+      final value = await _storage.read(key: key);
+      if (value != null) legacy[key] = value;
+    }
     await _storage.write(key: vaultKey, value: jsonEncode(legacy));
     for (final key in legacy.keys) {
       // Un reste non supprimé est inoffensif : le coffre existe désormais et
@@ -78,3 +85,15 @@ class SecretVault {
     return run;
   }
 }
+
+/// Les éléments que les versions ≤ 1.13 rangeaient un par un dans le trousseau.
+/// Noms figés : ils ne suivent plus les clés du coffre.
+Iterable<String> legacySecretKeys(SharedPreferences prefs) => [
+      for (final a in Account.decodeList(prefs.getString('glance.accounts')))
+        'glance.creds.${a.id}',
+      for (final m
+          in MetricsSource.decodeList(prefs.getString('glance.metricsSources')))
+        'glance.metricsToken.${m.site.accountId}.${m.site.siteId}',
+      'glance.sync.token',
+      'glance.sync.pw',
+    ];

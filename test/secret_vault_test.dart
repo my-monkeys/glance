@@ -2,7 +2,11 @@ import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:glance/data/models/account.dart';
+import 'package:glance/data/models/metrics_source.dart';
+import 'package:glance/data/models/workspace.dart';
 import 'package:glance/data/repository/secret_vault.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Trousseau en mémoire qui compte ses lectures et peut échouer à la demande.
 class _FakeStorage extends FlutterSecureStorage {
@@ -43,7 +47,8 @@ class _FakeStorage extends FlutterSecureStorage {
     WindowsOptions? wOptions,
   }) async {
     readAlls++;
-    return {...data};
+    // Comme le trousseau legacy de macOS : errSecParam (-50).
+    throw Exception('readAll non pris en charge');
   }
 
   @override
@@ -90,18 +95,19 @@ void main() {
   };
 
   test('migration : anciens éléments dans le coffre, puis supprimés', () async {
-    final s = _FakeStorage(legacy);
-    final v = SecretVault(s);
+    final s = _FakeStorage({...legacy, 'glance.autre': 'inconnu'});
+    final v = SecretVault(s, legacyKeys: () => [...legacy.keys, 'glance.absent']);
 
     expect(await v.read('glance.creds.a1'), '{"token":"t"}');
     expect(await v.read('glance.sync.pw'), 'pw');
     expect(_vaultOf(s), legacy);
-    expect(s.data.keys, [SecretVault.vaultKey]);
+    expect(s.data.keys, {SecretVault.vaultKey, 'glance.autre'});
+    expect(s.readAlls, 0);
   });
 
   test('migration ratée : rien n\'est supprimé, et on réessaie', () async {
     final s = _FakeStorage(legacy)..failVaultWrite = true;
-    final v = SecretVault(s);
+    final v = SecretVault(s, legacyKeys: () => legacy.keys);
 
     await expectLater(v.read('glance.sync.pw'), throwsException);
     expect(s.data, legacy);
@@ -159,5 +165,26 @@ void main() {
     expect(_vaultOf(s), expected);
     expect(await v.read('k9'), 'v9');
     expect(await v.read('k3'), isNull);
+  });
+
+  test('anciennes clés déduites des comptes et des sources en prefs', () async {
+    SharedPreferences.setMockInitialValues({
+      'glance.accounts': Account.encodeList(const [
+        Account(id: 'a1', kind: ProviderKind.umami, baseUrl: 'https://u.fr'),
+        Account(id: 'a2', kind: ProviderKind.umami, baseUrl: 'https://u.fr'),
+      ]),
+      'glance.metricsSources': MetricsSource.encodeList(const [
+        MetricsSource(site: SiteRef('a1', 's1'), baseUrl: 'https://x.eu/'),
+      ]),
+    });
+    final prefs = await SharedPreferences.getInstance();
+
+    expect(legacySecretKeys(prefs), [
+      'glance.creds.a1',
+      'glance.creds.a2',
+      'glance.metricsToken.a1.s1',
+      'glance.sync.token',
+      'glance.sync.pw',
+    ]);
   });
 }
