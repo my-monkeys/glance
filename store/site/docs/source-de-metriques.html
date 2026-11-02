@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source de métriques : brancher votre base à Glance, contrat v1 · Glance</title>
+<meta name="description" content="Documentation de l&#x27;API d&#x27;agrégats de Glance : exposez des indicateurs calculés sur votre base (rétention, comptes, installations), le contrat v1, les règles de lecture, des exemples et un serveur Node.js minimal.">
+<meta name="robots" content="index, follow">
+<link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml">
+<link rel="canonical" href="https://glance-analytics.com/docs/source-de-metriques.html">
+<link rel="alternate" hreflang="fr" href="https://glance-analytics.com/docs/source-de-metriques.html">
+<link rel="alternate" hreflang="en" href="https://glance-analytics.com/en/docs/metrics-source.html">
+<link rel="alternate" hreflang="x-default" href="https://glance-analytics.com/en/docs/metrics-source.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Glance">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:title" content="Source de métriques · Glance">
+<meta property="og:description" content="Documentation de l&#x27;API d&#x27;agrégats de Glance : exposez des indicateurs calculés sur votre base (rétention, comptes, installations), le contrat v1, les règles de lecture, des exemples et un serveur Node.js minimal.">
+<meta property="og:url" content="https://glance-analytics.com/docs/source-de-metriques.html">
+<meta property="og:image" content="https://glance-analytics.com/img/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "Source de métriques", "inLanguage": "fr", "url": "https://glance-analytics.com/docs/source-de-metriques.html", "dateModified": "2026-11-02", "author": {"@type": "Organization", "name": "My-Monkey"}, "publisher": {"@type": "Organization", "name": "My-Monkey"}}</script>
+<script defer src="https://uuu.my-monkey.fr/u.js" data-website-id="0d62b5ee-a8e2-4b05-959c-9e8b5a41c0dc"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Geist:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/docs/docs.css">
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <a href="/" class="brand"><span class="mark"><svg width="24" height="24" viewBox="0 0 72 72" fill="none"><path d="M14 48C21 48 24 30 31 30C37 30 37 41 43 41C49 41 50 24 55 24" stroke="#F7F5F1" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="55" cy="24" r="6" fill="#F7F5F1"/></svg></span><b>Glance</b></a>
+  <nav class="toplinks">
+    <a href="/en/docs/metrics-source.html" data-lang="en" hreflang="en" aria-label="Switch to English">EN</a>
+    <a class="gh" href="https://github.com/my-monkeys/glance">GitHub</a>
+    <a href="/">Retour au site</a>
+  </nav>
+</header>
+<div class="hero">
+  <div class="kick">Documentation</div>
+  <h1>Source de métriques</h1>
+  <p class="lead">Branchez vos propres indicateurs sur Glance : rétention, comptes créés, installations… calculés sur votre base, affichés comme des cartes. Voici ce que votre serveur doit exposer, et comment l'app lit ses réponses.</p>
+  <div class="meta">Contrat v1 · mis à jour le 2 novembre 2026</div>
+</div>
+<div class="layout">
+  <aside class="toc" aria-label="Sommaire"><div class="lbl">Sommaire</div><ol>
+<li><a href="#usage">À quoi ça sert</a></li>
+<li><a href="#mise-en-place">Brancher la source</a></li>
+<li><a href="#contrat">Le contrat v1</a></li>
+<li class="sub"><a href="#auth">Authentification</a></li>
+<li class="sub"><a href="#catalogue">GET catalogue</a></li>
+<li class="sub"><a href="#series">GET series</a></li>
+<li class="sub"><a href="#erreurs">Erreurs</a></li>
+<li><a href="#lecture">Comment Glance lit</a></li>
+<li class="sub"><a href="#unites">Unités et trous</a></li>
+<li class="sub"><a href="#delais">Délais</a></li>
+<li class="sub"><a href="#familles">Familles</a></li>
+<li class="sub"><a href="#retard">Données en retard</a></li>
+<li class="sub"><a href="#segments">Segments</a></li>
+<li class="sub"><a href="#heures">Heures</a></li>
+<li class="sub"><a href="#limites">Limites</a></li>
+<li><a href="#exemples">Exemples</a></li>
+<li><a href="#serveur">Serveur minimal</a></li>
+  </ol></aside>
+  <article>
+  <details class="toc-m"><summary>Sommaire de la page</summary><ol>
+<li><a href="#usage">À quoi ça sert</a></li>
+<li><a href="#mise-en-place">Brancher la source</a></li>
+<li><a href="#contrat">Le contrat v1</a></li>
+<li class="sub"><a href="#auth">Authentification</a></li>
+<li class="sub"><a href="#catalogue">GET catalogue</a></li>
+<li class="sub"><a href="#series">GET series</a></li>
+<li class="sub"><a href="#erreurs">Erreurs</a></li>
+<li><a href="#lecture">Comment Glance lit</a></li>
+<li class="sub"><a href="#unites">Unités et trous</a></li>
+<li class="sub"><a href="#delais">Délais</a></li>
+<li class="sub"><a href="#familles">Familles</a></li>
+<li class="sub"><a href="#retard">Données en retard</a></li>
+<li class="sub"><a href="#segments">Segments</a></li>
+<li class="sub"><a href="#heures">Heures</a></li>
+<li class="sub"><a href="#limites">Limites</a></li>
+<li><a href="#exemples">Exemples</a></li>
+<li><a href="#serveur">Serveur minimal</a></li>
+  </ol></details>
+<section id="usage">
+<h2>À quoi ça sert</h2>
+<p>Glance lit déjà vos statistiques d'audience dans Umami ou Plausible. Mais certains chiffres ne s'y trouvent pas, parce qu'ils vivent dans <strong>votre base de données</strong> : la rétention de vos joueurs, le nombre de comptes créés, les installations d'une application, les abonnements actifs…</p>
+<p>Une <strong>source de métriques</strong> est une petite API que vous ajoutez à votre site. Elle expose deux adresses en lecture seule : un <em>catalogue</em> (la liste de vos indicateurs) et des <em>séries</em> (leurs valeurs jour par jour). Glance s'y connecte avec un jeton, sans rien savoir de votre base : tout le calcul reste chez vous.</p>
+<p>Chaque indicateur devient une carte <strong>« Métrique du site »</strong> dans l'onglet Tableaux du site, avec sa courbe, son chiffre global et sa comparaison à la période choisie, comme n'importe quelle autre carte.</p>
+<div class="demo" aria-hidden="true">
+  <div class="mcard"><div class="k">Métrique</div><div class="v">13,2<small>%</small></div><div class="s">Rétention J1 · mesurée sur les cohortes du 12 au 17 oct.</div>
+    <svg viewBox="0 0 200 64" preserveAspectRatio="none"><path d="M0 30 C20 24 30 40 50 36 C70 32 76 12 100 14 C124 16 130 44 150 40 C170 36 180 22 200 26" fill="none" stroke="#3b7a5a" stroke-width="2.6" stroke-linecap="round"/></svg></div>
+  <div class="mcard"><div class="k">Métrique</div><div class="v">1 842<small>joueurs actifs</small></div><div class="s">Site 44 % · Appli 55 % · Autres 1 % (estimé)</div>
+    <svg viewBox="0 0 200 64" preserveAspectRatio="none"><path d="M0 48 C25 46 35 30 60 28 C85 26 95 44 120 40 C145 36 160 14 200 10" fill="none" stroke="#3b7a5a" stroke-width="2.6" stroke-linecap="round"/><path d="M0 56 C30 54 50 46 80 46 C110 46 150 34 200 30" fill="none" stroke="#b4ada1" stroke-width="2" stroke-linecap="round"/></svg></div>
+</div>
+<p class="demo-note">Deux cartes d'exemple : un taux avec sa courbe, puis un compteur découpé par plateforme.</p>
+<p>Ce que vous devez fournir est volontairement petit : deux routes <code>GET</code>, du JSON, un jeton. La suite de cette page décrit le contrat exact (version 1), la façon dont Glance interprète vos réponses, des exemples, et un serveur minimal que vous pouvez lancer en une minute.</p>
+</section>
+
+<section id="mise-en-place">
+<h2>Brancher la source dans l'app</h2>
+<p>Une source se configure <strong>par site</strong>. Prévoyez l'adresse de base de votre API et un jeton.</p>
+<ol class="steps">
+<li><b>Ouvrez le site</b> concerné dans Glance, puis son onglet <b>Tableaux</b>.</li>
+<li>Tout en bas, sélectionnez <b>« Source de métriques »</b> (le même lien apparaît dans l'état vide, quand il n'y a encore aucun tableau).</li>
+<li>Saisissez l'<b>adresse de l'API</b> : l'URL de base, celle qui précède <code>catalogue</code> et <code>series</code>. Le <code>https://</code> et le slash final sont facultatifs, Glance les ajoute.</li>
+<li>Saisissez le <b>jeton</b>. Il est gardé dans le trousseau de l'appareil (Keychain), jamais dans les réglages.</li>
+<li>Sélectionnez <b>Tester</b> : Glance appelle <code>catalogue</code> et annonce « 3 indicateurs disponibles », ou le message d'erreur du serveur (voir <a href="#erreurs">Erreurs</a>).</li>
+<li>Sélectionnez <b>Enregistrer</b>.</li>
+<li>De retour dans l'onglet Tableaux, sélectionnez <b>« Nouveau tableau »</b>, choisissez le genre <b>« Métrique du site »</b>, puis un indicateur du catalogue (ou une famille, voir <a href="#familles">Familles</a>). La carte apparaît et suit la période affichée.</li>
+</ol>
+<div class="callout"><p><strong>Bon à savoir.</strong> L'URL et le jeton voyagent avec la synchronisation chiffrée de bout en bout entre vos appareils, mais pas avec le QR de transfert. « Retirer la source » supprime aussi le jeton et les cartes « Métrique » du site, qui n'auraient plus rien à afficher.</p></div>
+</section>
+
+<section id="contrat">
+<h2>Le contrat, version 1</h2>
+<p>Deux routes, relatives à l'adresse de base saisie dans l'app. Tout est du JSON, en UTF-8.</p>
+
+<h3 id="auth">Authentification</h3>
+<p>Chaque requête, <code>catalogue</code> comme <code>series</code>, porte l'en-tête <code>Authorization: Bearer &lt;jeton&gt;</code>. Le jeton est un secret que <em>vous</em> choisissez et que votre serveur compare : Glance ne le décode pas. Servez l'API en HTTPS.</p>
+<div class="codehead"><span>Requête · catalogue</span><button class="cp" type="button" data-copy>Copier</button></div><pre><code>GET https://api.exemple.fr/metriques/catalogue
+Authorization: Bearer &lt;votre jeton&gt;
+Accept: application/json</code></pre>
+
+<h3 id="catalogue">GET catalogue</h3>
+<p>Sans paramètre. Renvoie la liste des indicateurs que Glance peut proposer.</p>
+<div class="codehead"><span>Réponse · catalogue (tous les champs)</span><button class="cp" type="button" data-copy>Copier</button></div><pre><code>{
+  <span class="tk-k">"version"</span>: <span class="tk-n">1</span>,
+  <span class="tk-k">"indicateurs"</span>: [
+    {
+      <span class="tk-k">"id"</span>: <span class="tk-s">"retention_j1"</span>,
+      <span class="tk-k">"libelle"</span>: <span class="tk-s">"Rétention J1"</span>,
+      <span class="tk-k">"description"</span>: <span class="tk-s">"Part des nouveaux joueurs revenus le lendemain."</span>,
+      <span class="tk-k">"unite"</span>: <span class="tk-s">"pourcentage"</span>,
+      <span class="tk-k">"granularites"</span>: [<span class="tk-s">"jour"</span>, <span class="tk-s">"mois"</span>],
+      <span class="tk-k">"delai_jours"</span>: <span class="tk-n">1</span>,
+      <span class="tk-k">"famille"</span>: <span class="tk-s">"retention"</span>,
+      <span class="tk-k">"libelle_famille"</span>: <span class="tk-s">"Rétention"</span>,
+      <span class="tk-k">"donnees_jusqu_au"</span>: <span class="tk-s">"2026-10-18"</span>,
+      <span class="tk-k">"segments"</span>: [{ <span class="tk-k">"id"</span>: <span class="tk-s">"site"</span>, <span class="tk-k">"libelle"</span>: <span class="tk-s">"Site"</span>, <span class="tk-k">"estime"</span>: <span class="tk-n">false</span> }]
+    }
+  ]
+}</code></pre>
+<div class="tw"><table>
+<thead><tr><th>Champ</th><th>Type</th><th>Statut</th><th>Rôle</th></tr></thead>
+<tbody>
+<tr><td><code>version</code></td><td data-l="Type">nombre</td><td data-l="Statut"><span class="req">requis</span></td><td data-l="Rôle">Toujours <code>1</code>. Toute autre valeur est refusée.</td></tr>
+<tr><td><code>indicateurs</code></td><td data-l="Type">tableau</td><td data-l="Statut"><span class="req">requis</span></td><td data-l="Rôle">Les indicateurs, dans l'ordre où Glance les présente.</td></tr>
+<tr><td><code>id</code></td><td data-l="Type">texte</td><td data-l="Statut"><span class="req">requis</span></td><td data-l="Rôle">Identifiant stable, repris dans <code>ids</code> de <code>series</code>. Ne le changez pas : les cartes déjà créées le mémorisent.</td></tr>
+<tr><td><code>libelle</code></td><td data-l="Type">texte</td><td data-l="Statut"><span class="req">requis</span></td><td data-l="Rôle">Nom affiché sur la carte et dans la liste.</td></tr>
+<tr><td><code>description</code></td><td data-l="Type">texte</td><td data-l="Statut"><span class="opt">facultatif</span></td><td data-l="Rôle">Phrase d'aide affichée dans la liste de choix.</td></tr>
+<tr><td><code>unite</code></td><td data-l="Type">texte</td><td data-l="Statut"><span class="req">recommandé</span></td><td data-l="Rôle"><code>pourcentage</code> (valeurs de 0 à 100) ou <code>nombre</code>. Absente ou inconnue : traitée comme <code>nombre</code>.</td></tr>
+<tr><td><code>granularites</code></td><td data-l="Type">tableau de textes</td><td data-l="Statut"><span class="opt">facultatif</span></td><td data-l="Rôle">Seule la valeur <code>"heure"</code> est lue : elle autorise les points horaires (voir <a href="#heures">Heures</a>). <code>jour</code> et <code>mois</code> sont demandés selon la période affichée, annoncés ou non.</td></tr>
+<tr><td><code>delai_jours</code></td><td data-l="Type">entier</td><td data-l="Statut"><span class="opt">facultatif</span></td><td data-l="Rôle">Jours à attendre après un jour J pour que sa cohorte soit mesurable (J1 : <code>1</code>, J7 : <code>7</code>). Absent ou <code>0</code> pour un nombre. Voir <a href="#delais">Délais</a>.</td></tr>
+<tr><td><code>famille</code></td><td data-l="Type">texte</td><td data-l="Statut"><span class="opt">facultatif</span></td><td data-l="Rôle">Identifiant d'un groupe d'indicateurs qui ne diffèrent que par leur délai. Voir <a href="#familles">Familles</a>.</td></tr>
+<tr><td><code>libelle_famille</code></td><td data-l="Type">texte</td><td data-l="Statut"><span class="opt">facultatif</span></td><td data-l="Rôle">Nom de la famille (celui du premier membre qui en porte un ; sinon <code>famille</code>).</td></tr>
+<tr><td><code>donnees_jusqu_au</code></td><td data-l="Type">date</td><td data-l="Statut"><span class="opt">facultatif</span></td><td data-l="Rôle">Dernier jour publié par la source, <code>AAAA-MM-JJ</code> (tout autre format est ignoré). Voir <a href="#retard">Données en retard</a>.</td></tr>
+<tr><td><code>segments</code></td><td data-l="Type">tableau</td><td data-l="Statut"><span class="opt">facultatif</span></td><td data-l="Rôle">Découpage d'un <code>nombre</code> en parts. Chaque entrée : <code>id</code> (requis), <code>libelle</code> (défaut : l'<code>id</code>), <code>estime</code> (booléen, vrai si la part n'est qu'une estimation : « · estimé » s'ajoute au libellé). Une entrée sans <code>id</code> est ignorée. Voir <a href="#segments">Segments</a>.</td></tr>
+</tbody></table></div>
+
+<h3 id="series">GET series</h3>
+<p>Renvoie les valeurs d'un ou plusieurs indicateurs sur une plage de dates.</p>
+<div class="codehead"><span>Requête · series</span><button class="cp" type="button" data-copy>Copier</button></div><pre><code>GET https://api.exemple.fr/metriques/series?ids=retention_j1
+    &amp;de=2026-10-12&amp;a=2026-10-18&amp;granularite=jour&amp;tz=Europe/Paris
+Authorization: Bearer &lt;votre jeton&gt;</code></pre>
+<div class="tw"><table>
+<thead><tr><th>Paramètre</th><th>Valeur</th><th>Rôle</th></tr></thead>
+<tbody>
+<tr><td><code>ids</code></td><td data-l="Valeur">identifiants séparés par des virgules</td><td data-l="Rôle">Glance en demande un seul à la fois, mais votre serveur doit accepter la liste.</td></tr>
+<tr><td><code>de</code>, <code>a</code></td><td data-l="Valeur"><code>AAAA-MM-JJ</code></td><td data-l="Rôle">Premier et dernier jour, <strong>inclusifs</strong>, dans le fuseau <code>tz</code>. 400 jours au plus : au-delà, répondez <code>400</code>.</td></tr>
+<tr><td><code>granularite</code></td><td data-l="Valeur"><code>jour</code>, <code>mois</code> ou <code>heure</code></td><td data-l="Rôle">La taille d'un point. <code>heure</code> n'est demandée que dans les conditions décrites plus bas. Glance ne demande jamais de semaine.</td></tr>
+<tr><td><code>tz</code></td><td data-l="Valeur">fuseau IANA</td><td data-l="Rôle">Celui de l'appareil (<code>Europe/Paris</code>), <code>UTC</code> s'il ne le donne pas. C'est dans ce fuseau que vous découpez les jours.</td></tr>
+</tbody></table></div>
+<div class="codehead"><span>Réponse · series (tous les champs)</span><button class="cp" type="button" data-copy>Copier</button></div><pre><code>{
+  <span class="tk-k">"version"</span>: <span class="tk-n">1</span>,
+  <span class="tk-k">"series"</span>: [
+    {
+      <span class="tk-k">"id"</span>: <span class="tk-s">"retention_j1"</span>,
+      <span class="tk-k">"points"</span>: [
+        {
+          <span class="tk-k">"t"</span>: <span class="tk-s">"2026-10-12"</span>,
+          <span class="tk-k">"valeur"</span>: <span class="tk-n">14.3</span>,
+          <span class="tk-k">"numerateur"</span>: <span class="tk-n">21</span>,
+          <span class="tk-k">"denominateur"</span>: <span class="tk-n">147</span>,
+          <span class="tk-k">"segments"</span>: { <span class="tk-k">"site"</span>: <span class="tk-n">9</span>, <span class="tk-k">"appli"</span>: <span class="tk-n">12</span> }
+        }
+      ],
+      <span class="tk-k">"totaux"</span>: { <span class="tk-k">"site"</span>: <span class="tk-n">31</span>, <span class="tk-k">"appli"</span>: <span class="tk-n">40</span> }
+    }
+  ]
+}</code></pre>
+<div class="tw"><table>
+<thead><tr><th>Champ</th><th>Type</th><th>Statut</th><th>Rôle</th></tr></thead>
+<tbody>
+<tr><td><code>version</code></td><td data-l="Type">nombre</td><td data-l="Statut"><span class="req">requis</span></td><td data-l="Rôle">Toujours <code>1</code>.</td></tr>
+<tr><td><code>series</code></td><td data-l="Type">tableau</td><td data-l="Statut"><span class="req">requis</span></td><td data-l="Rôle">Une entrée par id demandé. Un id absent de la réponse donne une carte sans point.</td></tr>
+<tr><td><code>id</code></td><td data-l="Type">texte</td><td data-l="Statut"><span class="req">requis</span></td><td data-l="Rôle">L'indicateur de la série.</td></tr>
+<tr><td><code>points</code></td><td data-l="Type">tableau</td><td data-l="Statut"><span class="req">requis</span></td><td data-l="Rôle">Un point par bucket de la plage, <strong>vides compris</strong>. Le premier peut commencer avant <code>de</code> (le mois qui contient le premier jour, par exemple).</td></tr>
+<tr><td><code>t</code></td><td data-l="Type">texte</td><td data-l="Statut"><span class="req">requis</span></td><td data-l="Rôle">Début du bucket, en heure locale <strong>sans fuseau</strong> : <code>AAAA-MM-JJ</code> (jour ; pour un mois, son premier jour), ou <code>AAAA-MM-JJTHH:00</code> (heure).</td></tr>
+<tr><td><code>valeur</code></td><td data-l="Type">nombre ou <code>null</code></td><td data-l="Statut"><span class="req">requis</span></td><td data-l="Rôle">La mesure. <code>null</code> : non mesurable (voir <a href="#unites">Unités et trous</a>).</td></tr>
+<tr><td><code>numerateur</code>, <code>denominateur</code></td><td data-l="Type">entiers</td><td data-l="Statut"><span class="req">requis pour un %</span></td><td data-l="Rôle">Les effectifs derrière le pourcentage. Ils servent au taux global de la carte. Absents : lus comme <code>0</code>. Ignorés pour un nombre.</td></tr>
+<tr><td><code>segments</code></td><td data-l="Type">objet</td><td data-l="Statut"><span class="opt">facultatif</span></td><td data-l="Rôle">Pour un indicateur découpé : la valeur de chaque part, <code>{ "site": 190, "appli": 230 }</code>. Un point sans cette clé est <em>inconnu</em>, pas nul.</td></tr>
+<tr><td><code>totaux</code></td><td data-l="Type">objet</td><td data-l="Statut"><span class="opt">facultatif</span></td><td data-l="Rôle">Sur la série : le total <strong>distinct</strong> de chaque part sur toute la plage demandée. Voir <a href="#segments">Segments</a>.</td></tr>
+</tbody></table></div>
+
+<h3 id="erreurs">Erreurs</h3>
+<p>Répondez avec un code HTTP, Glance traduit chacun en message qu'il affiche tel quel sur la carte (et sous le bouton Tester).</p>
+<div class="tw"><table>
+<thead><tr><th>Réponse du serveur</th><th>Message affiché dans Glance</th></tr></thead>
+<tbody>
+<tr><td><code>404</code></td><td data-l="Message">Source non configurée sur le serveur</td></tr>
+<tr><td><code>401</code> (jeton absent ou faux)</td><td data-l="Message">Jeton refusé</td></tr>
+<tr><td><code>400</code> avec <code>{"error":{"code":"…"}}</code></td><td data-l="Message">Requête refusée (<em>code</em>) ; sans code lisible : « Requête refusée (inconnu) »</td></tr>
+<tr><td><code>200</code> avec <code>version</code> ≠ 1</td><td data-l="Message">Version d'API non prise en charge</td></tr>
+<tr><td>Autre statut, ou corps qui n'est pas un objet JSON</td><td data-l="Message">Réponse inattendue du serveur</td></tr>
+<tr><td>Pas de réponse (réseau, délai dépassé : 15 s pour se connecter, 25 s pour répondre)</td><td data-l="Message">Chargement impossible.</td></tr>
+</tbody></table></div>
+<div class="codehead"><span>Corps d'une erreur 400</span><button class="cp" type="button" data-copy>Copier</button></div><pre><code>{ <span class="tk-k">"error"</span>: { <span class="tk-k">"code"</span>: <span class="tk-s">"plage_trop_longue"</span> } }</code></pre>
+<p>Glance ne relance pas automatiquement après l'une de ces erreurs : le message reste sur la carte jusqu'au prochain rafraîchissement, pour que vous puissiez corriger.</p>
+</section>
+
+<section id="lecture">
+<h2>Comment Glance lit vos réponses</h2>
+<p>Le contrat tient en quelques champs, mais chacun a une conséquence visible. Voici les règles, telles que l'app les applique.</p>
+
+<h3 id="unites">Unités, trous et taux global</h3>
+<ul>
+<li><strong><code>pourcentage</code></strong> : <code>valeur</code> va de 0 à 100 (14,3 pour 14,3 %). Glance la divise par 100 pour l'afficher.</li>
+<li><strong><code>nombre</code></strong> : <code>valeur</code> est un compte. Un <code>null</code> y vaut <strong>0</strong> : un compteur n'est jamais « non mesurable ».</li>
+<li><strong><code>valeur: null</code> sur un pourcentage = non mesurable</strong> (cohorte pas terminée, ou trop peu d'effectif). C'est un <strong>trou</strong> dans la courbe, jamais un 0 : « rien mesuré » n'est pas « 0 % ». Ses effectifs ne comptent pas dans le total.</li>
+<li><strong>Seuil de confidentialité : 5.</strong> Renvoyez <code>null</code> quand le dénominateur d'un bucket est inférieur à 5 : un taux sur trois personnes ne veut rien dire. Glance affiche la <code>valeur</code> reçue sans la recalculer.</li>
+<li><strong>Taux global</strong> de la carte = Σ numérateurs ÷ Σ dénominateurs des points mesurés, jamais la moyenne des taux. Il n'est pas affiché si Σ dénominateurs est inférieur à 5.</li>
+<li>Les buckets que vous n'envoyez pas sont comblés : trou pour un pourcentage, 0 pour un nombre. Les points hors de la fenêtre affichée sont écartés.</li>
+</ul>
+
+<h3 id="delais">Délais et cohortes (<code>delai_jours</code>)</h3>
+<p>La rétention J7 du jour J ne se connaît qu'au jour J + 7. Pour que la carte reste alignée sur la période choisie, Glance place chaque point à sa <strong>date de mesure</strong>, pas à sa date de cohorte.</p>
+<ul>
+<li>Votre <code>t</code> est le jour de la <strong>cohorte</strong> ; <code>valeur</code> est son taux, mesuré une fois <code>delai_jours</code> écoulés.</li>
+<li>Pour une période du 15 au 21 octobre, un indicateur J7 reçoit <code>de=2026-10-08&amp;a=2026-10-14</code> : les cohortes du 8 au 14, affichées aux dates du 15 au 21.</li>
+<li>Un point dont le jour de mesure n'est pas terminé (aujourd'hui) reste un trou, <strong>quoi que réponde le serveur</strong>. Sur « Aujourd'hui », un J1 n'a donc rien de mesurable, et la carte dit « Pas encore mesurable sur cette période ».</li>
+<li>En <strong>mois</strong>, Glance demande des mois et décale chaque bucket de <code>delai_jours</code> avant de le rattacher à son mois. Agrégez le mois entier côté serveur : chaque jour isolé tombe souvent sous le seuil de 5.</li>
+</ul>
+
+<h3 id="familles">Familles (<code>famille</code>)</h3>
+<p>Plusieurs indicateurs qui ne diffèrent que par leur délai (J1, J7, J30) forment une <strong>famille</strong>. Dans l'éditeur, l'utilisateur choisit la famille une fois ; <strong>Glance choisit le membre à chaque calcul</strong> : le plus grand délai qui tient <strong>quatre fois</strong> dans la fenêtre affichée, sinon le plus court.</p>
+<div class="tw"><table>
+<thead><tr><th>Période</th><th>Durée</th><th>Membre retenu</th></tr></thead>
+<tbody>
+<tr><td>Aujourd'hui, 24 h, 7 jours</td><td data-l="Durée">1 à 7 jours</td><td data-l="Membre">J1 (J7 exigerait 28 jours)</td></tr>
+<tr><td>30 jours</td><td data-l="Durée">30 jours</td><td data-l="Membre">J7 (28 ≤ 30 ; J30 exigerait 120)</td></tr>
+<tr><td>12 mois</td><td data-l="Durée">365 jours</td><td data-l="Membre">J30 (120 ≤ 365)</td></tr>
+</tbody></table></div>
+<p>Une seule carte suit ainsi la période, au lieu de trois cartes dont deux sont vides. Elle affiche le nom de la famille et « J7 · s'ajuste à la période ». Exemple de catalogue plus bas, dans <a href="#exemples">Exemples</a>.</p>
+<div class="callout"><p>Les membres d'une famille doivent partager la même <code>unite</code> (Glance prend celle du plus court délai), et <code>libelle_famille</code> suffit sur un seul d'entre eux.</p></div>
+
+<h3 id="retard">Données en retard (<code>donnees_jusqu_au</code>)</h3>
+<p>Certaines sources publient avec retard (les rapports d'une boutique d'applications, par exemple). Annoncez le dernier jour publié, <code>AAAA-MM-JJ</code> :</p>
+<ul>
+<li>Les buckets d'après sont des <strong>trous, même pour un <code>nombre</code></strong> : un jour pas encore publié n'est pas un jour à 0. Ils sont hors des totaux.</li>
+<li>La carte note « Données jusqu'au 18 oct. ». Si toute la fenêtre est postérieure, elle dit « Pas encore publiées ».</li>
+<li>La date porte sur le <code>t</code> de la série. Avec un délai, Glance la décale de <code>delai_jours</code>, comme les points.</li>
+<li>Côté serveur, il est conseillé de renvoyer pour le bucket mois qui <em>contient</em> cette date sa somme partielle, et <code>null</code> seulement pour un bucket qui commence après.</li>
+</ul>
+
+<h3 id="segments">Segments (<code>segments</code> et <code>totaux</code>)</h3>
+<p>Un <code>nombre</code> peut être découpé en parts (site, appli, autre plateforme…). Déclarez-les dans le catalogue, puis donnez dans chaque point la valeur de chaque part.</p>
+<ul>
+<li>La carte trace une courbe « Total » plus une courbe par part (légende cliquable), puis une barre par part sur la période.</li>
+<li>Un point <strong>sans clé <code>segments</code></strong> est <em>inconnu</em>, pas zéro : la source ne savait pas encore découper ce jour-là. Chaque part y est un trou ; <code>valeur</code> reste le vrai total distinct.</li>
+<li><code>totaux</code> donne le nombre de <strong>distincts sur toute la plage</strong> pour chaque part. Les barres se calculent dessus, <strong>jamais sur la somme des points</strong> : un joueur actif deux jours compterait deux fois.</li>
+<li>La somme des parts peut dépasser le total, si une même personne passe par deux plateformes : la barre se lit donc en part de Σ <code>totaux</code>.</li>
+<li>Tant qu'aucune part n'a de valeur, la carte reste un compteur simple. Les segments ne s'appliquent pas à un <code>pourcentage</code>.</li>
+</ul>
+
+<h3 id="heures">Heures (<code>granularites</code>)</h3>
+<p>Par défaut, même sur « Aujourd'hui », Glance demande des jours et la carte affiche un point par jour. Elle demande <code>granularite=heure</code> seulement si <strong>les trois conditions</strong> sont réunies :</p>
+<ul>
+<li>la période affichée se lit en heures (« Aujourd'hui », « 24 h »…) ;</li>
+<li>l'indicateur annonce <code>"heure"</code> dans <code>granularites</code> ;</li>
+<li>il n'a pas de délai (<code>delai_jours</code> absent ou 0).</li>
+</ul>
+<p>Alors : <code>de</code> et <code>a</code> restent des <strong>jours</strong> (la source rend des journées entières, Glance ne garde que les heures de la fenêtre) ; <code>t</code> vaut <code>AAAA-MM-JJTHH:00</code> en heure locale, un point par heure, vides compris (23 ou 25 points les jours de changement d'heure) ; 30 jours au plus, au-delà répondez <code>400</code> <code>plage_trop_longue</code>. Les <code>totaux</code> portent sur les journées entières.</p>
+
+<h3 id="limites">Limites et bonnes pratiques</h3>
+<ul>
+<li><strong>400 jours au plus</strong> par requête. Pour « Tout » ou une période perso plus longue, Glance ramène lui-même <code>de</code> à <code>a</code> − 399 jours : les buckets d'avant restent vides (trou pour un %, 0 pour un nombre).</li>
+<li><strong>Version</strong> : toute <code>version</code> autre que <code>1</code> est refusée. Une évolution incompatible du contrat passera par une nouvelle version, pas par un changement silencieux.</li>
+<li><strong>Cache</strong> : mettez les réponses en cache côté serveur, 5 minutes conviennent. Plusieurs cartes et plusieurs appareils interrogent la même source.</li>
+<li><strong>Lecture seule, sans donnée personnelle</strong> : n'exposez que des agrégats. Le seuil de 5 existe pour qu'aucun chiffre ne désigne une personne.</li>
+<li><strong>Jeton</strong> : comparez-le à temps constant, révoquez-le si un appareil est perdu, et ne l'inscrivez jamais dans une URL.</li>
+</ul>
+</section>
+
+<section id="exemples">
+<h2>Exemples de réponses</h2>
+
+<h3>Un pourcentage, avec des trous</h3>
+<p>Rétention J1 sur sept jours. Le 14, la cohorte n'a que 3 personnes : <code>null</code>. Le 18, la cohorte n'est pas encore mesurable : <code>null</code> aussi. Le taux global est (21 + 17 + 23 + 18 + 15) ÷ (147 + 140 + 146 + 138 + 126), soit 94 ÷ 697 ≈ 13,5 %, sans les deux trous.</p>
+<div class="codehead"><span>series?ids=retention_j1&amp;de=2026-10-12&amp;a=2026-10-18&amp;granularite=jour</span><button class="cp" type="button" data-copy>Copier</button></div><pre><code>{
+  <span class="tk-k">"version"</span>: <span class="tk-n">1</span>,
+  <span class="tk-k">"series"</span>: [{
+    <span class="tk-k">"id"</span>: <span class="tk-s">"retention_j1"</span>,
+    <span class="tk-k">"points"</span>: [
+      { <span class="tk-k">"t"</span>: <span class="tk-s">"2026-10-12"</span>, <span class="tk-k">"valeur"</span>: <span class="tk-n">14.3</span>, <span class="tk-k">"numerateur"</span>: <span class="tk-n">21</span>, <span class="tk-k">"denominateur"</span>: <span class="tk-n">147</span> },
+      { <span class="tk-k">"t"</span>: <span class="tk-s">"2026-10-13"</span>, <span class="tk-k">"valeur"</span>: <span class="tk-n">12.1</span>, <span class="tk-k">"numerateur"</span>: <span class="tk-n">17</span>, <span class="tk-k">"denominateur"</span>: <span class="tk-n">140</span> },
+      { <span class="tk-k">"t"</span>: <span class="tk-s">"2026-10-14"</span>, <span class="tk-k">"valeur"</span>: <span class="tk-n">null</span>, <span class="tk-k">"numerateur"</span>: <span class="tk-n">2</span>, <span class="tk-k">"denominateur"</span>: <span class="tk-n">3</span> },
+      { <span class="tk-k">"t"</span>: <span class="tk-s">"2026-10-15"</span>, <span class="tk-k">"valeur"</span>: <span class="tk-n">15.8</span>, <span class="tk-k">"numerateur"</span>: <span class="tk-n">23</span>, <span class="tk-k">"denominateur"</span>: <span class="tk-n">146</span> },
+      { <span class="tk-k">"t"</span>: <span class="tk-s">"2026-10-16"</span>, <span class="tk-k">"valeur"</span>: <span class="tk-n">13.0</span>, <span class="tk-k">"numerateur"</span>: <span class="tk-n">18</span>, <span class="tk-k">"denominateur"</span>: <span class="tk-n">138</span> },
+      { <span class="tk-k">"t"</span>: <span class="tk-s">"2026-10-17"</span>, <span class="tk-k">"valeur"</span>: <span class="tk-n">11.9</span>, <span class="tk-k">"numerateur"</span>: <span class="tk-n">15</span>, <span class="tk-k">"denominateur"</span>: <span class="tk-n">126</span> },
+      { <span class="tk-k">"t"</span>: <span class="tk-s">"2026-10-18"</span>, <span class="tk-k">"valeur"</span>: <span class="tk-n">null</span>, <span class="tk-k">"numerateur"</span>: <span class="tk-n">0</span>, <span class="tk-k">"denominateur"</span>: <span class="tk-n">0</span> }
+    ]
+  }]
+}</code></pre>
+
+<h3>Un nombre, avec des parts</h3>
+<p>Un indicateur découpé en trois plateformes, déclaré ainsi dans le catalogue :</p>
+<div class="codehead"><span>Catalogue · un indicateur découpé</span><button class="cp" type="button" data-copy>Copier</button></div><pre><code>{
+  <span class="tk-k">"id"</span>: <span class="tk-s">"joueurs_actifs"</span>,
+  <span class="tk-k">"libelle"</span>: <span class="tk-s">"Joueurs actifs"</span>,
+  <span class="tk-k">"unite"</span>: <span class="tk-s">"nombre"</span>,
+  <span class="tk-k">"granularites"</span>: [<span class="tk-s">"heure"</span>, <span class="tk-s">"jour"</span>, <span class="tk-s">"mois"</span>],
+  <span class="tk-k">"segments"</span>: [
+    { <span class="tk-k">"id"</span>: <span class="tk-s">"site"</span>, <span class="tk-k">"libelle"</span>: <span class="tk-s">"Site"</span> },
+    { <span class="tk-k">"id"</span>: <span class="tk-s">"appli"</span>, <span class="tk-k">"libelle"</span>: <span class="tk-s">"Appli"</span> },
+    { <span class="tk-k">"id"</span>: <span class="tk-s">"tiers"</span>, <span class="tk-k">"libelle"</span>: <span class="tk-s">"Autres"</span>, <span class="tk-k">"estime"</span>: <span class="tk-n">true</span> }
+  ]
+}</code></pre>
+<p>Sa série : le 18 n'a pas de clé <code>segments</code> (la journée n'est pas encore découpée), et <code>totaux</code> donne les distincts de la plage. La part « Site » vaut 310 ÷ (310 + 402 + 9) ≈ 43 %.</p>
+<div class="codehead"><span>Réponse · series</span><button class="cp" type="button" data-copy>Copier</button></div><pre><code>{
+  <span class="tk-k">"version"</span>: <span class="tk-n">1</span>,
+  <span class="tk-k">"series"</span>: [{
+    <span class="tk-k">"id"</span>: <span class="tk-s">"joueurs_actifs"</span>,
+    <span class="tk-k">"points"</span>: [
+      { <span class="tk-k">"t"</span>: <span class="tk-s">"2026-10-16"</span>, <span class="tk-k">"valeur"</span>: <span class="tk-n">412</span>,
+        <span class="tk-k">"segments"</span>: { <span class="tk-k">"site"</span>: <span class="tk-n">190</span>, <span class="tk-k">"appli"</span>: <span class="tk-n">230</span>, <span class="tk-k">"tiers"</span>: <span class="tk-n">5</span> } },
+      { <span class="tk-k">"t"</span>: <span class="tk-s">"2026-10-17"</span>, <span class="tk-k">"valeur"</span>: <span class="tk-n">388</span>,
+        <span class="tk-k">"segments"</span>: { <span class="tk-k">"site"</span>: <span class="tk-n">171</span>, <span class="tk-k">"appli"</span>: <span class="tk-n">221</span>, <span class="tk-k">"tiers"</span>: <span class="tk-n">4</span> } },
+      { <span class="tk-k">"t"</span>: <span class="tk-s">"2026-10-18"</span>, <span class="tk-k">"valeur"</span>: <span class="tk-n">120</span> }
+    ],
+    <span class="tk-k">"totaux"</span>: { <span class="tk-k">"site"</span>: <span class="tk-n">310</span>, <span class="tk-k">"appli"</span>: <span class="tk-n">402</span>, <span class="tk-k">"tiers"</span>: <span class="tk-n">9</span> }
+  }]
+}</code></pre>
+
+<h3>Une famille J1 / J7 / J30</h3>
+<p>Trois indicateurs d'une même famille. Dans l'éditeur, une seule entrée « Rétention » apparaît.</p>
+<div class="codehead"><span>Réponse · catalogue</span><button class="cp" type="button" data-copy>Copier</button></div><pre><code>{
+  <span class="tk-k">"version"</span>: <span class="tk-n">1</span>,
+  <span class="tk-k">"indicateurs"</span>: [
+    { <span class="tk-k">"id"</span>: <span class="tk-s">"retention_j1"</span>, <span class="tk-k">"libelle"</span>: <span class="tk-s">"Rétention J1"</span>, <span class="tk-k">"unite"</span>: <span class="tk-s">"pourcentage"</span>,
+      <span class="tk-k">"granularites"</span>: [<span class="tk-s">"jour"</span>, <span class="tk-s">"mois"</span>], <span class="tk-k">"delai_jours"</span>: <span class="tk-n">1</span>,
+      <span class="tk-k">"famille"</span>: <span class="tk-s">"retention"</span>, <span class="tk-k">"libelle_famille"</span>: <span class="tk-s">"Rétention"</span> },
+    { <span class="tk-k">"id"</span>: <span class="tk-s">"retention_j7"</span>, <span class="tk-k">"libelle"</span>: <span class="tk-s">"Rétention J7"</span>, <span class="tk-k">"unite"</span>: <span class="tk-s">"pourcentage"</span>,
+      <span class="tk-k">"granularites"</span>: [<span class="tk-s">"jour"</span>, <span class="tk-s">"mois"</span>], <span class="tk-k">"delai_jours"</span>: <span class="tk-n">7</span>,
+      <span class="tk-k">"famille"</span>: <span class="tk-s">"retention"</span>, <span class="tk-k">"libelle_famille"</span>: <span class="tk-s">"Rétention"</span> },
+    { <span class="tk-k">"id"</span>: <span class="tk-s">"retention_j30"</span>, <span class="tk-k">"libelle"</span>: <span class="tk-s">"Rétention J30"</span>, <span class="tk-k">"unite"</span>: <span class="tk-s">"pourcentage"</span>,
+      <span class="tk-k">"granularites"</span>: [<span class="tk-s">"jour"</span>, <span class="tk-s">"mois"</span>], <span class="tk-k">"delai_jours"</span>: <span class="tk-n">30</span>,
+      <span class="tk-k">"famille"</span>: <span class="tk-s">"retention"</span>, <span class="tk-k">"libelle_famille"</span>: <span class="tk-s">"Rétention"</span> }
+  ]
+}</code></pre>
+
+<h3>Des points horaires</h3>
+<p>Réponse à <code>granularite=heure</code> pour un indicateur sans délai qui annonce <code>"heure"</code> :</p>
+<div class="codehead"><span>Réponse · series</span><button class="cp" type="button" data-copy>Copier</button></div><pre><code>{
+  <span class="tk-k">"version"</span>: <span class="tk-n">1</span>,
+  <span class="tk-k">"series"</span>: [{
+    <span class="tk-k">"id"</span>: <span class="tk-s">"joueurs_actifs"</span>,
+    <span class="tk-k">"points"</span>: [
+      { <span class="tk-k">"t"</span>: <span class="tk-s">"2026-10-18T00:00"</span>, <span class="tk-k">"valeur"</span>: <span class="tk-n">12</span> },
+      { <span class="tk-k">"t"</span>: <span class="tk-s">"2026-10-18T01:00"</span>, <span class="tk-k">"valeur"</span>: <span class="tk-n">7</span> },
+      { <span class="tk-k">"t"</span>: <span class="tk-s">"2026-10-18T02:00"</span>, <span class="tk-k">"valeur"</span>: <span class="tk-n">3</span> }
+    ]
+  }]
+}</code></pre>
+</section>
+
+<section id="serveur">
+<h2>Un serveur minimal d'exemple</h2>
+<p>Environ soixante lignes de Node.js, sans dépendance : le module <code>http</code> natif suffit. Il sert un catalogue de deux indicateurs (<code>comptes_crees</code>, un nombre, et <code>retention_j1</code>, un pourcentage à délai), vérifie le jeton, valide les paramètres, gère jours et mois, applique le seuil de 5 et l'attente de la cohorte. Les chiffres sont fictifs : remplacez <code>dayStats</code> par vos requêtes.</p>
+<div class="codehead"><span>server.js · node server.js</span><button class="cp" type="button" data-copy>Copier</button></div><pre><code>const http = require(<span class="tk-s">'node:http'</span>);
+
+const TOKEN = process.env.METRICS_TOKEN || <span class="tk-s">'change-me'</span>;
+const DAY = 86_400_000;
+const MAX_DAYS = 400;
+const MIN_DEN = 5; <span class="tk-c">// seuil de confidentialité : en dessous, valeur = null</span>
+
+const CATALOGUE = { version: 1, indicateurs: [
+  { id: <span class="tk-s">'comptes_crees'</span>, libelle: <span class="tk-s">'Comptes créés'</span>, description: <span class="tk-s">'Inscriptions du jour.'</span>,
+    unite: <span class="tk-s">'nombre'</span>, granularites: [<span class="tk-s">'jour'</span>, <span class="tk-s">'mois'</span>] },
+  { id: <span class="tk-s">'retention_j1'</span>, libelle: <span class="tk-s">'Rétention J1'</span>, description: <span class="tk-s">'Nouveaux revenus le lendemain.'</span>,
+    unite: <span class="tk-s">'pourcentage'</span>, granularites: [<span class="tk-s">'jour'</span>, <span class="tk-s">'mois'</span>], delai_jours: 1 },
+] };
+const DELAI = { comptes_crees: 0, retention_j1: 1 };
+
+<span class="tk-c">// À remplacer par vos requêtes : un jour -&gt; { n, d } (numérateur, dénominateur).</span>
+const dayStats = (id, day) =&gt; {
+  const k = Date.parse(day) / DAY;
+  return id === <span class="tk-s">'comptes_crees'</span> ? { n: 20 + (k % 7) * 3, d: 0 } : { n: 10 + (k % 5), d: 90 + (k % 9) };
+};
+
+function series(q) {
+  const ids = (q.get(<span class="tk-s">'ids'</span>) || <span class="tk-s">''</span>).split(<span class="tk-s">','</span>).filter(Boolean);
+  const de = Date.parse(q.get(<span class="tk-s">'de'</span>)), a = Date.parse(q.get(<span class="tk-s">'a'</span>));
+  const gran = q.get(<span class="tk-s">'granularite'</span>) || <span class="tk-s">'jour'</span>;
+  if (!ids.length || ids.some((id) =&gt; !(id in DELAI))) return [400, <span class="tk-s">'indicateur_inconnu'</span>];
+  if (isNaN(de) || isNaN(a) || a &lt; de) return [400, <span class="tk-s">'dates_invalides'</span>];
+  if ((a - de) / DAY + 1 &gt; MAX_DAYS) return [400, <span class="tk-s">'plage_trop_longue'</span>];
+  if (gran !== <span class="tk-s">'jour'</span> &amp;&amp; gran !== <span class="tk-s">'mois'</span>) return [400, <span class="tk-s">'granularite_inconnue'</span>];
+  const today = Date.now() - (Date.now() % DAY);
+  return [200, { version: 1, series: ids.map((id) =&gt; {
+    const buckets = new Map();
+    for (let t = de; t &lt;= a; t += DAY) {
+      const day = new Date(t).toISOString().slice(0, 10);
+      const key = gran === <span class="tk-s">'mois'</span> ? day.slice(0, 8) + <span class="tk-s">'01'</span> : day;
+      const b = buckets.get(key) || { n: 0, d: 0, fini: true };
+      const s = dayStats(id, day);
+      buckets.set(key, { n: b.n + s.n, d: b.d + s.d, fini: b.fini &amp;&amp; t + DELAI[id] * DAY &lt; today });
+    }
+    return { id, points: [...buckets].map(([t, b]) =&gt; ({
+      t,
+      valeur: id === <span class="tk-s">'comptes_crees'</span> ? b.n
+        : b.fini &amp;&amp; b.d &gt;= MIN_DEN ? Math.round((1000 * b.n) / b.d) / 10 : null,
+      numerateur: b.n, denominateur: b.d,
+    })) };
+  }) }];
+}
+
+http.createServer((req, res) =&gt; {
+  const url = new URL(req.url, <span class="tk-s">'http://x'</span>);
+  const send = (status, body) =&gt; {
+    res.writeHead(status, { <span class="tk-s">'content-type'</span>: <span class="tk-s">'application/json'</span> });
+    res.end(JSON.stringify(status === 400 ? { error: { code: body } } : body));
+  };
+  if (req.headers.authorization !== <span class="tk-s">`Bearer ${TOKEN}`</span>) return send(401, {});
+  if (url.pathname === <span class="tk-s">'/metriques/catalogue'</span>) return send(200, CATALOGUE);
+  if (url.pathname === <span class="tk-s">'/metriques/series'</span>) return send(...series(url.searchParams));
+  send(404, {});
+}).listen(3000, () =&gt; console.log(<span class="tk-s">'http://localhost:3000/metriques/'</span>));</code></pre>
+<p>Lancez-le avec <code>METRICS_TOKEN=mon-jeton node server.js</code>, testez-le avec <code>curl</code> :</p>
+<div class="codehead"><span>Terminal</span><button class="cp" type="button" data-copy>Copier</button></div><pre><code>curl -H 'Authorization: Bearer mon-jeton' \
+  http://localhost:3000/metriques/catalogue
+
+curl -H 'Authorization: Bearer mon-jeton' \
+  'http://localhost:3000/metriques/series?ids=retention_j1&amp;de=2026-10-12&amp;a=2026-10-18&amp;granularite=jour'</code></pre>
+<p>Puis, dans Glance, saisissez l'adresse <code>http://&lt;ip-de-votre-machine&gt;:3000/metriques/</code> et le jeton. En production, placez-le derrière HTTPS (un reverse proxy suffit) : le jeton circule dans chaque requête.</p>
+<div class="callout warn"><p><strong>Ce n'est qu'un squelette.</strong> Il ne gère ni <code>heure</code>, ni <code>delai_jours</code> au-delà de la cohorte, ni <code>segments</code>, ni le cache. Ajoutez ce dont vos indicateurs ont besoin en suivant les sections précédentes.</p></div>
+</section>
+
+  </article>
+</div>
+<footer class="bot"><span>© 2026 My-Monkey · Glance est open source (MIT)</span><span><a href="/privacy.html">Confidentialité</a></span></footer>
+</div>
+<script>
+(function(){
+  document.addEventListener('click',function(e){
+    var a=e.target.closest&&e.target.closest('[data-lang]');
+    if(a){try{localStorage.setItem('glance-lang',a.getAttribute('data-lang'))}catch(_){}}
+    var b=e.target.closest&&e.target.closest('[data-copy]');
+    if(b){
+      var t=b.parentNode.nextElementSibling.textContent, l=b.textContent;
+      var done=function(){b.textContent=document.documentElement.lang==='fr'?'Copié':'Copied';setTimeout(function(){b.textContent=l},1400)};
+      if(navigator.clipboard)navigator.clipboard.writeText(t).then(done,function(){});
+    }
+  });
+  var links=[].slice.call(document.querySelectorAll('.toc a')),map={};
+  links.forEach(function(a){map[a.getAttribute('href').slice(1)]=a});
+  if(!('IntersectionObserver' in window))return;
+  var heads=[].slice.call(document.querySelectorAll('article section[id], article h3[id]'));
+  var io=new IntersectionObserver(function(es){
+    es.forEach(function(en){
+      if(!en.isIntersecting)return;
+      links.forEach(function(a){a.classList.remove('on')});
+      var a=map[en.target.id]; if(a)a.classList.add('on');
+    });
+  },{rootMargin:'-10% 0px -80% 0px'});
+  heads.forEach(function(h){io.observe(h)});
+})();
+</script>
+</body>
+</html>
