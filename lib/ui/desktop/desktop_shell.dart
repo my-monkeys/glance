@@ -702,7 +702,7 @@ class _OverviewState extends ConsumerState<_Overview> {
         ListView(
           padding: const EdgeInsets.fromLTRB(28, 26, 28, 40),
           children: [
-            Text('${dateLabel.toUpperCase()} · ${periodState.period.label}',
+            Text('${dateLabel.toUpperCase()} · ${periodState.period.label(context.l10n)}',
                 style: GT.mono(11.5, color: p.fg3)),
             const SizedBox(height: 4),
             Row(

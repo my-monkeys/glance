@@ -267,7 +267,7 @@ class SettingsScreen extends ConsumerWidget {
                       for (final per in Period.values)
                         if (per != Period.custom)
                           GlanceChip(
-                            label: per.label,
+                            label: per.label(l10n),
                             selected: settings.defaultPeriod == per,
                             onTap: () => notifier.setDefaultPeriod(per),
                           ),

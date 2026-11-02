@@ -1045,5 +1045,327 @@
   "periodUnitMonth": "Mois",
   "@periodUnitMonth": {
     "description": "Granularité du graphique, libellé de puce très court"
+  },
+  "errorsAuthRefused": "Identifiants refusés.",
+  "errorsRequestRefused": "Requête refusée par le serveur.",
+  "errorsNotFound": "Instance ou API introuvable.",
+  "errorsTimeout": "Délai dépassé — instance lente ou injoignable.",
+  "errorsUnreachable": "Instance injoignable. Vérifie l'URL.",
+  "errorsServerCode": "Erreur {code} du serveur.",
+  "@errorsServerCode": {
+    "placeholders": {
+      "code": {
+        "type": "int"
+      }
+    }
+  },
+  "errorsConnectionFailed": "Connexion impossible.",
+  "errorsGeneric": "Erreur : {detail}",
+  "@errorsGeneric": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "errUnsupportedIndicators": "Indicateurs non pris en charge",
+  "errUnsupportedSiteTables": "Tableaux de sites non pris en charge",
+  "errUnsupportedFunnels": "Entonnoirs non pris en charge",
+  "errUnsupportedBreakdowns": "Répartitions non prises en charge",
+  "errOperatorUmamiFunnel": "Opérateur « {op} » indisponible dans un entonnoir Umami",
+  "@errOperatorUmamiFunnel": {
+    "placeholders": {
+      "op": {
+        "type": "String"
+      }
+    }
+  },
+  "errOperatorPlausible": "Opérateur « {op} » indisponible chez Plausible (propriétés en texte seulement)",
+  "@errOperatorPlausible": {
+    "placeholders": {
+      "op": {
+        "type": "String"
+      }
+    }
+  },
+  "errFathomSoon": "Fathom arrive bientôt.",
+  "errPlausibleNeedsSite": "Renseignez un domaine, ou email + mot de passe pour lister vos sites automatiquement.",
+  "errUmamiLoginUnexpected": "Réponse de login Umami inattendue",
+  "errBucketsTooFine": "Découpage trop fin : plus de {count} points sur la période.",
+  "@errBucketsTooFine": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "errMetricsNotConfigured": "Source non configurée sur le serveur",
+  "errMetricsBadToken": "Jeton refusé",
+  "errMetricsBadRequest": "Requête refusée ({code})",
+  "@errMetricsBadRequest": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "errMetricsUnsupportedVersion": "Version d'API non prise en charge",
+  "errMetricsUnexpected": "Réponse inattendue du serveur",
+  "syncMsgUnreachable": "Serveur injoignable. Réessayez.",
+  "syncMsgSessionExpired": "Session expirée. Reconnectez-vous puis réessayez.",
+  "syncMsgPurchaseFailed": "Achat impossible. Réessayez.",
+  "syncMsgPurchasePending": "Achat validé — activation en cours, réessayez la sync dans un instant.",
+  "syncMsgNothingToRestore": "Aucun achat à restaurer.",
+  "syncMsgRestorePending": "Achat restauré — activation en cours…",
+  "syncMsgCannotDecrypt": "Impossible de déchiffrer la config distante.",
+  "syncMsgProRequired": "Sync réservée à Glance Sync (Pro).",
+  "syncMsgBadCredentials": "E-mail ou mot de passe incorrect.",
+  "syncMsgPasswordTooShort": "Mot de passe trop court : {count} caractères minimum.",
+  "@syncMsgPasswordTooShort": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncMsgPasswordTooLong": "Mot de passe trop long.",
+  "syncMsgInvalidEmail": "Adresse e-mail invalide.",
+  "syncMsgAccountExists": "Cet e-mail a déjà un compte : connectez-vous.",
+  "syncMsgSignUpFailed": "Impossible de créer le compte.",
+  "periodToday": "Aujourd'hui",
+  "@periodToday": {
+    "description": "Libellé court d'une période, dans la barre de contrôles"
+  },
+  "period24h": "24 h",
+  "@period24h": {
+    "description": "Libellé court d'une période, dans la barre de contrôles"
+  },
+  "period7d": "7 jours",
+  "@period7d": {
+    "description": "Libellé court d'une période, dans la barre de contrôles"
+  },
+  "period30d": "30 j",
+  "@period30d": {
+    "description": "Libellé court d'une période, dans la barre de contrôles"
+  },
+  "periodThisMonth": "Ce mois-ci",
+  "@periodThisMonth": {
+    "description": "Libellé court d'une période, dans la barre de contrôles"
+  },
+  "period12m": "12 m",
+  "@period12m": {
+    "description": "Libellé court d'une période, dans la barre de contrôles"
+  },
+  "periodThisYear": "Cette année",
+  "@periodThisYear": {
+    "description": "Libellé court d'une période, dans la barre de contrôles"
+  },
+  "periodAllTime": "Tout",
+  "@periodAllTime": {
+    "description": "Libellé court d'une période, dans la barre de contrôles : depuis la première donnée"
+  },
+  "periodCustom": "Perso",
+  "@periodCustom": {
+    "description": "Libellé court d'une période, dans la barre de contrôles : dates choisies à la main"
+  },
+  "metricTypePages": "Chemins",
+  "@metricTypePages": {
+    "description": "Dimension de données d'un site, dans le sélecteur d'une section du détail : chemins des pages"
+  },
+  "metricTypeEntry": "Entrée",
+  "@metricTypeEntry": {
+    "description": "Dimension de données d'un site, dans le sélecteur d'une section du détail : pages d'entrée"
+  },
+  "metricTypeExit": "Sortie",
+  "@metricTypeExit": {
+    "description": "Dimension de données d'un site, dans le sélecteur d'une section du détail : pages de sortie"
+  },
+  "metricTypeTitle": "Titre",
+  "@metricTypeTitle": {
+    "description": "Dimension de données d'un site, dans le sélecteur d'une section du détail : titres des pages"
+  },
+  "metricTypeReferrers": "Référents",
+  "@metricTypeReferrers": {
+    "description": "Dimension de données d'un site, dans le sélecteur d'une section du détail"
+  },
+  "metricTypeChannels": "Canaux",
+  "@metricTypeChannels": {
+    "description": "Dimension de données d'un site, dans le sélecteur d'une section du détail : canaux d'acquisition"
+  },
+  "metricTypeQueries": "Requêtes",
+  "@metricTypeQueries": {
+    "description": "Dimension de données d'un site, dans le sélecteur d'une section du détail : requêtes de recherche"
+  },
+  "metricTypeBrowsers": "Navigateurs",
+  "@metricTypeBrowsers": {
+    "description": "Dimension de données d'un site, dans le sélecteur d'une section du détail"
+  },
+  "metricTypeOs": "OS",
+  "@metricTypeOs": {
+    "description": "Dimension de données d'un site, dans le sélecteur d'une section du détail : systèmes d'exploitation"
+  },
+  "metricTypeDevices": "Appareils",
+  "@metricTypeDevices": {
+    "description": "Dimension de données d'un site, dans le sélecteur d'une section du détail"
+  },
+  "metricTypeScreens": "Écrans",
+  "@metricTypeScreens": {
+    "description": "Dimension de données d'un site, dans le sélecteur d'une section du détail : résolutions d'écran"
+  },
+  "metricTypeCountries": "Pays",
+  "@metricTypeCountries": {
+    "description": "Dimension de données d'un site, dans le sélecteur d'une section du détail"
+  },
+  "metricTypeRegions": "Régions",
+  "@metricTypeRegions": {
+    "description": "Dimension de données d'un site, dans le sélecteur d'une section du détail"
+  },
+  "metricTypeCities": "Villes",
+  "@metricTypeCities": {
+    "description": "Dimension de données d'un site, dans le sélecteur d'une section du détail"
+  },
+  "metricTypeLanguages": "Langues",
+  "@metricTypeLanguages": {
+    "description": "Dimension de données d'un site, dans le sélecteur d'une section du détail"
+  },
+  "metricTypeEvents": "Événements",
+  "@metricTypeEvents": {
+    "description": "Dimension de données d'un site, dans le sélecteur d'une section du détail"
+  },
+  "metricSectionPages": "Pages",
+  "@metricSectionPages": {
+    "description": "Titre d'un des quatre panneaux de données du détail d'un site"
+  },
+  "metricSectionSources": "Sources",
+  "@metricSectionSources": {
+    "description": "Titre d'un des quatre panneaux de données du détail d'un site : d'où viennent les visiteurs"
+  },
+  "metricSectionEnvironment": "Environnement",
+  "@metricSectionEnvironment": {
+    "description": "Titre d'un des quatre panneaux de données du détail d'un site : navigateur, système, appareil"
+  },
+  "metricSectionLocation": "Emplacement",
+  "@metricSectionLocation": {
+    "description": "Titre d'un des quatre panneaux de données du détail d'un site : pays, régions, villes, langues"
+  },
+  "filterOpContains": "contient",
+  "@filterOpContains": {
+    "description": "Opérateur de filtre, lu dans « propriété contient valeur »"
+  },
+  "filterOpNotContains": "ne contient pas",
+  "@filterOpNotContains": {
+    "description": "Opérateur de filtre, lu dans « propriété ne contient pas valeur »"
+  },
+  "entityUnknown": "Inconnu",
+  "@entityUnknown": {
+    "description": "Valeur absente (navigateur, appareil, langue…)"
+  },
+  "entityReferrerDirect": "Accès direct",
+  "@entityReferrerDirect": {
+    "description": "Source d'une visite sans référent"
+  },
+  "entityBrowserSearchBot": "Robot d'indexation",
+  "@entityBrowserSearchBot": {
+    "description": "Navigateur : robot des moteurs de recherche"
+  },
+  "entityDeviceDesktop": "Ordinateur",
+  "@entityDeviceDesktop": {
+    "description": "Type d'appareil"
+  },
+  "entityDeviceLaptop": "Portable",
+  "@entityDeviceLaptop": {
+    "description": "Type d'appareil"
+  },
+  "entityDeviceTablet": "Tablette",
+  "@entityDeviceTablet": {
+    "description": "Type d'appareil"
+  },
+  "entityDeviceMobile": "Mobile",
+  "@entityDeviceMobile": {
+    "description": "Type d'appareil"
+  },
+  "entityDeviceWearable": "Montre",
+  "@entityDeviceWearable": {
+    "description": "Type d'appareil"
+  },
+  "entityDeviceConsole": "Console",
+  "@entityDeviceConsole": {
+    "description": "Type d'appareil"
+  },
+  "entityDeviceTv": "Téléviseur",
+  "@entityDeviceTv": {
+    "description": "Type d'appareil"
+  },
+  "channelDirect": "Direct",
+  "@channelDirect": {
+    "description": "Canal d'acquisition de trafic : visite sans référent"
+  },
+  "channelReferral": "Référent",
+  "@channelReferral": {
+    "description": "Canal d'acquisition de trafic : lien depuis un autre site"
+  },
+  "channelAffiliate": "Affiliation",
+  "@channelAffiliate": {
+    "description": "Canal d'acquisition de trafic"
+  },
+  "channelEmail": "E-mail",
+  "@channelEmail": {
+    "description": "Canal d'acquisition de trafic"
+  },
+  "channelOrganicSearch": "Recherche organique",
+  "@channelOrganicSearch": {
+    "description": "Canal d'acquisition de trafic"
+  },
+  "channelOrganicSocial": "Réseaux sociaux",
+  "@channelOrganicSocial": {
+    "description": "Canal d'acquisition de trafic"
+  },
+  "channelOrganicShopping": "Achat organique",
+  "@channelOrganicShopping": {
+    "description": "Canal d'acquisition de trafic"
+  },
+  "channelOrganicVideo": "Vidéo organique",
+  "@channelOrganicVideo": {
+    "description": "Canal d'acquisition de trafic"
+  },
+  "channelPaidAds": "Publicité payante",
+  "@channelPaidAds": {
+    "description": "Canal d'acquisition de trafic"
+  },
+  "channelPaidSearch": "Recherche payante",
+  "@channelPaidSearch": {
+    "description": "Canal d'acquisition de trafic"
+  },
+  "channelPaidSocial": "Réseaux sociaux payants",
+  "@channelPaidSocial": {
+    "description": "Canal d'acquisition de trafic"
+  },
+  "channelPaidShopping": "Achat payant",
+  "@channelPaidShopping": {
+    "description": "Canal d'acquisition de trafic"
+  },
+  "channelPaidVideo": "Vidéo payante",
+  "@channelPaidVideo": {
+    "description": "Canal d'acquisition de trafic"
+  },
+  "credInstanceUrl": "URL de l'instance",
+  "credUmamiUrlPlaceholder": "analytics.mondomaine.fr",
+  "@credUmamiUrlPlaceholder": {
+    "description": "Exemple d'adresse d'instance Umami"
+  },
+  "credUsername": "Nom d'utilisateur",
+  "credPassword": "Mot de passe",
+  "credApiKey": "Clé API",
+  "credEmailOptional": "Email du compte (facultatif)",
+  "credEmailPlaceholder": "vous@exemple.fr",
+  "@credEmailPlaceholder": {
+    "description": "Exemple d'adresse e-mail"
+  },
+  "credEmailHint": "Email + mot de passe : Glance liste vos sites automatiquement. Sinon, laissez vide et renseignez un domaine ci-dessous.",
+  "credPasswordOptional": "Mot de passe (facultatif)",
+  "credDomainFallback": "Domaine (si pas d'email/mot de passe)",
+  "credDomainPlaceholder": "mondomaine.fr",
+  "@credDomainPlaceholder": {
+    "description": "Exemple de nom de domaine"
   }
 }

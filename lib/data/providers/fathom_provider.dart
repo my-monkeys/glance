@@ -1,13 +1,14 @@
 import '../models/models.dart';
 import '../models/period.dart';
 import 'analytics_provider.dart';
+import 'provider_errors.dart';
 
 /// Emplacement réservé pour Fathom. L'interface est prête ; l'implémentation
 /// sera branchée quand on aura une instance à tester.
 class FathomProvider extends AnalyticsProvider {
   FathomProvider(super.account, super.creds);
 
-  Never _todo() => throw UnimplementedError('Fathom arrive bientôt.');
+  Never _todo() => throw const FathomComingSoon();
 
   @override
   Future<int> verify() => _todo();

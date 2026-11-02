@@ -1427,4 +1427,331 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get periodUnitMonth => 'Mois';
+
+  @override
+  String get errorsAuthRefused => 'Identifiants refusés.';
+
+  @override
+  String get errorsRequestRefused => 'Requête refusée par le serveur.';
+
+  @override
+  String get errorsNotFound => 'Instance ou API introuvable.';
+
+  @override
+  String get errorsTimeout => 'Délai dépassé — instance lente ou injoignable.';
+
+  @override
+  String get errorsUnreachable => 'Instance injoignable. Vérifie l\'URL.';
+
+  @override
+  String errorsServerCode(int code) {
+    return 'Erreur $code du serveur.';
+  }
+
+  @override
+  String get errorsConnectionFailed => 'Connexion impossible.';
+
+  @override
+  String errorsGeneric(String detail) {
+    return 'Erreur : $detail';
+  }
+
+  @override
+  String get errUnsupportedIndicators => 'Indicateurs non pris en charge';
+
+  @override
+  String get errUnsupportedSiteTables => 'Tableaux de sites non pris en charge';
+
+  @override
+  String get errUnsupportedFunnels => 'Entonnoirs non pris en charge';
+
+  @override
+  String get errUnsupportedBreakdowns => 'Répartitions non prises en charge';
+
+  @override
+  String errOperatorUmamiFunnel(String op) {
+    return 'Opérateur « $op » indisponible dans un entonnoir Umami';
+  }
+
+  @override
+  String errOperatorPlausible(String op) {
+    return 'Opérateur « $op » indisponible chez Plausible (propriétés en texte seulement)';
+  }
+
+  @override
+  String get errFathomSoon => 'Fathom arrive bientôt.';
+
+  @override
+  String get errPlausibleNeedsSite =>
+      'Renseignez un domaine, ou email + mot de passe pour lister vos sites automatiquement.';
+
+  @override
+  String get errUmamiLoginUnexpected => 'Réponse de login Umami inattendue';
+
+  @override
+  String errBucketsTooFine(int count) {
+    return 'Découpage trop fin : plus de $count points sur la période.';
+  }
+
+  @override
+  String get errMetricsNotConfigured => 'Source non configurée sur le serveur';
+
+  @override
+  String get errMetricsBadToken => 'Jeton refusé';
+
+  @override
+  String errMetricsBadRequest(String code) {
+    return 'Requête refusée ($code)';
+  }
+
+  @override
+  String get errMetricsUnsupportedVersion =>
+      'Version d\'API non prise en charge';
+
+  @override
+  String get errMetricsUnexpected => 'Réponse inattendue du serveur';
+
+  @override
+  String get syncMsgUnreachable => 'Serveur injoignable. Réessayez.';
+
+  @override
+  String get syncMsgSessionExpired =>
+      'Session expirée. Reconnectez-vous puis réessayez.';
+
+  @override
+  String get syncMsgPurchaseFailed => 'Achat impossible. Réessayez.';
+
+  @override
+  String get syncMsgPurchasePending =>
+      'Achat validé — activation en cours, réessayez la sync dans un instant.';
+
+  @override
+  String get syncMsgNothingToRestore => 'Aucun achat à restaurer.';
+
+  @override
+  String get syncMsgRestorePending => 'Achat restauré — activation en cours…';
+
+  @override
+  String get syncMsgCannotDecrypt =>
+      'Impossible de déchiffrer la config distante.';
+
+  @override
+  String get syncMsgProRequired => 'Sync réservée à Glance Sync (Pro).';
+
+  @override
+  String get syncMsgBadCredentials => 'E-mail ou mot de passe incorrect.';
+
+  @override
+  String syncMsgPasswordTooShort(int count) {
+    return 'Mot de passe trop court : $count caractères minimum.';
+  }
+
+  @override
+  String get syncMsgPasswordTooLong => 'Mot de passe trop long.';
+
+  @override
+  String get syncMsgInvalidEmail => 'Adresse e-mail invalide.';
+
+  @override
+  String get syncMsgAccountExists =>
+      'Cet e-mail a déjà un compte : connectez-vous.';
+
+  @override
+  String get syncMsgSignUpFailed => 'Impossible de créer le compte.';
+
+  @override
+  String get periodToday => 'Aujourd\'hui';
+
+  @override
+  String get period24h => '24 h';
+
+  @override
+  String get period7d => '7 jours';
+
+  @override
+  String get period30d => '30 j';
+
+  @override
+  String get periodThisMonth => 'Ce mois-ci';
+
+  @override
+  String get period12m => '12 m';
+
+  @override
+  String get periodThisYear => 'Cette année';
+
+  @override
+  String get periodAllTime => 'Tout';
+
+  @override
+  String get periodCustom => 'Perso';
+
+  @override
+  String get metricTypePages => 'Chemins';
+
+  @override
+  String get metricTypeEntry => 'Entrée';
+
+  @override
+  String get metricTypeExit => 'Sortie';
+
+  @override
+  String get metricTypeTitle => 'Titre';
+
+  @override
+  String get metricTypeReferrers => 'Référents';
+
+  @override
+  String get metricTypeChannels => 'Canaux';
+
+  @override
+  String get metricTypeQueries => 'Requêtes';
+
+  @override
+  String get metricTypeBrowsers => 'Navigateurs';
+
+  @override
+  String get metricTypeOs => 'OS';
+
+  @override
+  String get metricTypeDevices => 'Appareils';
+
+  @override
+  String get metricTypeScreens => 'Écrans';
+
+  @override
+  String get metricTypeCountries => 'Pays';
+
+  @override
+  String get metricTypeRegions => 'Régions';
+
+  @override
+  String get metricTypeCities => 'Villes';
+
+  @override
+  String get metricTypeLanguages => 'Langues';
+
+  @override
+  String get metricTypeEvents => 'Événements';
+
+  @override
+  String get metricSectionPages => 'Pages';
+
+  @override
+  String get metricSectionSources => 'Sources';
+
+  @override
+  String get metricSectionEnvironment => 'Environnement';
+
+  @override
+  String get metricSectionLocation => 'Emplacement';
+
+  @override
+  String get filterOpContains => 'contient';
+
+  @override
+  String get filterOpNotContains => 'ne contient pas';
+
+  @override
+  String get entityUnknown => 'Inconnu';
+
+  @override
+  String get entityReferrerDirect => 'Accès direct';
+
+  @override
+  String get entityBrowserSearchBot => 'Robot d\'indexation';
+
+  @override
+  String get entityDeviceDesktop => 'Ordinateur';
+
+  @override
+  String get entityDeviceLaptop => 'Portable';
+
+  @override
+  String get entityDeviceTablet => 'Tablette';
+
+  @override
+  String get entityDeviceMobile => 'Mobile';
+
+  @override
+  String get entityDeviceWearable => 'Montre';
+
+  @override
+  String get entityDeviceConsole => 'Console';
+
+  @override
+  String get entityDeviceTv => 'Téléviseur';
+
+  @override
+  String get channelDirect => 'Direct';
+
+  @override
+  String get channelReferral => 'Référent';
+
+  @override
+  String get channelAffiliate => 'Affiliation';
+
+  @override
+  String get channelEmail => 'E-mail';
+
+  @override
+  String get channelOrganicSearch => 'Recherche organique';
+
+  @override
+  String get channelOrganicSocial => 'Réseaux sociaux';
+
+  @override
+  String get channelOrganicShopping => 'Achat organique';
+
+  @override
+  String get channelOrganicVideo => 'Vidéo organique';
+
+  @override
+  String get channelPaidAds => 'Publicité payante';
+
+  @override
+  String get channelPaidSearch => 'Recherche payante';
+
+  @override
+  String get channelPaidSocial => 'Réseaux sociaux payants';
+
+  @override
+  String get channelPaidShopping => 'Achat payant';
+
+  @override
+  String get channelPaidVideo => 'Vidéo payante';
+
+  @override
+  String get credInstanceUrl => 'URL de l\'instance';
+
+  @override
+  String get credUmamiUrlPlaceholder => 'analytics.mondomaine.fr';
+
+  @override
+  String get credUsername => 'Nom d\'utilisateur';
+
+  @override
+  String get credPassword => 'Mot de passe';
+
+  @override
+  String get credApiKey => 'Clé API';
+
+  @override
+  String get credEmailOptional => 'Email du compte (facultatif)';
+
+  @override
+  String get credEmailPlaceholder => 'vous@exemple.fr';
+
+  @override
+  String get credEmailHint =>
+      'Email + mot de passe : Glance liste vos sites automatiquement. Sinon, laissez vide et renseignez un domaine ci-dessous.';
+
+  @override
+  String get credPasswordOptional => 'Mot de passe (facultatif)';
+
+  @override
+  String get credDomainFallback => 'Domaine (si pas d\'email/mot de passe)';
+
+  @override
+  String get credDomainPlaceholder => 'mondomaine.fr';
 }

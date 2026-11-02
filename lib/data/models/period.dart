@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+import '../../l10n/l10n.dart';
+
 /// Granularité des points de série renvoyés par le provider.
 ///
 /// Pas de `year` : Umami la ramène de toute façon à `month` côté serveur, et
@@ -117,19 +119,30 @@ List<TimeUnit> allowedUnits(
 /// Périodes de la maquette. Les bornes sont calculées à la volée (dépendent de
 /// « maintenant »).
 enum Period {
-  today('today', "Aujourd'hui"),
-  h24('24h', '24 h'),
-  d7('7j', '7 jours'),
-  d30('30j', '30 j'),
-  thisMonth('mois', 'Ce mois-ci'),
-  m12('12m', '12 m'),
-  thisYear('annee', 'Cette année'),
-  allTime('tout', 'Tout'),
-  custom('perso', 'Perso');
+  today('today'),
+  h24('24h'),
+  d7('7j'),
+  d30('30j'),
+  thisMonth('mois'),
+  m12('12m'),
+  thisYear('annee'),
+  allTime('tout'),
+  custom('perso');
 
-  const Period(this.key, this.label);
+  const Period(this.key);
   final String key;
-  final String label;
+
+  String label(AppLocalizations l10n) => switch (this) {
+    today => l10n.periodToday,
+    h24 => l10n.period24h,
+    d7 => l10n.period7d,
+    d30 => l10n.period30d,
+    thisMonth => l10n.periodThisMonth,
+    m12 => l10n.period12m,
+    thisYear => l10n.periodThisYear,
+    allTime => l10n.periodAllTime,
+    custom => l10n.periodCustom,
+  };
 
   static DateTime _startOfDay(DateTime d) => DateTime(d.year, d.month, d.day);
 

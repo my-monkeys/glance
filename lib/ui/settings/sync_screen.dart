@@ -14,6 +14,25 @@ import '../widgets/field.dart';
 import '../widgets/motion.dart';
 import '../widgets/toast.dart';
 
+/// Texte d'un message de synchro, dans la langue de l'app.
+String syncMessageText(AppLocalizations l10n, SyncMessage m) => switch (m) {
+      SyncMessage.unreachable => l10n.syncMsgUnreachable,
+      SyncMessage.sessionExpired => l10n.syncMsgSessionExpired,
+      SyncMessage.purchaseFailed => l10n.syncMsgPurchaseFailed,
+      SyncMessage.purchasePending => l10n.syncMsgPurchasePending,
+      SyncMessage.nothingToRestore => l10n.syncMsgNothingToRestore,
+      SyncMessage.restorePending => l10n.syncMsgRestorePending,
+      SyncMessage.cannotDecrypt => l10n.syncMsgCannotDecrypt,
+      SyncMessage.proRequired => l10n.syncMsgProRequired,
+      SyncMessage.badCredentials => l10n.syncMsgBadCredentials,
+      SyncMessage.passwordTooShort =>
+        l10n.syncMsgPasswordTooShort(kSyncMinPasswordLength),
+      SyncMessage.passwordTooLong => l10n.syncMsgPasswordTooLong,
+      SyncMessage.invalidEmail => l10n.syncMsgInvalidEmail,
+      SyncMessage.accountExists => l10n.syncMsgAccountExists,
+      SyncMessage.signUpFailed => l10n.syncMsgSignUpFailed,
+    };
+
 /// Ouvre l'écran Glance Sync (modale sur desktop, page sur mobile).
 Future<void> openSync(BuildContext context) =>
     showGlanceModal<void>(context, const SyncScreen());
@@ -143,7 +162,10 @@ class _AuthFormState extends ConsumerState<_AuthForm> {
           show: sync.error != null,
           child: Padding(
             padding: const EdgeInsets.only(top: 12),
-            child: Text(sync.error ?? '', style: GT.body(13, color: p.neg)),
+            child: Text(
+              sync.error == null ? '' : syncMessageText(l10n, sync.error!),
+              style: GT.body(13, color: p.neg),
+            ),
           ),
         ),
         const SizedBox(height: 20),
@@ -273,7 +295,10 @@ class _Account extends ConsumerWidget {
           child: Padding(
             padding: const EdgeInsets.only(top: 12),
             child: Text(
-              sync.error ?? sync.notice ?? '',
+              switch (sync.error ?? sync.notice) {
+                final m? => syncMessageText(l10n, m),
+                null => '',
+              },
               style: GT.body(13, color: sync.error != null ? p.neg : p.fg2),
             ),
           ),

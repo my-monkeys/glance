@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 
+import '../../core/errors.dart';
+import '../../l10n/l10n.dart';
 import '../models/metrics_source.dart';
 import '../models/period.dart';
 
@@ -13,37 +15,48 @@ const kMetricsApiVersion = 1;
 const _userAgent =
     'Mozilla/5.0 (compatible; Glance/1.0; +https://glance.my-monkey.fr)';
 
-/// Échec typé de l'API d'agrégats : l'écran affiche [message] tel quel.
-sealed class MetricsApiException implements Exception {
-  const MetricsApiException(this.message);
-  final String message;
-
-  @override
-  String toString() => message;
+/// Échec typé de l'API d'agrégats : l'écran affiche son `message(l10n)` tel quel.
+sealed class MetricsApiException implements LocalizedError {
+  const MetricsApiException();
 }
 
 /// 404 : le serveur n'a pas activé la source.
 class MetricsNotConfigured extends MetricsApiException {
-  const MetricsNotConfigured() : super('Source non configurée sur le serveur');
+  const MetricsNotConfigured();
+
+  @override
+  String message(AppLocalizations l10n) => l10n.errMetricsNotConfigured;
 }
 
 /// 401 : jeton absent ou faux.
 class MetricsBadToken extends MetricsApiException {
-  const MetricsBadToken() : super('Jeton refusé');
+  const MetricsBadToken();
+
+  @override
+  String message(AppLocalizations l10n) => l10n.errMetricsBadToken;
 }
 
 /// 400 : paramètre invalide ; [code] est celui de `{error:{code}}`.
 class MetricsBadRequest extends MetricsApiException {
-  const MetricsBadRequest(this.code) : super('Requête refusée ($code)');
+  const MetricsBadRequest(this.code);
   final String code;
+
+  @override
+  String message(AppLocalizations l10n) => l10n.errMetricsBadRequest(code);
 }
 
 class MetricsUnsupportedVersion extends MetricsApiException {
-  const MetricsUnsupportedVersion() : super('Version d\'API non prise en charge');
+  const MetricsUnsupportedVersion();
+
+  @override
+  String message(AppLocalizations l10n) => l10n.errMetricsUnsupportedVersion;
 }
 
 class MetricsUnexpectedResponse extends MetricsApiException {
-  const MetricsUnexpectedResponse() : super('Réponse inattendue du serveur');
+  const MetricsUnexpectedResponse();
+
+  @override
+  String message(AppLocalizations l10n) => l10n.errMetricsUnexpected;
 }
 
 /// Plage maximale d'une requête `series`, en jours (limite du serveur).

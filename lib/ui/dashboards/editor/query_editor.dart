@@ -139,7 +139,7 @@ class _FilterRow extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                '${filter.property} ${filter.op.label} ${filter.value}',
+                '${filter.property} ${filter.op.label(context.l10n)} ${filter.value}',
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: GT.mono(12.5, color: p.fg),
@@ -277,7 +277,7 @@ class _FilterFormState extends ConsumerState<_FilterForm> {
             children: [
               for (final o in _ops)
                 GlanceChip(
-                  label: o.label,
+                  label: o.label(context.l10n),
                   selected: o == _op,
                   onTap: () => setState(() => _op = o),
                 ),

@@ -1,47 +1,9 @@
-/// Nom FR pour les codes pays fréquents. Fallback = le code brut.
-const Map<String, String> _names = {
-  'FR': 'France',
-  'BE': 'Belgique',
-  'CH': 'Suisse',
-  'CA': 'Canada',
-  'DE': 'Allemagne',
-  'GB': 'Royaume-Uni',
-  'US': 'États-Unis',
-  'ES': 'Espagne',
-  'IT': 'Italie',
-  'PT': 'Portugal',
-  'NL': 'Pays-Bas',
-  'LU': 'Luxembourg',
-  'MA': 'Maroc',
-  'DZ': 'Algérie',
-  'TN': 'Tunisie',
-  'SN': 'Sénégal',
-  'CI': "Côte d'Ivoire",
-  'IE': 'Irlande',
-  'PL': 'Pologne',
-  'SE': 'Suède',
-  'NO': 'Norvège',
-  'DK': 'Danemark',
-  'FI': 'Finlande',
-  'AT': 'Autriche',
-  'BR': 'Brésil',
-  'JP': 'Japon',
-  'CN': 'Chine',
-  'IN': 'Inde',
-  'AU': 'Australie',
-  'RU': 'Russie',
-  'UA': 'Ukraine',
-  'RO': 'Roumanie',
-  'GR': 'Grèce',
-  'CZ': 'Tchéquie',
-  'MX': 'Mexique',
-  'TR': 'Turquie',
-};
+import '../l10n/display_names.dart';
+import '../l10n/l10n.dart';
 
-String countryName(String code) {
-  final c = code.toUpperCase();
-  return _names[c] ?? code;
-}
+/// Nom d'un pays dans la langue de l'app (CLDR). Repli : le code brut.
+String countryName(String code) =>
+    lookupDisplayName(kRegionNames, code.toUpperCase()) ?? code;
 
 /// Émoji drapeau à partir d'un code ISO-2 (indicateurs régionaux).
 String countryFlag(String code) {

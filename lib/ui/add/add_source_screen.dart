@@ -46,7 +46,7 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
 
   /// Lit les identifiants saisis et signale s'il manque un champ obligatoire.
   ({Map<String, String> creds, bool missing}) _readCreds() {
-    final fields = credentialFieldsFor(_kind);
+    final fields = credentialFieldsFor(context.l10n, _kind);
     final creds = {for (final f in fields) f.key: _c(f.key).text.trim()};
     final missing =
         fields.any((f) => !f.optional && (creds[f.key] ?? '').isEmpty);
@@ -80,7 +80,7 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
           ? l10n.addSourceTestOkSites(n)
           : l10n.addSourceTestOk);
     } catch (e) {
-      if (mounted) setState(() => _error = friendlyError(e));
+      if (mounted) setState(() => _error = friendlyError(l10n, e));
     } finally {
       if (mounted) setState(() => _testing = false);
     }
@@ -116,7 +116,7 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
 
   Future<void> _continue() async {
     final l10n = context.l10n;
-    final fields = credentialFieldsFor(_kind);
+    final fields = credentialFieldsFor(context.l10n, _kind);
     final creds = {for (final f in fields) f.key: _c(f.key).text.trim()};
     final missingRequired =
         fields.any((f) => !f.optional && (creds[f.key] ?? '').isEmpty);
@@ -204,7 +204,7 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
         Navigator.of(context).pop();
       }
     } catch (e) {
-      if (mounted) setState(() => _error = friendlyError(e));
+      if (mounted) setState(() => _error = friendlyError(l10n, e));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -214,7 +214,7 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
   Widget build(BuildContext context) {
     final p = context.glance;
     final l10n = context.l10n;
-    final fields = credentialFieldsFor(_kind);
+    final fields = credentialFieldsFor(context.l10n, _kind);
 
     return Scaffold(
       body: SafeArea(

@@ -8,6 +8,8 @@
 /// mise en page saute d'un fournisseur à l'autre.
 library;
 
+import '../../l10n/l10n.dart';
+
 /// Ce qu'on demande au fournisseur. Une valeur = une dimension d'agrégation.
 enum MetricType {
   pages,
@@ -52,23 +54,23 @@ enum MetricIconKind {
 
 extension MetricTypeInfo on MetricType {
   /// Libellé court, tel qu'il apparaît dans le sélecteur d'une section.
-  String get label => switch (this) {
-    MetricType.pages => 'Chemins',
-    MetricType.entryPages => 'Entrée',
-    MetricType.exitPages => 'Sortie',
-    MetricType.pageTitles => 'Titre',
-    MetricType.referrers => 'Référents',
-    MetricType.channels => 'Canaux',
-    MetricType.queries => 'Requêtes',
-    MetricType.browsers => 'Navigateurs',
-    MetricType.operatingSystems => 'OS',
-    MetricType.devices => 'Appareils',
-    MetricType.screens => 'Écrans',
-    MetricType.countries => 'Pays',
-    MetricType.regions => 'Régions',
-    MetricType.cities => 'Villes',
-    MetricType.languages => 'Langues',
-    MetricType.events => 'Événements',
+  String label(AppLocalizations l10n) => switch (this) {
+    MetricType.pages => l10n.metricTypePages,
+    MetricType.entryPages => l10n.metricTypeEntry,
+    MetricType.exitPages => l10n.metricTypeExit,
+    MetricType.pageTitles => l10n.metricTypeTitle,
+    MetricType.referrers => l10n.metricTypeReferrers,
+    MetricType.channels => l10n.metricTypeChannels,
+    MetricType.queries => l10n.metricTypeQueries,
+    MetricType.browsers => l10n.metricTypeBrowsers,
+    MetricType.operatingSystems => l10n.metricTypeOs,
+    MetricType.devices => l10n.metricTypeDevices,
+    MetricType.screens => l10n.metricTypeScreens,
+    MetricType.countries => l10n.metricTypeCountries,
+    MetricType.regions => l10n.metricTypeRegions,
+    MetricType.cities => l10n.metricTypeCities,
+    MetricType.languages => l10n.metricTypeLanguages,
+    MetricType.events => l10n.metricTypeEvents,
   };
 
   /// Libellé en police à chasse fixe (chemins, requêtes, résolutions) : ce sont
@@ -117,33 +119,39 @@ extension MetricTypeInfo on MetricType {
 
 /// Les quatre panneaux de données du détail d'un site.
 enum MetricSection {
-  pages('Pages', [
+  pages([
     MetricType.pages,
     MetricType.entryPages,
     MetricType.exitPages,
     MetricType.pageTitles,
   ]),
-  sources('Sources', [
+  sources([
     MetricType.referrers,
     MetricType.channels,
     MetricType.queries,
   ]),
-  environment('Environnement', [
+  environment([
     MetricType.browsers,
     MetricType.operatingSystems,
     MetricType.devices,
     MetricType.screens,
   ]),
-  location('Emplacement', [
+  location([
     MetricType.countries,
     MetricType.regions,
     MetricType.cities,
     MetricType.languages,
   ]);
 
-  const MetricSection(this.label, this.dimensions);
+  const MetricSection(this.dimensions);
 
-  final String label;
+  String label(AppLocalizations l10n) => switch (this) {
+    pages => l10n.metricSectionPages,
+    sources => l10n.metricSectionSources,
+    environment => l10n.metricSectionEnvironment,
+    location => l10n.metricSectionLocation,
+  };
+
   final List<MetricType> dimensions;
 
   MetricType get defaultDimension => dimensions.first;

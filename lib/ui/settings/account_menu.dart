@@ -58,7 +58,7 @@ class _AccountMenuState extends ConsumerState<AccountMenu> {
           : l10n.accountMenuConnectionOk;
     } catch (e) {
       ok = false;
-      message = friendlyError(e);
+      message = friendlyError(l10n, e);
     }
     if (!mounted) return;
     setState(() {

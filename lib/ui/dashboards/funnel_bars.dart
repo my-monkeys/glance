@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/format.dart';
 import '../../data/models/indicator_result.dart';
+import '../../l10n/l10n.dart';
 import '../../theme/motion.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
@@ -63,7 +64,7 @@ class _StepRow extends StatelessWidget {
                   children: [
                     Text(step.event, style: GT.mono(12, color: p.fg)),
                     if (step.filters.isNotEmpty)
-                      Text(filtersSummary(step.filters),
+                      Text(filtersSummary(context.l10n, step.filters),
                           style: GT.mono(10.5, color: p.fg3)),
                   ],
                 ),

@@ -188,12 +188,12 @@ class _CardBody extends StatelessWidget {
   Widget _body(BuildContext context) {
     return switch ((indicator, data)) {
       (CounterIndicator(:final query), CounterData d) =>
-        _counterStat(context, d, sub: _unlessName(queryLabel(query)), unit: window.unit),
+        _counterStat(context, d, sub: _unlessName(queryLabel(context.l10n, query)), unit: window.unit),
       (RatioIndicator(:final numerator, :final denominator), RatioData d) =>
         _ratioStat(
           context,
           d,
-          detail: _unlessName('${queryLabel(numerator)} ÷ ${queryLabel(denominator)}'),
+          detail: _unlessName('${queryLabel(context.l10n, numerator)} ÷ ${queryLabel(context.l10n, denominator)}'),
           unit: window.unit,
         ),
       // Le libellé de la métrique EST le titre : pas de ligne de contexte.
@@ -229,7 +229,9 @@ class _CardBody extends StatelessWidget {
                     rows: [
                       for (final (i, r) in d.rows.take(kBreakdownRows).indexed)
                         MetricBarRow(
-                          label: r.label,
+                          label: r.label.isEmpty
+                              ? context.l10n.entityUnknown
+                              : r.label,
                           value: r.value,
                           // Même couleur que la courbe de cette valeur.
                           color: d.series == null ? null : eventColorAt(i),

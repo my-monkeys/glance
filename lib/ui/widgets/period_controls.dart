@@ -57,7 +57,7 @@ class PeriodControls extends ConsumerWidget {
       children: [
         for (final per in Period.values)
           GlanceChip(
-            label: per.label,
+            label: per.label(context.l10n),
             selected: current == per,
             onTap: () => per == Period.custom
                 ? onPickCustom()
@@ -75,7 +75,7 @@ class PeriodControls extends ConsumerWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final chipsWidth = Period.values.fold<double>(
-                0, (w, per) => w + GlanceChip.widthOf(context, per.label)) +
+                0, (w, per) => w + GlanceChip.widthOf(context, per.label(context.l10n))) +
             _chipGap * (Period.values.length - 1);
         final room = constraints.maxWidth -
             _padding.horizontal -

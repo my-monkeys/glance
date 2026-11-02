@@ -53,7 +53,7 @@ class InternalTrafficScreen extends ConsumerWidget {
                 for (final per in Period.values)
                   if (per != Period.custom)
                     GlanceChip(
-                      label: per.label,
+                      label: per.label(context.l10n),
                       selected: periodState.period == per,
                       onTap: () => ref.read(periodProvider.notifier).set(per),
                     ),
@@ -66,7 +66,7 @@ class InternalTrafficScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SectionLabel(
-                      context.l10n.networkExchanged(periodState.period.label)),
+                      context.l10n.networkExchanged(periodState.period.label(context.l10n))),
                   const SizedBox(height: 6),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.end,

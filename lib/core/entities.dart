@@ -1,11 +1,23 @@
-/// Mise en français des valeurs brutes renvoyées par les fournisseurs
+/// Mise en forme des valeurs brutes renvoyées par les fournisseurs
 /// (navigateurs, appareils, canaux d'acquisition, langues). Les tables suivent
 /// celles d'Umami pour que les libellés soient les mêmes des deux côtés.
+///
+/// Les noms propres (navigateurs, systèmes) restent tels quels ; le reste est
+/// traduit à l'affichage, jamais au chargement : les lignes sont mises en cache
+/// et doivent suivre la langue de l'app.
 ///
 /// Toutes ces fonctions renvoient la valeur d'origine quand elles ne la
 /// connaissent pas : un navigateur inconnu s'affiche tel quel plutôt que
 /// « Inconnu », qui effacerait l'information.
 library;
+
+import 'package:intl/intl.dart';
+
+import '../data/models/dimension.dart';
+import '../data/models/models.dart';
+import '../l10n/display_names.dart';
+import '../l10n/l10n.dart';
+import 'countries.dart';
 
 const _browsers = <String, String>{
   'android': 'Android',
@@ -33,129 +45,83 @@ const _browsers = <String, String>{
   'phantomjs': 'PhantomJS',
   'safari': 'Safari',
   'samsung': 'Samsung Internet',
-  'searchbot': 'Robot d\'indexation',
   'silk': 'Silk',
   'yandexbrowser': 'Yandex',
   'brave': 'Brave',
   'chromium': 'Chromium',
 };
 
-String browserName(String raw) {
+String browserName(AppLocalizations l10n, String raw) {
   final k = raw.trim().toLowerCase();
-  if (k.isEmpty) return 'Inconnu';
+  if (k.isEmpty) return l10n.entityUnknown;
+  if (k == 'searchbot') return l10n.entityBrowserSearchBot;
   return _browsers[k] ?? raw;
 }
 
-const _devices = <String, String>{
-  'desktop': 'Ordinateur',
-  'laptop': 'Portable',
-  'tablet': 'Tablette',
-  'mobile': 'Mobile',
-  'wearable': 'Montre',
-  'console': 'Console',
-  'tv': 'Téléviseur',
-};
-
-String deviceName(String raw) {
-  final k = raw.trim().toLowerCase();
-  if (k.isEmpty) return 'Inconnu';
-  return _devices[k] ?? raw;
-}
+String deviceName(AppLocalizations l10n, String raw) =>
+    switch (raw.trim().toLowerCase()) {
+      '' => l10n.entityUnknown,
+      'desktop' => l10n.entityDeviceDesktop,
+      'laptop' => l10n.entityDeviceLaptop,
+      'tablet' => l10n.entityDeviceTablet,
+      'mobile' => l10n.entityDeviceMobile,
+      'wearable' => l10n.entityDeviceWearable,
+      'console' => l10n.entityDeviceConsole,
+      'tv' => l10n.entityDeviceTv,
+      _ => raw,
+    };
 
 /// Canaux d'acquisition d'Umami (`type=channel`) et de Plausible
 /// (`visit:channel`, en « Organic Search » plutôt qu'en camelCase).
-const _channels = <String, String>{
-  'direct': 'Direct',
-  'referral': 'Référent',
-  'affiliate': 'Affiliation',
-  'email': 'E-mail',
-  'sms': 'SMS',
-  'llm': 'LLM',
-  'organicsearch': 'Recherche organique',
-  'organicsocial': 'Réseaux sociaux',
-  'organicshopping': 'Achat organique',
-  'organicvideo': 'Vidéo organique',
-  'paidads': 'Publicité payante',
-  'paidsearch': 'Recherche payante',
-  'paidsocial': 'Réseaux sociaux payants',
-  'paidshopping': 'Achat payant',
-  'paidvideo': 'Vidéo payante',
-  'unknown': 'Inconnu',
-};
+String channelName(AppLocalizations l10n, String raw) =>
+    switch (raw.trim().toLowerCase().replaceAll(RegExp(r'[\s_-]'), '')) {
+      '' || 'unknown' => l10n.entityUnknown,
+      'direct' => l10n.channelDirect,
+      'referral' => l10n.channelReferral,
+      'affiliate' => l10n.channelAffiliate,
+      'email' => l10n.channelEmail,
+      'sms' => 'SMS',
+      'llm' => 'LLM',
+      'organicsearch' => l10n.channelOrganicSearch,
+      'organicsocial' => l10n.channelOrganicSocial,
+      'organicshopping' => l10n.channelOrganicShopping,
+      'organicvideo' => l10n.channelOrganicVideo,
+      'paidads' => l10n.channelPaidAds,
+      'paidsearch' => l10n.channelPaidSearch,
+      'paidsocial' => l10n.channelPaidSocial,
+      'paidshopping' => l10n.channelPaidShopping,
+      'paidvideo' => l10n.channelPaidVideo,
+      _ => raw,
+    };
 
-String channelName(String raw) {
-  final k = raw.trim().toLowerCase().replaceAll(RegExp(r'[\s_-]'), '');
-  if (k.isEmpty) return 'Inconnu';
-  return _channels[k] ?? raw;
+/// « fr », « fr-fr », « fr_FR » → « Français » (dans la langue de l'app). La
+/// variante régionale est conservée entre parenthèses quand elle diffère de la
+/// langue (« pt-br »).
+String languageName(AppLocalizations l10n, String raw) {
+  final k = raw.trim().toLowerCase().replaceAll('_', '-');
+  if (k.isEmpty) return l10n.entityUnknown;
+  final parts = k.split('-');
+  final name = lookupDisplayName(kLanguageNames, parts.first);
+  if (name == null) return raw;
+  final base = toBeginningOfSentenceCase(name, Intl.defaultLocale);
+  if (parts.length < 2 || parts[1].isEmpty || parts[1] == parts.first) {
+    return base;
+  }
+  return '$base (${parts[1].toUpperCase()})';
 }
 
-const _languages = <String, String>{
-  'af': 'Afrikaans',
-  'ar': 'Arabe',
-  'be': 'Biélorusse',
-  'bg': 'Bulgare',
-  'bn': 'Bengali',
-  'ca': 'Catalan',
-  'cs': 'Tchèque',
-  'da': 'Danois',
-  'de': 'Allemand',
-  'el': 'Grec',
-  'en': 'Anglais',
-  'eo': 'Espéranto',
-  'es': 'Espagnol',
-  'et': 'Estonien',
-  'eu': 'Basque',
-  'fa': 'Persan',
-  'fi': 'Finnois',
-  'fr': 'Français',
-  'ga': 'Irlandais',
-  'he': 'Hébreu',
-  'hi': 'Hindi',
-  'hr': 'Croate',
-  'hu': 'Hongrois',
-  'hy': 'Arménien',
-  'id': 'Indonésien',
-  'is': 'Islandais',
-  'it': 'Italien',
-  'ja': 'Japonais',
-  'ka': 'Géorgien',
-  'kk': 'Kazakh',
-  'ko': 'Coréen',
-  'lt': 'Lituanien',
-  'lv': 'Letton',
-  'mk': 'Macédonien',
-  'ms': 'Malais',
-  'nb': 'Norvégien',
-  'nl': 'Néerlandais',
-  'nn': 'Norvégien (nynorsk)',
-  'no': 'Norvégien',
-  'pl': 'Polonais',
-  'pt': 'Portugais',
-  'ro': 'Roumain',
-  'ru': 'Russe',
-  'sk': 'Slovaque',
-  'sl': 'Slovène',
-  'sq': 'Albanais',
-  'sr': 'Serbe',
-  'sv': 'Suédois',
-  'sw': 'Swahili',
-  'ta': 'Tamoul',
-  'th': 'Thaï',
-  'tr': 'Turc',
-  'uk': 'Ukrainien',
-  'ur': 'Ourdou',
-  'vi': 'Vietnamien',
-  'zh': 'Chinois',
-};
-
-/// « fr », « fr-fr », « fr_FR » → « Français ». La variante régionale est
-/// conservée entre parenthèses quand elle diffère de la langue (« pt-br »).
-String languageName(String raw) {
-  final k = raw.trim().toLowerCase().replaceAll('_', '-');
-  if (k.isEmpty) return 'Inconnu';
-  final parts = k.split('-');
-  final base = _languages[parts.first];
-  if (base == null) return raw;
-  if (parts.length < 2 || parts[1].isEmpty) return base;
-  return '$base (${parts[1].toUpperCase()})';
+/// Libellé affiché d'une ligne de métrique. Le fournisseur ne rend que la
+/// valeur brute (`code`) : la traduction se fait ici, à l'affichage.
+String metricRowLabel(AppLocalizations l10n, MetricType type, MetricRow row) {
+  final raw = row.code ?? row.label;
+  return switch (type) {
+    MetricType.channels => channelName(l10n, raw),
+    MetricType.countries => countryName(raw),
+    MetricType.browsers => browserName(l10n, raw),
+    MetricType.devices => deviceName(l10n, raw),
+    MetricType.languages => languageName(l10n, raw),
+    MetricType.referrers when row.isDirect => l10n.entityReferrerDirect,
+    MetricType.pages || MetricType.entryPages || MetricType.exitPages => row.label,
+    _ => row.label.isEmpty ? l10n.entityUnknown : row.label,
+  };
 }

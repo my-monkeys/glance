@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import 'data/models/account.dart';
 import 'data/models/indicator.dart';
@@ -10,6 +11,7 @@ import 'data/models/workspace.dart';
 import 'l10n/l10n.dart';
 import 'state/indicators.dart';
 import 'state/metrics_sources.dart';
+import 'state/home_data.dart';
 import 'state/period_state.dart';
 import 'state/providers.dart';
 import 'state/settings.dart';
@@ -96,26 +98,44 @@ class _SyncBridgeState extends ConsumerState<_SyncBridge> {
 /// qu'on regarde dans l'app. Le choix étant persisté, il reste stable entre
 /// deux lancements. (Un widget configurable par groupe demanderait des App
 /// Intents iOS/macOS et une activité de config Android — pas fait.)
-class _WidgetSync extends ConsumerWidget {
+class _WidgetSync extends ConsumerStatefulWidget {
   const _WidgetSync({required this.child});
   final Widget child;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_WidgetSync> createState() => _WidgetSyncState();
+}
+
+class _WidgetSyncState extends ConsumerState<_WidgetSync> {
+  String? _lastLocale;
+
+  @override
+  Widget build(BuildContext context) {
     final periodState = ref.watch(periodProvider);
     // Toujours monté : s'il résolvait la fenêtre lui-même, il maintiendrait en
     // vie une seconde grappe de providers pour tous les sites.
     final window = ref.watch(windowProvider);
-    if (window == null) return child;
-    ref.listen(homeTotalsProvider((window, periodState.compare)), (prev, next) {
-      if (next.data.cards.isNotEmpty && !next.loading) {
-        WidgetPublisher.publish(
-          next.data,
-          periodState.period.label,
-          window,
-        );
+    // Lu ici pour que la reconstruction suive aussi un changement de langue.
+    final periodLabel = periodState.period.label(context.l10n);
+    final locale = Intl.defaultLocale;
+    if (window == null) return widget.child;
+
+    final totals = homeTotalsProvider((window, periodState.compare));
+    void publish(HomeTotals t) {
+      if (t.data.cards.isNotEmpty && !t.loading) {
+        WidgetPublisher.publish(t.data, periodLabel, window, locale);
       }
-    });
-    return child;
+    }
+
+    ref.listen(totals, (prev, next) => publish(next));
+    // Les widgets natifs gardent le libellé publié : on le republie dans la
+    // nouvelle langue sans attendre le prochain rafraîchissement des données.
+    if (_lastLocale != null && _lastLocale != locale) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) publish(ref.read(totals));
+      });
+    }
+    _lastLocale = locale;
+    return widget.child;
   }
 }

@@ -1410,4 +1410,331 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get periodUnitMonth => 'Month';
+
+  @override
+  String get errorsAuthRefused => 'Credentials rejected.';
+
+  @override
+  String get errorsRequestRefused => 'Request rejected by the server.';
+
+  @override
+  String get errorsNotFound => 'Instance or API not found.';
+
+  @override
+  String get errorsTimeout =>
+      'Timed out — the instance is slow or unreachable.';
+
+  @override
+  String get errorsUnreachable => 'Instance unreachable. Check the URL.';
+
+  @override
+  String errorsServerCode(int code) {
+    return 'Server error $code.';
+  }
+
+  @override
+  String get errorsConnectionFailed => 'Couldn\'t connect.';
+
+  @override
+  String errorsGeneric(String detail) {
+    return 'Error: $detail';
+  }
+
+  @override
+  String get errUnsupportedIndicators => 'Indicators not supported';
+
+  @override
+  String get errUnsupportedSiteTables => 'Site tables not supported';
+
+  @override
+  String get errUnsupportedFunnels => 'Funnels not supported';
+
+  @override
+  String get errUnsupportedBreakdowns => 'Breakdowns not supported';
+
+  @override
+  String errOperatorUmamiFunnel(String op) {
+    return 'Operator “$op” isn\'t available in an Umami funnel';
+  }
+
+  @override
+  String errOperatorPlausible(String op) {
+    return 'Operator “$op” isn\'t available on Plausible (text properties only)';
+  }
+
+  @override
+  String get errFathomSoon => 'Fathom is coming soon.';
+
+  @override
+  String get errPlausibleNeedsSite =>
+      'Enter a domain, or an email and password to list your sites automatically.';
+
+  @override
+  String get errUmamiLoginUnexpected => 'Unexpected Umami login response';
+
+  @override
+  String errBucketsTooFine(int count) {
+    return 'Split too fine: more than $count points over the period.';
+  }
+
+  @override
+  String get errMetricsNotConfigured => 'Source not configured on the server';
+
+  @override
+  String get errMetricsBadToken => 'Token rejected';
+
+  @override
+  String errMetricsBadRequest(String code) {
+    return 'Request rejected ($code)';
+  }
+
+  @override
+  String get errMetricsUnsupportedVersion => 'API version not supported';
+
+  @override
+  String get errMetricsUnexpected => 'Unexpected response from the server';
+
+  @override
+  String get syncMsgUnreachable => 'Server unreachable. Try again.';
+
+  @override
+  String get syncMsgSessionExpired =>
+      'Session expired. Sign in again, then retry.';
+
+  @override
+  String get syncMsgPurchaseFailed => 'Purchase failed. Try again.';
+
+  @override
+  String get syncMsgPurchasePending =>
+      'Purchase confirmed — activation in progress, retry the sync in a moment.';
+
+  @override
+  String get syncMsgNothingToRestore => 'No purchase to restore.';
+
+  @override
+  String get syncMsgRestorePending =>
+      'Purchase restored — activation in progress…';
+
+  @override
+  String get syncMsgCannotDecrypt => 'Couldn\'t decrypt the remote config.';
+
+  @override
+  String get syncMsgProRequired => 'Sync is reserved for Glance Sync (Pro).';
+
+  @override
+  String get syncMsgBadCredentials => 'Wrong email or password.';
+
+  @override
+  String syncMsgPasswordTooShort(int count) {
+    return 'Password too short: $count characters minimum.';
+  }
+
+  @override
+  String get syncMsgPasswordTooLong => 'Password too long.';
+
+  @override
+  String get syncMsgInvalidEmail => 'Invalid email address.';
+
+  @override
+  String get syncMsgAccountExists =>
+      'This email already has an account: sign in instead.';
+
+  @override
+  String get syncMsgSignUpFailed => 'Couldn\'t create the account.';
+
+  @override
+  String get periodToday => 'Today';
+
+  @override
+  String get period24h => '24 h';
+
+  @override
+  String get period7d => '7 days';
+
+  @override
+  String get period30d => '30 d';
+
+  @override
+  String get periodThisMonth => 'This month';
+
+  @override
+  String get period12m => '12 mo';
+
+  @override
+  String get periodThisYear => 'This year';
+
+  @override
+  String get periodAllTime => 'All';
+
+  @override
+  String get periodCustom => 'Custom';
+
+  @override
+  String get metricTypePages => 'Paths';
+
+  @override
+  String get metricTypeEntry => 'Entry';
+
+  @override
+  String get metricTypeExit => 'Exit';
+
+  @override
+  String get metricTypeTitle => 'Title';
+
+  @override
+  String get metricTypeReferrers => 'Referrers';
+
+  @override
+  String get metricTypeChannels => 'Channels';
+
+  @override
+  String get metricTypeQueries => 'Queries';
+
+  @override
+  String get metricTypeBrowsers => 'Browsers';
+
+  @override
+  String get metricTypeOs => 'OS';
+
+  @override
+  String get metricTypeDevices => 'Devices';
+
+  @override
+  String get metricTypeScreens => 'Screens';
+
+  @override
+  String get metricTypeCountries => 'Countries';
+
+  @override
+  String get metricTypeRegions => 'Regions';
+
+  @override
+  String get metricTypeCities => 'Cities';
+
+  @override
+  String get metricTypeLanguages => 'Languages';
+
+  @override
+  String get metricTypeEvents => 'Events';
+
+  @override
+  String get metricSectionPages => 'Pages';
+
+  @override
+  String get metricSectionSources => 'Sources';
+
+  @override
+  String get metricSectionEnvironment => 'Environment';
+
+  @override
+  String get metricSectionLocation => 'Location';
+
+  @override
+  String get filterOpContains => 'contains';
+
+  @override
+  String get filterOpNotContains => 'doesn\'t contain';
+
+  @override
+  String get entityUnknown => 'Unknown';
+
+  @override
+  String get entityReferrerDirect => 'Direct';
+
+  @override
+  String get entityBrowserSearchBot => 'Search bot';
+
+  @override
+  String get entityDeviceDesktop => 'Desktop';
+
+  @override
+  String get entityDeviceLaptop => 'Laptop';
+
+  @override
+  String get entityDeviceTablet => 'Tablet';
+
+  @override
+  String get entityDeviceMobile => 'Mobile';
+
+  @override
+  String get entityDeviceWearable => 'Watch';
+
+  @override
+  String get entityDeviceConsole => 'Console';
+
+  @override
+  String get entityDeviceTv => 'TV';
+
+  @override
+  String get channelDirect => 'Direct';
+
+  @override
+  String get channelReferral => 'Referral';
+
+  @override
+  String get channelAffiliate => 'Affiliate';
+
+  @override
+  String get channelEmail => 'Email';
+
+  @override
+  String get channelOrganicSearch => 'Organic search';
+
+  @override
+  String get channelOrganicSocial => 'Organic social';
+
+  @override
+  String get channelOrganicShopping => 'Organic shopping';
+
+  @override
+  String get channelOrganicVideo => 'Organic video';
+
+  @override
+  String get channelPaidAds => 'Paid ads';
+
+  @override
+  String get channelPaidSearch => 'Paid search';
+
+  @override
+  String get channelPaidSocial => 'Paid social';
+
+  @override
+  String get channelPaidShopping => 'Paid shopping';
+
+  @override
+  String get channelPaidVideo => 'Paid video';
+
+  @override
+  String get credInstanceUrl => 'Instance URL';
+
+  @override
+  String get credUmamiUrlPlaceholder => 'analytics.yourdomain.com';
+
+  @override
+  String get credUsername => 'Username';
+
+  @override
+  String get credPassword => 'Password';
+
+  @override
+  String get credApiKey => 'API key';
+
+  @override
+  String get credEmailOptional => 'Account email (optional)';
+
+  @override
+  String get credEmailPlaceholder => 'you@example.com';
+
+  @override
+  String get credEmailHint =>
+      'Email + password: Glance lists your sites automatically. Otherwise, leave blank and enter a domain below.';
+
+  @override
+  String get credPasswordOptional => 'Password (optional)';
+
+  @override
+  String get credDomainFallback => 'Domain (if no email/password)';
+
+  @override
+  String get credDomainPlaceholder => 'yourdomain.com';
 }

@@ -2395,6 +2395,618 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Mois'**
   String get periodUnitMonth;
+
+  /// No description provided for @errorsAuthRefused.
+  ///
+  /// In fr, this message translates to:
+  /// **'Identifiants refusés.'**
+  String get errorsAuthRefused;
+
+  /// No description provided for @errorsRequestRefused.
+  ///
+  /// In fr, this message translates to:
+  /// **'Requête refusée par le serveur.'**
+  String get errorsRequestRefused;
+
+  /// No description provided for @errorsNotFound.
+  ///
+  /// In fr, this message translates to:
+  /// **'Instance ou API introuvable.'**
+  String get errorsNotFound;
+
+  /// No description provided for @errorsTimeout.
+  ///
+  /// In fr, this message translates to:
+  /// **'Délai dépassé — instance lente ou injoignable.'**
+  String get errorsTimeout;
+
+  /// No description provided for @errorsUnreachable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Instance injoignable. Vérifie l\'URL.'**
+  String get errorsUnreachable;
+
+  /// No description provided for @errorsServerCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur {code} du serveur.'**
+  String errorsServerCode(int code);
+
+  /// No description provided for @errorsConnectionFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Connexion impossible.'**
+  String get errorsConnectionFailed;
+
+  /// No description provided for @errorsGeneric.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur : {detail}'**
+  String errorsGeneric(String detail);
+
+  /// No description provided for @errUnsupportedIndicators.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indicateurs non pris en charge'**
+  String get errUnsupportedIndicators;
+
+  /// No description provided for @errUnsupportedSiteTables.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tableaux de sites non pris en charge'**
+  String get errUnsupportedSiteTables;
+
+  /// No description provided for @errUnsupportedFunnels.
+  ///
+  /// In fr, this message translates to:
+  /// **'Entonnoirs non pris en charge'**
+  String get errUnsupportedFunnels;
+
+  /// No description provided for @errUnsupportedBreakdowns.
+  ///
+  /// In fr, this message translates to:
+  /// **'Répartitions non prises en charge'**
+  String get errUnsupportedBreakdowns;
+
+  /// No description provided for @errOperatorUmamiFunnel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Opérateur « {op} » indisponible dans un entonnoir Umami'**
+  String errOperatorUmamiFunnel(String op);
+
+  /// No description provided for @errOperatorPlausible.
+  ///
+  /// In fr, this message translates to:
+  /// **'Opérateur « {op} » indisponible chez Plausible (propriétés en texte seulement)'**
+  String errOperatorPlausible(String op);
+
+  /// No description provided for @errFathomSoon.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fathom arrive bientôt.'**
+  String get errFathomSoon;
+
+  /// No description provided for @errPlausibleNeedsSite.
+  ///
+  /// In fr, this message translates to:
+  /// **'Renseignez un domaine, ou email + mot de passe pour lister vos sites automatiquement.'**
+  String get errPlausibleNeedsSite;
+
+  /// No description provided for @errUmamiLoginUnexpected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réponse de login Umami inattendue'**
+  String get errUmamiLoginUnexpected;
+
+  /// No description provided for @errBucketsTooFine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Découpage trop fin : plus de {count} points sur la période.'**
+  String errBucketsTooFine(int count);
+
+  /// No description provided for @errMetricsNotConfigured.
+  ///
+  /// In fr, this message translates to:
+  /// **'Source non configurée sur le serveur'**
+  String get errMetricsNotConfigured;
+
+  /// No description provided for @errMetricsBadToken.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jeton refusé'**
+  String get errMetricsBadToken;
+
+  /// No description provided for @errMetricsBadRequest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Requête refusée ({code})'**
+  String errMetricsBadRequest(String code);
+
+  /// No description provided for @errMetricsUnsupportedVersion.
+  ///
+  /// In fr, this message translates to:
+  /// **'Version d\'API non prise en charge'**
+  String get errMetricsUnsupportedVersion;
+
+  /// No description provided for @errMetricsUnexpected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réponse inattendue du serveur'**
+  String get errMetricsUnexpected;
+
+  /// No description provided for @syncMsgUnreachable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Serveur injoignable. Réessayez.'**
+  String get syncMsgUnreachable;
+
+  /// No description provided for @syncMsgSessionExpired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Session expirée. Reconnectez-vous puis réessayez.'**
+  String get syncMsgSessionExpired;
+
+  /// No description provided for @syncMsgPurchaseFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Achat impossible. Réessayez.'**
+  String get syncMsgPurchaseFailed;
+
+  /// No description provided for @syncMsgPurchasePending.
+  ///
+  /// In fr, this message translates to:
+  /// **'Achat validé — activation en cours, réessayez la sync dans un instant.'**
+  String get syncMsgPurchasePending;
+
+  /// No description provided for @syncMsgNothingToRestore.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun achat à restaurer.'**
+  String get syncMsgNothingToRestore;
+
+  /// No description provided for @syncMsgRestorePending.
+  ///
+  /// In fr, this message translates to:
+  /// **'Achat restauré — activation en cours…'**
+  String get syncMsgRestorePending;
+
+  /// No description provided for @syncMsgCannotDecrypt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de déchiffrer la config distante.'**
+  String get syncMsgCannotDecrypt;
+
+  /// No description provided for @syncMsgProRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sync réservée à Glance Sync (Pro).'**
+  String get syncMsgProRequired;
+
+  /// No description provided for @syncMsgBadCredentials.
+  ///
+  /// In fr, this message translates to:
+  /// **'E-mail ou mot de passe incorrect.'**
+  String get syncMsgBadCredentials;
+
+  /// No description provided for @syncMsgPasswordTooShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe trop court : {count} caractères minimum.'**
+  String syncMsgPasswordTooShort(int count);
+
+  /// No description provided for @syncMsgPasswordTooLong.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe trop long.'**
+  String get syncMsgPasswordTooLong;
+
+  /// No description provided for @syncMsgInvalidEmail.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse e-mail invalide.'**
+  String get syncMsgInvalidEmail;
+
+  /// No description provided for @syncMsgAccountExists.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cet e-mail a déjà un compte : connectez-vous.'**
+  String get syncMsgAccountExists;
+
+  /// No description provided for @syncMsgSignUpFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de créer le compte.'**
+  String get syncMsgSignUpFailed;
+
+  /// Libellé court d'une période, dans la barre de contrôles
+  ///
+  /// In fr, this message translates to:
+  /// **'Aujourd\'hui'**
+  String get periodToday;
+
+  /// Libellé court d'une période, dans la barre de contrôles
+  ///
+  /// In fr, this message translates to:
+  /// **'24 h'**
+  String get period24h;
+
+  /// Libellé court d'une période, dans la barre de contrôles
+  ///
+  /// In fr, this message translates to:
+  /// **'7 jours'**
+  String get period7d;
+
+  /// Libellé court d'une période, dans la barre de contrôles
+  ///
+  /// In fr, this message translates to:
+  /// **'30 j'**
+  String get period30d;
+
+  /// Libellé court d'une période, dans la barre de contrôles
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce mois-ci'**
+  String get periodThisMonth;
+
+  /// Libellé court d'une période, dans la barre de contrôles
+  ///
+  /// In fr, this message translates to:
+  /// **'12 m'**
+  String get period12m;
+
+  /// Libellé court d'une période, dans la barre de contrôles
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette année'**
+  String get periodThisYear;
+
+  /// Libellé court d'une période, dans la barre de contrôles : depuis la première donnée
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout'**
+  String get periodAllTime;
+
+  /// Libellé court d'une période, dans la barre de contrôles : dates choisies à la main
+  ///
+  /// In fr, this message translates to:
+  /// **'Perso'**
+  String get periodCustom;
+
+  /// Dimension de données d'un site, dans le sélecteur d'une section du détail : chemins des pages
+  ///
+  /// In fr, this message translates to:
+  /// **'Chemins'**
+  String get metricTypePages;
+
+  /// Dimension de données d'un site, dans le sélecteur d'une section du détail : pages d'entrée
+  ///
+  /// In fr, this message translates to:
+  /// **'Entrée'**
+  String get metricTypeEntry;
+
+  /// Dimension de données d'un site, dans le sélecteur d'une section du détail : pages de sortie
+  ///
+  /// In fr, this message translates to:
+  /// **'Sortie'**
+  String get metricTypeExit;
+
+  /// Dimension de données d'un site, dans le sélecteur d'une section du détail : titres des pages
+  ///
+  /// In fr, this message translates to:
+  /// **'Titre'**
+  String get metricTypeTitle;
+
+  /// Dimension de données d'un site, dans le sélecteur d'une section du détail
+  ///
+  /// In fr, this message translates to:
+  /// **'Référents'**
+  String get metricTypeReferrers;
+
+  /// Dimension de données d'un site, dans le sélecteur d'une section du détail : canaux d'acquisition
+  ///
+  /// In fr, this message translates to:
+  /// **'Canaux'**
+  String get metricTypeChannels;
+
+  /// Dimension de données d'un site, dans le sélecteur d'une section du détail : requêtes de recherche
+  ///
+  /// In fr, this message translates to:
+  /// **'Requêtes'**
+  String get metricTypeQueries;
+
+  /// Dimension de données d'un site, dans le sélecteur d'une section du détail
+  ///
+  /// In fr, this message translates to:
+  /// **'Navigateurs'**
+  String get metricTypeBrowsers;
+
+  /// Dimension de données d'un site, dans le sélecteur d'une section du détail : systèmes d'exploitation
+  ///
+  /// In fr, this message translates to:
+  /// **'OS'**
+  String get metricTypeOs;
+
+  /// Dimension de données d'un site, dans le sélecteur d'une section du détail
+  ///
+  /// In fr, this message translates to:
+  /// **'Appareils'**
+  String get metricTypeDevices;
+
+  /// Dimension de données d'un site, dans le sélecteur d'une section du détail : résolutions d'écran
+  ///
+  /// In fr, this message translates to:
+  /// **'Écrans'**
+  String get metricTypeScreens;
+
+  /// Dimension de données d'un site, dans le sélecteur d'une section du détail
+  ///
+  /// In fr, this message translates to:
+  /// **'Pays'**
+  String get metricTypeCountries;
+
+  /// Dimension de données d'un site, dans le sélecteur d'une section du détail
+  ///
+  /// In fr, this message translates to:
+  /// **'Régions'**
+  String get metricTypeRegions;
+
+  /// Dimension de données d'un site, dans le sélecteur d'une section du détail
+  ///
+  /// In fr, this message translates to:
+  /// **'Villes'**
+  String get metricTypeCities;
+
+  /// Dimension de données d'un site, dans le sélecteur d'une section du détail
+  ///
+  /// In fr, this message translates to:
+  /// **'Langues'**
+  String get metricTypeLanguages;
+
+  /// Dimension de données d'un site, dans le sélecteur d'une section du détail
+  ///
+  /// In fr, this message translates to:
+  /// **'Événements'**
+  String get metricTypeEvents;
+
+  /// Titre d'un des quatre panneaux de données du détail d'un site
+  ///
+  /// In fr, this message translates to:
+  /// **'Pages'**
+  String get metricSectionPages;
+
+  /// Titre d'un des quatre panneaux de données du détail d'un site : d'où viennent les visiteurs
+  ///
+  /// In fr, this message translates to:
+  /// **'Sources'**
+  String get metricSectionSources;
+
+  /// Titre d'un des quatre panneaux de données du détail d'un site : navigateur, système, appareil
+  ///
+  /// In fr, this message translates to:
+  /// **'Environnement'**
+  String get metricSectionEnvironment;
+
+  /// Titre d'un des quatre panneaux de données du détail d'un site : pays, régions, villes, langues
+  ///
+  /// In fr, this message translates to:
+  /// **'Emplacement'**
+  String get metricSectionLocation;
+
+  /// Opérateur de filtre, lu dans « propriété contient valeur »
+  ///
+  /// In fr, this message translates to:
+  /// **'contient'**
+  String get filterOpContains;
+
+  /// Opérateur de filtre, lu dans « propriété ne contient pas valeur »
+  ///
+  /// In fr, this message translates to:
+  /// **'ne contient pas'**
+  String get filterOpNotContains;
+
+  /// Valeur absente (navigateur, appareil, langue…)
+  ///
+  /// In fr, this message translates to:
+  /// **'Inconnu'**
+  String get entityUnknown;
+
+  /// Source d'une visite sans référent
+  ///
+  /// In fr, this message translates to:
+  /// **'Accès direct'**
+  String get entityReferrerDirect;
+
+  /// Navigateur : robot des moteurs de recherche
+  ///
+  /// In fr, this message translates to:
+  /// **'Robot d\'indexation'**
+  String get entityBrowserSearchBot;
+
+  /// Type d'appareil
+  ///
+  /// In fr, this message translates to:
+  /// **'Ordinateur'**
+  String get entityDeviceDesktop;
+
+  /// Type d'appareil
+  ///
+  /// In fr, this message translates to:
+  /// **'Portable'**
+  String get entityDeviceLaptop;
+
+  /// Type d'appareil
+  ///
+  /// In fr, this message translates to:
+  /// **'Tablette'**
+  String get entityDeviceTablet;
+
+  /// Type d'appareil
+  ///
+  /// In fr, this message translates to:
+  /// **'Mobile'**
+  String get entityDeviceMobile;
+
+  /// Type d'appareil
+  ///
+  /// In fr, this message translates to:
+  /// **'Montre'**
+  String get entityDeviceWearable;
+
+  /// Type d'appareil
+  ///
+  /// In fr, this message translates to:
+  /// **'Console'**
+  String get entityDeviceConsole;
+
+  /// Type d'appareil
+  ///
+  /// In fr, this message translates to:
+  /// **'Téléviseur'**
+  String get entityDeviceTv;
+
+  /// Canal d'acquisition de trafic : visite sans référent
+  ///
+  /// In fr, this message translates to:
+  /// **'Direct'**
+  String get channelDirect;
+
+  /// Canal d'acquisition de trafic : lien depuis un autre site
+  ///
+  /// In fr, this message translates to:
+  /// **'Référent'**
+  String get channelReferral;
+
+  /// Canal d'acquisition de trafic
+  ///
+  /// In fr, this message translates to:
+  /// **'Affiliation'**
+  String get channelAffiliate;
+
+  /// Canal d'acquisition de trafic
+  ///
+  /// In fr, this message translates to:
+  /// **'E-mail'**
+  String get channelEmail;
+
+  /// Canal d'acquisition de trafic
+  ///
+  /// In fr, this message translates to:
+  /// **'Recherche organique'**
+  String get channelOrganicSearch;
+
+  /// Canal d'acquisition de trafic
+  ///
+  /// In fr, this message translates to:
+  /// **'Réseaux sociaux'**
+  String get channelOrganicSocial;
+
+  /// Canal d'acquisition de trafic
+  ///
+  /// In fr, this message translates to:
+  /// **'Achat organique'**
+  String get channelOrganicShopping;
+
+  /// Canal d'acquisition de trafic
+  ///
+  /// In fr, this message translates to:
+  /// **'Vidéo organique'**
+  String get channelOrganicVideo;
+
+  /// Canal d'acquisition de trafic
+  ///
+  /// In fr, this message translates to:
+  /// **'Publicité payante'**
+  String get channelPaidAds;
+
+  /// Canal d'acquisition de trafic
+  ///
+  /// In fr, this message translates to:
+  /// **'Recherche payante'**
+  String get channelPaidSearch;
+
+  /// Canal d'acquisition de trafic
+  ///
+  /// In fr, this message translates to:
+  /// **'Réseaux sociaux payants'**
+  String get channelPaidSocial;
+
+  /// Canal d'acquisition de trafic
+  ///
+  /// In fr, this message translates to:
+  /// **'Achat payant'**
+  String get channelPaidShopping;
+
+  /// Canal d'acquisition de trafic
+  ///
+  /// In fr, this message translates to:
+  /// **'Vidéo payante'**
+  String get channelPaidVideo;
+
+  /// No description provided for @credInstanceUrl.
+  ///
+  /// In fr, this message translates to:
+  /// **'URL de l\'instance'**
+  String get credInstanceUrl;
+
+  /// Exemple d'adresse d'instance Umami
+  ///
+  /// In fr, this message translates to:
+  /// **'analytics.mondomaine.fr'**
+  String get credUmamiUrlPlaceholder;
+
+  /// No description provided for @credUsername.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom d\'utilisateur'**
+  String get credUsername;
+
+  /// No description provided for @credPassword.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe'**
+  String get credPassword;
+
+  /// No description provided for @credApiKey.
+  ///
+  /// In fr, this message translates to:
+  /// **'Clé API'**
+  String get credApiKey;
+
+  /// No description provided for @credEmailOptional.
+  ///
+  /// In fr, this message translates to:
+  /// **'Email du compte (facultatif)'**
+  String get credEmailOptional;
+
+  /// Exemple d'adresse e-mail
+  ///
+  /// In fr, this message translates to:
+  /// **'vous@exemple.fr'**
+  String get credEmailPlaceholder;
+
+  /// No description provided for @credEmailHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Email + mot de passe : Glance liste vos sites automatiquement. Sinon, laissez vide et renseignez un domaine ci-dessous.'**
+  String get credEmailHint;
+
+  /// No description provided for @credPasswordOptional.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe (facultatif)'**
+  String get credPasswordOptional;
+
+  /// No description provided for @credDomainFallback.
+  ///
+  /// In fr, this message translates to:
+  /// **'Domaine (si pas d\'email/mot de passe)'**
+  String get credDomainFallback;
+
+  /// Exemple de nom de domaine
+  ///
+  /// In fr, this message translates to:
+  /// **'mondomaine.fr'**
+  String get credDomainPlaceholder;
 }
 
 class _AppLocalizationsDelegate

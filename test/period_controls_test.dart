@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:glance/data/models/period.dart';
+import 'package:glance/l10n/app_localizations_fr.dart';
 import 'package:glance/state/period_state.dart';
 import 'package:glance/state/providers.dart';
 import 'package:glance/state/settings.dart';
@@ -46,7 +47,7 @@ const _wide = 1500.0;
 double _dy(WidgetTester tester, Finder f) => tester.getCenter(f).dy;
 
 void main() {
-  final periods = find.text(Period.d7.label);
+  final periods = find.text(Period.d7.label(AppLocalizationsFr()));
   final button = find.text('Affichage');
 
   testWidgets('large : périodes et bouton partagent la même ligne', (tester) async {

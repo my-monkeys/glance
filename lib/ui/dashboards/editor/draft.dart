@@ -197,8 +197,8 @@ class IndicatorDraft {
   /// Nom proposé tant que le champ « Nom » reste vide.
   String suggestedName(AppLocalizations l10n) {
     final parts = switch (kind) {
-      IndicatorKind.counter => [_label(query)],
-      IndicatorKind.ratio => [_label(query), _label(denominator)],
+      IndicatorKind.counter => [_label(l10n, query)],
+      IndicatorKind.ratio => [_label(l10n, query), _label(l10n, denominator)],
       IndicatorKind.funnel => [steps.first.event, steps.last.event],
       IndicatorKind.breakdown => [breakdownEvent, breakdownProperty],
       IndicatorKind.external => [metricLabel],
@@ -214,7 +214,8 @@ class IndicatorDraft {
     };
   }
 
-  static String _label(EventQuery q) => q.event.isEmpty ? '' : queryLabel(q);
+  static String _label(AppLocalizations l10n, EventQuery q) =>
+      q.event.isEmpty ? '' : queryLabel(l10n, q);
 
   /// Raison courte pour laquelle le brouillon ne peut pas être enregistré, ou
   /// null s'il est valide.
