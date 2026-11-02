@@ -97,5 +97,25 @@
     "prevision": "Prognose",
     "etiquette_v": "Besucher",
     "w_titre": "Alle Websites"
+  },
+  "app": {
+    "homeTitleDefault": "Meine Websites",
+    "homeTotalVisitorsAll": "Besucher · alle Websites",
+    "homeVsPrevious": "ggü. Vorperiode",
+    "homeLiveCount": "{count} live",
+    "periodToday": "Heute",
+    "period24h": "24 Std.",
+    "period7d": "7 Tage",
+    "period30d": "30 T.",
+    "periodThisMonth": "Dieser Monat",
+    "period12m": "12 M.",
+    "periodThisYear": "Dieses Jahr",
+    "periodAllTime": "Alle",
+    "periodCustom": "Eigene",
+    "commonVisitors": "Besucher",
+    "commonPageviews": "Seitenaufrufe",
+    "tabSites": "Websites",
+    "tabDirect": "Live",
+    "tabSettings": "Einstellungen"
   }
 }

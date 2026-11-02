@@ -97,5 +97,25 @@
     "prevision": "Forecast",
     "etiquette_v": "Visitors",
     "w_titre": "All sites"
+  },
+  "app": {
+    "homeTitleDefault": "My sites",
+    "homeTotalVisitorsAll": "Visitors · all sites",
+    "homeVsPrevious": "vs prev. period",
+    "homeLiveCount": "{count} live",
+    "periodToday": "Today",
+    "period24h": "24 h",
+    "period7d": "7 days",
+    "period30d": "30 d",
+    "periodThisMonth": "This month",
+    "period12m": "12 mo",
+    "periodThisYear": "This year",
+    "periodAllTime": "All",
+    "periodCustom": "Custom",
+    "commonVisitors": "Visitors",
+    "commonPageviews": "Pageviews",
+    "tabSites": "Sites",
+    "tabDirect": "Live",
+    "tabSettings": "Settings"
   }
 }
