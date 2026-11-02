@@ -49,6 +49,15 @@
   }
 }
 
+/* Les trois polices n'ont pas les idéogrammes : chaque famille reçoit une seconde déclaration limitée au CJK
+   et à la ponctuation pleine chasse, qui suit la police du système (même règle que les visuels des stores). */
+@font-face { font-family: "Fredoka"; font-weight: 300 700; unicode-range: U+2E80-9FFF, U+F900-FAFF, U+FE30-FE4F, U+FF00-FFEF, U+3000-303F;
+  src: local("PingFangSC-Semibold"), local("PingFang SC Semibold"), local("PingFang SC"), local("Hiragino Sans GB"), local("Noto Sans SC"); }
+@font-face { font-family: "Geist"; font-weight: 100 900; unicode-range: U+2E80-9FFF, U+F900-FAFF, U+FE30-FE4F, U+FF00-FFEF, U+3000-303F;
+  src: local("PingFangSC-Regular"), local("PingFang SC"), local("Hiragino Sans GB"), local("Noto Sans SC"); }
+@font-face { font-family: "JetBrains Mono"; font-weight: 100 800; unicode-range: U+2E80-9FFF, U+F900-FAFF, U+FE30-FE4F, U+FF00-FFEF, U+3000-303F;
+  src: local("PingFangSC-Regular"), local("PingFang SC"), local("Hiragino Sans GB"), local("Noto Sans SC"); }
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; scroll-padding-top: 88px; color-scheme: light dark; }
 body {
@@ -72,7 +81,33 @@ a:hover { color: var(--fg); }
 .haut nav { display: flex; align-items: center; gap: clamp(14px, 2.4vw, 32px); font-size: 15px; font-weight: 500; }
 .haut nav a { color: var(--fg2); text-decoration: none; }
 .haut nav a:hover { color: var(--fg); }
-.haut nav .langue { padding: 7px 14px; border: 1.5px solid var(--line); border-radius: 999px; color: var(--fg); }
+.haut nav { position: relative; }
+
+/* ——— Sélecteur de langue : six langues, chacune par son propre nom ——— */
+.langues { position: relative; }
+.langues summary { display: flex; align-items: center; gap: 8px; padding: 7px 14px; border: 1.5px solid var(--line); border-radius: 999px;
+  color: var(--fg); cursor: pointer; list-style: none; white-space: nowrap; }
+.langues summary::-webkit-details-marker { display: none; }
+.langues summary:hover, .langues[open] summary { border-color: var(--fg); }
+.langues summary svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; flex: none; }
+.langues ul { position: absolute; right: 0; top: calc(100% + 8px); z-index: 30; min-width: 180px; list-style: none; padding: 6px;
+  background: var(--surface); border: 1.5px solid var(--line); border-radius: 16px; }
+.langues li a { display: block; padding: 9px 14px; border-radius: 10px; color: var(--fg); text-decoration: none; white-space: nowrap; }
+.langues li a:hover { background: var(--bg-alt); }
+.langues li a[aria-current] { color: var(--accent-ink); font-weight: 600; }
+
+/* La bulle qui propose la langue du navigateur. */
+.lang-tip { position: absolute; top: calc(100% + 16px); right: 0; z-index: 40; width: 264px; padding: 16px 18px; background: var(--surface);
+  border: 1.5px solid var(--line); border-radius: 16px; font-size: 14px; line-height: 1.45; }
+.lang-tip::before { content: ""; position: absolute; top: -8px; right: 34px; width: 14px; height: 14px; background: var(--surface);
+  border-left: 1.5px solid var(--line); border-top: 1.5px solid var(--line); transform: rotate(45deg); }
+.lang-tip p { margin: 0 0 12px; padding-right: 22px; color: var(--fg); }
+.lang-tip .go { display: block; padding: 10px 0; border-radius: 10px; background: var(--accent); color: var(--on-accent); text-align: center;
+  font-family: var(--titre); font-weight: 500; text-decoration: none; }
+.lang-tip .go:hover { background: var(--accent-ink); color: var(--on-accent); }
+.lang-tip .x { position: absolute; top: 8px; right: 8px; width: 26px; height: 26px; border: 0; border-radius: 8px; background: var(--bg-alt);
+  color: var(--fg3); font-size: 12px; cursor: pointer; }
+.lang-tip .x:hover { color: var(--fg); }
 
 /* ——— Titres et texte ——— */
 .surtitre { font-family: var(--mono); font-size: 13px; font-weight: 500; letter-spacing: .04em; color: var(--accent-ink); }
@@ -159,6 +194,7 @@ h3 { font-size: 26px; line-height: 1.15; letter-spacing: -.01em; }
 .telecharger h2 { margin-top: 18px; margin-bottom: 22px; }
 .telecharger .badges { grid-column: 7 / 13; align-self: end; margin-top: 0; display: grid; grid-template-columns: 1fr 1fr; }
 .brew { grid-column: 1 / 13; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; font-size: 16px; color: var(--fg2); }
+.brew a { font-weight: 600; }
 .brew code { font-family: var(--mono); font-size: 15px; background: var(--band); color: var(--band-fg); padding: 13px 18px; border-radius: 12px; }
 .brew code i { font-style: normal; color: var(--band-accent); }
 
@@ -173,6 +209,28 @@ h3 { font-size: 26px; line-height: 1.15; letter-spacing: -.01em; }
 .faq details[open] summary::after { content: "–"; }
 .faq details p { padding: 0 0 22px; color: var(--fg2); max-width: 60ch; }
 
+/* ——— Retours : le bouton rond et son formulaire ——— */
+.fab { position: fixed; right: 22px; bottom: 22px; z-index: 25; width: 54px; height: 54px; border-radius: 50%; border: 0; cursor: pointer;
+  display: grid; place-items: center; background: var(--accent); color: var(--on-accent); transition: transform .15s; }
+.fab:hover { transform: translateY(-2px); }
+.fbk-ov { position: fixed; inset: 0; z-index: 70; display: flex; align-items: center; justify-content: center; padding: 18px; background: rgba(22, 20, 15, .55); }
+.fbk-ov[hidden], .fbk [hidden] { display: none; }
+.fbk { width: 100%; max-width: 420px; padding: 28px; background: var(--surface); border: 1.5px solid var(--line); border-radius: 22px; }
+.fbk h3 { font-size: 24px; }
+.fbk .sub { margin: 8px 0 18px; font-size: 15px; color: var(--fg2); line-height: 1.5; }
+.fbk textarea, .fbk input { width: 100%; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--bg);
+  color: var(--fg); font: inherit; font-size: 15px; }
+.fbk textarea { min-height: 120px; margin-bottom: 10px; resize: vertical; }
+.fbk input { margin-bottom: 16px; }
+.fbk textarea:focus, .fbk input:focus { outline: none; border-color: var(--accent); }
+.fbk .err { margin: 0 0 12px; font-size: 14px; color: #B15A42; }
+.fbk .row { display: flex; gap: 10px; }
+.fbk .btn { flex: 1; padding: 12px 16px; border: 1.5px solid var(--line); border-radius: 14px; background: transparent; color: var(--fg);
+  font-family: var(--titre); font-weight: 500; font-size: 16px; cursor: pointer; }
+.fbk .btn.primaire { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.fbk .btn:disabled { opacity: .6; }
+.fbk [data-f="done"] .btn { width: 100%; }
+
 /* ——— Pied de page ——— */
 .pied { padding: 56px 0 44px; background: var(--band); color: var(--band-fg2); font-size: 15px; }
 .pied .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 32px; }
@@ -181,6 +239,7 @@ h3 { font-size: 26px; line-height: 1.15; letter-spacing: -.01em; }
 .pied ul { list-style: none; display: flex; flex-wrap: wrap; gap: 12px 28px; align-items: flex-start; }
 .pied a { color: var(--band-fg); text-decoration: none; }
 .pied a:hover { color: var(--band-accent); }
+.pied .pied-langues { flex-basis: 100%; }
 .pied .droits { flex-basis: 100%; max-width: none; margin-top: 0; padding-top: 24px; border-top: 1px solid rgba(255, 255, 255, .1); font-family: var(--mono); font-size: 12px; }
 
 /* Avant le premier rendu de GSAP : le hero attend son entrée (anim.js retire la classe). */
@@ -191,15 +250,28 @@ h3 { font-size: 26px; line-height: 1.15; letter-spacing: -.01em; }
   .idee.etroit .scene, .idee.inverse.etroit .scene, .bande .texte, .outils, .prive h2, .telecharger .texte,
   .telecharger .badges, .faq h2, .faq .liste { grid-column: 1 / 13; grid-row: auto; }
   .hero .telephone { width: min(100%, 420px); margin: 0 auto; }
+  .hero .courbe { display: none; }
   .hero .texte { padding-bottom: 48px; }
   .idee .texte { position: static; margin-bottom: 40px; }
   .bande .texte { margin-bottom: 36px; }
   .prive ul { grid-template-columns: 1fr; }
   .faq h2 { margin-bottom: 28px; }
-  .haut nav a:not(.langue) { display: none; }
+  .haut nav > a { display: none; }
+  .lang-tip { position: fixed; top: var(--tip-top, 64px); left: 12px; right: 12px; width: auto; }
+  .lang-tip::before { right: auto; left: var(--tip-arrow, 84%); margin-left: -7px; }
   .scene img { border-radius: 22px; }
 }
 @media (max-width: 480px) {
   .badge { flex: 1 1 calc(50% - 6px); padding-right: 12px; }
   body { font-size: 17px; }
 }
+
+/* Chinois : pas de césure, pas de resserrement des lettres (conçu pour le latin). */
+html[lang="zh-Hans"] h1, html[lang="zh-Hans"] h2, html[lang="zh-Hans"] h3 { letter-spacing: 0; line-height: 1.18; }
+html[lang="zh-Hans"] .surtitre { letter-spacing: 0; }
+html[lang="zh-Hans"] .texte p, html[lang="zh-Hans"] .accroche { line-height: 1.8; max-width: 34em; }
+html[lang="zh-Hans"] body { line-break: strict; }
+/* Allemand : mots longs, la césure automatique évite les débordements. */
+html[lang="de"] .texte p, html[lang="de"] .prive li p, html[lang="de"] .faq details p, html[lang="de"] .outils p { hyphens: auto; }
+html[lang="de"] h1, html[lang="de"] h2 { hyphens: auto; overflow-wrap: break-word; }
+.badge b, .badge small { white-space: nowrap; }

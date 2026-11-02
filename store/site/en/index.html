@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script>document.documentElement.className+=" js";</script>
-<script>(function(){try{if(localStorage.getItem('glance-lang')==='fr')location.replace('/')}catch(e){}})();</script>
+<script src="/js/langue.js"></script>
 <title>Glance — Umami &amp; Plausible client for Mac, iOS &amp; Android · Free and open source</title>
 <meta name="description" content="Glance: a clean mobile &amp; desktop client for your Umami and Plausible analytics. All your sites on iOS, Android, macOS and Windows — open source, no third-party server.">
 <meta name="color-scheme" content="light dark">
@@ -12,6 +12,10 @@
 <link rel="canonical" href="https://glance-analytics.com/en/">
 <link rel="alternate" hreflang="fr" href="https://glance-analytics.com/">
 <link rel="alternate" hreflang="en" href="https://glance-analytics.com/en/">
+<link rel="alternate" hreflang="de" href="https://glance-analytics.com/de/">
+<link rel="alternate" hreflang="es" href="https://glance-analytics.com/es/">
+<link rel="alternate" hreflang="pt-BR" href="https://glance-analytics.com/pt/">
+<link rel="alternate" hreflang="zh-Hans" href="https://glance-analytics.com/zh/">
 <link rel="alternate" hreflang="x-default" href="https://glance-analytics.com/en/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Glance">
@@ -50,7 +54,7 @@
   "@type": "WebSite",
   "@id": "https://glance-analytics.com/#website",
   "name": "Glance",
-  "url": "https://glance-analytics.com/en/",
+  "url": "https://glance-analytics.com",
   "inLanguage": "en-US",
   "publisher": {
     "@id": "https://my-monkey.fr/#organization"
@@ -63,8 +67,8 @@
   "@type": "SoftwareApplication",
   "@id": "https://glance-analytics.com/#app",
   "name": "Glance",
-  "description": "A clean mobile & desktop client for your Umami and Plausible analytics. All your sites on iOS, Android, macOS and Windows — open source, no third-party server.",
-  "url": "https://glance-analytics.com/en/",
+  "description": "Glance: a clean mobile & desktop client for your Umami and Plausible analytics. All your sites on iOS, Android, macOS and Windows — open source, no third-party server.",
+  "url": "https://glance-analytics.com",
   "image": "https://glance-analytics.com/img/og.jpg",
   "applicationCategory": "BusinessApplication",
   "operatingSystem": "iOS, Android, macOS, Windows",
@@ -172,19 +176,20 @@
         "text": "Yes. Whether your Umami or Plausible instance is self-hosted or cloud, Glance connects to it directly with your URL and API key. No server-side configuration is needed."
       }
     }
-  ]
+  ],
+  "inLanguage": "en-US"
 }
 </script>
 </head>
 <body>
-<!-- Ajouter une langue (de, es, pt, zh) : copier ce fichier dans <code>/index.html, traduire les textes,
-     puis changer <html lang>, <title>, la description, canonical, og:locale, og:url, "inLanguage" et les liens internes
-     (/<code>/…), ajouter la langue aux hreflang de toutes les pages et au sitemap, et rendre les scènes avec
-     `python3 -I store/visuels/rendre.py --langue <code> --site` (écrit img/scenes/<code>/). -->
+<!-- Ajouter une langue : copier ce fichier dans <code>/index.html, traduire les textes, changer <html lang>,
+     <title>, la description, canonical, og:locale, og:url, "inLanguage" et les liens internes, puis ajouter la langue à
+     la liste LANGUES de js/langue.js, aux hreflang de TOUTES les pages d'accueil, au sélecteur de langue et au sitemap.
+     Les scènes viennent de `python3 -I store/visuels/rendre.py --langue <code visuels> --site` (écrit img/scenes/<code visuels>/). -->
 <header class="haut">
   <div class="wrap">
     <a class="marque" href="/en/"><img src="/favicon.svg?v=2" width="38" height="38" alt="">Glance</a>
-    <nav><a href="/en/docs/metrics-source.html">Documentation</a><a href="/en/privacy.html">Privacy</a><a href="https://github.com/my-monkeys/glance">GitHub</a><a class="langue" href="/" data-lang="fr" hreflang="fr" lang="fr" aria-label="Passer en français">Français</a></nav>
+    <nav><a href="/en/docs/metrics-source.html">Documentation</a><a href="/en/privacy.html">Privacy</a><a href="https://github.com/my-monkeys/glance">GitHub</a><details class="langues"><summary aria-label="Language : English"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.7 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.7-3.8-9s1.3-6.4 3.8-9z"/></svg><span>English</span></summary><ul><li><a href="/" lang="fr" hreflang="fr" data-lang="fr">Français</a></li><li><a href="/en/" lang="en" hreflang="en" data-lang="en" aria-current="true">English</a></li><li><a href="/de/" lang="de" hreflang="de" data-lang="de">Deutsch</a></li><li><a href="/es/" lang="es" hreflang="es" data-lang="es">Español</a></li><li><a href="/pt/" lang="pt-BR" hreflang="pt-BR" data-lang="pt">Português</a></li><li><a href="/zh/" lang="zh-Hans" hreflang="zh-Hans" data-lang="zh">简体中文</a></li></ul></details></nav>
   </div>
 </header>
 <main>
@@ -210,7 +215,7 @@
     <div class="texte">
       <p class="surtitre">Compare sites</p>
       <h2>Compare your sites</h2>
-      <p>Several sites side by side: one curve per site, plus the total. From 1 to 6 rows, from one or several Umami accounts.</p><p>Add a “from” or “excluding visitors from” filter on a domain to see what your sites send each other.</p>
+      <p>Several sites side by side: one curve per site, plus the total. From 1 to 6 rows, from one or several Umami accounts.</p><p>Add a “from” or “excluding visitors from” filter on a domain to see what your sites send each other.</p><p>A separate view adds up the visitors your sites send each other.</p>
       
     </div>
     <figure class="scene"><img src="/img/scenes/en/2-sites.webp" width="1320" height="1832" alt="Glance’s Sites dashboard: four sites side by side, one curve per row, and the “from” referrer filter" loading="lazy" decoding="async"></figure>
@@ -246,7 +251,7 @@
       <p>Plug in a metrics source: a small API on your site, protected by a token.</p><p>Glance then shows D1, D7 and D30 retention, accounts created, any indicator your site exposes. The computation stays on your own database.</p>
       <a class="lien" href="/en/docs/metrics-source.html">Read the metrics source documentation</a>
     </div>
-    <figure class="scene"><img src="/img/scenes/en/5-retention.webp" width="1320" height="1885" alt="Three D1, D7 and D30 retention cards and Glance’s Metrics source screen" loading="lazy" decoding="async"></figure>
+    <figure class="scene"><img src="/img/scenes/en/5-retention.webp" width="1320" height="1876" alt="Three D1, D7 and D30 retention cards and Glance’s Metrics source screen" loading="lazy" decoding="async"></figure>
   </div>
 </section>
 <section class="idee prevision" id="prevision">
@@ -276,7 +281,7 @@
     <div class="texte">
       <p class="surtitre">Every device</p>
       <h2>On all your devices</h2>
-      <p>iPhone, iPad, Android, Mac and Windows, in light and dark.</p><p>An encrypted QR code to pick up your setup in one scan, or end-to-end encrypted sync between your devices (optional, one-time purchase).</p>
+      <p>iPhone, iPad, Android, Mac and Windows, in light and dark. On Mac and Windows, the site list sits on the left and the detail on the right.</p><p>An encrypted QR code to pick up your setup in one scan, or end-to-end encrypted sync between your devices (optional, one-time purchase).</p>
       
     </div>
     <figure class="scene"><img src="/img/scenes/en/8-appareils.webp" width="1320" height="1550" alt="Glance on iPhone, Android, Mac and Windows, with end-to-end encrypted sync" loading="lazy" decoding="async"></figure>
@@ -304,7 +309,7 @@
       <a class="badge" href="https://github.com/my-monkeys/glance/releases/download/v1.13.0/Glance-1.13.0.dmg"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 12.5c0-2 1.1-3.3 1.6-3.7-.9-1.3-2.3-1.5-2.8-1.5-1.2-.1-2.3.7-2.9.7-.6 0-1.5-.7-2.5-.7-1.3 0-2.5.8-3.1 1.9-1.4 2.3-.4 5.8.9 7.7.6.9 1.4 2 2.4 1.9.9 0 1.3-.6 2.4-.6s1.4.6 2.4.6c1 0 1.6-.9 2.2-1.8.5-.7.8-1.5 1-2.1-1.2-.5-2-1.6-2-2.6zM15 5.9c.5-.6.9-1.5.8-2.4-.8 0-1.7.5-2.2 1.2-.5.5-.9 1.4-.8 2.3.9 0 1.7-.5 2.2-1.1z"/></svg><span><small>macOS · .dmg</small><b>Mac</b></span></a>
       <a class="badge" href="https://github.com/my-monkeys/glance/releases/download/windows-v1.13.0/glance-windows-x64.zip"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="2" width="9.3" height="9.3"/><rect x="12.7" y="2" width="9.3" height="9.3"/><rect x="2" y="12.7" width="9.3" height="9.3"/><rect x="12.7" y="12.7" width="9.3" height="9.3"/></svg><span><small>Windows · .zip</small><b>Windows</b></span></a>
     </div>
-    <div class="brew"><code><i>$</i> brew install --cask my-monkeys/tap/glance</code></div>
+    <div class="brew"><code><i>$</i> brew install --cask my-monkeys/tap/glance</code><a href="https://github.com/my-monkeys/glance">See the code on GitHub</a></div>
   </div>
 </section>
 <section class="faq" id="faq">
@@ -317,11 +322,22 @@
 <footer class="pied">
   <div class="wrap">
     <div><a class="marque" href="/en/"><img src="/favicon.svg?v=2" width="38" height="38" alt="">Glance</a><p>A project by the My-Monkey collective.</p></div>
-    <ul><li><a href="/en/docs/metrics-source.html">Documentation</a></li><li><a href="/en/privacy.html">Privacy</a></li><li><a href="https://github.com/my-monkeys/glance">GitHub</a></li><li><a href="/" data-lang="fr">Français</a></li></ul>
+    <ul><li><a href="/en/docs/metrics-source.html">Documentation</a></li><li><a href="/en/privacy.html">Privacy</a></li><li><a href="https://github.com/my-monkeys/glance">GitHub</a></li></ul>
+    <ul class="pied-langues"><li><a href="/" lang="fr" hreflang="fr" data-lang="fr">Français</a></li><li><a href="/en/" lang="en" hreflang="en" data-lang="en">English</a></li><li><a href="/de/" lang="de" hreflang="de" data-lang="de">Deutsch</a></li><li><a href="/es/" lang="es" hreflang="es" data-lang="es">Español</a></li><li><a href="/pt/" lang="pt-BR" hreflang="pt-BR" data-lang="pt">Português</a></li><li><a href="/zh/" lang="zh-Hans" hreflang="zh-Hans" data-lang="zh">简体中文</a></li></ul>
     <p class="droits">© 2026 My-Monkey · MIT license</p>
   </div>
 </footer>
-<script>document.addEventListener('click',function(e){var a=e.target&&e.target.closest&&e.target.closest('[data-lang]');if(a){try{localStorage.setItem('glance-lang',a.getAttribute('data-lang'))}catch(_){}}});</script>
+<button class="fab" type="button" aria-label="Send feedback" title="Send feedback"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 01-9 8.4 8.9 8.9 0 01-3.9-.9L3 20l1-4.9a8.4 8.4 0 015-11.7 8.4 8.4 0 0112 8.1z"/></svg></button>
+<div class="fbk-ov" hidden><div class="fbk" role="dialog" aria-modal="true" aria-labelledby="fbk-titre">
+<div data-f="form"><h3 id="fbk-titre">Feedback or bug?</h3><p class="sub">Tell us what works or what doesn't — every message helps.</p>
+<textarea maxlength="4000" placeholder="Your message…" aria-label="Your message…"></textarea>
+<input type="email" autocomplete="email" placeholder="Email (optional, so we can reply)" aria-label="Email (optional, so we can reply)">
+<p class="err" hidden>Sending failed. Please try again in a moment.</p>
+<div class="row"><button type="button" class="btn" data-f="cancel">Cancel</button><button type="button" class="btn primaire" data-f="send">Send</button></div></div>
+<div data-f="done" hidden><h3>Thank you</h3><p class="sub">Your feedback landed safely.</p>
+<button type="button" class="btn primaire" data-f="close">Close</button></div>
+</div></div>
+<script src="/js/retours.js"></script>
 <script src="/js/gsap.min.js"></script>
 <script src="/js/ScrollTrigger.min.js"></script>
 <script src="/js/anim.js"></script>
