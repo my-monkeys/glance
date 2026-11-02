@@ -45,7 +45,13 @@
 <script>
 monter("v6", async () => {
   const n = 30, aujourdhui = 18; // le 19 du mois
-  const tout = serie(n, { base: 130, amp: 26, f: n / 7, phase: .1, pente: 14, bruit: 3, graine: 61 });
+  // Données fixes, identiques dans tous les formats : un mois qui commence un lundi, semaine haute,
+  // samedi puis dimanche nettement plus bas, une légère hausse, un pic (le 9) et un creux (le 14).
+  // Les 19 premiers jours sont observés (2 570 visiteurs) ; la prévision reprend le niveau des
+  // 7 derniers jours × le profil de la semaine, donc plus lisse.
+  const reel = [136, 140, 158, 130, 135, 86, 64, 149, 220, 157, 136, 125, 91, 48, 140, 156, 172, 178, 149];
+  const projete = [90, 74, 151, 163, 161, 155, 142, 94, 77, 158, 170];
+  const tout = [...reel, ...projete];
   const observe = tout.map((v, i) => (i <= aujourdhui ? v : null));
   const prevision = tout.map((v, i) => (i >= aujourdhui ? v : null));
   const somme = (a) => Math.round(a.filter((v) => v != null).reduce((s, v) => s + v, 0) / 10) * 10;
@@ -57,7 +63,7 @@ monter("v6", async () => {
       { v: prevision, couleur: "#C98A2E", pointille: true, epaisseur: 9 },
       { v: observe, couleur: "#3B7A5A", aire: true, epaisseur: 8, point: 11 },
     ],
-    max: 200, ticks: [0, 100, 200], gauche: 76, bas: 44, haut: 40,
+    max: 240, ticks: [0, 80, 160, 240], gauche: 76, bas: 44, haut: 40,
     xlabels: [[0, "1"], [7, "8"], [14, "15"], [21, "22"], [29, "30"]],
   });
   const x = g.X(aujourdhui);

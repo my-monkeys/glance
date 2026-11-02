@@ -37,7 +37,7 @@ Ticket : #20. Le site viendra dans un autre lot (il reprendra les mêmes scènes
 | 4 | `4-entonnoir` | sombre | Voyez où ils décrochent | See where they drop off | Entonnoir en 4 étapes, perte à chaque passage, taux final |
 | 5 | `5-retention` | chip `#F0EDE7` | Mesurez la rétention | Measure retention | Trois cartes « Métrique du site » J1, J7, J30 et l'écran « Source de métriques » |
 | 6 | `6-prevision` | crème | Anticipez la fin du mois | Forecast your month | Courbe observée, prévision en pointillé orange, total projeté, méthode |
-| 7 | `7-direct` | vert forêt | En direct, jusque sur l'écran d'accueil | Live, right on your home screen | Visiteurs en direct, widgets iOS et Android sur un écran d'accueil |
+| 7 | `7-direct` | vert forêt | En direct sur l'écran d'accueil | Live, right on your home screen | Visiteurs en direct, widgets iOS et Android sur un écran d'accueil |
 | 8 | `8-appareils` | sombre | Sur tous vos appareils | On all your devices | iPhone, Android, Mac, Windows, et la synchronisation chiffrée de bout en bout |
 
 ## Les formats
@@ -85,9 +85,9 @@ Pour voir un gabarit dans un navigateur : `python3 -m http.server` à la racine,
 
 1. **La capture du visuel 1** montre les sites réels du compte de démonstration (`opensuperwhisper`,
    `tamdoku.fr`…), qui sont des projets My-Monkey. Les huit autres scènes utilisent des noms fictifs.
-2. **Les titres** : le FR du visuel 7 compte six mots (la consigne en autorisait cinq) ; garder ou
-   raccourcir en « En direct sur l'écran d'accueil ».
-3. **Les chiffres** (4 812 visiteurs, 31,4 % de rétention J1, 4 180 projetés…) sont des exemples.
+2. **Visuel 6** : les 30 jours sont des données fixes écrites dans le gabarit (semaine haute,
+   week-end bas, un pic le 9, un creux le 14, 2 570 visiteurs sur les 19 jours observés).
+3. **Les chiffres** (4 812 visiteurs, 31,4 % de rétention J1, 4 010 projetés…) sont des exemples.
 4. **Le visuel 5** suppose que le site de l'utilisateur expose l'API d'agrégats : la fiche le dit
    (« branchez une source de métriques »).
 5. **iPad** : les visuels 13" sont faits ; l'app est déclarée iPhone + iPad, la revue d'Apple la
