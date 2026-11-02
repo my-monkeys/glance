@@ -396,6 +396,10 @@ Un site peut exposer ses propres indicateurs, calculés sur sa base (rétention,
 comptes…). Glance les affiche comme un 5ᵉ genre de tableau, « Métrique du site »
 (`ExternalIndicator`). Le contrat est **générique** : rien de propre à un site
 dans le code.
+- **Documentation publique** : `store/site/docs/source-de-metriques.html` (FR) et
+  `store/site/en/docs/metrics-source.html` (EN), liées depuis l'écran « Source de
+  métriques » (`kMetricsDocUrl`, bouton « Comment ça marche ? »). ⚠️ À tenir à jour
+  quand le contrat change : le code fait foi, pas ce fichier.
 - **Contrat** (v1), `Authorization: Bearer <jeton>` :
   - `GET {base}catalogue` → `{version, indicateurs:[{id, libelle, description, unite, granularites}]}`.
   - `GET {base}series?ids=a,b&de=&a=&granularite=jour|semaine|mois&tz=` →

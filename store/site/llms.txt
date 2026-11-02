@@ -43,4 +43,5 @@ Glance n'est pas un outil d'analytics : c'est un client (une interface de lectur
 - Code source (GitHub) : https://github.com/my-monkeys/glance
 - Licence MIT : https://github.com/my-monkeys/glance/blob/main/LICENSE
 - Dernières versions : https://github.com/my-monkeys/glance/releases/latest
+- Documentation de la source de métriques (API d'agrégats : indicateurs calculés sur votre base, contrat v1) : https://glance-analytics.com/docs/source-de-metriques.html (anglais : https://glance-analytics.com/en/docs/metrics-source.html)
 - Confidentialité : https://glance-analytics.com/privacy.html

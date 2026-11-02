@@ -139,6 +139,13 @@ void main() {
       expect(find.text('2 indicateurs disponibles'), findsOneWidget);
     });
 
+    testWidgets('le lien « Comment ça marche ? » est présent', (tester) async {
+      await _pump(tester, screen);
+
+      expect(find.text('Comment ça marche ?'), findsOneWidget);
+      expect(find.byKey(const ValueKey('metrics-doc-link')), findsOneWidget);
+    });
+
     testWidgets('Tester affiche l\'erreur typée', (tester) async {
       await _pump(tester, screen,
           api: FakeMetricsApi(error: const MetricsBadToken()));
