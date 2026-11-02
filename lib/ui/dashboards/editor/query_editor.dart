@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/models/indicator.dart';
 import '../../../data/models/models.dart';
+import '../../../l10n/l10n.dart';
 import '../../../state/indicators.dart';
 import '../../../theme/palette.dart';
 import '../../../theme/type.dart';
@@ -68,12 +69,13 @@ class _QueryEditorState extends State<QueryEditor> {
     final p = context.glance;
     final q = widget.query;
     final hasEvent = q.event.isNotEmpty;
+    final l10n = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         PickerField(
-          label: widget.label ?? 'Événement',
-          placeholder: 'Choisir un événement',
+          label: widget.label ?? l10n.editorEventLabel,
+          placeholder: l10n.editorEventPlaceholder,
           value: q.event,
           onTap: _pickEvent,
         ),
@@ -102,7 +104,7 @@ class _QueryEditorState extends State<QueryEditor> {
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 child: Text(
-                  'Ajouter un filtre',
+                  l10n.editorAddFilter,
                   style: GT.body(
                     13.5,
                     weight: 600,
@@ -149,7 +151,7 @@ class _FilterRow extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(8),
                 child: Icon(Icons.close_rounded,
-                    size: 16, color: p.fg2, semanticLabel: 'Retirer le filtre'),
+                    size: 16, color: p.fg2, semanticLabel: context.l10n.editorRemoveFilter),
               ),
             ),
           ],
@@ -223,6 +225,7 @@ class _FilterFormState extends ConsumerState<_FilterForm> {
   @override
   Widget build(BuildContext context) {
     final p = context.glance;
+    final l10n = context.l10n;
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -234,8 +237,8 @@ class _FilterFormState extends ConsumerState<_FilterForm> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           PickerField(
-            label: 'Propriété',
-            placeholder: 'Choisir une propriété',
+            label: l10n.editorPropertyLabel,
+            placeholder: l10n.editorPropertyPlaceholder,
             value: _property,
             onTap: _pickProperty,
           ),
@@ -247,12 +250,15 @@ class _FilterFormState extends ConsumerState<_FilterForm> {
           Row(
             children: [
               Expanded(
-                child: GlanceButtonOutline(label: 'Annuler', onTap: widget.onCancel),
+                child: GlanceButtonOutline(
+                  label: l10n.commonCancel,
+                  onTap: widget.onCancel,
+                ),
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: GlanceButton(
-                  label: 'Ajouter',
+                  label: l10n.commonAdd,
                   onTap: _valid ? _submit : null,
                 ),
               ),
@@ -283,7 +289,7 @@ class _FilterFormState extends ConsumerState<_FilterForm> {
                 children: [
                   for (final v in const ['true', 'false'])
                     GlanceChip(
-                      label: v == 'true' ? 'vrai' : 'faux',
+                      label: v == 'true' ? context.l10n.editorTrue : context.l10n.editorFalse,
                       selected: _value.text == v,
                       onTap: () => setState(() => _value.text = v),
                     ),
@@ -299,7 +305,7 @@ class _FilterFormState extends ConsumerState<_FilterForm> {
       );
 
   Widget _valueField({bool number = false}) => GlanceField(
-        label: 'Valeur',
+        label: context.l10n.editorFilterValue,
         controller: _value,
         mono: true,
         keyboardType: number

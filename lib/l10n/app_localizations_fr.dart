@@ -503,4 +503,277 @@ class AppLocalizationsFr extends AppLocalizations {
     );
     return 'Source retirée, $_temp0';
   }
+
+  @override
+  String get commonCancel => 'Annuler';
+
+  @override
+  String get commonAdd => 'Ajouter';
+
+  @override
+  String get commonSearch => 'Rechercher';
+
+  @override
+  String get editorNameFallback => 'Sans titre';
+
+  @override
+  String editorNameBy(String a, String b) {
+    return '$a par $b';
+  }
+
+  @override
+  String get editorErrChooseEvent => 'Choisissez un événement';
+
+  @override
+  String get editorErrChooseCountEvent => 'Choisissez l\'événement à compter';
+
+  @override
+  String get editorErrChooseRefEvent => 'Choisissez l\'événement de référence';
+
+  @override
+  String get editorErrChooseProperty => 'Choisissez une propriété';
+
+  @override
+  String get editorErrChooseMetric => 'Choisissez une métrique';
+
+  @override
+  String get editorErrAddSite => 'Ajoutez au moins un site';
+
+  @override
+  String editorErrSitesMax(int max) {
+    return 'Un tableau compte au plus $max sites';
+  }
+
+  @override
+  String get editorErrChooseLineSite => 'Choisissez le site de chaque ligne';
+
+  @override
+  String get editorErrNameLines => 'Nommez chaque ligne';
+
+  @override
+  String get editorErrReferrer => 'Indiquez le domaine du référent';
+
+  @override
+  String editorErrFunnelMin(int min) {
+    return 'Un entonnoir compte au moins $min étapes';
+  }
+
+  @override
+  String editorErrFunnelMax(int max) {
+    return 'Un entonnoir compte au plus $max étapes';
+  }
+
+  @override
+  String editorErrStepEvent(int n) {
+    return 'Choisissez l\'événement de l\'étape $n';
+  }
+
+  @override
+  String get editorErrFunnelNumeric =>
+      'Un entonnoir ne compare pas les nombres : retirez ce filtre';
+
+  @override
+  String get editorErrWindow => 'Délai invalide';
+
+  @override
+  String get editorErrFilterValueMissing => 'Valeur du filtre manquante';
+
+  @override
+  String get editorErrFilterNotNumber => 'Valeur de filtre non numérique';
+
+  @override
+  String get editorTitleEdit => 'Modifier le tableau';
+
+  @override
+  String get editorFieldName => 'Nom';
+
+  @override
+  String get editorHeadingType => 'Type';
+
+  @override
+  String get editorHeadingPreview => 'Aperçu';
+
+  @override
+  String get editorPreviewEmpty =>
+      'L\'aperçu apparaît dès que le tableau est complet.';
+
+  @override
+  String get editorCreated => 'Tableau créé';
+
+  @override
+  String get editorSaved => 'Tableau enregistré';
+
+  @override
+  String get editorDelete => 'Supprimer ce tableau';
+
+  @override
+  String get editorCreate => 'Créer';
+
+  @override
+  String get editorCountLabel => 'Ce qu\'on compte';
+
+  @override
+  String get editorRatioOf => 'Rapporté à';
+
+  @override
+  String get editorGapsLabel => 'Laisser un trou quand rien ne s\'est passé';
+
+  @override
+  String get editorGapsHint => 'Sinon, ces jours-là comptent pour 0 %.';
+
+  @override
+  String get editorOverTimeLabel => 'Évolution dans le temps';
+
+  @override
+  String get editorOverTimeHint =>
+      'Une courbe par valeur, sur toute la largeur';
+
+  @override
+  String get editorMetricLabel => 'Métrique';
+
+  @override
+  String get editorMetricPlaceholder => 'Choisir une métrique';
+
+  @override
+  String get editorMetricNone => 'Cette source ne propose aucun indicateur.';
+
+  @override
+  String get editorMetricAdjusts => 's\'ajuste à la période';
+
+  @override
+  String get editorEventLabel => 'Événement';
+
+  @override
+  String get editorEventPlaceholder => 'Choisir un événement';
+
+  @override
+  String get editorPropertyLabel => 'Propriété';
+
+  @override
+  String get editorPropertyPlaceholder => 'Choisir une propriété';
+
+  @override
+  String get editorKindExternal => 'Métrique du site';
+
+  @override
+  String get editorKindHintCounter => 'Combien de fois un événement arrive';
+
+  @override
+  String get editorKindHintRatio => 'Un événement rapporté à un autre';
+
+  @override
+  String get editorKindHintFunnel => 'Le parcours étape par étape';
+
+  @override
+  String get editorKindHintBreakdown => 'Les valeurs d\'une propriété';
+
+  @override
+  String get editorKindHintExternal => 'Un indicateur fourni par votre API';
+
+  @override
+  String get editorKindHintSites => 'Les visiteurs de plusieurs sites';
+
+  @override
+  String get editorFunnelAddStep => 'Ajouter une étape';
+
+  @override
+  String get editorFunnelWindowLabel => 'Délai maximum entre deux étapes';
+
+  @override
+  String editorFunnelWindowHint(int min, int max) {
+    return 'En minutes (de $min à $max) : un visiteur qui met plus de temps à passer d\'une étape à la suivante n\'est plus compté.';
+  }
+
+  @override
+  String editorFunnelStep(int n) {
+    return 'ÉTAPE $n';
+  }
+
+  @override
+  String get editorFunnelMoveUp => 'Monter l\'étape';
+
+  @override
+  String get editorFunnelMoveDown => 'Descendre l\'étape';
+
+  @override
+  String get editorFunnelRemove => 'Retirer l\'étape';
+
+  @override
+  String get editorTypeText => 'texte';
+
+  @override
+  String get editorTypeNumber => 'nombre';
+
+  @override
+  String get editorTypeBoolean => 'oui-non';
+
+  @override
+  String get editorFreeEvent => 'Saisir un nom d\'événement';
+
+  @override
+  String get editorFreeProperty => 'Saisir un nom de propriété';
+
+  @override
+  String get editorSiteLabel => 'Site';
+
+  @override
+  String editorUseTyped(String value) {
+    return 'Utiliser « $value »';
+  }
+
+  @override
+  String get editorListUnavailable =>
+      'Liste indisponible — saisissez le nom à la main.';
+
+  @override
+  String get editorListEmpty =>
+      'Rien de vu sur 30 jours — saisissez le nom à la main.';
+
+  @override
+  String get editorAddFilter => 'Ajouter un filtre';
+
+  @override
+  String get editorRemoveFilter => 'Retirer le filtre';
+
+  @override
+  String get editorFilterValue => 'Valeur';
+
+  @override
+  String get editorTrue => 'vrai';
+
+  @override
+  String get editorFalse => 'faux';
+
+  @override
+  String get editorModeAll => 'Tous';
+
+  @override
+  String get editorModeOnly => 'Venus de';
+
+  @override
+  String get editorModeExcept => 'Sauf venus de';
+
+  @override
+  String get editorLineSitePlaceholder => 'Choisir un site';
+
+  @override
+  String get editorLineLabel => 'Libellé';
+
+  @override
+  String get editorLineReferrer => 'Domaine du référent';
+
+  @override
+  String get editorLineAdd => 'Ajouter un site';
+
+  @override
+  String get editorLinesHint =>
+      'Visiteurs uniques de chaque ligne. « Sauf venus de » retire ceux que le site a reçus de ce domaine.';
+
+  @override
+  String editorLineTitle(int n) {
+    return 'LIGNE $n';
+  }
+
+  @override
+  String get editorLineRemove => 'Retirer la ligne';
 }

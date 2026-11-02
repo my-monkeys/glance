@@ -249,9 +249,10 @@ class _CardBody extends StatelessWidget {
   }
 
   /// Le nom par défaut d'une carte reprend sa requête (« a / b » pour « a ÷ b »,
-  /// « e par p » pour « e · p ») : on compare sans les séparateurs.
+  /// « e par p » / « e by p » pour « e · p », selon la langue où le nom a été
+  /// enregistré) : on compare sans les séparateurs.
   String? _unlessName(String line) {
-    String norm(String t) => t.replaceAll(RegExp(r'\s*[÷/·]\s*| par '), ' ');
+    String norm(String t) => t.replaceAll(RegExp(r'\s*[÷/·]\s*| par | by '), ' ');
     return norm(line) == norm(name) ? null : line;
   }
 

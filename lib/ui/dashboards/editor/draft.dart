@@ -4,6 +4,7 @@ import '../../../core/internal_traffic.dart' show normDomain;
 import '../../../data/models/indicator.dart';
 import '../../../data/models/metrics_source.dart';
 import '../../../data/models/workspace.dart';
+import '../../../l10n/l10n.dart';
 import '../labels.dart';
 
 /// Opérateurs que l'API d'entonnoir d'Umami accepte : elle ne sait pas
@@ -21,8 +22,6 @@ const int kFunnelMaxSteps = 8;
 const int kFunnelMinWindow = 1;
 const int kFunnelMaxWindow = 1440;
 const int kFunnelDefaultWindow = 60;
-
-const String _fallbackName = 'Sans titre';
 
 /// Au-delà, les couleurs des courbes se répètent (une est prise par le total).
 const int kSiteLinesMax = 6;
@@ -196,7 +195,7 @@ class IndicatorDraft {
           : d;
 
   /// Nom proposé tant que le champ « Nom » reste vide.
-  String suggestedName() {
+  String suggestedName(AppLocalizations l10n) {
     final parts = switch (kind) {
       IndicatorKind.counter => [_label(query)],
       IndicatorKind.ratio => [_label(query), _label(denominator)],
@@ -205,13 +204,13 @@ class IndicatorDraft {
       IndicatorKind.external => [metricLabel],
       IndicatorKind.sites => [for (final l in siteLines) l.label.trim()],
     }.where((s) => s.isNotEmpty).toList();
-    if (parts.isEmpty) return _fallbackName;
+    if (parts.isEmpty) return l10n.editorNameFallback;
     if (parts.length == 1) return parts.single;
     return switch (kind) {
       IndicatorKind.sites => parts.join(' · '),
       IndicatorKind.ratio => '${parts[0]} / ${parts[1]}',
       IndicatorKind.funnel => '${parts[0]} → ${parts[1]}',
-      _ => '${parts[0]} par ${parts[1]}',
+      _ => l10n.editorNameBy(parts[0], parts[1]),
     };
   }
 
@@ -219,64 +218,62 @@ class IndicatorDraft {
 
   /// Raison courte pour laquelle le brouillon ne peut pas être enregistré, ou
   /// null s'il est valide.
-  String? validationError() {
+  String? validationError(AppLocalizations l10n) {
     switch (kind) {
       case IndicatorKind.counter:
         return query.event.isEmpty
-            ? 'Choisissez un événement'
-            : _filtersError(query);
+            ? l10n.editorErrChooseEvent
+            : _filtersError(l10n, query);
       case IndicatorKind.ratio:
-        if (query.event.isEmpty) return 'Choisissez l\'événement à compter';
-        if (denominator.event.isEmpty) {
-          return 'Choisissez l\'événement de référence';
-        }
-        return _filtersError(query) ?? _filtersError(denominator);
+        if (query.event.isEmpty) return l10n.editorErrChooseCountEvent;
+        if (denominator.event.isEmpty) return l10n.editorErrChooseRefEvent;
+        return _filtersError(l10n, query) ?? _filtersError(l10n, denominator);
       case IndicatorKind.funnel:
-        return _funnelError();
+        return _funnelError(l10n);
       case IndicatorKind.breakdown:
-        if (breakdownEvent.isEmpty) return 'Choisissez un événement';
-        if (breakdownProperty.isEmpty) return 'Choisissez une propriété';
+        if (breakdownEvent.isEmpty) return l10n.editorErrChooseEvent;
+        if (breakdownProperty.isEmpty) return l10n.editorErrChooseProperty;
         return null;
       case IndicatorKind.external:
-        return metricId.isEmpty ? 'Choisissez une métrique' : null;
+        return metricId.isEmpty ? l10n.editorErrChooseMetric : null;
       case IndicatorKind.sites:
-        return _sitesError();
+        return _sitesError(l10n);
     }
   }
 
-  String? _sitesError() {
-    if (siteLines.isEmpty) return 'Ajoutez au moins un site';
+  String? _sitesError(AppLocalizations l10n) {
+    if (siteLines.isEmpty) return l10n.editorErrAddSite;
     if (siteLines.length > kSiteLinesMax) {
-      return 'Un tableau compte au plus $kSiteLinesMax sites';
+      return l10n.editorErrSitesMax(kSiteLinesMax);
     }
     for (final l in siteLines) {
-      if (l.site.siteId.isEmpty) return 'Choisissez le site de chaque ligne';
-      if (l.label.trim().isEmpty) return 'Nommez chaque ligne';
+      if (l.site.siteId.isEmpty) return l10n.editorErrChooseLineSite;
+      if (l.label.trim().isEmpty) return l10n.editorErrNameLines;
       if (l.mode != ReferrerMode.all && normDomain(l.referrer).isEmpty) {
-        return 'Indiquez le domaine du référent';
+        return l10n.editorErrReferrer;
       }
     }
     return null;
   }
 
-  String? _funnelError() {
+  String? _funnelError(AppLocalizations l10n) {
     if (steps.length < kFunnelMinSteps) {
-      return 'Un entonnoir compte au moins $kFunnelMinSteps étapes';
+      return l10n.editorErrFunnelMin(kFunnelMinSteps);
     }
     if (steps.length > kFunnelMaxSteps) {
-      return 'Un entonnoir compte au plus $kFunnelMaxSteps étapes';
+      return l10n.editorErrFunnelMax(kFunnelMaxSteps);
     }
     for (var i = 0; i < steps.length; i++) {
-      if (steps[i].event.isEmpty) return 'Choisissez l\'événement de l\'étape ${i + 1}';
+      if (steps[i].event.isEmpty) return l10n.editorErrStepEvent(i + 1);
     }
     for (final s in steps) {
-      final e = _filtersError(s);
+      final e = _filtersError(l10n, s);
       if (e != null) return e;
       if (s.filters.any((f) => !kFunnelOps.contains(f.op))) {
-        return 'Un entonnoir ne compare pas les nombres : retirez ce filtre';
+        return l10n.editorErrFunnelNumeric;
       }
     }
-    return windowMinutes == null ? 'Délai invalide' : null;
+    return windowMinutes == null ? l10n.editorErrWindow : null;
   }
 
   /// Délai en minutes, null s'il n'est pas un entier de 1 à 1440.
@@ -285,11 +282,11 @@ class IndicatorDraft {
     return m != null && m >= kFunnelMinWindow && m <= kFunnelMaxWindow ? m : null;
   }
 
-  static String? _filtersError(EventQuery q) {
+  static String? _filtersError(AppLocalizations l10n, EventQuery q) {
     for (final f in q.filters) {
-      if (f.value.trim().isEmpty) return 'Valeur du filtre manquante';
+      if (f.value.trim().isEmpty) return l10n.editorErrFilterValueMissing;
       if (f.type == PropertyType.number && num.tryParse(f.value.trim()) == null) {
-        return 'Valeur de filtre non numérique';
+        return l10n.editorErrFilterNotNumber;
       }
     }
     return null;
@@ -297,9 +294,9 @@ class IndicatorDraft {
 
   /// Null tant que [validationError] en trouve une. Un nom laissé vide prend
   /// [suggestedName].
-  Indicator? toIndicator(String id) {
-    if (validationError() != null) return null;
-    final label = name.trim().isEmpty ? suggestedName() : name.trim();
+  Indicator? toIndicator(String id, AppLocalizations l10n) {
+    if (validationError(l10n) != null) return null;
+    final label = name.trim().isEmpty ? suggestedName(l10n) : name.trim();
     return switch (kind) {
       IndicatorKind.counter =>
         CounterIndicator(id: id, name: label, query: query),

@@ -859,6 +859,504 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Source retirée, {count, plural, =1{1 tableau supprimé} other{{count} tableaux supprimés}}'**
   String dashboardsMetricsRemovedWithCards(int count);
+
+  /// No description provided for @commonCancel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get commonCancel;
+
+  /// No description provided for @commonAdd.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter'**
+  String get commonAdd;
+
+  /// No description provided for @commonSearch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher'**
+  String get commonSearch;
+
+  /// Nom proposé quand rien n'est encore choisi
+  ///
+  /// In fr, this message translates to:
+  /// **'Sans titre'**
+  String get editorNameFallback;
+
+  /// Nom proposé : une répartition « événement par propriété »
+  ///
+  /// In fr, this message translates to:
+  /// **'{a} par {b}'**
+  String editorNameBy(String a, String b);
+
+  /// Raison de validation affichée sous l'éditeur
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez un événement'**
+  String get editorErrChooseEvent;
+
+  /// No description provided for @editorErrChooseCountEvent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez l\'événement à compter'**
+  String get editorErrChooseCountEvent;
+
+  /// Dénominateur d'un taux
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez l\'événement de référence'**
+  String get editorErrChooseRefEvent;
+
+  /// No description provided for @editorErrChooseProperty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez une propriété'**
+  String get editorErrChooseProperty;
+
+  /// No description provided for @editorErrChooseMetric.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez une métrique'**
+  String get editorErrChooseMetric;
+
+  /// No description provided for @editorErrAddSite.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajoutez au moins un site'**
+  String get editorErrAddSite;
+
+  /// No description provided for @editorErrSitesMax.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un tableau compte au plus {max} sites'**
+  String editorErrSitesMax(int max);
+
+  /// No description provided for @editorErrChooseLineSite.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez le site de chaque ligne'**
+  String get editorErrChooseLineSite;
+
+  /// No description provided for @editorErrNameLines.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nommez chaque ligne'**
+  String get editorErrNameLines;
+
+  /// No description provided for @editorErrReferrer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indiquez le domaine du référent'**
+  String get editorErrReferrer;
+
+  /// No description provided for @editorErrFunnelMin.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un entonnoir compte au moins {min} étapes'**
+  String editorErrFunnelMin(int min);
+
+  /// No description provided for @editorErrFunnelMax.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un entonnoir compte au plus {max} étapes'**
+  String editorErrFunnelMax(int max);
+
+  /// No description provided for @editorErrStepEvent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez l\'événement de l\'étape {n}'**
+  String editorErrStepEvent(int n);
+
+  /// No description provided for @editorErrFunnelNumeric.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un entonnoir ne compare pas les nombres : retirez ce filtre'**
+  String get editorErrFunnelNumeric;
+
+  /// Délai maximum entre deux étapes d'un entonnoir
+  ///
+  /// In fr, this message translates to:
+  /// **'Délai invalide'**
+  String get editorErrWindow;
+
+  /// No description provided for @editorErrFilterValueMissing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valeur du filtre manquante'**
+  String get editorErrFilterValueMissing;
+
+  /// No description provided for @editorErrFilterNotNumber.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valeur de filtre non numérique'**
+  String get editorErrFilterNotNumber;
+
+  /// No description provided for @editorTitleEdit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier le tableau'**
+  String get editorTitleEdit;
+
+  /// No description provided for @editorFieldName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom'**
+  String get editorFieldName;
+
+  /// Titre de section : genre du tableau (compteur, taux…)
+  ///
+  /// In fr, this message translates to:
+  /// **'Type'**
+  String get editorHeadingType;
+
+  /// No description provided for @editorHeadingPreview.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aperçu'**
+  String get editorHeadingPreview;
+
+  /// No description provided for @editorPreviewEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'aperçu apparaît dès que le tableau est complet.'**
+  String get editorPreviewEmpty;
+
+  /// No description provided for @editorCreated.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tableau créé'**
+  String get editorCreated;
+
+  /// No description provided for @editorSaved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tableau enregistré'**
+  String get editorSaved;
+
+  /// No description provided for @editorDelete.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer ce tableau'**
+  String get editorDelete;
+
+  /// No description provided for @editorCreate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer'**
+  String get editorCreate;
+
+  /// Numérateur d'un taux
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce qu\'on compte'**
+  String get editorCountLabel;
+
+  /// Dénominateur d'un taux
+  ///
+  /// In fr, this message translates to:
+  /// **'Rapporté à'**
+  String get editorRatioOf;
+
+  /// No description provided for @editorGapsLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Laisser un trou quand rien ne s\'est passé'**
+  String get editorGapsLabel;
+
+  /// No description provided for @editorGapsHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sinon, ces jours-là comptent pour 0 %.'**
+  String get editorGapsHint;
+
+  /// No description provided for @editorOverTimeLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Évolution dans le temps'**
+  String get editorOverTimeLabel;
+
+  /// No description provided for @editorOverTimeHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une courbe par valeur, sur toute la largeur'**
+  String get editorOverTimeHint;
+
+  /// No description provided for @editorMetricLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Métrique'**
+  String get editorMetricLabel;
+
+  /// No description provided for @editorMetricPlaceholder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir une métrique'**
+  String get editorMetricPlaceholder;
+
+  /// No description provided for @editorMetricNone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette source ne propose aucun indicateur.'**
+  String get editorMetricNone;
+
+  /// Sous le nom d'une famille de métriques (J1, J7, J30)
+  ///
+  /// In fr, this message translates to:
+  /// **'s\'ajuste à la période'**
+  String get editorMetricAdjusts;
+
+  /// No description provided for @editorEventLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Événement'**
+  String get editorEventLabel;
+
+  /// No description provided for @editorEventPlaceholder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir un événement'**
+  String get editorEventPlaceholder;
+
+  /// Propriété d'un événement
+  ///
+  /// In fr, this message translates to:
+  /// **'Propriété'**
+  String get editorPropertyLabel;
+
+  /// No description provided for @editorPropertyPlaceholder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir une propriété'**
+  String get editorPropertyPlaceholder;
+
+  /// No description provided for @editorKindExternal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Métrique du site'**
+  String get editorKindExternal;
+
+  /// No description provided for @editorKindHintCounter.
+  ///
+  /// In fr, this message translates to:
+  /// **'Combien de fois un événement arrive'**
+  String get editorKindHintCounter;
+
+  /// No description provided for @editorKindHintRatio.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un événement rapporté à un autre'**
+  String get editorKindHintRatio;
+
+  /// No description provided for @editorKindHintFunnel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le parcours étape par étape'**
+  String get editorKindHintFunnel;
+
+  /// No description provided for @editorKindHintBreakdown.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les valeurs d\'une propriété'**
+  String get editorKindHintBreakdown;
+
+  /// No description provided for @editorKindHintExternal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un indicateur fourni par votre API'**
+  String get editorKindHintExternal;
+
+  /// No description provided for @editorKindHintSites.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les visiteurs de plusieurs sites'**
+  String get editorKindHintSites;
+
+  /// No description provided for @editorFunnelAddStep.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter une étape'**
+  String get editorFunnelAddStep;
+
+  /// No description provided for @editorFunnelWindowLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Délai maximum entre deux étapes'**
+  String get editorFunnelWindowLabel;
+
+  /// No description provided for @editorFunnelWindowHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'En minutes (de {min} à {max}) : un visiteur qui met plus de temps à passer d\'une étape à la suivante n\'est plus compté.'**
+  String editorFunnelWindowHint(int min, int max);
+
+  /// Titre d'une carte d'étape, en capitales
+  ///
+  /// In fr, this message translates to:
+  /// **'ÉTAPE {n}'**
+  String editorFunnelStep(int n);
+
+  /// No description provided for @editorFunnelMoveUp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Monter l\'étape'**
+  String get editorFunnelMoveUp;
+
+  /// No description provided for @editorFunnelMoveDown.
+  ///
+  /// In fr, this message translates to:
+  /// **'Descendre l\'étape'**
+  String get editorFunnelMoveDown;
+
+  /// No description provided for @editorFunnelRemove.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer l\'étape'**
+  String get editorFunnelRemove;
+
+  /// Type d'une propriété, en petit à droite d'une ligne
+  ///
+  /// In fr, this message translates to:
+  /// **'texte'**
+  String get editorTypeText;
+
+  /// No description provided for @editorTypeNumber.
+  ///
+  /// In fr, this message translates to:
+  /// **'nombre'**
+  String get editorTypeNumber;
+
+  /// No description provided for @editorTypeBoolean.
+  ///
+  /// In fr, this message translates to:
+  /// **'oui-non'**
+  String get editorTypeBoolean;
+
+  /// No description provided for @editorFreeEvent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisir un nom d\'événement'**
+  String get editorFreeEvent;
+
+  /// No description provided for @editorFreeProperty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisir un nom de propriété'**
+  String get editorFreeProperty;
+
+  /// No description provided for @editorSiteLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Site'**
+  String get editorSiteLabel;
+
+  /// Ligne qui valide le texte saisi à la main
+  ///
+  /// In fr, this message translates to:
+  /// **'Utiliser « {value} »'**
+  String editorUseTyped(String value);
+
+  /// No description provided for @editorListUnavailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Liste indisponible — saisissez le nom à la main.'**
+  String get editorListUnavailable;
+
+  /// No description provided for @editorListEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rien de vu sur 30 jours — saisissez le nom à la main.'**
+  String get editorListEmpty;
+
+  /// No description provided for @editorAddFilter.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter un filtre'**
+  String get editorAddFilter;
+
+  /// No description provided for @editorRemoveFilter.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer le filtre'**
+  String get editorRemoveFilter;
+
+  /// No description provided for @editorFilterValue.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valeur'**
+  String get editorFilterValue;
+
+  /// Valeur booléenne d'un filtre
+  ///
+  /// In fr, this message translates to:
+  /// **'vrai'**
+  String get editorTrue;
+
+  /// No description provided for @editorFalse.
+  ///
+  /// In fr, this message translates to:
+  /// **'faux'**
+  String get editorFalse;
+
+  /// Filtre de référent d'une ligne : aucun filtre
+  ///
+  /// In fr, this message translates to:
+  /// **'Tous'**
+  String get editorModeAll;
+
+  /// Filtre de référent : seulement les visiteurs venus d'un domaine
+  ///
+  /// In fr, this message translates to:
+  /// **'Venus de'**
+  String get editorModeOnly;
+
+  /// Filtre de référent : tous sauf ceux venus d'un domaine
+  ///
+  /// In fr, this message translates to:
+  /// **'Sauf venus de'**
+  String get editorModeExcept;
+
+  /// No description provided for @editorLineSitePlaceholder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir un site'**
+  String get editorLineSitePlaceholder;
+
+  /// Nom court d'une ligne du tableau Sites
+  ///
+  /// In fr, this message translates to:
+  /// **'Libellé'**
+  String get editorLineLabel;
+
+  /// No description provided for @editorLineReferrer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Domaine du référent'**
+  String get editorLineReferrer;
+
+  /// No description provided for @editorLineAdd.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter un site'**
+  String get editorLineAdd;
+
+  /// No description provided for @editorLinesHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Visiteurs uniques de chaque ligne. « Sauf venus de » retire ceux que le site a reçus de ce domaine.'**
+  String get editorLinesHint;
+
+  /// Titre d'une carte de ligne, en capitales
+  ///
+  /// In fr, this message translates to:
+  /// **'LIGNE {n}'**
+  String editorLineTitle(int n);
+
+  /// No description provided for @editorLineRemove.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer la ligne'**
+  String get editorLineRemove;
 }
 
 class _AppLocalizationsDelegate

@@ -1,27 +1,28 @@
 import 'package:flutter/material.dart';
 
 import '../../../data/models/indicator.dart';
+import '../../../l10n/l10n.dart';
 import '../../../theme/motion.dart';
 import '../../../theme/palette.dart';
 import '../../../theme/type.dart';
 
-const kindNames = {
-  IndicatorKind.counter: 'Compteur',
-  IndicatorKind.ratio: 'Taux',
-  IndicatorKind.funnel: 'Entonnoir',
-  IndicatorKind.breakdown: 'Répartition',
-  IndicatorKind.external: 'Métrique du site',
-  IndicatorKind.sites: 'Sites',
-};
+String _kindName(AppLocalizations l10n, IndicatorKind k) => switch (k) {
+      IndicatorKind.counter => l10n.dashboardsKindCounter,
+      IndicatorKind.ratio => l10n.dashboardsKindRatio,
+      IndicatorKind.funnel => l10n.dashboardsKindFunnel,
+      IndicatorKind.breakdown => l10n.dashboardsKindBreakdown,
+      IndicatorKind.external => l10n.editorKindExternal,
+      IndicatorKind.sites => l10n.dashboardsKindSites,
+    };
 
-const _kindHints = {
-  IndicatorKind.counter: 'Combien de fois un événement arrive',
-  IndicatorKind.ratio: 'Un événement rapporté à un autre',
-  IndicatorKind.funnel: 'Le parcours étape par étape',
-  IndicatorKind.breakdown: 'Les valeurs d\'une propriété',
-  IndicatorKind.external: 'Un indicateur fourni par votre API',
-  IndicatorKind.sites: 'Les visiteurs de plusieurs sites',
-};
+String _kindHint(AppLocalizations l10n, IndicatorKind k) => switch (k) {
+      IndicatorKind.counter => l10n.editorKindHintCounter,
+      IndicatorKind.ratio => l10n.editorKindHintRatio,
+      IndicatorKind.funnel => l10n.editorKindHintFunnel,
+      IndicatorKind.breakdown => l10n.editorKindHintBreakdown,
+      IndicatorKind.external => l10n.editorKindHintExternal,
+      IndicatorKind.sites => l10n.editorKindHintSites,
+    };
 
 /// Les genres en grille de deux colonnes : empilés, ils remplissaient l'écran
 /// et repoussaient le formulaire sous la ligne de flottaison. Toujours deux
@@ -71,6 +72,7 @@ class KindPicker extends StatelessWidget {
   Widget _tile(BuildContext context, IndicatorKind k) {
     final p = context.glance;
     final on = k == selected;
+    final l10n = context.l10n;
     return GestureDetector(
       onTap: () => onChanged(k),
       behavior: HitTestBehavior.opaque,
@@ -86,10 +88,10 @@ class KindPicker extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(kindNames[k]!, style: GT.body(14, weight: 600, color: p.fg)),
+            Text(_kindName(l10n, k), style: GT.body(14, weight: 600, color: p.fg)),
             const SizedBox(height: 2),
             Text(
-              _kindHints[k]!,
+              _kindHint(l10n, k),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: GT.body(11.5, color: p.fg2),

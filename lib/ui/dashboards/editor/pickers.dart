@@ -5,6 +5,7 @@ import '../../../data/models/account.dart';
 import '../../../data/models/indicator.dart';
 import '../../../data/models/indicator_result.dart';
 import '../../../data/models/models.dart';
+import '../../../l10n/l10n.dart';
 import '../../../state/indicators.dart';
 import '../../../state/providers.dart';
 import '../../../theme/palette.dart';
@@ -92,8 +93,8 @@ Future<String?> pickEvent(BuildContext context, Site site) =>
       context,
       (_) => Consumer(
         builder: (context, ref, _) => _SearchSheet(
-          title: 'Événement',
-          freeTextHint: 'Saisir un nom d\'événement',
+          title: context.l10n.editorEventLabel,
+          freeTextHint: context.l10n.editorFreeEvent,
           options: ref.watch(eventNamesProvider(site)).whenData(
                 (names) => [for (final n in names) _Option(n)],
               ),
@@ -114,8 +115,8 @@ Future<Site?> pickSite(BuildContext context) async {
             if (a.kind == ProviderKind.umami) a.id,
         };
         return _SearchSheet(
-          title: 'Site',
-          freeTextHint: 'Rechercher un site',
+          title: context.l10n.editorSiteLabel,
+          freeTextHint: context.l10n.siteSearchHint,
           options: ref.watch(sitesProvider).whenData((sites) {
             final shown = [for (final s in sites) if (umami.contains(s.accountId)) s];
             for (final s in shown) {
@@ -131,10 +132,10 @@ Future<Site?> pickSite(BuildContext context) async {
   return name == null ? null : byName[name];
 }
 
-String propertyTypeHint(PropertyType t) => switch (t) {
-      PropertyType.string => 'texte',
-      PropertyType.number => 'nombre',
-      PropertyType.boolean => 'oui-non',
+String propertyTypeHint(AppLocalizations l10n, PropertyType t) => switch (t) {
+      PropertyType.string => l10n.editorTypeText,
+      PropertyType.number => l10n.editorTypeNumber,
+      PropertyType.boolean => l10n.editorTypeBoolean,
     };
 
 /// Choisit une propriété de [event]. Sans liste (Plausible), le nom saisi à la
@@ -149,8 +150,8 @@ Future<EventProperty?> pickProperty(
     context,
     (_) => Consumer(
       builder: (context, ref, _) => _SearchSheet(
-        title: 'Propriété',
-        freeTextHint: 'Saisir un nom de propriété',
+        title: context.l10n.editorPropertyLabel,
+        freeTextHint: context.l10n.editorFreeProperty,
         options: ref.watch(eventPropertiesProvider((site, event))).whenData(
           (props) {
             for (final p in props) {
@@ -158,7 +159,7 @@ Future<EventProperty?> pickProperty(
             }
             return [
               for (final p in props)
-                _Option(p.name, hint: propertyTypeHint(p.type)),
+                _Option(p.name, hint: propertyTypeHint(context.l10n, p.type)),
             ];
           },
         ),
@@ -225,7 +226,7 @@ class _SearchSheetState extends State<_SearchSheet> {
               const SizedBox(height: 14),
               if (searchable) ...[
                 GlanceField(
-                  label: options.isEmpty ? 'Nom' : 'Rechercher',
+                  label: options.isEmpty ? context.l10n.editorFieldName : context.l10n.commonSearch,
                   hint: options.isEmpty ? widget.freeTextHint : null,
                   controller: _query,
                   mono: true,
@@ -261,7 +262,7 @@ class _SearchSheetState extends State<_SearchSheet> {
       children: [
         if (typed != null)
           _Row(
-            label: 'Utiliser « $typed »',
+            label: context.l10n.editorUseTyped(typed),
             accent: true,
             onTap: () => Navigator.of(context).pop(typed),
           ),
@@ -276,8 +277,8 @@ class _SearchSheetState extends State<_SearchSheet> {
             padding: const EdgeInsets.symmetric(vertical: 14),
             child: Text(
               failed
-                  ? 'Liste indisponible — saisissez le nom à la main.'
-                  : 'Rien de vu sur 30 jours — saisissez le nom à la main.',
+                  ? context.l10n.editorListUnavailable
+                  : context.l10n.editorListEmpty,
               style: GT.body(13, color: p.fg3),
             ),
           ),

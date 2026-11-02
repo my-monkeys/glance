@@ -427,5 +427,206 @@
         "type": "int"
       }
     }
-  }
+  },
+  "commonCancel": "Annuler",
+  "commonAdd": "Ajouter",
+  "commonSearch": "Rechercher",
+  "editorNameFallback": "Sans titre",
+  "@editorNameFallback": {
+    "description": "Nom proposé quand rien n'est encore choisi"
+  },
+  "editorNameBy": "{a} par {b}",
+  "@editorNameBy": {
+    "description": "Nom proposé : une répartition « événement par propriété »",
+    "placeholders": {
+      "a": {
+        "type": "String"
+      },
+      "b": {
+        "type": "String"
+      }
+    }
+  },
+  "editorErrChooseEvent": "Choisissez un événement",
+  "@editorErrChooseEvent": {
+    "description": "Raison de validation affichée sous l'éditeur"
+  },
+  "editorErrChooseCountEvent": "Choisissez l'événement à compter",
+  "editorErrChooseRefEvent": "Choisissez l'événement de référence",
+  "@editorErrChooseRefEvent": {
+    "description": "Dénominateur d'un taux"
+  },
+  "editorErrChooseProperty": "Choisissez une propriété",
+  "editorErrChooseMetric": "Choisissez une métrique",
+  "editorErrAddSite": "Ajoutez au moins un site",
+  "editorErrSitesMax": "Un tableau compte au plus {max} sites",
+  "@editorErrSitesMax": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "editorErrChooseLineSite": "Choisissez le site de chaque ligne",
+  "editorErrNameLines": "Nommez chaque ligne",
+  "editorErrReferrer": "Indiquez le domaine du référent",
+  "editorErrFunnelMin": "Un entonnoir compte au moins {min} étapes",
+  "@editorErrFunnelMin": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "editorErrFunnelMax": "Un entonnoir compte au plus {max} étapes",
+  "@editorErrFunnelMax": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "editorErrStepEvent": "Choisissez l'événement de l'étape {n}",
+  "@editorErrStepEvent": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "editorErrFunnelNumeric": "Un entonnoir ne compare pas les nombres : retirez ce filtre",
+  "editorErrWindow": "Délai invalide",
+  "@editorErrWindow": {
+    "description": "Délai maximum entre deux étapes d'un entonnoir"
+  },
+  "editorErrFilterValueMissing": "Valeur du filtre manquante",
+  "editorErrFilterNotNumber": "Valeur de filtre non numérique",
+  "editorTitleEdit": "Modifier le tableau",
+  "editorFieldName": "Nom",
+  "editorHeadingType": "Type",
+  "@editorHeadingType": {
+    "description": "Titre de section : genre du tableau (compteur, taux…)"
+  },
+  "editorHeadingPreview": "Aperçu",
+  "editorPreviewEmpty": "L'aperçu apparaît dès que le tableau est complet.",
+  "editorCreated": "Tableau créé",
+  "editorSaved": "Tableau enregistré",
+  "editorDelete": "Supprimer ce tableau",
+  "editorCreate": "Créer",
+  "editorCountLabel": "Ce qu'on compte",
+  "@editorCountLabel": {
+    "description": "Numérateur d'un taux"
+  },
+  "editorRatioOf": "Rapporté à",
+  "@editorRatioOf": {
+    "description": "Dénominateur d'un taux"
+  },
+  "editorGapsLabel": "Laisser un trou quand rien ne s'est passé",
+  "editorGapsHint": "Sinon, ces jours-là comptent pour 0 %.",
+  "editorOverTimeLabel": "Évolution dans le temps",
+  "editorOverTimeHint": "Une courbe par valeur, sur toute la largeur",
+  "editorMetricLabel": "Métrique",
+  "editorMetricPlaceholder": "Choisir une métrique",
+  "editorMetricNone": "Cette source ne propose aucun indicateur.",
+  "editorMetricAdjusts": "s'ajuste à la période",
+  "@editorMetricAdjusts": {
+    "description": "Sous le nom d'une famille de métriques (J1, J7, J30)"
+  },
+  "editorEventLabel": "Événement",
+  "editorEventPlaceholder": "Choisir un événement",
+  "editorPropertyLabel": "Propriété",
+  "@editorPropertyLabel": {
+    "description": "Propriété d'un événement"
+  },
+  "editorPropertyPlaceholder": "Choisir une propriété",
+  "editorKindExternal": "Métrique du site",
+  "editorKindHintCounter": "Combien de fois un événement arrive",
+  "editorKindHintRatio": "Un événement rapporté à un autre",
+  "editorKindHintFunnel": "Le parcours étape par étape",
+  "editorKindHintBreakdown": "Les valeurs d'une propriété",
+  "editorKindHintExternal": "Un indicateur fourni par votre API",
+  "editorKindHintSites": "Les visiteurs de plusieurs sites",
+  "editorFunnelAddStep": "Ajouter une étape",
+  "editorFunnelWindowLabel": "Délai maximum entre deux étapes",
+  "editorFunnelWindowHint": "En minutes (de {min} à {max}) : un visiteur qui met plus de temps à passer d'une étape à la suivante n'est plus compté.",
+  "@editorFunnelWindowHint": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "editorFunnelStep": "ÉTAPE {n}",
+  "@editorFunnelStep": {
+    "description": "Titre d'une carte d'étape, en capitales",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "editorFunnelMoveUp": "Monter l'étape",
+  "editorFunnelMoveDown": "Descendre l'étape",
+  "editorFunnelRemove": "Retirer l'étape",
+  "editorTypeText": "texte",
+  "@editorTypeText": {
+    "description": "Type d'une propriété, en petit à droite d'une ligne"
+  },
+  "editorTypeNumber": "nombre",
+  "editorTypeBoolean": "oui-non",
+  "editorFreeEvent": "Saisir un nom d'événement",
+  "editorFreeProperty": "Saisir un nom de propriété",
+  "editorSiteLabel": "Site",
+  "editorUseTyped": "Utiliser « {value} »",
+  "@editorUseTyped": {
+    "description": "Ligne qui valide le texte saisi à la main",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "editorListUnavailable": "Liste indisponible — saisissez le nom à la main.",
+  "editorListEmpty": "Rien de vu sur 30 jours — saisissez le nom à la main.",
+  "editorAddFilter": "Ajouter un filtre",
+  "editorRemoveFilter": "Retirer le filtre",
+  "editorFilterValue": "Valeur",
+  "editorTrue": "vrai",
+  "@editorTrue": {
+    "description": "Valeur booléenne d'un filtre"
+  },
+  "editorFalse": "faux",
+  "editorModeAll": "Tous",
+  "@editorModeAll": {
+    "description": "Filtre de référent d'une ligne : aucun filtre"
+  },
+  "editorModeOnly": "Venus de",
+  "@editorModeOnly": {
+    "description": "Filtre de référent : seulement les visiteurs venus d'un domaine"
+  },
+  "editorModeExcept": "Sauf venus de",
+  "@editorModeExcept": {
+    "description": "Filtre de référent : tous sauf ceux venus d'un domaine"
+  },
+  "editorLineSitePlaceholder": "Choisir un site",
+  "editorLineLabel": "Libellé",
+  "@editorLineLabel": {
+    "description": "Nom court d'une ligne du tableau Sites"
+  },
+  "editorLineReferrer": "Domaine du référent",
+  "editorLineAdd": "Ajouter un site",
+  "editorLinesHint": "Visiteurs uniques de chaque ligne. « Sauf venus de » retire ceux que le site a reçus de ce domaine.",
+  "editorLineTitle": "LIGNE {n}",
+  "@editorLineTitle": {
+    "description": "Titre d'une carte de ligne, en capitales",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "editorLineRemove": "Retirer la ligne"
 }

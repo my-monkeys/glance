@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:glance/data/models/indicator.dart';
+import 'package:glance/l10n/app_localizations_fr.dart';
 import 'package:glance/data/models/metrics_source.dart';
 import 'package:glance/ui/dashboards/editor/draft.dart';
 
@@ -9,6 +10,8 @@ const _issue = EventFilter(
   op: FilterOp.eq,
   value: 'complet',
 );
+
+final l10n = AppLocalizationsFr();
 
 void main() {
   group('aller-retour fromIndicator → toIndicator', () {
@@ -52,7 +55,7 @@ void main() {
     ];
     for (final i in all) {
       test(i.kind.name, () {
-        expect(IndicatorDraft.fromIndicator(i).toIndicator(i.id), i);
+        expect(IndicatorDraft.fromIndicator(i).toIndicator(i.id, l10n), i);
       });
     }
   });
@@ -63,9 +66,9 @@ void main() {
       breakdownEvent: 'partie',
       breakdownProperty: 'jeu',
     );
-    expect((d.toIndicator('x') as BreakdownIndicator).overTime, isFalse);
+    expect((d.toIndicator('x', l10n) as BreakdownIndicator).overTime, isFalse);
     final on = d.copyWith(breakdownOverTime: true);
-    final i = on.toIndicator('x') as BreakdownIndicator;
+    final i = on.toIndicator('x', l10n) as BreakdownIndicator;
     expect(i.overTime, isTrue);
     expect(IndicatorDraft.fromIndicator(i).breakdownOverTime, isTrue);
   });
@@ -74,8 +77,8 @@ void main() {
     const d = IndicatorDraft(kind: IndicatorKind.external);
 
     test('sans métrique : refusé', () {
-      expect(d.validationError(), 'Choisissez une métrique');
-      expect(d.toIndicator('x'), isNull);
+      expect(d.validationError(l10n), 'Choisissez une métrique');
+      expect(d.toIndicator('x', l10n), isNull);
     });
 
     test('le nom proposé est le libellé du catalogue', () {
@@ -84,9 +87,9 @@ void main() {
         metricLabel: 'Rétention J1',
         metricUnit: MetricUnit.percent,
       );
-      expect(chosen.validationError(), isNull);
-      expect(chosen.suggestedName(), 'Rétention J1');
-      final i = chosen.toIndicator('i') as ExternalIndicator;
+      expect(chosen.validationError(l10n), isNull);
+      expect(chosen.suggestedName(l10n), 'Rétention J1');
+      final i = chosen.toIndicator('i', l10n) as ExternalIndicator;
       expect(i.unit, MetricUnit.percent);
     });
 
@@ -101,43 +104,43 @@ void main() {
 
   group('validationError', () {
     test('compteur sans événement', () {
-      expect(const IndicatorDraft().validationError(), 'Choisissez un événement');
+      expect(const IndicatorDraft().validationError(l10n), 'Choisissez un événement');
     });
 
     test('taux : numérateur puis dénominateur', () {
       const d = IndicatorDraft(kind: IndicatorKind.ratio);
-      expect(d.validationError(), contains('compter'));
+      expect(d.validationError(l10n), contains('compter'));
       expect(
-        d.copyWith(query: const EventQuery('a')).validationError(),
+        d.copyWith(query: const EventQuery('a')).validationError(l10n),
         contains('référence'),
       );
       expect(
         d
             .copyWith(
                 query: const EventQuery('a'), denominator: const EventQuery('b'))
-            .validationError(),
+            .validationError(l10n),
         isNull,
       );
     });
 
     test('entonnoir : étapes, événements, délai', () {
       const d = IndicatorDraft(kind: IndicatorKind.funnel);
-      expect(d.validationError(), contains('étape 1'));
+      expect(d.validationError(l10n), contains('étape 1'));
       expect(
-        d.copyWith(steps: const [EventQuery('a')]).validationError(),
+        d.copyWith(steps: const [EventQuery('a')]).validationError(l10n),
         'Un entonnoir compte au moins 2 étapes',
       );
       final ok = d.copyWith(steps: const [EventQuery('a'), EventQuery('b')]);
-      expect(ok.validationError(), isNull);
+      expect(ok.validationError(l10n), isNull);
       for (final bad in ['', 'abc', '0', '1441', '1.5']) {
-        expect(ok.copyWith(windowText: bad).validationError(), 'Délai invalide',
+        expect(ok.copyWith(windowText: bad).validationError(l10n), 'Délai invalide',
             reason: bad);
       }
-      expect(ok.copyWith(windowText: '1440').validationError(), isNull);
+      expect(ok.copyWith(windowText: '1440').validationError(l10n), isNull);
       expect(
         ok
             .copyWith(steps: [for (var i = 0; i < 9; i++) EventQuery('e$i')])
-            .validationError(),
+            .validationError(l10n),
         contains('au plus 8'),
       );
     });
@@ -149,8 +152,8 @@ void main() {
         kind: IndicatorKind.funnel,
         steps: const [EventQuery('a', [gt]), EventQuery('b')],
       );
-      expect(d.validationError(), contains('retirez ce filtre'));
-      expect(d.toIndicator('x'), isNull);
+      expect(d.validationError(l10n), contains('retirez ce filtre'));
+      expect(d.toIndicator('x', l10n), isNull);
     });
 
     test('filtres : valeur manquante, nombre invalide', () {
@@ -159,19 +162,19 @@ void main() {
       const nan = EventFilter(
           property: 'n', type: PropertyType.number, op: FilterOp.gt, value: 'x');
       expect(
-        const IndicatorDraft(query: EventQuery('a', [empty])).validationError(),
+        const IndicatorDraft(query: EventQuery('a', [empty])).validationError(l10n),
         'Valeur du filtre manquante',
       );
       expect(
-        const IndicatorDraft(query: EventQuery('a', [nan])).validationError(),
+        const IndicatorDraft(query: EventQuery('a', [nan])).validationError(l10n),
         'Valeur de filtre non numérique',
       );
     });
 
     test('répartition : événement puis propriété', () {
       const d = IndicatorDraft(kind: IndicatorKind.breakdown);
-      expect(d.validationError(), 'Choisissez un événement');
-      expect(d.copyWith(breakdownEvent: 'e').validationError(),
+      expect(d.validationError(l10n), 'Choisissez un événement');
+      expect(d.copyWith(breakdownEvent: 'e').validationError(l10n),
           'Choisissez une propriété');
     });
   });
@@ -179,27 +182,27 @@ void main() {
   group('suggestedName', () {
     test('un nom saisi prime, sinon la suggestion', () {
       const d = IndicatorDraft(query: EventQuery('partie', [_issue]));
-      expect(d.suggestedName(), 'partie · issue = complet');
-      expect(d.toIndicator('x')!.name, 'partie · issue = complet');
-      expect(d.copyWith(name: ' Mes parties ').toIndicator('x')!.name,
+      expect(d.suggestedName(l10n), 'partie · issue = complet');
+      expect(d.toIndicator('x', l10n)!.name, 'partie · issue = complet');
+      expect(d.copyWith(name: ' Mes parties ').toIndicator('x', l10n)!.name,
           'Mes parties');
     });
 
     test('un nom par genre', () {
-      expect(const IndicatorDraft().suggestedName(), 'Sans titre');
+      expect(const IndicatorDraft().suggestedName(l10n), 'Sans titre');
       expect(
         const IndicatorDraft(
           kind: IndicatorKind.ratio,
           query: EventQuery('fin'),
           denominator: EventQuery('debut'),
-        ).suggestedName(),
+        ).suggestedName(l10n),
         'fin / debut',
       );
       expect(
         const IndicatorDraft(
           kind: IndicatorKind.funnel,
           steps: [EventQuery('a'), EventQuery('b'), EventQuery('c')],
-        ).suggestedName(),
+        ).suggestedName(l10n),
         'a → c',
       );
       expect(
@@ -207,7 +210,7 @@ void main() {
           kind: IndicatorKind.breakdown,
           breakdownEvent: 'partie',
           breakdownProperty: 'jeu',
-        ).suggestedName(),
+        ).suggestedName(l10n),
         'partie par jeu',
       );
     });

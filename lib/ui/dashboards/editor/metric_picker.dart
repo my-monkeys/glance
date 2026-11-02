@@ -42,7 +42,7 @@ class _MetricSheet extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Métrique du site', style: GT.display(22, color: p.fg)),
+            Text(context.l10n.editorKindExternal, style: GT.display(22, color: p.fg)),
             const SizedBox(height: 14),
             Flexible(
               child: catalogue.when(
@@ -57,7 +57,7 @@ class _MetricSheet extends ConsumerWidget {
                 ),
                 error: (e, _) => _Note(metricsErrorMessage(context.l10n, e)),
                 data: (defs) => defs.isEmpty
-                    ? const _Note('Cette source ne propose aucun indicateur.')
+                    ? _Note(context.l10n.editorMetricNone)
                     : ListView(
                         shrinkWrap: true,
                         physics: const BouncingScrollPhysics(),
@@ -65,7 +65,7 @@ class _MetricSheet extends ConsumerWidget {
                           for (final f in metricFamiliesOf(defs))
                             _ChoiceRow(
                               title: f.libelle,
-                              detail: 's\'ajuste à la période',
+                              detail: context.l10n.editorMetricAdjusts,
                               onTap: () => Navigator.of(context)
                                   .pop(MetricChoice.family(f)),
                             ),

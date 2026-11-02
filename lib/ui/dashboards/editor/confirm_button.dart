@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/l10n.dart';
 import '../../../theme/motion.dart';
 import '../../../theme/palette.dart';
 import '../../../theme/type.dart';
@@ -58,7 +59,7 @@ class _ConfirmButtonState extends State<ConfirmButton> {
             behavior: HitTestBehavior.opaque,
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 14),
-              child: Text('Annuler', style: GT.body(14, color: p.fg2)),
+              child: Text(context.l10n.commonCancel, style: GT.body(14, color: p.fg2)),
             ),
           ),
         ],

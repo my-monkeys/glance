@@ -500,4 +500,276 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return 'Source removed, $_temp0';
   }
+
+  @override
+  String get commonCancel => 'Cancel';
+
+  @override
+  String get commonAdd => 'Add';
+
+  @override
+  String get commonSearch => 'Search';
+
+  @override
+  String get editorNameFallback => 'Untitled';
+
+  @override
+  String editorNameBy(String a, String b) {
+    return '$a by $b';
+  }
+
+  @override
+  String get editorErrChooseEvent => 'Choose an event';
+
+  @override
+  String get editorErrChooseCountEvent => 'Choose the event to count';
+
+  @override
+  String get editorErrChooseRefEvent => 'Choose the reference event';
+
+  @override
+  String get editorErrChooseProperty => 'Choose a property';
+
+  @override
+  String get editorErrChooseMetric => 'Choose a metric';
+
+  @override
+  String get editorErrAddSite => 'Add at least one site';
+
+  @override
+  String editorErrSitesMax(int max) {
+    return 'A dashboard has at most $max sites';
+  }
+
+  @override
+  String get editorErrChooseLineSite => 'Choose the site for each line';
+
+  @override
+  String get editorErrNameLines => 'Name each line';
+
+  @override
+  String get editorErrReferrer => 'Enter the referrer domain';
+
+  @override
+  String editorErrFunnelMin(int min) {
+    return 'A funnel has at least $min steps';
+  }
+
+  @override
+  String editorErrFunnelMax(int max) {
+    return 'A funnel has at most $max steps';
+  }
+
+  @override
+  String editorErrStepEvent(int n) {
+    return 'Choose the event for step $n';
+  }
+
+  @override
+  String get editorErrFunnelNumeric =>
+      'A funnel can\'t compare numbers: remove this filter';
+
+  @override
+  String get editorErrWindow => 'Invalid time limit';
+
+  @override
+  String get editorErrFilterValueMissing => 'Filter value missing';
+
+  @override
+  String get editorErrFilterNotNumber => 'Filter value isn\'t a number';
+
+  @override
+  String get editorTitleEdit => 'Edit dashboard';
+
+  @override
+  String get editorFieldName => 'Name';
+
+  @override
+  String get editorHeadingType => 'Type';
+
+  @override
+  String get editorHeadingPreview => 'Preview';
+
+  @override
+  String get editorPreviewEmpty =>
+      'The preview appears as soon as the dashboard is complete.';
+
+  @override
+  String get editorCreated => 'Dashboard created';
+
+  @override
+  String get editorSaved => 'Dashboard saved';
+
+  @override
+  String get editorDelete => 'Delete this dashboard';
+
+  @override
+  String get editorCreate => 'Create';
+
+  @override
+  String get editorCountLabel => 'What to count';
+
+  @override
+  String get editorRatioOf => 'Relative to';
+
+  @override
+  String get editorGapsLabel => 'Leave a gap when nothing happened';
+
+  @override
+  String get editorGapsHint => 'Otherwise those days count as 0%.';
+
+  @override
+  String get editorOverTimeLabel => 'Trend over time';
+
+  @override
+  String get editorOverTimeHint => 'One line per value, full width';
+
+  @override
+  String get editorMetricLabel => 'Metric';
+
+  @override
+  String get editorMetricPlaceholder => 'Choose a metric';
+
+  @override
+  String get editorMetricNone => 'This source offers no indicators.';
+
+  @override
+  String get editorMetricAdjusts => 'adjusts to the period';
+
+  @override
+  String get editorEventLabel => 'Event';
+
+  @override
+  String get editorEventPlaceholder => 'Choose an event';
+
+  @override
+  String get editorPropertyLabel => 'Property';
+
+  @override
+  String get editorPropertyPlaceholder => 'Choose a property';
+
+  @override
+  String get editorKindExternal => 'Site metric';
+
+  @override
+  String get editorKindHintCounter => 'How often an event happens';
+
+  @override
+  String get editorKindHintRatio => 'One event relative to another';
+
+  @override
+  String get editorKindHintFunnel => 'The journey, step by step';
+
+  @override
+  String get editorKindHintBreakdown => 'The values of a property';
+
+  @override
+  String get editorKindHintExternal => 'An indicator served by your API';
+
+  @override
+  String get editorKindHintSites => 'Visitors across several sites';
+
+  @override
+  String get editorFunnelAddStep => 'Add a step';
+
+  @override
+  String get editorFunnelWindowLabel => 'Maximum time between two steps';
+
+  @override
+  String editorFunnelWindowHint(int min, int max) {
+    return 'In minutes ($min to $max): a visitor who takes longer to get from one step to the next is no longer counted.';
+  }
+
+  @override
+  String editorFunnelStep(int n) {
+    return 'STEP $n';
+  }
+
+  @override
+  String get editorFunnelMoveUp => 'Move step up';
+
+  @override
+  String get editorFunnelMoveDown => 'Move step down';
+
+  @override
+  String get editorFunnelRemove => 'Remove step';
+
+  @override
+  String get editorTypeText => 'text';
+
+  @override
+  String get editorTypeNumber => 'number';
+
+  @override
+  String get editorTypeBoolean => 'yes/no';
+
+  @override
+  String get editorFreeEvent => 'Type an event name';
+
+  @override
+  String get editorFreeProperty => 'Type a property name';
+
+  @override
+  String get editorSiteLabel => 'Site';
+
+  @override
+  String editorUseTyped(String value) {
+    return 'Use “$value”';
+  }
+
+  @override
+  String get editorListUnavailable =>
+      'List unavailable — type the name by hand.';
+
+  @override
+  String get editorListEmpty =>
+      'Nothing seen in 30 days — type the name by hand.';
+
+  @override
+  String get editorAddFilter => 'Add a filter';
+
+  @override
+  String get editorRemoveFilter => 'Remove filter';
+
+  @override
+  String get editorFilterValue => 'Value';
+
+  @override
+  String get editorTrue => 'true';
+
+  @override
+  String get editorFalse => 'false';
+
+  @override
+  String get editorModeAll => 'All';
+
+  @override
+  String get editorModeOnly => 'From';
+
+  @override
+  String get editorModeExcept => 'Except from';
+
+  @override
+  String get editorLineSitePlaceholder => 'Choose a site';
+
+  @override
+  String get editorLineLabel => 'Label';
+
+  @override
+  String get editorLineReferrer => 'Referrer domain';
+
+  @override
+  String get editorLineAdd => 'Add a site';
+
+  @override
+  String get editorLinesHint =>
+      'Unique visitors for each line. “Except from” removes those the site received from that domain.';
+
+  @override
+  String editorLineTitle(int n) {
+    return 'LINE $n';
+  }
+
+  @override
+  String get editorLineRemove => 'Remove line';
 }
