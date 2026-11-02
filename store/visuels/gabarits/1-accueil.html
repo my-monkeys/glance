@@ -14,9 +14,82 @@
   .telephone { position: absolute; left: 50%; transform: translateX(-50%); top: calc(190 * var(--u)); width: calc(960 * var(--u));
     background: #211E19; padding: calc(20 * var(--u)); border-radius: calc(118 * var(--u));
     box-shadow: 0 calc(40 * var(--u)) calc(90 * var(--u)) rgba(33, 30, 25, .22); }
-  .telephone .ecran { border-radius: calc(98 * var(--u)); overflow: hidden; background: var(--creme); }
-  .telephone img { display: block; width: 100%; }
+  .telephone .ecran { border-radius: calc(98 * var(--u)); overflow: hidden; background: var(--creme); container-type: inline-size; }
   .f-ipad .telephone { width: calc(1000 * var(--u)); }
+
+  /* L'écran d'accueil de l'appli, redessiné. Les mesures sont celles de la capture d'origine
+     (1068 px de large), ramenées à la largeur de l'écran par --p. */
+  .app { --p: calc(100cqw / 1068); position: relative; width: 100%; height: calc(2200 * var(--p)); overflow: hidden;
+    background: var(--creme); font-family: "Geist", sans-serif; color: var(--fg); }
+  .app .entete-app { position: relative; display: flex; justify-content: space-between; align-items: flex-start;
+    padding: calc(38 * var(--p)) calc(48 * var(--p)) 0; }
+  .app .titre-bloc { min-width: 0; flex: 1; padding-top: calc(4 * var(--p)); }
+  .app .date { font-family: "JetBrains Mono"; font-size: calc(26 * var(--p)); letter-spacing: .16em; color: var(--fg2);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .app .titre-app { font-family: "Fredoka"; font-weight: 600; font-size: calc(94 * var(--p)); line-height: 1.1; letter-spacing: -.01em;
+    margin-top: calc(14 * var(--p)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .app .boutons { display: flex; gap: calc(20 * var(--p)); flex: none; margin-left: calc(20 * var(--p)); }
+  .app .rond { width: calc(99 * var(--p)); height: calc(99 * var(--p)); border-radius: 50%; background: var(--chip);
+    display: grid; place-items: center; font-size: calc(48 * var(--p)); }
+  .app .rond.contour { background: var(--surface); box-shadow: inset 0 0 0 calc(2.5 * var(--p)) var(--line); }
+  .app .icone svg { stroke-width: 2.2; }
+
+  .app .controles { display: flex; align-items: center; gap: calc(26 * var(--p)); margin: calc(38 * var(--p)) 0 0 calc(48 * var(--p)); padding-right: calc(48 * var(--p)); }
+  .app .periodes { flex: 1; min-width: 0; display: flex; gap: calc(16 * var(--p)); overflow: hidden; }
+  .app .periode { flex: none; padding: calc(0 * var(--p)) calc(30 * var(--p)); height: calc(80 * var(--p)); display: flex; align-items: center;
+    border-radius: calc(21 * var(--p)); background: var(--chip); color: var(--fg2); font-family: "JetBrains Mono"; font-size: calc(30 * var(--p)); font-weight: 500;
+    letter-spacing: .03em; white-space: nowrap; }
+  .app .periode.on { background: var(--accent); color: #fff; font-weight: 600; }
+  .app .bascule { flex: none; display: flex; gap: calc(6 * var(--p)); padding: calc(7 * var(--p)); border-radius: calc(26 * var(--p)); background: var(--chip); }
+  .app .bascule span { width: calc(80 * var(--p)); height: calc(80 * var(--p)); border-radius: calc(20 * var(--p)); display: grid; place-items: center; font-size: calc(40 * var(--p)); color: var(--fg2); }
+  .app .bascule span.on { background: var(--accent); color: #fff; }
+
+  .app .carte-app { background: var(--surface); border-radius: calc(60 * var(--p)); box-shadow: 0 0 0 calc(2 * var(--p)) var(--line), var(--ombre-carte); position: relative; }
+  .app .total { margin: calc(40 * var(--p)) calc(48 * var(--p)) 0; padding: calc(48 * var(--p)) calc(48 * var(--p)) calc(40 * var(--p)); height: calc(887 * var(--p)); }
+  .app .total .haut { display: flex; justify-content: space-between; align-items: center; gap: calc(20 * var(--p)); }
+  .app .total .etiquette { font-family: "JetBrains Mono"; font-size: calc(26 * var(--p)); letter-spacing: .16em; text-transform: uppercase; color: var(--fg2);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .app .live { flex: none; display: inline-flex; align-items: center; gap: calc(14 * var(--p)); height: calc(64 * var(--p)); padding: 0 calc(30 * var(--p));
+    border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-family: "JetBrains Mono"; font-weight: 600; font-size: calc(30 * var(--p)); white-space: nowrap; }
+  .app .live i, .app .site .nom-bloc i { width: calc(23 * var(--p)); height: calc(23 * var(--p)); border-radius: 50%; background: var(--accent); display: block; flex: none; }
+  .app .grand-nombre { font-family: "Fredoka"; font-weight: 600; font-size: calc(132 * var(--p)); line-height: 1; letter-spacing: -.03em; margin: calc(8 * var(--p)) 0 0 calc(2 * var(--p)); }
+  .app .variation { display: flex; align-items: baseline; gap: calc(22 * var(--p)); margin-top: calc(34 * var(--p)); padding-left: calc(2 * var(--p)); white-space: nowrap; min-width: 0; }
+  .app .variation .delta { font-size: calc(34 * var(--p)); }
+  .app .variation .vs { color: var(--fg2); font-size: calc(33 * var(--p)); overflow: hidden; text-overflow: ellipsis; }
+  .app .legende { display: flex; gap: calc(40 * var(--p)); margin-top: calc(34 * var(--p)); font-size: calc(33 * var(--p)); color: var(--fg2); white-space: nowrap; }
+  .app .legende span { display: inline-flex; align-items: center; gap: calc(14 * var(--p)); min-width: 0; }
+  .app .legende i { width: calc(24 * var(--p)); height: calc(24 * var(--p)); border-radius: 50%; background: var(--c); display: block; flex: none; }
+  .app .legende b { font-family: "JetBrains Mono"; font-weight: 500; color: var(--c); }
+  .app .legende b.gris { color: var(--fg2); }
+  .app .legende em { font-style: normal; overflow: hidden; text-overflow: ellipsis; }
+  .app .courbe { position: absolute; left: calc(48 * var(--p)); right: calc(48 * var(--p)); bottom: calc(40 * var(--p)); height: calc(430 * var(--p)); }
+  .app .courbe svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+
+  .app .liste { position: absolute; left: calc(48 * var(--p)); right: calc(48 * var(--p)); top: calc(1326 * var(--p)); }
+  .app .site { display: grid; grid-template-columns: calc(99 * var(--p)) minmax(0, 1fr) calc(158 * var(--p)) calc(190 * var(--p));
+    column-gap: calc(24 * var(--p)); align-items: center; height: calc(187 * var(--p)); padding: 0 calc(38 * var(--p)); margin-bottom: calc(36 * var(--p)); border-radius: calc(60 * var(--p)); }
+  .app .avatar { width: calc(99 * var(--p)); height: calc(99 * var(--p)); border-radius: calc(22 * var(--p)); background: var(--chip); display: grid; place-items: center;
+    box-shadow: inset 0 0 0 calc(2 * var(--p)) var(--line); overflow: hidden; }
+  .app .avatar svg { width: 100%; height: 100%; display: block; }
+  .app .nom-bloc { min-width: 0; }
+  .app .nom { font-size: calc(42 * var(--p)); font-weight: 500; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .app .nom-bloc .l { display: flex; align-items: center; gap: calc(16 * var(--p)); margin-top: calc(14 * var(--p)); font-family: "JetBrains Mono"; font-size: calc(30 * var(--p)); color: var(--accent); white-space: nowrap; }
+  .app .nom-bloc .l.zero { color: var(--fg2); }
+  .app .nom-bloc .l.zero i { background: var(--fg3); }
+  .app .nom-bloc .l span { overflow: hidden; text-overflow: ellipsis; }
+  .app .spark { position: relative; height: calc(56 * var(--p)); }
+  .app .spark svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .app .chiffre { text-align: right; min-width: 0; }
+  .app .chiffre .v { font-family: "Fredoka"; font-weight: 600; font-size: calc(60 * var(--p)); line-height: 1; letter-spacing: -.01em; }
+  .app .chiffre .delta { display: block; font-size: calc(30 * var(--p)); margin-top: calc(14 * var(--p)); }
+
+  .app .onglets { position: absolute; left: 50%; transform: translateX(-50%); bottom: calc(27 * var(--p)); display: flex; padding: calc(13 * var(--p));
+    border-radius: calc(72 * var(--p)); background: rgba(255, 255, 255, .74); backdrop-filter: blur(calc(30 * var(--p)));
+    box-shadow: 0 0 0 calc(2 * var(--p)) var(--line), 0 calc(20 * var(--p)) calc(60 * var(--p)) rgba(0, 0, 0, .10); }
+  .app .onglet { display: flex; flex-direction: column; align-items: center; gap: calc(8 * var(--p)); padding: calc(20 * var(--p)) calc(42 * var(--p)); border-radius: calc(55 * var(--p));
+    color: var(--fg2); font-size: calc(30 * var(--p)); font-weight: 500; min-width: calc(130 * var(--p)); white-space: nowrap; }
+  .app .onglet .icone { font-size: calc(58 * var(--p)); }
+  .app .onglet.on { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
 </style>
 </head>
 <body class="fond-creme clair">
@@ -31,9 +104,107 @@
       <span class="pastille"><i style="--c:#C98A2E"></i><span data-t="p2"></span></span>
       <span class="pastille accent"><span data-icone="lock"></span><span data-t="p3"></span></span>
     </div>
-    <div class="telephone coupe-bas"><div class="ecran"><img src="../sources/cap-accueil.png" alt=""></div></div>
+    <div class="telephone coupe-bas"><div class="ecran"><div class="app" id="app"></div></div></div>
   </main>
 <script src="commun.js"></script>
-<script>monter("v1");</script>
+<script>
+// Les formes de l'appli : les mêmes tracés Material que les icônes de lib/ui.
+const FORMES = {
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  anneau: '<path d="M12 4a8 8 0 1 0 8 8" /><path d="M12 4a8 8 0 0 1 6.4 3.2"/>',
+  liste: '<rect x="4.5" y="4.5" width="15" height="6" rx="2"/><rect x="4.5" y="13.5" width="15" height="6" rx="2"/>',
+  grille: '<rect x="4.5" y="4.5" width="6" height="6" rx="1.8" fill="currentColor"/><rect x="13.5" y="4.5" width="6" height="6" rx="1.8" fill="currentColor"/><rect x="4.5" y="13.5" width="6" height="6" rx="1.8" fill="currentColor"/><rect x="13.5" y="13.5" width="6" height="6" rx="1.8" fill="currentColor"/>',
+  sites: '<rect x="4" y="4" width="7" height="7" rx="2" fill="currentColor" stroke="none"/><rect x="13" y="4" width="7" height="7" rx="2" fill="currentColor" stroke="none"/><rect x="4" y="13" width="7" height="7" rx="2" fill="currentColor" stroke="none"/><rect x="13" y="13" width="7" height="7" rx="2" fill="currentColor" stroke="none"/>',
+  direct: '<path d="M3.5 17.5l5.5-6 4 3.8 7.5-8.3"/>',
+  reglages: '<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/>',
+};
+const forme = (n) => `<span class="icone"><svg viewBox="0 0 24 24">${FORMES[n]}</svg></span>`;
+
+// Des favicons dessinés : une initiale ou une forme sur une pastille, jamais une marque.
+const FAV = (fond, dedans) => `<svg viewBox="0 0 100 100"><rect width="100" height="100" fill="${fond}"/>${dedans}</svg>`;
+const initiale = (c, fond) => FAV(fond, `<text x="50" y="68" text-anchor="middle" font-family="Fredoka" font-weight="600" font-size="56" fill="#fff">${c}</text>`);
+const SITES = [
+  { nom: "atelier-lune.fr", v: 612, pv: 1196, d: 24.1, live: 1, pente: 6, graine: 21,
+    fav: FAV("#2F3B52", '<path d="M62 24a28 28 0 1 0 14 46A24 24 0 0 1 62 24z" fill="#F2D9A0"/>') },
+  { nom: "carnet.app", v: 388, pv: 742, d: -6.3, live: 0, pente: -3, graine: 4, fav: initiale("c", "#C97F44") },
+  { nom: "studio-nord.com", v: 244, pv: 489, d: 9.8, live: 0, pente: 2, graine: 9,
+    fav: FAV("#E7EFE9", '<path d="M50 20L78 74H22z" fill="#3B7A5A"/><path d="M50 44L64 74H36z" fill="#E7EFE9"/>') },
+  { nom: "petit-atlas.fr", v: 131, pv: 261, d: 0, live: 0, pente: 0, graine: 14,
+    fav: FAV("#F3E6F4", '<circle cx="50" cy="50" r="26" fill="none" stroke="#9A5BA6" stroke-width="9"/><path d="M24 50h52M50 24c-16 16-16 36 0 52" fill="none" stroke="#9A5BA6" stroke-width="6"/>') },
+  { nom: "bruit-blanc.fr", v: 79, pv: 155, d: -14.1, live: 0, pente: -4, graine: 2,
+    fav: FAV("#211E19", [26, 38, 50, 62, 74].map((x, i) => `<rect x="${x - 4}" y="${50 - [10, 24, 16, 28, 12][i]}" width="8" height="${[20, 48, 32, 56, 24][i]}" rx="4" fill="#F7F5F1"/>`).join(""))},
+];
+const TOTAL = SITES.reduce((s, x) => s + x.v, 0);
+const PAGES = SITES.reduce((s, x) => s + x.pv, 0);
+const PRECEDENT = SITES.reduce((s, x) => s + x.v / (1 + x.d / 100), 0);
+const LIVE = SITES.reduce((s, x) => s + x.live, 0);
+const PERIODES = ["periodToday", "period24h", "period7d", "period30d", "periodThisMonth", "period12m", "periodThisYear", "periodAllTime", "periodCustom"];
+const MAINTENANT = new Date(2026, 10, 2); // lundi 2 novembre 2026
+
+const A = (cle) => TEXTES.app[cle];
+const delta = (x, d = 1) => `<span class="delta${x < 0 ? " neg" : ""}">${signe(x, d)}</span>`;
+
+monter("v1", async () => {
+  const date = new Intl.DateTimeFormat(LOCALE, { weekday: "short", month: "short", day: "numeric" }).format(MAINTENANT);
+  const ligneDate = `${date} · ${A("period7d")}`.toLocaleUpperCase(LOCALE);
+  const app = document.getElementById("app");
+  const live = (n) => A("homeLiveCount").replace("{count}", nb(n));
+
+  app.innerHTML = `
+    <div class="entete-app">
+      <div class="titre-bloc"><div class="date">${ligneDate}</div><div class="titre-app">${A("homeTitleDefault")}</div></div>
+      <div class="boutons"><span class="rond contour">${forme("plus")}</span><span class="rond">${forme("anneau")}</span></div>
+    </div>
+    <div class="controles">
+      <div class="periodes">${PERIODES.map((k) => `<span class="periode${k === "period7d" ? " on" : ""}">${A(k)}</span>`).join("")}</div>
+      <div class="bascule"><span class="on">${forme("liste")}</span><span>${forme("grille")}</span></div>
+    </div>
+    <section class="carte-app total">
+      <div class="haut"><span class="etiquette">${A("homeTotalVisitorsAll")}</span><span class="live"><i></i>${live(LIVE)}</span></div>
+      <div class="grand-nombre">${TOTAL}</div>
+      <div class="variation">${delta((TOTAL / PRECEDENT - 1) * 100)}<span class="vs">${A("homeVsPrevious")}</span></div>
+      <div class="legende">
+        <span style="--c:var(--accent)"><i></i><b>${nb(TOTAL)}</b><em>${A("commonVisitors")}</em></span>
+        <span style="--c:#8C857A"><i></i><b class="gris">${nb(PAGES)}</b><em>${A("commonPageviews")}</em></span>
+      </div>
+      <div class="courbe" id="courbe"></div>
+    </section>
+    <div class="liste">${SITES.map((s, i) => `
+      <div class="carte-app site">
+        <span class="avatar">${s.fav}</span>
+        <div class="nom-bloc"><div class="nom">${s.nom}</div>
+          <div class="l${s.live ? "" : " zero"}"><i></i><span>${live(s.live)}</span></div></div>
+        <div class="spark" id="spark${i}"></div>
+        <div class="chiffre"><span class="v">${nb(s.v)}</span>${delta(s.d)}</div>
+      </div>`).join("")}</div>
+    <nav class="onglets">
+      <span class="onglet on">${forme("sites")}${A("tabSites")}</span>
+      <span class="onglet">${forme("direct")}${A("tabDirect")}</span>
+      <span class="onglet">${forme("reglages")}${A("tabSettings")}</span>
+    </nav>`;
+
+  // Comme l'appli, la rangée de périodes défile : la période choisie reste visible.
+  const rangee = app.querySelector(".periodes"), choisie = rangee.querySelector(".on");
+  rangee.scrollLeft = Math.max(0, choisie.offsetLeft + choisie.offsetWidth - rangee.clientWidth);
+
+  // u par pixel de capture : l'écran fait 1068 px dans la capture d'origine.
+  const k = app.clientWidth / 1068 / U;
+  const jours = Array.from({ length: 7 }, (_, i) => new Date(2026, 9, 27 + i).getDate());
+  const visiteurs = [212, 236, 228, 224, 214, 168, 172].map((v) => v * 1.0);
+  const pages = [430, 540, 405, 370, 330, 290, 318];
+  graphe(document.getElementById("courbe"), {
+    series: [
+      { v: pages, couleur: "#8C857A", epaisseur: 7 * k, point: 13 * k },
+      { v: visiteurs, couleur: "#3B7A5A", aire: true, epaisseur: 8 * k, point: 13 * k },
+    ],
+    max: 1000, ticks: [0, 250, 500, 750, 1000], gauche: 120 * k, bas: 54 * k, haut: 20 * k, droite: 0, police: 26 * k,
+    xlabels: [0, 2, 4, 6].map((i) => [i, jours[i]]),
+  });
+  SITES.forEach((s, i) => {
+    const v = serie(24, { base: 40, amp: 8, f: 1.3, phase: i * .17, pente: s.pente * 3, bruit: 1, graine: s.graine });
+    spark(document.getElementById(`spark${i}`), v, "#3B7A5A", { epaisseur: 6.5 * k });
+  });
+});
+</script>
 </body>
 </html>

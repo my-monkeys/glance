@@ -18,8 +18,8 @@ Sortie dans store/visuels/ :
   google-play/presentation-<langue>.png         1024 × 500
   planche.png                                   la planche de contrôle
 Avec --site, uniquement les scènes du site (sans l'en-tête marque + titre), dans store/site/img/scenes/ :
-  <langue>/<n>-<nom>.webp   scènes 2 à 8, 1320 px de large, hauteur naturelle, < 150 Ko
-  1-accueil.webp            le téléphone du visuel 1, commun à toutes les langues (la capture ne change pas)
+  <langue>/<n>-<nom>.webp   scènes 1 à 8, 1320 px de large, hauteur naturelle, < 150 Ko
+                            (la 1 : le téléphone seul, fond transparent)
 Tout en PNG RGB 8 bits, sans canal alpha (Apple le refuse).
 """
 import argparse
@@ -154,9 +154,8 @@ def rendre_site(page, base, filtre, liste_langues):
     for visuel in VISUELS:
         if filtre and visuel not in filtre:
             continue
-        # Le téléphone du visuel 1 ne porte aucun texte : une seule image pour toutes les langues.
-        for langue in liste_langues[:1] if visuel == VISUELS[0] else liste_langues:
-            sortie = SITE / ("" if visuel == VISUELS[0] else langue) / f"{visuel}.webp"
+        for langue in liste_langues:
+            sortie = SITE / langue / f"{visuel}.webp"
             capturer_site(page, f"{base}/{visuel}.html?lang={langue}&format=site", sortie)
             print(sortie.relative_to(SITE.parent.parent), sortie.stat().st_size // 1024, "Ko")
 
