@@ -11,12 +11,11 @@ import '../../state/updater.dart';
 import '../../state/workspaces.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
-import '../add/add_source_screen.dart';
-import '../add/site_picker.dart';
 import '../root_scaffold.dart';
+import '../widgets/adaptive_sheet.dart';
 import '../widgets/chip.dart';
 import '../widgets/common.dart';
-import '../widgets/toast.dart';
+import 'account_menu.dart';
 import 'sync_screen.dart';
 import 'transfer_screen.dart';
 import 'workspaces_screen.dart';
@@ -81,7 +80,7 @@ class SettingsScreen extends ConsumerWidget {
                       Icon(Icons.chevron_right_rounded, color: p.fg3, size: 22),
                     ],
                   ),
-                  onTap: () => _openAccount(context, ref, a),
+                  onTap: () => openAccountMenu(context, a),
                 );
               }),
             _Row(
@@ -297,13 +296,9 @@ class SettingsScreen extends ConsumerWidget {
 
   void _pickRefresh(BuildContext context, WidgetRef ref, int current) {
     const options = [10, 30, 60, 300];
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: context.glance.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
-      ),
-      builder: (ctx) => SafeArea(
+    showGlanceSheet<void>(
+      context,
+      (ctx) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -327,111 +322,6 @@ class SettingsScreen extends ConsumerWidget {
       ),
     );
   }
-
-  void _openAccount(BuildContext context, WidgetRef ref, Account a) {
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: context.glance.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
-      ),
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 16),
-            Text(a.title, style: GT.body(16, weight: 600, color: ctx.glance.fg)),
-            Text(
-              '${a.kind.displayName} · ${_selectionLabel(a)}',
-              style: GT.body(13, color: ctx.glance.fg2),
-            ),
-            const SizedBox(height: 8),
-            ListTile(
-              leading: Icon(Icons.tune_rounded, color: ctx.glance.fg),
-              title: Text(
-                'Modifier la source',
-                style: GT.body(16, color: ctx.glance.fg),
-              ),
-              subtitle: Text(
-                'URL, identifiants, clé API…',
-                style: GT.body(12.5, color: ctx.glance.fg3),
-              ),
-              onTap: () {
-                Navigator.of(ctx).pop();
-                _editSource(context, ref, a);
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.checklist_rounded, color: ctx.glance.fg),
-              title: Text(
-                'Choisir les sites',
-                style: GT.body(16, color: ctx.glance.fg),
-              ),
-              onTap: () {
-                Navigator.of(ctx).pop();
-                _editSites(context, ref, a);
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.delete_outline_rounded, color: ctx.glance.neg),
-              title: Text(
-                'Supprimer ce compte',
-                style: GT.body(16, color: ctx.glance.neg),
-              ),
-              onTap: () {
-                ref.read(accountsProvider.notifier).remove(a.id);
-                showGlanceToast(context, 'Source supprimée',
-                    kind: ToastKind.info);
-                Navigator.of(ctx).pop();
-              },
-            ),
-            const SizedBox(height: 8),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _editSource(BuildContext context, WidgetRef ref, Account a) async {
-    final creds = await ref.read(accountsRepoProvider).credentials(a.id);
-    if (!context.mounted) return;
-    await showGlanceModal<void>(
-      context,
-      AddSourceScreen(editing: a, initialCreds: creds),
-    );
-  }
-
-  static String _selectionLabel(Account a) {
-    String n(int c) => '$c site${c > 1 ? 's' : ''}';
-    final sites = a.sites;
-    if (sites == null) {
-      final x = a.excludedSites.length;
-      return x == 0 ? 'tous les sites' : 'tous sauf ${n(x)}';
-    }
-    return sites.isEmpty ? 'aucun site' : n(sites.length);
-  }
-
-  Future<void> _editSites(BuildContext context, WidgetRef ref, Account a) async {
-    // Rechargée : la liste en cache date du lancement et ne montrerait pas un
-    // site créé depuis.
-    final sites = await ref.refresh(accountSitesProvider(a.id).future);
-    if (!context.mounted) return;
-    final choice = await showGlanceModal<SiteChoice?>(
-      context,
-      SitePickerScreen(
-        providerName: a.kind.displayName,
-        sites: sites,
-        initialSelection: a.sites,
-        initialExcluded: a.excludedSites,
-      ),
-    );
-    if (choice == null) return; // annulé
-    await ref
-        .read(accountsProvider.notifier)
-        .updateSites(a.id, choice.sites, excluded: choice.excluded);
-    if (context.mounted) showGlanceToast(context, 'Sélection enregistrée');
-  }
-
 }
 
 class _GroupLabel extends StatelessWidget {

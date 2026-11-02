@@ -9,23 +9,11 @@ import '../../../state/indicators.dart';
 import '../../../state/providers.dart';
 import '../../../theme/palette.dart';
 import '../../../theme/type.dart';
+import '../../widgets/adaptive_sheet.dart';
 import '../../widgets/field.dart';
 
 /// Au-delà, une liste de suggestions se cherche plus qu'elle ne se parcourt.
 const int kSearchThreshold = 8;
-
-/// Feuille du bas des choix de l'éditeur.
-Future<T?> showGlanceSheet<T>(BuildContext context, WidgetBuilder builder) =>
-    showModalBottomSheet<T>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      backgroundColor: context.glance.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
-      ),
-      builder: builder,
-    );
 
 /// Champ qui s'ouvre au tap (choix d'un événement, d'une propriété) : même
 /// habillage que [GlanceField], sans saisie.

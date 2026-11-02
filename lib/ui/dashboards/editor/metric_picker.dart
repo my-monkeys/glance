@@ -6,8 +6,8 @@ import '../../../data/models/models.dart';
 import '../../../state/metrics_sources.dart';
 import '../../../theme/palette.dart';
 import '../../../theme/type.dart';
+import '../../widgets/adaptive_sheet.dart';
 import '../labels.dart';
-import 'pickers.dart';
 
 /// Le choix de l'utilisateur : une famille (le membre suit la période) ou une
 /// métrique seule.

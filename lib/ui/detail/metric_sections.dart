@@ -11,6 +11,7 @@ import '../../state/providers.dart';
 import '../../theme/motion.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
+import '../widgets/adaptive_sheet.dart';
 import '../widgets/common.dart';
 import '../widgets/motion.dart';
 
@@ -198,20 +199,11 @@ class _MetricSectionCardState extends ConsumerState<MetricSectionCard> {
   }
 
   void _openAll(BuildContext context, MetricType dim, List<MetricRow> rows) {
-    final p = context.glance;
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: p.surface,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
-      ),
-      builder: (ctx) => DraggableScrollableSheet(
-        expand: false,
-        initialChildSize: 0.75,
-        maxChildSize: 0.95,
-        builder: (ctx, controller) => ListView(
+    // `controller` est celui de la feuille déroulante ; le pop-up du bureau
+    // dimensionne la liste sur son contenu et la fait défiler lui-même.
+    Widget list(BuildContext ctx, {ScrollController? controller}) => ListView(
           controller: controller,
+          shrinkWrap: controller == null,
           padding: const EdgeInsets.fromLTRB(20, 18, 20, 30),
           children: [
             Text(
@@ -227,8 +219,17 @@ class _MetricSectionCardState extends ConsumerState<MetricSectionCard> {
               limit: rows.length,
             ),
           ],
-        ),
-      ),
+        );
+    showGlanceSheet<void>(
+      context,
+      (ctx) => isDesktopWidth(ctx)
+          ? list(ctx)
+          : DraggableScrollableSheet(
+              expand: false,
+              initialChildSize: 0.75,
+              maxChildSize: 0.95,
+              builder: (ctx, controller) => list(ctx, controller: controller),
+            ),
     );
   }
 }
