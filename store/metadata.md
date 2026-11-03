@@ -41,7 +41,7 @@ PENSÉE POUR LE RESPECT DE LA VIE PRIVÉE
 Glance ne collecte rien. Vos identifiants restent dans le trousseau de votre appareil, et l'app ne parle qu'à VOS serveurs analytics — jamais à un tiers. Accès en lecture seule : Glance affiche vos données, ne les modifie pas.
 
 OUTILS SUPPORTÉS
-• Umami (auto-hébergé)
+• Umami (Cloud avec un plan Pro, ou auto-hébergé)
 • Plausible (Cloud ou auto-hébergé)
 • Fathom : bientôt
 

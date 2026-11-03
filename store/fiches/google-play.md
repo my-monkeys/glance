@@ -67,7 +67,7 @@ VIE PRIVÉE
 • Pas de publicité, pas de pistage.
 
 OUTILS SUPPORTÉS
-• Umami, auto-hébergé.
+• Umami, Cloud (plan Pro) ou auto-hébergé.
 • Plausible, Cloud ou auto-hébergé : compteurs, taux et répartitions.
 • Fathom : bientôt.
 
@@ -130,7 +130,7 @@ PRIVACY
 • No ads, no tracking.
 
 SUPPORTED TOOLS
-• Umami, self-hosted.
+• Umami, Cloud (Pro plan) or self-hosted.
 • Plausible, Cloud or self-hosted: counters, rates and breakdowns.
 • Fathom: coming soon.
 
@@ -193,7 +193,7 @@ DATENSCHUTZ
 • Keine Werbung, kein Tracking.
 
 UNTERSTÜTZTE TOOLS
-• Umami, selbst gehostet.
+• Umami, Cloud (Pro-Tarif) oder selbst gehostet.
 • Plausible, Cloud oder selbst gehostet: Zähler, Raten und Aufschlüsselungen.
 • Fathom: demnächst.
 
@@ -256,7 +256,7 @@ PRIVACIDAD
 • Sin publicidad, sin rastreo.
 
 HERRAMIENTAS COMPATIBLES
-• Umami, autoalojado.
+• Umami, Cloud (plan Pro) o autoalojado.
 • Plausible, Cloud o autoalojado: contadores, tasas y desgloses.
 • Fathom: próximamente.
 
@@ -319,7 +319,7 @@ PRIVACIDADE
 • Sem anúncios, sem rastreamento.
 
 FERRAMENTAS SUPORTADAS
-• Umami, auto-hospedado.
+• Umami, Cloud (plano Pro) ou auto-hospedado.
 • Plausible, Cloud ou auto-hospedado: contadores, taxas e detalhamentos.
 • Fathom: em breve.
 
@@ -382,7 +382,7 @@ Glance 是 Umami 和 Plausible 的移动端与桌面端客户端。所有站点�
 • 没有广告，没有追踪。
 
 支持的工具
-• Umami，自托管。
+• Umami，Cloud（Pro 套餐）或自托管。
 • Plausible，云端版或自托管：计数、比率和分布。
 • Fathom：即将支持。
 
