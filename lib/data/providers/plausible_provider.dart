@@ -6,6 +6,7 @@ import '../models/models.dart';
 import '../models/period.dart';
 import 'analytics_provider.dart';
 import 'buckets.dart';
+import 'follow_redirects.dart';
 import 'provider_errors.dart';
 
 /// Client Plausible (Stats API v2 — `POST /api/v2/query`, via clé API). La Stats
@@ -28,6 +29,7 @@ class PlausibleProvider extends AnalyticsProvider {
         },
       ),
     );
+    _dio.interceptors.add(FollowRedirects(_dio));
   }
 
   late final Dio _dio;
