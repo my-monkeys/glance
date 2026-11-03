@@ -127,11 +127,23 @@ Set<IndicatorKind> supportedIndicatorsFor(ProviderKind kind) => switch (kind) {
     };
 
 /// Champs d'identifiants demandés à l'écran d'ajout, par fournisseur.
+/// [umamiCloud] : Umami Cloud ne prend qu'une clé API (pas d'URL : son API est
+/// toujours `UmamiProvider.cloudBase`).
 List<CredentialField> credentialFieldsFor(
   AppLocalizations l10n,
-  ProviderKind kind,
-) {
+  ProviderKind kind, {
+  bool umamiCloud = false,
+}) {
   switch (kind) {
+    case ProviderKind.umami when umamiCloud:
+      return [
+        CredentialField(
+          key: 'apiKey',
+          label: l10n.credApiKey,
+          secret: true,
+          hint: l10n.credUmamiCloudKeyHint,
+        ),
+      ];
     case ProviderKind.umami:
       return [
         CredentialField(

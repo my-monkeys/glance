@@ -2170,6 +2170,24 @@ abstract class AppLocalizations {
   /// **'Identifiants refusés.'**
   String get addSourceCredsRejected;
 
+  /// Libellé (majuscules) du choix entre Umami Cloud et une instance auto-hébergée
+  ///
+  /// In fr, this message translates to:
+  /// **'HÉBERGEMENT'**
+  String get addSourceUmamiHosting;
+
+  /// No description provided for @addSourceUmamiSelfHosted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Auto-hébergé'**
+  String get addSourceUmamiSelfHosted;
+
+  /// No description provided for @addSourceUmamiCloudUseKey.
+  ///
+  /// In fr, this message translates to:
+  /// **'Umami Cloud se connecte avec une clé API : choisissez « Umami Cloud » ci-dessus.'**
+  String get addSourceUmamiCloudUseKey;
+
   /// No description provided for @addSourceAdded.
   ///
   /// In fr, this message translates to:
@@ -2979,6 +2997,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Clé API'**
   String get credApiKey;
+
+  /// « Settings → API keys » reste en anglais : ce sont les menus d’Umami Cloud
+  ///
+  /// In fr, this message translates to:
+  /// **'Créez-la dans Umami Cloud : Settings → API keys.'**
+  String get credUmamiCloudKeyHint;
 
   /// No description provided for @credEmailOptional.
   ///

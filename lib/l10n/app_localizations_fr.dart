@@ -1268,6 +1268,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get addSourceCredsRejected => 'Identifiants refusés.';
 
   @override
+  String get addSourceUmamiHosting => 'HÉBERGEMENT';
+
+  @override
+  String get addSourceUmamiSelfHosted => 'Auto-hébergé';
+
+  @override
+  String get addSourceUmamiCloudUseKey =>
+      'Umami Cloud se connecte avec une clé API : choisissez « Umami Cloud » ci-dessus.';
+
+  @override
   String get addSourceAdded => 'Source ajoutée';
 
   @override
@@ -1735,6 +1745,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get credApiKey => 'Clé API';
+
+  @override
+  String get credUmamiCloudKeyHint =>
+      'Créez-la dans Umami Cloud : Settings → API keys.';
 
   @override
   String get credEmailOptional => 'Email du compte (facultatif)';

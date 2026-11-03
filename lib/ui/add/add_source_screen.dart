@@ -6,6 +6,7 @@ import '../../core/errors.dart';
 import '../../data/models/account.dart';
 import '../../data/providers/analytics_provider.dart';
 import '../../data/providers/provider_factory.dart';
+import '../../data/providers/umami_provider.dart';
 import '../../data/repository/accounts_repository.dart';
 import '../../l10n/l10n.dart';
 import '../../state/period_state.dart';
@@ -13,6 +14,7 @@ import '../../state/providers.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
 import '../root_scaffold.dart';
+import '../widgets/chip.dart';
 import '../widgets/common.dart';
 import '../widgets/field.dart';
 import '../widgets/motion.dart';
@@ -35,6 +37,7 @@ class AddSourceScreen extends ConsumerStatefulWidget {
 
 class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
   ProviderKind _kind = ProviderKind.umami;
+  bool _umamiCloud = false;
   final Map<String, TextEditingController> _ctl = {};
   final _name = TextEditingController();
   bool _busy = false;
@@ -44,28 +47,46 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
 
   bool get _isEditing => widget.editing != null;
 
-  /// Lit les identifiants saisis et signale s'il manque un champ obligatoire.
-  ({Map<String, String> creds, bool missing}) _readCreds() {
-    final fields = credentialFieldsFor(context.l10n, _kind);
+  bool get _cloud => _kind == ProviderKind.umami && _umamiCloud;
+
+  List<CredentialField> _fields() =>
+      credentialFieldsFor(context.l10n, _kind, umamiCloud: _cloud);
+
+  /// Lit les identifiants saisis ; [error] dit pourquoi ils sont inutilisables.
+  ({Map<String, String> creds, String? error}) _readCreds() {
+    final l10n = context.l10n;
+    final fields = _fields();
     final creds = {for (final f in fields) f.key: _c(f.key).text.trim()};
     final missing =
         fields.any((f) => !f.optional && (creds[f.key] ?? '').isEmpty);
-    return (creds: creds, missing: missing);
+    // Umami Cloud n'a pas de login : son adresse dans le champ « URL de
+    // l'instance » finirait en « Ressource introuvable ».
+    final cloudUrl = _kind == ProviderKind.umami &&
+        !_cloud &&
+        UmamiProvider.looksLikeCloud(creds['baseUrl'] ?? '');
+    final error = missing
+        ? l10n.addSourceMissingFields
+        : cloudUrl
+            ? l10n.addSourceUmamiCloudUseKey
+            : null;
+    return (creds: creds, error: error);
   }
 
   Account _accountFrom(Map<String, String> creds) => Account(
         id: widget.editing?.id ?? AccountsRepository.newId(),
         kind: _kind,
-        baseUrl: creds['baseUrl'] ?? 'https://api.usefathom.com',
+        baseUrl: _cloud
+            ? UmamiProvider.cloudBase
+            : creds['baseUrl'] ?? 'https://api.usefathom.com',
         label: _name.text.trim().isEmpty ? null : _name.text.trim(),
       );
 
   /// Teste la configuration sans l'enregistrer (valide identifiants + clé).
   Future<void> _test() async {
     final l10n = context.l10n;
-    final (:creds, :missing) = _readCreds();
-    if (missing) {
-      setState(() => _error = l10n.addSourceMissingFields);
+    final (:creds, :error) = _readCreds();
+    if (error != null) {
+      setState(() => _error = error);
       return;
     }
     setState(() {
@@ -95,6 +116,7 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
     final acc = widget.editing;
     if (acc != null) {
       _kind = acc.kind;
+      _umamiCloud = UmamiProvider.isCloud(acc.baseUrl);
       _name.text = acc.label ?? '';
       final creds = widget.initialCreds ?? const {};
       for (final e in creds.entries) {
@@ -116,12 +138,9 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
 
   Future<void> _continue() async {
     final l10n = context.l10n;
-    final fields = credentialFieldsFor(context.l10n, _kind);
-    final creds = {for (final f in fields) f.key: _c(f.key).text.trim()};
-    final missingRequired =
-        fields.any((f) => !f.optional && (creds[f.key] ?? '').isEmpty);
-    if (missingRequired) {
-      setState(() => _error = l10n.addSourceMissingFields);
+    final (:creds, :error) = _readCreds();
+    if (error != null) {
+      setState(() => _error = error);
       return;
     }
     setState(() {
@@ -129,12 +148,7 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
       _error = null;
     });
 
-    final account = Account(
-      id: widget.editing?.id ?? AccountsRepository.newId(),
-      kind: _kind,
-      baseUrl: creds['baseUrl'] ?? 'https://api.usefathom.com',
-      label: _name.text.trim().isEmpty ? null : _name.text.trim(),
-    );
+    final account = _accountFrom(creds);
 
     try {
       final provider = buildProvider(account, creds);
@@ -162,7 +176,7 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
         if (code == 401 || code == 403) {
           setState(() {
             _busy = false;
-            _error = _kind == ProviderKind.plausible
+            _error = _kind == ProviderKind.plausible || _cloud
                 ? l10n.addSourceKeyRejected
                 : l10n.addSourceCredsRejected;
           });
@@ -214,7 +228,7 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
   Widget build(BuildContext context) {
     final p = context.glance;
     final l10n = context.l10n;
-    final fields = credentialFieldsFor(context.l10n, _kind);
+    final fields = _fields();
 
     return Scaffold(
       body: SafeArea(
@@ -277,6 +291,17 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
                             const SizedBox(width: 10),
                         ],
                       ],
+                    ),
+                    GlanceReveal(
+                      show: _kind == ProviderKind.umami,
+                      child: _UmamiHosting(
+                        cloud: _umamiCloud,
+                        onChanged: (cloud) => setState(() {
+                          _umamiCloud = cloud;
+                          _error = null;
+                          _testOk = null;
+                        }),
+                      ),
                     ),
                     const SizedBox(height: 22),
                   ],
@@ -367,6 +392,50 @@ class _AddSourceScreenState extends ConsumerState<AddSourceScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Umami Cloud ou instance auto-hébergée : la première se connecte avec une
+/// clé API, la seconde avec un identifiant et un mot de passe.
+class _UmamiHosting extends StatelessWidget {
+  const _UmamiHosting({required this.cloud, required this.onChanged});
+
+  final bool cloud;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.glance;
+    final l10n = context.l10n;
+    // Pleine largeur : `GlanceReveal` centre un enfant plus étroit que lui.
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.only(top: 18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 3, bottom: 7),
+            child:
+                Text(l10n.addSourceUmamiHosting, style: GT.label(color: p.fg2)),
+          ),
+          ChipRow(
+            children: [
+              GlanceChip(
+                label: l10n.addSourceUmamiSelfHosted,
+                selected: !cloud,
+                onTap: () => onChanged(false),
+              ),
+              GlanceChip(
+                label: 'Umami Cloud',
+                selected: cloud,
+                onTap: () => onChanged(true),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
