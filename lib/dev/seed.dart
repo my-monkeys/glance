@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/models/account.dart';
 import '../data/models/indicator.dart';
 import '../data/models/models.dart';
+import '../data/providers/umami_provider.dart';
 import '../data/repository/accounts_repository.dart';
 import '../state/indicators.dart';
 import '../state/providers.dart';
@@ -15,6 +16,9 @@ const _seedUser = String.fromEnvironment('SEED_UMAMI_USER');
 const _seedPass = String.fromEnvironment('SEED_UMAMI_PASS');
 const _seedSites = String.fromEnvironment('SEED_UMAMI_SITES'); // ids séparés par des virgules
 
+/// Clé API Umami Cloud : remplace URL + identifiants (compte sur `api.umami.is`).
+const _seedCloudKey = String.fromEnvironment('SEED_UMAMI_CLOUD_KEY');
+
 /// Indicateurs d'amorçage : le site visé et le jeu prédéfini (`geography`).
 /// Sert à voir l'onglet Tableaux avant que l'éditeur existe.
 const _seedIndicatorsSite = String.fromEnvironment('SEED_INDICATORS_SITE');
@@ -26,7 +30,10 @@ Future<void> maybeSeed(ProviderContainer container) async {
 }
 
 Future<void> _seedAccount(ProviderContainer container) async {
-  if (_seedUrl.isEmpty || _seedUser.isEmpty || _seedPass.isEmpty) return;
+  final cloud = _seedCloudKey.isNotEmpty;
+  if (!cloud && (_seedUrl.isEmpty || _seedUser.isEmpty || _seedPass.isEmpty)) {
+    return;
+  }
   final repo = container.read(accountsRepoProvider);
   if (repo.loadAccounts().isNotEmpty) return;
 
@@ -36,13 +43,16 @@ Future<void> _seedAccount(ProviderContainer container) async {
   final account = Account(
     id: AccountsRepository.newId(),
     kind: ProviderKind.umami,
-    baseUrl: _seedUrl,
+    baseUrl: cloud ? UmamiProvider.cloudBase : _seedUrl,
     label: null,
     sites: sites,
   );
-  await container
-      .read(accountsProvider.notifier)
-      .add(account, {'username': _seedUser, 'password': _seedPass});
+  await container.read(accountsProvider.notifier).add(
+        account,
+        cloud
+            ? {'apiKey': _seedCloudKey}
+            : {'username': _seedUser, 'password': _seedPass},
+      );
 }
 
 /// Le compte porte les indicateurs, pas le site : on prend le compte seedé, ou

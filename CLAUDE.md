@@ -617,6 +617,9 @@ flutter run -d <udid> \
   --dart-define=SEED_UMAMI_USER=<user> \
   --dart-define=SEED_UMAMI_PASS=<pass> \
   --dart-define=SEED_UMAMI_SITES=<id1,id2,...>   # optionnel, sinon tous
+
+# Umami Cloud : la clé API remplace URL + identifiants
+flutter run -d <udid> --dart-define=SEED_UMAMI_CLOUD_KEY=<clé>
 ```
 
 - Piloter le simulateur : **idb** (`idb ui tap/text/swipe --udid …`), coordonnées en **points logiques** (= pixels du screenshot / 3 sur @3x). Screenshots via `xcrun simctl io <udid> screenshot`.
