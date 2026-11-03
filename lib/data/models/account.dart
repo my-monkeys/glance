@@ -83,6 +83,9 @@ class Account {
   static String _hostOf(String url) {
     final u = Uri.tryParse(url);
     if (u == null || u.host.isEmpty) return url;
+    // L'hôte de l'API d'Umami Cloud ne dit rien à l'utilisateur, qui ne
+    // connaît que `cloud.umami.is`.
+    if (u.host == 'api.umami.is') return 'Umami Cloud';
     return u.host;
   }
 

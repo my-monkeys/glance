@@ -133,10 +133,12 @@ final iconProvider = FutureProvider.autoDispose
 
 /// Origine de l'instance Umami d'un compte (`https://hôte`), null pour les
 /// autres fournisseurs. Normalisée : l'URL peut avoir été saisie sans schéma.
+/// Null aussi pour Umami Cloud, qui ne sert pas ces images (404 sur
+/// `cloud.umami.is/images/…`, vérifié le 2026-11-03).
 final instanceBaseProvider = Provider.family<String?, String>((ref, accountId) {
   for (final a in ref.watch(accountsProvider)) {
     if (a.id != accountId) continue;
-    return a.kind == ProviderKind.umami
+    return a.kind == ProviderKind.umami && !UmamiProvider.isCloud(a.baseUrl)
         ? UmamiProvider.normalizeBase(a.baseUrl)
         : null;
   }
