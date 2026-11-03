@@ -593,6 +593,13 @@ dans le code.
   User-Agent de navigateur ou de curl (urllib Python, par exemple). Ça compte pour
   les scripts de sonde, pas pour l'app.
 
+### Umami Cloud (même `UmamiProvider`, implémenté d'après la doc — à valider avec une vraie clé)
+- Un compte Cloud reste `ProviderKind.umami` : c'est `baseUrl == https://api.umami.is` (`UmamiProvider.isCloud`) qui bascule le mode. Pas de nouveau `ProviderKind` : tout ce qui vise Umami (tableaux, indicateur « Sites », `supportedIndicatorsFor`) vaut aussi pour Cloud sans rien toucher. Une app plus ancienne qui reçoit ce compte par la synchro tente un login et affiche une erreur sur ce compte seul.
+- **Pas de login** : `cloud.umami.is/api/auth/login` répond **404** (vérifié le 2026-11-03). Une clé API (`creds['apiKey']`) dans l'en-tête `x-umami-api-key`, posée dans les `BaseOptions` ; sans clé, l'API répond 400 « No API key specified. ». Un 401 n'est pas rejoué (une clé ne se rafraîchit pas).
+- **Chemins sous `/v1`** au lieu de `/api` (`_api`), le reste est identique. Pas de route admin ; `includeTeams=true` sur `/v1/websites` pour les sites d'équipe.
+- **Pas d'icônes navigateur/OS** : `cloud.umami.is/images/…` répond 404, donc `instanceBaseProvider` rend null pour un compte Cloud.
+- Écran d'ajout : choix « Auto-hébergé / Umami Cloud » sous le fournisseur ; Cloud n'affiche que « Clé API » (`credentialFieldsFor(umamiCloud: true)`). Une adresse `*.umami.is` saisie en auto-hébergé est refusée avec un message qui renvoie vers ce choix (`looksLikeCloud`). Le compte s'intitule « Umami Cloud » (`Account.title`).
+
 ### Plausible (Stats API v2, implémenté d'après la doc — à valider sur instance)
 - `POST /api/v2/query` Bearer, `{site_id, metrics, date_range, dimensions:['time:day'|'event:page'|…], timezone}`.
 - Un compte Plausible = **un domaine** (`site_id`) : la Stats API ne liste pas les sites.
