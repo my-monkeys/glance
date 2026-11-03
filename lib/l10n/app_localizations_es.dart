@@ -1742,7 +1742,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get credUmamiCloudKeyHint =>
-      'Créala en Umami Cloud: Settings → API keys.';
+      'Créala en Umami Cloud: Settings → API keys. El acceso a la API requiere un plan Pro.';
 
   @override
   String get credEmailOptional => 'Correo de la cuenta (opcional)';

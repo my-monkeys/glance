@@ -482,7 +482,7 @@
   "credUsername": "Nombre de usuario",
   "credPassword": "Contraseña",
   "credApiKey": "Clave de API",
-  "credUmamiCloudKeyHint": "Créala en Umami Cloud: Settings → API keys.",
+  "credUmamiCloudKeyHint": "Créala en Umami Cloud: Settings → API keys. El acceso a la API requiere un plan Pro.",
   "credEmailOptional": "Correo de la cuenta (opcional)",
   "credEmailPlaceholder": "tu@ejemplo.com",
   "credEmailHint": "Correo + contraseña: Glance lista tus sitios automáticamente. Si no, déjalo en blanco e introduce un dominio abajo.",

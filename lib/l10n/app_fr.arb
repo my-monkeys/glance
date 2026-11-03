@@ -1362,7 +1362,7 @@
   "credUsername": "Nom d'utilisateur",
   "credPassword": "Mot de passe",
   "credApiKey": "Clé API",
-  "credUmamiCloudKeyHint": "Créez-la dans Umami Cloud : Settings → API keys.",
+  "credUmamiCloudKeyHint": "Créez-la dans Umami Cloud : Settings → API keys. L'accès à l'API demande un plan Pro.",
   "@credUmamiCloudKeyHint": {
     "description": "« Settings → API keys » reste en anglais : ce sont les menus d’Umami Cloud"
   },

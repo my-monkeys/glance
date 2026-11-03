@@ -1680,7 +1680,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get credApiKey => 'API 密钥';
 
   @override
-  String get credUmamiCloudKeyHint => '在 Umami Cloud 中创建：Settings → API keys。';
+  String get credUmamiCloudKeyHint =>
+      '在 Umami Cloud 中创建：Settings → API keys。API 访问需要 Pro 套餐。';
 
   @override
   String get credEmailOptional => '账户邮箱（可选）';

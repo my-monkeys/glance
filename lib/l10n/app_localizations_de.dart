@@ -1757,7 +1757,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get credUmamiCloudKeyHint =>
-      'Erstellen Sie ihn in Umami Cloud: Settings → API keys.';
+      'Erstellen Sie ihn in Umami Cloud: Settings → API keys. Der API-Zugang erfordert einen Pro-Tarif.';
 
   @override
   String get credEmailOptional => 'Konto-E-Mail (optional)';

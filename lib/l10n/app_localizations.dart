@@ -3001,7 +3001,7 @@ abstract class AppLocalizations {
   /// « Settings → API keys » reste en anglais : ce sont les menus d’Umami Cloud
   ///
   /// In fr, this message translates to:
-  /// **'Créez-la dans Umami Cloud : Settings → API keys.'**
+  /// **'Créez-la dans Umami Cloud : Settings → API keys. L\'accès à l\'API demande un plan Pro.'**
   String get credUmamiCloudKeyHint;
 
   /// No description provided for @credEmailOptional.

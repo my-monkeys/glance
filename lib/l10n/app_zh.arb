@@ -482,7 +482,7 @@
   "credUsername": "用户名",
   "credPassword": "密码",
   "credApiKey": "API 密钥",
-  "credUmamiCloudKeyHint": "在 Umami Cloud 中创建：Settings → API keys。",
+  "credUmamiCloudKeyHint": "在 Umami Cloud 中创建：Settings → API keys。API 访问需要 Pro 套餐。",
   "credEmailOptional": "账户邮箱（可选）",
   "credEmailPlaceholder": "you@example.com",
   "credEmailHint": "邮箱加密码：Glance 会自动列出您的站点。否则请留空，并在下方输入域名。",
