@@ -8,6 +8,7 @@ import '../models/models.dart';
 import '../models/period.dart';
 import 'analytics_provider.dart';
 import 'buckets.dart';
+import 'follow_redirects.dart';
 import 'provider_errors.dart';
 import 'umami_filters.dart';
 
@@ -23,6 +24,7 @@ class UmamiProvider extends AnalyticsProvider {
         headers: const {'accept': 'application/json'},
       ),
     );
+    _dio.interceptors.add(FollowRedirects(_dio));
   }
 
   late final Dio _dio;
