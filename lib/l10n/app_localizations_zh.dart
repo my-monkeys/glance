@@ -1220,6 +1220,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get addSourceCredsRejected => '凭据被拒绝。';
 
   @override
+  String get addSourceUmamiHosting => '托管方式';
+
+  @override
+  String get addSourceUmamiSelfHosted => '自托管';
+
+  @override
+  String get addSourceUmamiCloudUseKey =>
+      'Umami Cloud 使用 API 密钥连接：请在上方选择“Umami Cloud”。';
+
+  @override
   String get addSourceAdded => '数据源已添加';
 
   @override
@@ -1668,6 +1678,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get credApiKey => 'API 密钥';
+
+  @override
+  String get credUmamiCloudKeyHint =>
+      '在 Umami Cloud 中创建：Settings → API keys。API 访问需要 Pro 套餐。';
 
   @override
   String get credEmailOptional => '账户邮箱（可选）';

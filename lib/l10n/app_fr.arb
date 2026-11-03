@@ -914,6 +914,12 @@
   "addSourceNoSites": "Aucun site trouvé pour ce compte.",
   "addSourceKeyRejected": "Clé API refusée (accès aux stats). Vérifiez la clé API.",
   "addSourceCredsRejected": "Identifiants refusés.",
+  "addSourceUmamiHosting": "HÉBERGEMENT",
+  "@addSourceUmamiHosting": {
+    "description": "Libellé (majuscules) du choix entre Umami Cloud et une instance auto-hébergée"
+  },
+  "addSourceUmamiSelfHosted": "Auto-hébergé",
+  "addSourceUmamiCloudUseKey": "Umami Cloud se connecte avec une clé API : choisissez « Umami Cloud » ci-dessus.",
   "addSourceAdded": "Source ajoutée",
   "addSourceEdited": "Source modifiée",
   "sitePickerTitle": "Choix des sites",
@@ -1356,6 +1362,10 @@
   "credUsername": "Nom d'utilisateur",
   "credPassword": "Mot de passe",
   "credApiKey": "Clé API",
+  "credUmamiCloudKeyHint": "Créez-la dans Umami Cloud : Settings → API keys. L'accès à l'API demande un plan Pro.",
+  "@credUmamiCloudKeyHint": {
+    "description": "« Settings → API keys » reste en anglais : ce sont les menus d’Umami Cloud"
+  },
   "credEmailOptional": "Email du compte (facultatif)",
   "credEmailPlaceholder": "vous@exemple.fr",
   "@credEmailPlaceholder": {

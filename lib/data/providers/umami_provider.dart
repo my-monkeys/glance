@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 
 import '../../core/sites_visitors.dart';
 import '../../core/timezone.dart';
@@ -12,24 +13,55 @@ import 'follow_redirects.dart';
 import 'provider_errors.dart';
 import 'umami_filters.dart';
 
-/// Client Umami (self-hosted). Auth par login username/mot de passe → token JWT
-/// Bearer, réutilisé et rafraîchi automatiquement sur 401.
+/// Client Umami, auto-hébergé ou Umami Cloud.
+///
+/// - **Auto-hébergé** : login username/mot de passe → token JWT Bearer,
+///   réutilisé et rafraîchi automatiquement sur 401. API sous `/api`.
+/// - **Umami Cloud** ([isCloud]) : pas de login (`/api/auth/login` y répond
+///   404) ; une clé API dans `x-umami-api-key`, sur `api.umami.is` et sous
+///   `/v1`. Les chemins qui suivent sont les mêmes.
 class UmamiProvider extends AnalyticsProvider {
-  UmamiProvider(super.account, super.creds) {
+  UmamiProvider(super.account, super.creds)
+      : _cloud = isCloud(account.baseUrl) {
     _dio = Dio(
       BaseOptions(
         baseUrl: normalizeBase(account.baseUrl),
         connectTimeout: const Duration(seconds: 15),
         receiveTimeout: const Duration(seconds: 25),
-        headers: const {'accept': 'application/json'},
+        headers: {
+          'accept': 'application/json',
+          if (_cloud) cloudKeyHeader: creds['apiKey'] ?? '',
+        },
       ),
     );
     _dio.interceptors.add(FollowRedirects(_dio));
   }
 
+  /// Origine de l'API d'Umami Cloud (le tableau de bord, lui, est sur
+  /// `cloud.umami.is`).
+  static const cloudBase = 'https://api.umami.is';
+  static const cloudKeyHeader = 'x-umami-api-key';
+
+  static bool isCloud(String baseUrl) =>
+      Uri.tryParse(normalizeBase(baseUrl))?.host == Uri.parse(cloudBase).host;
+
+  /// Adresse que l'on saisirait pour Umami Cloud dans le champ « URL de
+  /// l'instance » : elle n'accepte pas d'identifiant ni de mot de passe.
+  static bool looksLikeCloud(String url) {
+    if (url.trim().isEmpty) return false;
+    final host = Uri.tryParse(normalizeBase(url))?.host ?? '';
+    return host == 'umami.is' || host.endsWith('.umami.is');
+  }
+
+  final bool _cloud;
   late final Dio _dio;
   String? _token;
   bool _isAdmin = false;
+
+  String get _api => _cloud ? '/v1' : '/api';
+
+  @visibleForTesting
+  Dio get dio => _dio;
 
   /// Ajoute https:// si absent et retire tout chemin/slash final.
   static String normalizeBase(String raw) {
@@ -45,7 +77,7 @@ class UmamiProvider extends AnalyticsProvider {
 
   Future<void> _login() async {
     final r = await _dio.post(
-      '/api/auth/login',
+      '$_api/auth/login',
       data: {'username': creds['username'], 'password': creds['password']},
     );
     final data = r.data;
@@ -59,9 +91,12 @@ class UmamiProvider extends AnalyticsProvider {
   }
 
   /// Exécute [call] avec le Bearer ; sur 401, un seul re-login puis un rejeu.
+  /// Umami Cloud : la clé est déjà dans les en-têtes, et une clé refusée ne
+  /// se rafraîchit pas.
   Future<dynamic> _authed(
     Future<Response<dynamic>> Function(Options) call,
   ) async {
+    if (_cloud) return (await call(Options())).data;
     if (_token == null) await _login();
     Options opts() => Options(headers: {'Authorization': 'Bearer $_token'});
     try {
@@ -91,10 +126,14 @@ class UmamiProvider extends AnalyticsProvider {
   @override
   Future<List<Site>> listSites() async {
     // v3 : `/api/websites` ne renvoie que les sites possédés/partagés. Un compte
-    // admin doit passer par `/api/admin/websites` pour tout voir.
-    if (_token == null) await _login();
-    final path = _isAdmin ? '/api/admin/websites' : '/api/websites';
-    final data = await _get(path, {'pageSize': 500});
+    // admin doit passer par `/api/admin/websites` pour tout voir. Umami Cloud
+    // n'a pas d'admin, mais des équipes : `includeTeams` ajoute leurs sites.
+    if (!_cloud && _token == null) await _login();
+    final path = _isAdmin ? '$_api/admin/websites' : '$_api/websites';
+    final data = await _get(path, {
+      'pageSize': 500,
+      if (_cloud) 'includeTeams': true,
+    });
     final list = data is Map ? (data['data'] ?? data['websites'] ?? []) : data;
     return (list as List)
         .map(
@@ -110,7 +149,7 @@ class UmamiProvider extends AnalyticsProvider {
 
   @override
   Future<StatsSummary> summary(Site site, DateWindow w) async {
-    final d = await _get('/api/websites/${site.id}/stats', {
+    final d = await _get('$_api/websites/${site.id}/stats', {
       'startAt': w.startMs,
       'endAt': w.endMs,
     }) as Map;
@@ -119,7 +158,7 @@ class UmamiProvider extends AnalyticsProvider {
     // pour chaque site de l'accueil, à chaque rafraîchissement.
     final prev = d['comparison'] is Map
         ? (d['comparison'] as Map)
-        : await _get('/api/websites/${site.id}/stats', {
+        : await _get('$_api/websites/${site.id}/stats', {
             'startAt': w.start.subtract(w.end.difference(w.start)).millisecondsSinceEpoch,
             'endAt': w.startMs,
           }).catchError((_) => <String, dynamic>{}) as Map;
@@ -148,12 +187,12 @@ class UmamiProvider extends AnalyticsProvider {
     final filter = {'referrer': ?referrer};
     final tz = await _timezone();
     final (stats, views) = await (
-      _get('/api/websites/${site.id}/stats', {
+      _get('$_api/websites/${site.id}/stats', {
         'startAt': w.startMs,
         'endAt': w.endMs,
         ...filter,
       }),
-      _get('/api/websites/${site.id}/pageviews', {
+      _get('$_api/websites/${site.id}/pageviews', {
         'startAt': w.startMs,
         'endAt': w.endMs,
         'unit': w.unit.api,
@@ -175,7 +214,7 @@ class UmamiProvider extends AnalyticsProvider {
   @override
   Future<List<SeriesPoint>> series(Site site, DateWindow w) async {
     final tz = await _timezone();
-    final d = await _get('/api/websites/${site.id}/pageviews', {
+    final d = await _get('$_api/websites/${site.id}/pageviews', {
       'startAt': w.startMs,
       'endAt': w.endMs,
       'unit': w.unit.api,
@@ -201,7 +240,7 @@ class UmamiProvider extends AnalyticsProvider {
 
   @override
   Future<int> active(Site site) async {
-    final d = await _get('/api/websites/${site.id}/active');
+    final d = await _get('$_api/websites/${site.id}/active');
     if (d is List) {
       if (d.isEmpty) return 0;
       final first = d.first;
@@ -224,7 +263,7 @@ class UmamiProvider extends AnalyticsProvider {
     // Les clés de dimension sont exactement celles de l'API v3 (`url` y a été
     // renommé `path`).
     final apiType = type.key;
-    final d = await _get('/api/websites/${site.id}/metrics', {
+    final d = await _get('$_api/websites/${site.id}/metrics', {
       'startAt': w.startMs,
       'endAt': w.endMs,
       'type': apiType,
@@ -238,7 +277,7 @@ class UmamiProvider extends AnalyticsProvider {
 
   @override
   Future<DataRange?> dataRange(Site site) async {
-    final d = await _get('/api/websites/${site.id}/daterange');
+    final d = await _get('$_api/websites/${site.id}/daterange');
     if (d is! Map) return null;
     final start = DateTime.tryParse('${d['startDate']}');
     final end = DateTime.tryParse('${d['endDate']}');
@@ -261,7 +300,7 @@ class UmamiProvider extends AnalyticsProvider {
   @override
   Future<List<EventSeries>> eventSeries(Site site, DateWindow w) async {
     final tz = await _timezone();
-    final d = await _get('/api/websites/${site.id}/events/series', {
+    final d = await _get('$_api/websites/${site.id}/events/series', {
       'startAt': w.startMs,
       'endAt': w.endMs,
       'unit': w.unit.api,
@@ -306,7 +345,7 @@ class UmamiProvider extends AnalyticsProvider {
     EventQuery q,
   ) async {
     final tz = await _timezone();
-    final d = await _get('/api/websites/${site.id}/events/series', {
+    final d = await _get('$_api/websites/${site.id}/events/series', {
       'startAt': w.startMs,
       'endAt': w.endMs,
       'unit': w.unit.api,
@@ -337,7 +376,7 @@ class UmamiProvider extends AnalyticsProvider {
     DateWindow w,
     FunnelIndicator f,
   ) async {
-    final d = await _post('/api/reports/funnel', {
+    final d = await _post('$_api/reports/funnel', {
       'websiteId': site.id,
       'type': 'funnel',
       'filters': <String, dynamic>{},
@@ -392,7 +431,7 @@ class UmamiProvider extends AnalyticsProvider {
     String property, {
     int limit = 30,
   }) async {
-    final d = await _get('/api/websites/${site.id}/event-data/values', {
+    final d = await _get('$_api/websites/${site.id}/event-data/values', {
       'startAt': w.startMs,
       'endAt': w.endMs,
       'event': event,
@@ -416,7 +455,7 @@ class UmamiProvider extends AnalyticsProvider {
     DateWindow w,
     String event,
   ) async {
-    final d = await _get('/api/websites/${site.id}/event-data/properties', {
+    final d = await _get('$_api/websites/${site.id}/event-data/properties', {
       'startAt': w.startMs,
       'endAt': w.endMs,
       'event': event,
