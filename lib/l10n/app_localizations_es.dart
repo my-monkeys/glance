@@ -933,7 +933,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get accountMenuChooseSites => 'Elegir sitios';
 
   @override
-  String get accountMenuDelete => 'Eliminar esta cuenta';
+  String get accountMenuDelete => 'Eliminar esta fuente';
 
   @override
   String get accountMenuDeleted => 'Fuente eliminada';

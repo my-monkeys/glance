@@ -252,7 +252,7 @@
   "accountMenuEdit": "Edit source",
   "accountMenuEditHint": "URL, credentials, API key…",
   "accountMenuChooseSites": "Choose sites",
-  "accountMenuDelete": "Delete this account",
+  "accountMenuDelete": "Delete this source",
   "accountMenuDeleted": "Source deleted",
   "accountMenuSelectionSaved": "Selection saved",
   "accountSelectionAll": "all sites",

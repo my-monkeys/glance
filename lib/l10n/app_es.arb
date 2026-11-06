@@ -252,7 +252,7 @@
   "accountMenuEdit": "Editar la fuente",
   "accountMenuEditHint": "URL, credenciales, clave de API…",
   "accountMenuChooseSites": "Elegir sitios",
-  "accountMenuDelete": "Eliminar esta cuenta",
+  "accountMenuDelete": "Eliminar esta fuente",
   "accountMenuDeleted": "Fuente eliminada",
   "accountMenuSelectionSaved": "Selección guardada",
   "accountSelectionAll": "todos los sitios",

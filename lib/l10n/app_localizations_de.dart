@@ -934,7 +934,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get accountMenuChooseSites => 'Websites wählen';
 
   @override
-  String get accountMenuDelete => 'Dieses Konto löschen';
+  String get accountMenuDelete => 'Diese Quelle löschen';
 
   @override
   String get accountMenuDeleted => 'Quelle gelöscht';

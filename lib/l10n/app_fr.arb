@@ -742,7 +742,7 @@
   "accountMenuEdit": "Modifier la source",
   "accountMenuEditHint": "URL, identifiants, clé API…",
   "accountMenuChooseSites": "Choisir les sites",
-  "accountMenuDelete": "Supprimer ce compte",
+  "accountMenuDelete": "Supprimer cette source",
   "accountMenuDeleted": "Source supprimée",
   "accountMenuSelectionSaved": "Sélection enregistrée",
   "accountSelectionAll": "tous les sites",

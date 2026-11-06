@@ -1621,7 +1621,7 @@ abstract class AppLocalizations {
   /// No description provided for @accountMenuDelete.
   ///
   /// In fr, this message translates to:
-  /// **'Supprimer ce compte'**
+  /// **'Supprimer cette source'**
   String get accountMenuDelete;
 
   /// No description provided for @accountMenuDeleted.

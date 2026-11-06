@@ -906,7 +906,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get accountMenuChooseSites => '选择站点';
 
   @override
-  String get accountMenuDelete => '删除此账户';
+  String get accountMenuDelete => '删除此数据源';
 
   @override
   String get accountMenuDeleted => '数据源已删除';

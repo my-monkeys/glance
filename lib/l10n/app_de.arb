@@ -252,7 +252,7 @@
   "accountMenuEdit": "Quelle bearbeiten",
   "accountMenuEditHint": "URL, Zugangsdaten, API-Schlüssel…",
   "accountMenuChooseSites": "Websites wählen",
-  "accountMenuDelete": "Dieses Konto löschen",
+  "accountMenuDelete": "Diese Quelle löschen",
   "accountMenuDeleted": "Quelle gelöscht",
   "accountMenuSelectionSaved": "Auswahl gespeichert",
   "accountSelectionAll": "alle Websites",

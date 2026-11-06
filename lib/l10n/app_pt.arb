@@ -252,7 +252,7 @@
   "accountMenuEdit": "Editar a fonte",
   "accountMenuEditHint": "URL, credenciais, chave de API…",
   "accountMenuChooseSites": "Escolher sites",
-  "accountMenuDelete": "Excluir esta conta",
+  "accountMenuDelete": "Excluir esta fonte",
   "accountMenuDeleted": "Fonte excluída",
   "accountMenuSelectionSaved": "Seleção salva",
   "accountSelectionAll": "todos os sites",

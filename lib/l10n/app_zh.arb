@@ -252,7 +252,7 @@
   "accountMenuEdit": "编辑数据源",
   "accountMenuEditHint": "URL、凭据、API 密钥……",
   "accountMenuChooseSites": "选择站点",
-  "accountMenuDelete": "删除此账户",
+  "accountMenuDelete": "删除此数据源",
   "accountMenuDeleted": "数据源已删除",
   "accountMenuSelectionSaved": "选择已保存",
   "accountSelectionAll": "所有站点",
