@@ -156,9 +156,12 @@ class _AccountMenuState extends ConsumerState<AccountMenu> {
 
   Future<void> _editSites() async {
     final host = widget.hostContext;
+    // Le menu est déjà fermé : son `ref` lève une StateError une fois le
+    // widget démonté, et le choix des sites partait sans être enregistré.
+    final container = ProviderScope.containerOf(host, listen: false);
     // Rechargée : la liste en cache date du lancement et ne montrerait pas un
     // site créé depuis.
-    final sites = await ref.refresh(accountSitesProvider(_a.id).future);
+    final sites = await container.refresh(accountSitesProvider(_a.id).future);
     if (!host.mounted) return;
     final choice = await showGlanceModal<SiteChoice?>(
       host,
@@ -170,7 +173,7 @@ class _AccountMenuState extends ConsumerState<AccountMenu> {
       ),
     );
     if (choice == null) return; // annulé
-    await ref
+    await container
         .read(accountsProvider.notifier)
         .updateSites(_a.id, choice.sites, excluded: choice.excluded);
     if (host.mounted) showGlanceToast(host, host.l10n.accountMenuSelectionSaved);

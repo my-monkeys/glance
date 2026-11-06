@@ -906,7 +906,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get accountMenuChooseSites => '选择站点';
 
   @override
-  String get accountMenuDelete => '删除此账户';
+  String get accountMenuDelete => '删除此数据源';
 
   @override
   String get accountMenuDeleted => '数据源已删除';
@@ -1179,10 +1179,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get addSourceProvider => '服务商';
 
   @override
-  String get addSourceName => '名称（可选）';
+  String get addSourceName => '标签（可选）';
 
   @override
-  String get addSourceNameHint => '我的域名';
+  String get addSourceNameHint => '个人、工作…';
 
   @override
   String get addSourceTest => '测试配置';

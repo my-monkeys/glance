@@ -932,7 +932,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get accountMenuChooseSites => 'Escolher sites';
 
   @override
-  String get accountMenuDelete => 'Excluir esta conta';
+  String get accountMenuDelete => 'Excluir esta fonte';
 
   @override
   String get accountMenuDeleted => 'Fonte excluída';
@@ -1222,10 +1222,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get addSourceProvider => 'PROVEDOR';
 
   @override
-  String get addSourceName => 'Nome (opcional)';
+  String get addSourceName => 'Rótulo (opcional)';
 
   @override
-  String get addSourceNameHint => 'Meu domínio';
+  String get addSourceNameHint => 'Pessoal, Trabalho…';
 
   @override
   String get addSourceTest => 'Testar a configuração';

@@ -1621,7 +1621,7 @@ abstract class AppLocalizations {
   /// No description provided for @accountMenuDelete.
   ///
   /// In fr, this message translates to:
-  /// **'Supprimer ce compte'**
+  /// **'Supprimer cette source'**
   String get accountMenuDelete;
 
   /// No description provided for @accountMenuDeleted.
@@ -2107,13 +2107,13 @@ abstract class AppLocalizations {
   /// No description provided for @addSourceName.
   ///
   /// In fr, this message translates to:
-  /// **'Nom (optionnel)'**
+  /// **'Étiquette (optionnelle)'**
   String get addSourceName;
 
   /// No description provided for @addSourceNameHint.
   ///
   /// In fr, this message translates to:
-  /// **'Mon domaine'**
+  /// **'Perso, Pro…'**
   String get addSourceNameHint;
 
   /// No description provided for @addSourceTest.
