@@ -1179,10 +1179,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get addSourceProvider => '服务商';
 
   @override
-  String get addSourceName => '名称（可选）';
+  String get addSourceName => '标签（可选）';
 
   @override
-  String get addSourceNameHint => '我的域名';
+  String get addSourceNameHint => '个人、工作…';
 
   @override
   String get addSourceTest => '测试配置';

@@ -896,8 +896,8 @@
   "@addSourceProvider": {
     "description": "Petit titre en majuscules au-dessus du choix Umami / Plausible / Fathom"
   },
-  "addSourceName": "Nom (optionnel)",
-  "addSourceNameHint": "Mon domaine",
+  "addSourceName": "Étiquette (optionnelle)",
+  "addSourceNameHint": "Perso, Pro…",
   "addSourceTest": "Tester la configuration",
   "addSourceContinue": "Continuer",
   "addSourceMissingFields": "Renseigne les champs obligatoires.",

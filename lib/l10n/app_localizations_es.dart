@@ -1223,10 +1223,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get addSourceProvider => 'PROVEEDOR';
 
   @override
-  String get addSourceName => 'Nombre (opcional)';
+  String get addSourceName => 'Etiqueta (opcional)';
 
   @override
-  String get addSourceNameHint => 'Mi dominio';
+  String get addSourceNameHint => 'Personal, Trabajo…';
 
   @override
   String get addSourceTest => 'Probar la configuración';

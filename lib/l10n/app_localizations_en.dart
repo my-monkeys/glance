@@ -1216,10 +1216,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addSourceProvider => 'PROVIDER';
 
   @override
-  String get addSourceName => 'Name (optional)';
+  String get addSourceName => 'Label (optional)';
 
   @override
-  String get addSourceNameHint => 'My domain';
+  String get addSourceNameHint => 'Personal, Business…';
 
   @override
   String get addSourceTest => 'Test configuration';
