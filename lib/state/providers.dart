@@ -282,6 +282,22 @@ Future<AnalyticsProvider> analyticsProviderFor(Ref ref, Site site) =>
 /// Plafonne la concurrence des requêtes analytics (chargement incrémental).
 final fetchGateProvider = Provider<Semaphore>((ref) => Semaphore(6));
 
+/// Site affiché dans l'écran de détail : ses requêtes passent devant celles
+/// des autres sites, donc changer de période recharge d'abord ce qu'on regarde,
+/// puis la barre latérale.
+///
+/// Un porteur mutable, pas un état Riverpod : il n'est lu qu'au lancement d'une
+/// requête, et changer de site affiché ne doit rien recharger.
+class FetchFocus {
+  Site? site;
+
+  bool isFocused(Site s) => site == s;
+}
+
+final fetchFocusProvider = Provider<FetchFocus>((ref) => FetchFocus());
+
+bool _urgent(Ref ref, Site site) => ref.read(fetchFocusProvider).isFocused(site);
+
 String _dataStartKey(Site s) => 'glance.dataStart.${s.accountId}.${s.id}';
 
 /// Date de première donnée d'un site, telle que la donne le fournisseur.
@@ -349,7 +365,9 @@ final siteLiveProvider = FutureProvider.autoDispose.family<int, Site>((ref, site
   cacheFor(ref, kStatsCacheTtl);
   final gate = ref.watch(fetchGateProvider);
   final p = await analyticsProviderFor(ref, site);
-  return gate.run(() => p.active(site)).catchError((_) => 0);
+  return gate
+      .run(() => p.active(site), urgent: _urgent(ref, site))
+      .catchError((_) => 0);
 });
 
 /// Stats (résumé + série) d'un site sur une fenêtre. Chargé indépendamment des
@@ -385,7 +403,7 @@ final siteStatsProvider =
     );
     ref.read(statsCacheProvider).writeStats(site, w, stats);
     return stats;
-  });
+  }, urgent: _urgent(ref, site));
 });
 
 /// Série de la période précédente équivalente, pour la comparaison superposée
@@ -402,7 +420,7 @@ final siteCompareSeriesProvider = FutureProvider.autoDispose
   final gate = ref.watch(fetchGateProvider);
   final p = await analyticsProviderFor(ref, site);
   return gate
-      .run(() => p.series(site, prevW))
+      .run(() => p.series(site, prevW), urgent: _urgent(ref, site))
       .catchError((_) => <SeriesPoint>[]);
 });
 
@@ -472,7 +490,8 @@ final siteMetricProvider = FutureProvider.autoDispose
   final gate = ref.watch(fetchGateProvider);
   final p = await analyticsProviderFor(ref, site);
   final rows =
-      await gate.run(() => p.metric(site, w, type, limit: kMetricFetchLimit));
+      await gate.run(() => p.metric(site, w, type, limit: kMetricFetchLimit),
+          urgent: _urgent(ref, site));
   ref.read(statsCacheProvider).writeMetric(site, w, type, rows);
   return rows;
 });
@@ -483,7 +502,9 @@ final siteLivePagesProvider =
   cacheFor(ref, kStatsCacheTtl);
   final gate = ref.watch(fetchGateProvider);
   final p = await analyticsProviderFor(ref, site);
-  return gate.run(() => p.livePages(site)).catchError((_) => <LivePage>[]);
+  return gate
+      .run(() => p.livePages(site), urgent: _urgent(ref, site))
+      .catchError((_) => <LivePage>[]);
 });
 
 /// Données d'événements d'un site pour une fenêtre (série + répartition).
@@ -497,7 +518,7 @@ final eventsProvider =
     final series = await p.eventSeries(site, w);
     final total = series.fold<int>(0, (a, b) => a + b.total);
     return EventsData(total: total, series: series, unit: w.unit);
-  });
+  }, urgent: _urgent(ref, site));
 });
 
 /// Clé de persistance du flag « ce site a des événements ».
