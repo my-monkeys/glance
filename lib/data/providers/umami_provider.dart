@@ -13,6 +13,10 @@ import 'follow_redirects.dart';
 import 'provider_errors.dart';
 import 'umami_filters.dart';
 
+/// « En direct » : la fenêtre de `/active` chez Umami.
+const _kLiveWindow = Duration(minutes: 5);
+const _kLivePages = 5;
+
 /// Client Umami, auto-hébergé ou Umami Cloud.
 ///
 /// - **Auto-hébergé** : login username/mot de passe → token JWT Bearer,
@@ -287,14 +291,36 @@ class UmamiProvider extends AnalyticsProvider {
 
   @override
   Future<List<LivePage>> livePages(Site site) async {
+    if (_cloud) return _cloudLivePages(site);
     final now = DateTime.now();
-    final w = DateWindow(
-      now.subtract(const Duration(minutes: 5)),
-      now,
-      TimeUnit.hour,
-    );
-    final rows = await metric(site, w, MetricType.pages, limit: 5);
+    final w = DateWindow(now.subtract(_kLiveWindow), now, TimeUnit.hour);
+    final rows = await metric(site, w, MetricType.pages, limit: _kLivePages);
     return rows.map((r) => LivePage(r.label, r.value)).toList(growable: false);
+  }
+
+  /// Umami Cloud range `/metrics` par heure : une fenêtre qui ne contient pas
+  /// le début de l'heure rend `[]` (vérifié le 2026-11-07 : 3 visiteurs dans
+  /// `/active`, rien sur 5 ou 30 min, tout depuis l'heure pile). `/realtime`
+  /// rend les événements récents horodatés : on y compte, par page, les
+  /// sessions distinctes des 5 dernières minutes, comme le fait `/active`.
+  Future<List<LivePage>> _cloudLivePages(Site site) async {
+    final d = await _get('$_api/realtime/${site.id}');
+    final events = d is Map && d['events'] is List ? d['events'] as List : const [];
+    final since = DateTime.now().toUtc().subtract(_kLiveWindow);
+    final sessionsByPath = <String, Set<String>>{};
+    for (final e in events) {
+      if (e is! Map || e['__type'] != 'pageview') continue;
+      final at = DateTime.tryParse('${e['createdAt']}');
+      if (at == null || at.isBefore(since)) continue;
+      sessionsByPath
+          .putIfAbsent('${e['urlPath'] ?? ''}', () => <String>{})
+          .add('${e['sessionId']}');
+    }
+    final pages = [
+      for (final entry in sessionsByPath.entries)
+        LivePage(entry.key, entry.value.length),
+    ]..sort((a, b) => b.count.compareTo(a.count));
+    return pages.take(_kLivePages).toList(growable: false);
   }
 
   @override

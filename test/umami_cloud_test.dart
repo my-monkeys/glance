@@ -175,4 +175,36 @@ void main() {
     expect([for (final f in selfHosted) f.key],
         ['baseUrl', 'username', 'password']);
   });
+
+  // `/metrics` d'Umami Cloud est rangé par heure : sur 5 minutes il rend `[]`
+  // alors que `/active` compte des visiteurs (retour d'un testeur, 2026-11-07).
+  test('« En direct » sur Cloud : sessions distinctes des 5 dernières minutes, '
+      'par page, via /realtime', () async {
+    final now = DateTime.now().toUtc();
+    Map<String, Object> event(String type, String session, String path, int minAgo) => {
+          '__type': type,
+          'sessionId': session,
+          'urlPath': path,
+          'createdAt': now.subtract(Duration(minutes: minAgo)).toIso8601String(),
+        };
+    final (p, fake) = _provider(UmamiProvider.cloudBase, const {'apiKey': 'k'}, {
+      '/v1/realtime/w1': (200, {
+        'urls': {'/a': 9, '/b': 1, '/old': 1},
+        'events': [
+          event('pageview', 's1', '/a', 1),
+          event('pageview', 's1', '/a', 2), // même session : compte une fois
+          event('pageview', 's2', '/a', 3),
+          event('session', 's3', '/b', 1), // pas une page vue
+          event('pageview', 's3', '/b', 1),
+          event('pageview', 's4', '/old', 12), // hors des 5 minutes
+        ],
+      }),
+    });
+    const site = Site(id: 'w1', accountId: 'a', name: 'Blog', domain: 'blog.example.com');
+
+    final pages = await p.livePages(site);
+
+    expect([for (final l in pages) (l.path, l.count)], [('/a', 2), ('/b', 1)]);
+    expect(fake.seen.single.uri.path, '/v1/realtime/w1');
+  });
 }

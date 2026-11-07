@@ -104,12 +104,19 @@ découpage et les libellés d'Umami, pour qu'on retrouve son vocabulaire.
 - **Le rafraîchissement n'invalide que les 4 clés affichées** — `ref.invalidate` sur
   la famille entière relancerait des dizaines de requêtes par tick.
 - Grille : `MetricSectionGrid` répartit en colonnes-seaux (`LayoutBuilder` +
-  `Row` de `Column`), 1 à 3 colonnes selon `constraints.maxWidth` — **jamais**
+  `Row` de `Column`), selon `constraints.maxWidth` — **jamais**
   `MediaQuery.size` : le panneau central du bureau est plus étroit que la fenêtre,
   et franchir `kDesktopBreakpoint` fait apparaître 320 px de barre latérale, donc
   *élargir* la fenêtre peut *réduire* la place. Une `GridView` imposerait à chaque
   rangée la hauteur de sa plus haute carte ; ici `MetricBars.reserveRows` garde
   toutes les cartes à la même hauteur.
+- **1, 2 ou 4 colonnes, jamais 3** (`MetricSectionGrid.columnsFor`, testé) : à
+  trois, la 4ᵉ section restait seule sous la première. Les quatre tiennent sur
+  une ligne dès ~1200 px, donc sur un grand écran : le panneau central du bureau
+  va jusqu'à **1800 px** (`_centerMaxWidth`, réglages à 900). Les grands
+  graphiques (détail, événements, aperçu du bureau) prennent un cinquième de leur
+  largeur en hauteur, entre leur hauteur de téléphone et 360 px
+  (`chartHeightFor`).
 - **Pourcentage = part de `summary.visitors`**, jamais la somme des lignes reçues
   (qui dépend du nombre de lignes demandées : en afficher une de plus changerait
   tous les pourcentages). Vérifié sur l'instance : toutes les dimensions Umami
@@ -598,6 +605,7 @@ dans le code.
 - **Pas de login** : `cloud.umami.is/api/auth/login` répond **404** (vérifié le 2026-11-03). Une clé API (`creds['apiKey']`) dans l'en-tête `x-umami-api-key`, posée dans les `BaseOptions` ; sans clé, l'API répond 400 « No API key specified. ». Un 401 n'est pas rejoué (une clé ne se rafraîchit pas).
 - **Chemins sous `/v1`** au lieu de `/api` (`_api`), le reste est identique. Pas de route admin ; `includeTeams=true` sur `/v1/websites` pour les sites d'équipe.
 - **Pas d'icônes navigateur/OS** : `cloud.umami.is/images/…` répond 404, donc `instanceBaseProvider` rend null pour un compte Cloud.
+- ⚠️ **`/metrics` est rangé par heure** : une fenêtre qui ne contient pas le début d'une heure rend `[]` (vérifié le 2026-11-07 : 3 visiteurs dans `/active`, rien sur 5 ou 30 min, tout depuis l'heure pile). Les périodes de Glance sont alignées sur la grille, donc seul « En direct » était touché : il passe par `/v1/realtime/<site>` (événements horodatés, sessions distinctes des 5 dernières minutes par page). L'auto-hébergé garde `/metrics`.
 - ⚠️ **L'API d'Umami Cloud est réservée aux plans payants** (Pro à 20 $/mois, essai de 14 jours ; vu le 2026-11-03 sur un compte Hobby : « API access requires a Pro plan »). Un compte gratuit ne peut pas créer de clé, donc pas utiliser Glance : l'aide du champ le dit.
 - Écran d'ajout : choix « Auto-hébergé / Umami Cloud » sous le fournisseur ; Cloud n'affiche que « Clé API » (`credentialFieldsFor(umamiCloud: true)`). Une adresse `*.umami.is` saisie en auto-hébergé est refusée avec un message qui renvoie vers ce choix (`looksLikeCloud`). Le compte s'intitule « Umami Cloud » (`Account.title`).
 

@@ -38,6 +38,15 @@ double chartNiceMax(double m) {
   return math.pow(10, decade + 2).toDouble();
 }
 
+const double _kChartAspect = 0.2;
+const double _kChartMaxHeight = 360;
+
+/// Hauteur d'un grand graphique selon la largeur qu'on lui donne : [base] sur
+/// téléphone, puis un cinquième de la largeur, plafonné. À 1800 px de large,
+/// 172 px de haut écrasaient la courbe en une bande plate.
+double chartHeightFor(double width, {required double base}) =>
+    math.max(base, math.min(width * _kChartAspect, _kChartMaxHeight));
+
 /// Date d'entête de tooltip selon la granularité.
 String chartTooltipDate(AppLocalizations l10n, DateTime t, TimeUnit unit) =>
     switch (unit) {

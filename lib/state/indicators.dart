@@ -163,10 +163,11 @@ final indicatorDataProvider = FutureProvider.autoDispose
     cacheFor(ref, kStatsCacheTtl);
     final (site, w, indicator) = key;
     final gate = ref.watch(fetchGateProvider);
+    final urgent = ref.read(fetchFocusProvider).isFocused(site);
 
     Future<List<SeriesPoint>> count(EventQuery q) async {
       final p = await analyticsProviderFor(ref, site);
-      return gate.run(() => p.eventCountSeries(site, w, q));
+      return gate.run(() => p.eventCountSeries(site, w, q), urgent: urgent);
     }
 
     switch (indicator) {
@@ -179,15 +180,18 @@ final indicatorDataProvider = FutureProvider.autoDispose
         return ratioOf(num, den, gapsWhenEmpty: gapsWhenEmpty);
       case FunnelIndicator():
         final p = await analyticsProviderFor(ref, site);
-        return FunnelData(await gate.run(() => p.funnel(site, w, indicator)));
+        return FunnelData(
+            await gate.run(() => p.funnel(site, w, indicator), urgent: urgent));
       case BreakdownIndicator(:final event, :final property, :final overTime):
         final p = await analyticsProviderFor(ref, site);
-        final rows = await gate.run(() => p.propertyValues(site, w, event, property));
+        final rows = await gate.run(
+            () => p.propertyValues(site, w, event, property), urgent: urgent);
         final total = rows.fold<int>(0, (a, r) => a + r.value);
         if (!overTime) return BreakdownData(rows, total);
         // Le type fixe la forme du filtre `epf` : texte par défaut si le
         // fournisseur ne sait pas lister les propriétés.
-        final props = await gate.run(() => p.eventProperties(site, w, event));
+        final props = await gate.run(
+            () => p.eventProperties(site, w, event), urgent: urgent);
         final type = props
             .firstWhere((x) => x.name == property,
                 orElse: () => EventProperty(property, PropertyType.string))
@@ -204,9 +208,9 @@ final indicatorDataProvider = FutureProvider.autoDispose
         ]);
         return BreakdownData(rows, total, series);
       case ExternalIndicator():
-        return _externalData(ref, site, w, indicator);
+        return _externalData(ref, site, w, indicator, urgent: urgent);
       case SitesIndicator(:final lines):
-        return _sitesData(ref, w, lines);
+        return _sitesData(ref, w, lines, urgent: urgent);
     }
   },
 );
@@ -217,8 +221,9 @@ final indicatorDataProvider = FutureProvider.autoDispose
 Future<IndicatorData> _sitesData(
   Ref ref,
   DateWindow w,
-  List<SiteLine> lines,
-) async {
+  List<SiteLine> lines, {
+  required bool urgent,
+}) async {
   final gate = ref.read(fetchGateProvider);
   final requests = <(SiteRef, String?), Future<SiteVisitors>>{};
   Future<SiteVisitors> fetch(SiteRef s, String? referrer) =>
@@ -226,7 +231,8 @@ Future<IndicatorData> _sitesData(
         // Le fournisseur ne lit que l'id et le compte du site.
         final site = Site(id: s.siteId, accountId: s.accountId, name: '', domain: '');
         final p = await analyticsProviderFor(ref, site);
-        return gate.run(() => p.visitors(site, w, referrer: referrer));
+        return gate.run(() => p.visitors(site, w, referrer: referrer),
+            urgent: urgent);
       });
 
   final values = await Future.wait([
@@ -248,8 +254,9 @@ Future<IndicatorData> _externalData(
   Ref ref,
   Site site,
   DateWindow w,
-  ExternalIndicator indicator,
-) async {
+  ExternalIndicator indicator, {
+  required bool urgent,
+}) async {
   final api = await metricsApiFor(ref, site);
   final tz = await deviceTimezone();
   // Le serveur reste la source de vérité du délai et des familles. Catalogue en
@@ -271,7 +278,8 @@ Future<IndicatorData> _externalData(
   final range = metricsRangeFor(w, delayDays: delay, hourly: hourly);
   final gate = ref.read(fetchGateProvider);
   final series =
-      (await gate.run(() => api.series(ids: [id], range: range, tz: tz)))[id];
+      (await gate.run(() => api.series(ids: [id], range: range, tz: tz),
+          urgent: urgent))[id];
   // ⚠️ `now` est lu ici, jamais dans une clé de `family` (cf. « Chargement
   // infini »).
   return externalDataOf(

@@ -46,7 +46,16 @@ class MetricSectionGrid extends StatelessWidget {
   /// chiffres à côté d'un chemin.
   static const double _minCard = 290;
   static const double _gutter = 14;
-  static const int _maxColumns = 3;
+
+  /// 1, 2 ou 4 colonnes, jamais 3 : les quatre sections y laissaient la
+  /// dernière seule sous la première.
+  @visibleForTesting
+  static int columnsFor(double width) {
+    final fit = ((width + _gutter) / (_minCard + _gutter)).floor();
+    final sections = MetricSection.values.length;
+    if (fit >= sections) return sections;
+    return fit >= 2 ? 2 : 1;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,9 +65,7 @@ class MetricSectionGrid extends StatelessWidget {
     // seuil du mode bureau fait apparaître une barre latérale de 320 px.
     return LayoutBuilder(
       builder: (context, constraints) {
-        final columns = ((constraints.maxWidth + _gutter) / (_minCard + _gutter))
-            .floor()
-            .clamp(1, _maxColumns);
+        final columns = columnsFor(constraints.maxWidth);
 
         Widget card(MetricSection s) => MetricSectionCard(
               key: ValueKey(s),
