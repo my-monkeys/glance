@@ -20,6 +20,7 @@ import '../../theme/motion.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
 import '../dashboards/indicators_tab.dart';
+import '../widgets/chart_util.dart';
 import '../widgets/custom_range_picker.dart';
 import '../widgets/common.dart';
 import '../widgets/day_nav.dart';
@@ -344,10 +345,11 @@ class _DetailBody extends ConsumerWidget {
                 ],
               ),
               const SizedBox(height: 14),
-              GlanceChart(
+              LayoutBuilder(
+                builder: (context, c) => GlanceChart(
                 series: series,
                 unit: window.unit,
-                height: 172,
+                height: chartHeightFor(c.maxWidth, base: 172),
                 showPageviews: true,
                 visitorsTotal: s.visitors,
                 pageviewsTotal: s.pageviews,
@@ -361,6 +363,7 @@ class _DetailBody extends ConsumerWidget {
                 style: ref.watch(settingsProvider.select((s) => s.chartStyle)),
                 onToggle: (k) =>
                     ref.read(settingsProvider.notifier).toggleSeries(k),
+                ),
               ),
             ],
           ),
@@ -660,11 +663,13 @@ class _EventsTabState extends ConsumerState<_EventsTab> {
                 ],
               ),
               const SizedBox(height: 16),
-              EventsChart(
-                series: visible,
-                colors: colors,
-                unit: data.unit,
-                height: 200,
+              LayoutBuilder(
+                builder: (context, c) => EventsChart(
+                  series: visible,
+                  colors: colors,
+                  unit: data.unit,
+                  height: chartHeightFor(c.maxWidth, base: 200),
+                ),
               ),
             ],
           ),

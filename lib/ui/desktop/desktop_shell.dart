@@ -23,6 +23,7 @@ import '../detail/detail_screen.dart';
 import '../root_scaffold.dart';
 import '../settings/settings_screen.dart';
 import '../settings/workspaces_screen.dart';
+import '../widgets/chart_util.dart';
 import '../widgets/custom_range_picker.dart';
 import '../widgets/common.dart';
 import '../widgets/glance_chart.dart';
@@ -39,11 +40,11 @@ const double kDesktopBreakpoint = 860;
 
 const double _sidebarWidth = 320;
 
-/// Assez large pour trois colonnes de sections de données. À 900 px, un écran
-/// large laissait une colonne étroite entre deux grands vides (retour d'un
-/// testeur sur un 3440 px, 2026-11-07) ; sans plafond, un graphique de 3000 px
-/// ne se lit plus.
-const double _centerMaxWidth = 1400;
+/// Assez large pour les quatre sections de données sur une ligne, avec de la
+/// marge. À 900 px, un écran large laissait une colonne étroite entre deux
+/// grands vides (retour d'un testeur sur un 3440 px, 2026-11-07) ; sans
+/// plafond, un graphique de 3000 px ne se lit plus.
+const double _centerMaxWidth = 1800;
 
 /// Une liste de réglages étirée sur toute la largeur se lit mal.
 const double _settingsMaxWidth = 900;
@@ -759,10 +760,11 @@ class _OverviewState extends ConsumerState<_Overview> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  GlanceChart(
+                  LayoutBuilder(
+                    builder: (context, c) => GlanceChart(
                     series: displaySeries(data.totalSeries, window),
                     unit: window.unit,
-                    height: 220,
+                    height: chartHeightFor(c.maxWidth, base: 220),
                     showPageviews: true,
                     visitorsTotal: data.totalVisitors,
                     pageviewsTotal: data.totalPageviews,
@@ -782,6 +784,7 @@ class _OverviewState extends ConsumerState<_Overview> {
                         .watch(settingsProvider.select((s) => s.chartStyle)),
                     onToggle: (k) =>
                         ref.read(settingsProvider.notifier).toggleSeries(k),
+                    ),
                   ),
                 ],
               ),

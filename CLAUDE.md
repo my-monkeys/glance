@@ -104,12 +104,19 @@ découpage et les libellés d'Umami, pour qu'on retrouve son vocabulaire.
 - **Le rafraîchissement n'invalide que les 4 clés affichées** — `ref.invalidate` sur
   la famille entière relancerait des dizaines de requêtes par tick.
 - Grille : `MetricSectionGrid` répartit en colonnes-seaux (`LayoutBuilder` +
-  `Row` de `Column`), 1 à 3 colonnes selon `constraints.maxWidth` — **jamais**
+  `Row` de `Column`), selon `constraints.maxWidth` — **jamais**
   `MediaQuery.size` : le panneau central du bureau est plus étroit que la fenêtre,
   et franchir `kDesktopBreakpoint` fait apparaître 320 px de barre latérale, donc
   *élargir* la fenêtre peut *réduire* la place. Une `GridView` imposerait à chaque
   rangée la hauteur de sa plus haute carte ; ici `MetricBars.reserveRows` garde
   toutes les cartes à la même hauteur.
+- **1, 2 ou 4 colonnes, jamais 3** (`MetricSectionGrid.columnsFor`, testé) : à
+  trois, la 4ᵉ section restait seule sous la première. Les quatre tiennent sur
+  une ligne dès ~1200 px, donc sur un grand écran : le panneau central du bureau
+  va jusqu'à **1800 px** (`_centerMaxWidth`, réglages à 900). Les grands
+  graphiques (détail, événements, aperçu du bureau) prennent un cinquième de leur
+  largeur en hauteur, entre leur hauteur de téléphone et 360 px
+  (`chartHeightFor`).
 - **Pourcentage = part de `summary.visitors`**, jamais la somme des lignes reçues
   (qui dépend du nombre de lignes demandées : en afficher une de plus changerait
   tous les pourcentages). Vérifié sur l'instance : toutes les dimensions Umami
