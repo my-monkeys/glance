@@ -54,9 +54,14 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
   SiteStats? _lastStats;
   DateWindow? _lastStatsWindow;
 
+  /// Gardé en champ : `ref` n'est plus utilisable dans [dispose].
+  late final FetchFocus _focus;
+
   @override
   void initState() {
     super.initState();
+    // Avant le premier build : les requêtes qu'il lance passent déjà devant.
+    _focus = ref.read(fetchFocusProvider)..site = widget.site;
     final secs = ref.read(settingsProvider).refreshSeconds;
     _timer = Timer.periodic(Duration(seconds: secs), (_) {
       if (!mounted) return;
@@ -101,6 +106,8 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
   @override
   void dispose() {
     _timer?.cancel();
+    // Entre deux sites, le nouveau écran s'ouvre avant que l'ancien parte.
+    if (_focus.site == widget.site) _focus.site = null;
     super.dispose();
   }
 
