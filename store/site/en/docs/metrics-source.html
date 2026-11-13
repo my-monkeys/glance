@@ -58,6 +58,8 @@
 <li class="sub"><a href="#retard">Late data</a></li>
 <li class="sub"><a href="#segments">Segments</a></li>
 <li class="sub"><a href="#heures">Hours</a></li>
+<li class="sub"><a href="#semaines">Weeks</a></li>
+<li class="sub"><a href="#agregation">Aggregation</a></li>
 <li class="sub"><a href="#limites">Limits</a></li>
 <li><a href="#exemples">Examples</a></li>
 <li><a href="#serveur">Minimal server</a></li>
@@ -78,6 +80,8 @@
 <li class="sub"><a href="#retard">Late data</a></li>
 <li class="sub"><a href="#segments">Segments</a></li>
 <li class="sub"><a href="#heures">Hours</a></li>
+<li class="sub"><a href="#semaines">Weeks</a></li>
+<li class="sub"><a href="#agregation">Aggregation</a></li>
 <li class="sub"><a href="#limites">Limits</a></li>
 <li><a href="#exemples">Examples</a></li>
 <li><a href="#serveur">Minimal server</a></li>
@@ -150,12 +154,13 @@ Accept: application/json</code></pre>
 <tr><td><code>libelle</code></td><td data-l="Type">text</td><td data-l="Status"><span class="req">required</span></td><td data-l="Role">Name shown on the card and in the list.</td></tr>
 <tr><td><code>description</code></td><td data-l="Type">text</td><td data-l="Status"><span class="opt">optional</span></td><td data-l="Role">Help sentence shown in the picker.</td></tr>
 <tr><td><code>unite</code></td><td data-l="Type">text</td><td data-l="Status"><span class="req">recommended</span></td><td data-l="Role"><code>pourcentage</code> (values from 0 to 100) or <code>nombre</code> (a count). Missing or unknown: treated as <code>nombre</code>.</td></tr>
-<tr><td><code>granularites</code></td><td data-l="Type">array of text</td><td data-l="Status"><span class="opt">optional</span></td><td data-l="Role">Only the value <code>"heure"</code> (hour) is read: it allows hourly points (see <a href="#heures">Hours</a>). <code>jour</code> (day) and <code>mois</code> (month) are requested according to the displayed period, announced or not.</td></tr>
+<tr><td><code>granularites</code></td><td data-l="Type">array of text</td><td data-l="Status"><span class="opt">optional</span></td><td data-l="Role"><code>"heure"</code> (hour) allows hourly points (see <a href="#heures">Hours</a>). <code>["semaine"]</code> (week) alone: a weekly-only indicator (see <a href="#semaines">Weeks</a>). Otherwise <code>jour</code> (day) and <code>mois</code> (month) are requested according to the displayed period, announced or not.</td></tr>
 <tr><td><code>delai_jours</code></td><td data-l="Type">integer</td><td data-l="Status"><span class="opt">optional</span></td><td data-l="Role">Days to wait after a day D before its cohort can be measured (D1: <code>1</code>, D7: <code>7</code>). Missing or <code>0</code> for a count. See <a href="#delais">Delays</a>.</td></tr>
 <tr><td><code>famille</code></td><td data-l="Type">text</td><td data-l="Status"><span class="opt">optional</span></td><td data-l="Role">Identifier of a group of indicators that differ only by their delay. See <a href="#familles">Families</a>.</td></tr>
 <tr><td><code>libelle_famille</code></td><td data-l="Type">text</td><td data-l="Status"><span class="opt">optional</span></td><td data-l="Role">Name of the family (taken from the first member that has one; otherwise <code>famille</code>).</td></tr>
 <tr><td><code>donnees_jusqu_au</code></td><td data-l="Type">date</td><td data-l="Status"><span class="opt">optional</span></td><td data-l="Role">Last day published by the source, <code>YYYY-MM-DD</code> (any other format is ignored). See <a href="#retard">Late data</a>.</td></tr>
-<tr><td><code>segments</code></td><td data-l="Type">array</td><td data-l="Status"><span class="opt">optional</span></td><td data-l="Role">Splits a <code>nombre</code> into parts. Each entry: <code>id</code> (required), <code>libelle</code> (default: the <code>id</code>), <code>estime</code> (boolean, true if the part is only an estimate: “· estimé” is appended to its label). An entry without <code>id</code> is ignored. See <a href="#segments">Segments</a>.</td></tr>
+<tr><td><code>segments</code></td><td data-l="Type">array</td><td data-l="Status"><span class="opt">optional</span></td><td data-l="Role">Splits a <code>nombre</code> into parts. Each entry: <code>id</code> (required), <code>libelle</code> (default: the <code>id</code>), <code>estime</code> (boolean, true if the part is only an estimate: “· estimé” is appended to its label). An entry without <code>id</code> is ignored. Each entry also accepts <code>couleur</code> and <code>couleur_sombre</code> (colour, dark colour). See <a href="#segments">Segments</a>.</td></tr>
+<tr><td><code>agregation</code></td><td data-l="Type">text</td><td data-l="Status"><span class="opt">optional</span></td><td data-l="Role">For a <code>nombre</code>: <code>"somme"</code> (sum, the default) or <code>"dernier"</code> (last). Any other value means <code>"somme"</code>. See <a href="#agregation">Aggregation</a>.</td></tr>
 </tbody></table></div>
 
 <h3 id="series">GET series</h3>
@@ -269,6 +274,7 @@ Authorization: Bearer &lt;your token&gt;</code></pre>
 <li><code>totaux</code> gives the number of <strong>distinct people over the whole range</strong> for each part. The bars are computed from it, <strong>never from the sum of the points</strong>: a player active on two days would count twice.</li>
 <li>The sum of the parts may exceed the total, if one person goes through two platforms: the bar is therefore read as a share of Σ <code>totaux</code>.</li>
 <li>As long as no part has a value, the card stays a plain counter. Segments do not apply to a <code>pourcentage</code>.</li>
+<li><code>couleur</code> and <code>couleur_sombre</code> (optional, <code>#RRGGBB</code>) set a part's colour: the curve, the legend and the bar all use it. In the dark theme Glance uses <code>couleur_sombre</code> if present, otherwise <code>couleur</code>. Any other form is ignored, and the part falls back to Glance's palette.</li>
 </ul>
 
 <h3 id="heures">Hours (<code>granularites</code>)</h3>
@@ -279,6 +285,25 @@ Authorization: Bearer &lt;your token&gt;</code></pre>
 <li>it has no delay (<code>delai_jours</code> missing or 0).</li>
 </ul>
 <p>Then: <code>de</code> and <code>a</code> remain <strong>days</strong> (the source returns whole days, Glance keeps only the hours of the window); <code>t</code> is <code>YYYY-MM-DDTHH:00</code> in local time, one point per hour, empty ones included (23 or 25 points on daylight-saving days); 30 days at most, beyond that answer <code>400</code> <code>plage_trop_longue</code>. The <code>totaux</code> cover the whole days.</p>
+
+<h3 id="semaines">Weeks (<code>"semaine"</code>)</h3>
+<p>An indicator whose <code>granularites</code> contains <code>"semaine"</code> without <code>"jour"</code> or <code>"mois"</code> exists only in weeks (players per league, for example). Glance then requests <code>granularite=semaine</code>, whatever the displayed period:</p>
+<ul>
+<li><code>de</code> and <code>a</code> remain <strong>days</strong>. Answer with the whole weeks that touch the range, empty ones included.</li>
+<li><code>t</code> is the <strong>Monday</strong> of the week, <code>YYYY-MM-DD</code>; <code>valeur</code> is the week's total.</li>
+<li>The week that contains today is partial: the card labels it “ongoing”.</li>
+<li>For any other granularity, answer <code>400</code>: Glance never asks for one. An indicator with a delay (<code>delai_jours</code>) is not weekly.</li>
+<li>The axis and tooltip read “Week of Nov 9”.</li>
+</ul>
+
+<h3 id="agregation">Aggregation (<code>agregation</code>)</h3>
+<p>By default a <code>nombre</code>'s total is the <strong>sum</strong> of its buckets: a flow (sign-ups, games). A level (players in each league) does not add up: announce <code>"dernier"</code> (last).</p>
+<ul>
+<li>The total is then the value of the <strong>last published bucket</strong> of the window, never the sum.</li>
+<li>With <code>segments</code>, the parts are those of that same bucket: <code>totaux</code> is ignored.</li>
+<li>The card names the bucket under the figure (“Week of Nov 9 · ongoing”).</li>
+<li>A <code>pourcentage</code> ignores this field: the overall rate remains Σ numerator ÷ Σ denominator.</li>
+</ul>
 
 <h3 id="limites">Limits and good practice</h3>
 <ul>

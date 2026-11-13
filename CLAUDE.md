@@ -576,6 +576,24 @@ dans le code.
     Tant qu'aucune part n'a de valeur (`hasSegmentData`), la carte reste un
     compteur simple. Une carte découpée démarre à 11 rangées dans la grille
     (la hauteur se décide sur la donnée reçue, pas sur l'indicateur).
+- **Semaines (`granularites: ["semaine"]`, sans `jour` ni `mois`)** :
+  `MetricDef.weeklyOnly`. Glance demande `granularite=semaine` (prioritaire sur
+  heure/jour/mois), `de`/`a` restent des jours, et `externalDataOf(weekly: true)`
+  range chaque point au **lundi** de son `t` (un bucket par lundi, calendaire :
+  jamais `Duration(days: 7)`, un changement d'heure ferait tomber 23 h). Pas de
+  `TimeUnit.week` : l'enum a ~17 switchs (Umami, Plausible, prévision) où une
+  semaine n'a aucun sens, et la semaine n'existe que pour ces métriques. Le
+  résultat porte `weekly: true` + `unit: day` (ses points sont des dates) ; axe
+  « 5 oct. », infobulle « Semaine du 9 nov. · en cours » (`now` lu au tracé, pas
+  dans une clé de provider). Une semaine qui n'a pas commencé n'est pas un bucket.
+- **Agrégation (`agregation: "dernier"`)** : un `nombre` qui est un niveau (joueurs
+  par ligue), pas un flux, ne s'additionne pas. `total` = valeur du **dernier
+  bucket publié**, les parts = celles de ce bucket (`totaux` ignoré), et
+  `CounterData.latest` nomme ce bucket sous le chiffre (« · en cours » s'il contient
+  maintenant). Absent ou inconnu → `somme`. Un taux l'ignore : Σnum/Σden reste juste.
+- **Couleurs de segments (`couleur`, `couleur_sombre`)** : `#RRGGBB` seulement, toute
+  autre forme → null. Courbe, légende et barre d'une part partagent la même couleur
+  (`darkColor ?? color` en thème sombre), à défaut la palette (`eventColorAt(i + 1)`).
 - ⚠️ Le serveur refuse plus de 400 jours : `metricsRangeFor` ramène `de` à
   `a − 399 jours` (« Tout », période perso). Les buckets d'avant la borne restent
   vides : trou pour un %, 0 pour un nombre.

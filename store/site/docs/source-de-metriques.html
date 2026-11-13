@@ -58,6 +58,8 @@
 <li class="sub"><a href="#retard">Données en retard</a></li>
 <li class="sub"><a href="#segments">Segments</a></li>
 <li class="sub"><a href="#heures">Heures</a></li>
+<li class="sub"><a href="#semaines">Semaines</a></li>
+<li class="sub"><a href="#agregation">Agrégation</a></li>
 <li class="sub"><a href="#limites">Limites</a></li>
 <li><a href="#exemples">Exemples</a></li>
 <li><a href="#serveur">Serveur minimal</a></li>
@@ -78,6 +80,8 @@
 <li class="sub"><a href="#retard">Données en retard</a></li>
 <li class="sub"><a href="#segments">Segments</a></li>
 <li class="sub"><a href="#heures">Heures</a></li>
+<li class="sub"><a href="#semaines">Semaines</a></li>
+<li class="sub"><a href="#agregation">Agrégation</a></li>
 <li class="sub"><a href="#limites">Limites</a></li>
 <li><a href="#exemples">Exemples</a></li>
 <li><a href="#serveur">Serveur minimal</a></li>
@@ -149,12 +153,13 @@ Accept: application/json</code></pre>
 <tr><td><code>libelle</code></td><td data-l="Type">texte</td><td data-l="Statut"><span class="req">requis</span></td><td data-l="Rôle">Nom affiché sur la carte et dans la liste.</td></tr>
 <tr><td><code>description</code></td><td data-l="Type">texte</td><td data-l="Statut"><span class="opt">facultatif</span></td><td data-l="Rôle">Phrase d'aide affichée dans la liste de choix.</td></tr>
 <tr><td><code>unite</code></td><td data-l="Type">texte</td><td data-l="Statut"><span class="req">recommandé</span></td><td data-l="Rôle"><code>pourcentage</code> (valeurs de 0 à 100) ou <code>nombre</code>. Absente ou inconnue : traitée comme <code>nombre</code>.</td></tr>
-<tr><td><code>granularites</code></td><td data-l="Type">tableau de textes</td><td data-l="Statut"><span class="opt">facultatif</span></td><td data-l="Rôle">Seule la valeur <code>"heure"</code> est lue : elle autorise les points horaires (voir <a href="#heures">Heures</a>). <code>jour</code> et <code>mois</code> sont demandés selon la période affichée, annoncés ou non.</td></tr>
+<tr><td><code>granularites</code></td><td data-l="Type">tableau de textes</td><td data-l="Statut"><span class="opt">facultatif</span></td><td data-l="Rôle"><code>"heure"</code> autorise les points horaires (voir <a href="#heures">Heures</a>). <code>["semaine"]</code> seul : un indicateur hebdomadaire (voir <a href="#semaines">Semaines</a>). Sinon <code>jour</code> et <code>mois</code> sont demandés selon la période affichée, annoncés ou non.</td></tr>
 <tr><td><code>delai_jours</code></td><td data-l="Type">entier</td><td data-l="Statut"><span class="opt">facultatif</span></td><td data-l="Rôle">Jours à attendre après un jour J pour que sa cohorte soit mesurable (J1 : <code>1</code>, J7 : <code>7</code>). Absent ou <code>0</code> pour un nombre. Voir <a href="#delais">Délais</a>.</td></tr>
 <tr><td><code>famille</code></td><td data-l="Type">texte</td><td data-l="Statut"><span class="opt">facultatif</span></td><td data-l="Rôle">Identifiant d'un groupe d'indicateurs qui ne diffèrent que par leur délai. Voir <a href="#familles">Familles</a>.</td></tr>
 <tr><td><code>libelle_famille</code></td><td data-l="Type">texte</td><td data-l="Statut"><span class="opt">facultatif</span></td><td data-l="Rôle">Nom de la famille (celui du premier membre qui en porte un ; sinon <code>famille</code>).</td></tr>
 <tr><td><code>donnees_jusqu_au</code></td><td data-l="Type">date</td><td data-l="Statut"><span class="opt">facultatif</span></td><td data-l="Rôle">Dernier jour publié par la source, <code>AAAA-MM-JJ</code> (tout autre format est ignoré). Voir <a href="#retard">Données en retard</a>.</td></tr>
-<tr><td><code>segments</code></td><td data-l="Type">tableau</td><td data-l="Statut"><span class="opt">facultatif</span></td><td data-l="Rôle">Découpage d'un <code>nombre</code> en parts. Chaque entrée : <code>id</code> (requis), <code>libelle</code> (défaut : l'<code>id</code>), <code>estime</code> (booléen, vrai si la part n'est qu'une estimation : « · estimé » s'ajoute au libellé). Une entrée sans <code>id</code> est ignorée. Voir <a href="#segments">Segments</a>.</td></tr>
+<tr><td><code>segments</code></td><td data-l="Type">tableau</td><td data-l="Statut"><span class="opt">facultatif</span></td><td data-l="Rôle">Découpage d'un <code>nombre</code> en parts. Chaque entrée : <code>id</code> (requis), <code>libelle</code> (défaut : l'<code>id</code>), <code>estime</code> (booléen, vrai si la part n'est qu'une estimation : « · estimé » s'ajoute au libellé). Une entrée sans <code>id</code> est ignorée. Chaque entrée accepte aussi <code>couleur</code> et <code>couleur_sombre</code>. Voir <a href="#segments">Segments</a>.</td></tr>
+<tr><td><code>agregation</code></td><td data-l="Type">texte</td><td data-l="Statut"><span class="opt">facultatif</span></td><td data-l="Rôle">Pour un <code>nombre</code> : <code>"somme"</code> (défaut) ou <code>"dernier"</code>. Toute autre valeur vaut <code>"somme"</code>. Voir <a href="#agregation">Agrégation</a>.</td></tr>
 </tbody></table></div>
 
 <h3 id="series">GET series</h3>
@@ -268,6 +273,7 @@ Authorization: Bearer &lt;votre jeton&gt;</code></pre>
 <li><code>totaux</code> donne le nombre de <strong>distincts sur toute la plage</strong> pour chaque part. Les barres se calculent dessus, <strong>jamais sur la somme des points</strong> : un joueur actif deux jours compterait deux fois.</li>
 <li>La somme des parts peut dépasser le total, si une même personne passe par deux plateformes : la barre se lit donc en part de Σ <code>totaux</code>.</li>
 <li>Tant qu'aucune part n'a de valeur, la carte reste un compteur simple. Les segments ne s'appliquent pas à un <code>pourcentage</code>.</li>
+<li><code>couleur</code> et <code>couleur_sombre</code> (facultatifs, <code>#RRGGBB</code>) fixent la couleur d'une part : la courbe, la légende et la barre la reprennent. En thème sombre, Glance prend <code>couleur_sombre</code> si elle existe, sinon <code>couleur</code>. Toute autre forme est ignorée, et la part reprend la palette de Glance.</li>
 </ul>
 
 <h3 id="heures">Heures (<code>granularites</code>)</h3>
@@ -278,6 +284,25 @@ Authorization: Bearer &lt;votre jeton&gt;</code></pre>
 <li>il n'a pas de délai (<code>delai_jours</code> absent ou 0).</li>
 </ul>
 <p>Alors : <code>de</code> et <code>a</code> restent des <strong>jours</strong> (la source rend des journées entières, Glance ne garde que les heures de la fenêtre) ; <code>t</code> vaut <code>AAAA-MM-JJTHH:00</code> en heure locale, un point par heure, vides compris (23 ou 25 points les jours de changement d'heure) ; 30 jours au plus, au-delà répondez <code>400</code> <code>plage_trop_longue</code>. Les <code>totaux</code> portent sur les journées entières.</p>
+
+<h3 id="semaines">Semaines (<code>"semaine"</code>)</h3>
+<p>Un indicateur dont <code>granularites</code> contient <code>"semaine"</code> sans <code>"jour"</code> ni <code>"mois"</code> n'existe qu'en semaines (des joueurs par ligue, par exemple). Glance demande alors <code>granularite=semaine</code>, quelle que soit la période affichée :</p>
+<ul>
+<li><code>de</code> et <code>a</code> restent des <strong>jours</strong>. Répondez par les semaines entières qui touchent la plage, vides comprises.</li>
+<li><code>t</code> est le <strong>lundi</strong> de la semaine, <code>AAAA-MM-JJ</code> ; <code>valeur</code> est le total de la semaine.</li>
+<li>La semaine qui contient aujourd'hui est partielle : la carte l'annonce « en cours ».</li>
+<li>Pour une autre granularité, répondez <code>400</code> : Glance n'en demande pas. Un indicateur à délai (<code>delai_jours</code>) n'est pas hebdomadaire.</li>
+<li>L'axe et l'infobulle disent « Semaine du 9 nov. ».</li>
+</ul>
+
+<h3 id="agregation">Agrégation (<code>agregation</code>)</h3>
+<p>Par défaut, le total d'un <code>nombre</code> est la <strong>somme</strong> des buckets : c'est un flux (inscriptions, parties). Un niveau (joueurs dans chaque ligue) ne s'additionne pas : annoncez <code>"dernier"</code>.</p>
+<ul>
+<li>Le total est alors la valeur du <strong>dernier bucket publié</strong> de la fenêtre, jamais la somme.</li>
+<li>Avec des <code>segments</code>, les parts sont celles de ce même bucket : <code>totaux</code> est ignoré.</li>
+<li>La carte nomme le bucket sous le chiffre (« Semaine du 9 nov. · en cours »).</li>
+<li>Un <code>pourcentage</code> ignore ce champ : le taux global reste Σ numérateur ÷ Σ dénominateur.</li>
+</ul>
 
 <h3 id="limites">Limites et bonnes pratiques</h3>
 <ul>
