@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import 'dart:ui' show Color;
 
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -114,6 +115,39 @@ void main() {
       });
     });
 
+    test('catalogue : weeklyOnly, agregation, couleurs des parts', () {
+      MetricDef def(Map<String, dynamic> extra) =>
+          MetricDef.fromJson({'id': 'x', 'libelle': 'X', ...extra});
+
+      expect(def({'granularites': ['semaine']}).weeklyOnly, isTrue);
+      expect(def({'granularites': ['semaine', 'jour']}).weeklyOnly, isFalse);
+      expect(def({'granularites': ['mois', 'semaine']}).weeklyOnly, isFalse);
+      expect(def({'granularites': ['jour']}).weeklyOnly, isFalse);
+      expect(def({}).weeklyOnly, isFalse);
+
+      expect(def({'agregation': 'dernier'}).aggregation, MetricAggregation.last);
+      expect(def({'agregation': 'somme'}).aggregation, MetricAggregation.sum);
+      expect(def({}).aggregation, MetricAggregation.sum);
+      expect(def({'agregation': 'moyenne'}).aggregation, MetricAggregation.sum);
+
+      final s = def({
+        'segments': [
+          {'id': 'a', 'libelle': 'A', 'couleur': '#B45309'},
+          {'id': 'l', 'libelle': 'L', 'couleur': '#1E3241', 'couleur_sombre': '#9FB3C8'},
+          {'id': 'm', 'libelle': 'M', 'couleur': 'rouge', 'couleur_sombre': '#12'},
+          {'id': 'n', 'libelle': 'N', 'couleur': 42},
+          {'id': 'o', 'libelle': 'O'},
+        ],
+      }).segments;
+      expect(s[0].couleur, const Color(0xFFB45309));
+      expect(s[0].couleurSombre, isNull);
+      expect(s[1].couleurSombre, const Color(0xFF9FB3C8));
+      for (final bad in s.skip(2)) {
+        expect(bad.couleur, isNull);
+        expect(bad.couleurSombre, isNull);
+      }
+    });
+
     test('segments : parts du catalogue, valeurs par point, totaux', () async {
       final def = MetricDef.fromJson({
         'id': 'joueurs_actifs',
@@ -226,6 +260,13 @@ void main() {
         delayDays: 7,
       );
       expect(r, (de: '2026-10-08', a: '2026-10-14', granularite: 'jour'));
+    });
+
+    test('semaine : granularité prioritaire, de/a restent des jours', () {
+      final w = DateWindow(DateTime(2026, 10, 7), DateTime(2026, 11, 14), TimeUnit.month);
+      expect(metricsRangeFor(w, weekly: true),
+          (de: '2026-10-07', a: '2026-11-13', granularite: 'semaine'));
+      expect(metricsRangeFor(w, weekly: true, hourly: true).granularite, 'semaine');
     });
 
     test('fenêtre horaire qui se termine pile à minuit → la veille', () {

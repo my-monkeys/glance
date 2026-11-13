@@ -37,12 +37,16 @@ class IndicatorChart extends StatelessWidget {
     super.key,
     required this.points,
     required this.unit,
+    this.weekly = false,
     this.percent = false,
     this.height = 130,
   });
 
   final List<IndicatorPoint> points;
   final TimeUnit unit;
+
+  /// Un point par semaine (le lundi) : axe et infobulle en « semaine du ».
+  final bool weekly;
 
   /// Valeurs en % (0..100) : axe et tooltip suffixés.
   final bool percent;
@@ -51,7 +55,7 @@ class IndicatorChart extends StatelessWidget {
   /// « mar. 20 oct.\n », ou « 20 oct. · cohorte du 13 oct. · » en une ligne
   /// pour une métrique à délai.
   String _tooltipHead(AppLocalizations l10n, IndicatorPoint pt) => pt.cohort == null
-      ? '${chartTooltipDate(l10n, pt.t, unit)}\n'
+      ? '${chartTooltipDate(l10n, pt.t, unit, weekly: weekly)}\n'
       : '${l10n.dashboardsCohortTooltip(fmtDay(pt.t), fmtDay(pt.cohort!))} · ';
 
   String _fmt(double v) => percent ? fmtPct(v) : fmtInt(v);
@@ -137,7 +141,7 @@ class IndicatorChart extends StatelessWidget {
                   }
                   return Padding(
                     padding: const EdgeInsets.only(top: 8),
-                    child: Text(fmtAxis(context.l10n, points[i].t, unit),
+                    child: Text(fmtAxis(context.l10n, points[i].t, unit, weekly: weekly),
                         style: GT.mono(9.5, color: p.fg3)),
                   );
                 },

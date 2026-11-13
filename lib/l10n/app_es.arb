@@ -488,5 +488,29 @@
   "credEmailHint": "Correo + contraseña: Glance lista tus sitios automáticamente. Si no, déjalo en blanco e introduce un dominio abajo.",
   "credPasswordOptional": "Contraseña (opcional)",
   "credDomainFallback": "Dominio (si no hay correo ni contraseña)",
-  "credDomainPlaceholder": "tudominio.com"
+  "credDomainPlaceholder": "tudominio.com",
+  "chartWeekOf": "Semana del {date}",
+  "@chartWeekOf": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "chartWeekOfOngoing": "Semana del {date} · en curso",
+  "@chartWeekOfOngoing": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardsOngoing": "{date} · en curso",
+  "@dashboardsOngoing": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  }
 }

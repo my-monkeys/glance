@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'dart:ui' show Color;
+
 import 'package:flutter/foundation.dart';
 
 import 'workspace.dart';
@@ -54,10 +56,21 @@ enum MetricUnit {
 /// Une part d'un indicateur découpé (une plateforme : site, appli…).
 @immutable
 class MetricSegment {
-  const MetricSegment({required this.id, required this.libelle, this.estime = false});
+  const MetricSegment({
+    required this.id,
+    required this.libelle,
+    this.estime = false,
+    this.couleur,
+    this.couleurSombre,
+  });
 
   final String id;
   final String libelle;
+
+  /// Couleur voulue par la source (`couleur`, « #RRGGBB »), et sa variante
+  /// pour le thème sombre (`couleur_sombre`). Null = la palette de Glance.
+  final Color? couleur;
+  final Color? couleurSombre;
 
   /// La source ne fait qu'estimer cette part (joueurs comptés sans profil).
   final bool estime;
@@ -71,8 +84,28 @@ class MetricSegment {
       id: id,
       libelle: (j['libelle'] as String?) ?? id,
       estime: j['estime'] == true,
+      couleur: _hexColor(j['couleur']),
+      couleurSombre: _hexColor(j['couleur_sombre']),
     );
   }
+
+  /// « #RRGGBB » seulement ; toute autre forme est ignorée, jamais fatale.
+  static Color? _hexColor(Object? v) {
+    final m = RegExp(r'^#([0-9a-fA-F]{6})$').firstMatch('${v ?? ''}');
+    return m == null ? null : Color(0xFF000000 | int.parse(m[1]!, radix: 16));
+  }
+}
+
+/// Comment un `nombre` se résume sur une fenêtre : [sum] additionne les
+/// buckets (un flux : inscriptions), [last] prend le dernier (un niveau :
+/// joueurs par ligue).
+enum MetricAggregation {
+  sum,
+  last;
+
+  /// Absente ou inconnue → `sum`, le comportement d'avant ce champ.
+  static MetricAggregation fromApi(String? a) =>
+      a == 'dernier' ? last : sum;
 }
 
 /// Un indicateur du catalogue d'une source.
@@ -89,6 +122,7 @@ class MetricDef {
     this.libelleFamille,
     this.donneesJusquAu,
     this.segments = const [],
+    this.aggregation = MetricAggregation.sum,
   });
 
   final String id;
@@ -115,6 +149,16 @@ class MetricDef {
   /// Seul un `nombre` en a : chaque point porte alors sa valeur par part.
   final List<MetricSegment> segments;
 
+  /// `agregation` du catalogue, pour un `nombre`.
+  final MetricAggregation aggregation;
+
+  /// La source ne sait répondre qu'en semaines : Glance n'a pas de granularité
+  /// hebdomadaire (cf. `metricsRangeFor(weekly:)`).
+  bool get weeklyOnly =>
+      granularites.contains('semaine') &&
+      !granularites.contains('jour') &&
+      !granularites.contains('mois');
+
   factory MetricDef.fromJson(Map<String, dynamic> j) => MetricDef(
         id: j['id'] as String,
         libelle: j['libelle'] as String,
@@ -130,6 +174,7 @@ class MetricDef {
           for (final s in (j['segments'] as List?) ?? const [])
             ?MetricSegment.fromJson(s),
         ],
+        aggregation: MetricAggregation.fromApi(j['agregation'] as String?),
       );
 
   /// « 2026-10-18 » → minuit local ; tout autre format est ignoré.

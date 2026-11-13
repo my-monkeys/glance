@@ -1377,5 +1377,32 @@
   "credDomainPlaceholder": "mondomaine.fr",
   "@credDomainPlaceholder": {
     "description": "Exemple de nom de domaine"
+  },
+  "chartWeekOf": "Semaine du {date}",
+  "@chartWeekOf": {
+    "description": "Date d'un point d'une série hebdomadaire (axe, infobulle) ; date = le lundi, « 5 oct. »",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "chartWeekOfOngoing": "Semaine du {date} · en cours",
+  "@chartWeekOfOngoing": {
+    "description": "Idem pour la semaine qui contient aujourd'hui, encore partielle",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardsOngoing": "{date} · en cours",
+  "@dashboardsOngoing": {
+    "description": "Bucket (jour, mois) encore en cours, sous le chiffre d'un compteur qui montre le dernier bucket ; date = « 13 nov. » ou « novembre 2026 »",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
   }
 }

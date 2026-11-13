@@ -41,12 +41,16 @@ class EventsChart extends StatelessWidget {
     required this.series,
     required this.colors,
     required this.unit,
+    this.weekly = false,
     this.height = 200,
   });
 
   final List<EventSeries> series; // séries visibles
   final Map<String, Color> colors; // nom → couleur (stable)
   final TimeUnit unit;
+
+  /// Un point par semaine (le lundi) : axe et infobulle en « semaine du ».
+  final bool weekly;
   final double height;
 
   @override
@@ -124,7 +128,7 @@ class EventsChart extends StatelessWidget {
                   }
                   return Padding(
                     padding: const EdgeInsets.only(top: 8),
-                    child: Text(fmtAxis(context.l10n, times[i], unit),
+                    child: Text(fmtAxis(context.l10n, times[i], unit, weekly: weekly),
                         style: GT.mono(9.5, color: p.fg3)),
                   );
                 },
@@ -144,7 +148,7 @@ class EventsChart extends StatelessWidget {
                 final i = touched.isEmpty
                     ? 0
                     : touched.first.x.round().clamp(0, len - 1);
-                final date = chartTooltipDate(context.l10n, times[i], unit);
+                final date = chartTooltipDate(context.l10n, times[i], unit, weekly: weekly);
                 return [
                   for (var k = 0; k < touched.length; k++)
                     LineTooltipItem(

@@ -2,7 +2,9 @@ import 'dart:math' as math;
 
 import 'package:intl/intl.dart';
 
+import '../../core/format.dart';
 import '../../data/models/period.dart';
+import '../../data/providers/buckets.dart';
 import '../../l10n/l10n.dart';
 
 /// Paliers d'une décade, en dixièmes de la puissance de 10 : 1 · 1,2 · 1,6 · 2 ·
@@ -47,8 +49,22 @@ const double _kChartMaxHeight = 360;
 double chartHeightFor(double width, {required double base}) =>
     math.max(base, math.min(width * _kChartAspect, _kChartMaxHeight));
 
-/// Date d'entête de tooltip selon la granularité.
-String chartTooltipDate(AppLocalizations l10n, DateTime t, TimeUnit unit) =>
+/// « Semaine du 9 nov. », suivi de « · en cours » pour la semaine de [now].
+String chartWeekLabel(AppLocalizations l10n, DateTime monday, DateTime now) {
+  final day = fmtDay(monday);
+  return !now.isBefore(monday) && now.isBefore(advanceWeek(monday))
+      ? l10n.chartWeekOfOngoing(day)
+      : l10n.chartWeekOf(day);
+}
+
+/// Date d'entête de tooltip selon la granularité ; [weekly] : le lundi d'une
+/// semaine (`DateTime.now()` se lit ici, au tracé, jamais dans une clé de
+/// provider).
+String chartTooltipDate(AppLocalizations l10n, DateTime t, TimeUnit unit,
+        {bool weekly = false}) =>
+    weekly ? chartWeekLabel(l10n, t, DateTime.now()) : _tooltipDateUnit(l10n, t, unit);
+
+String _tooltipDateUnit(AppLocalizations l10n, DateTime t, TimeUnit unit) =>
     switch (unit) {
   TimeUnit.hour =>
     '${DateFormat.MMMd().format(t)} · ${l10n.chartHour(DateFormat('HH').format(t))}',

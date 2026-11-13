@@ -1768,4 +1768,19 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get credDomainPlaceholder => 'mondomaine.fr';
+
+  @override
+  String chartWeekOf(String date) {
+    return 'Semaine du $date';
+  }
+
+  @override
+  String chartWeekOfOngoing(String date) {
+    return 'Semaine du $date · en cours';
+  }
+
+  @override
+  String dashboardsOngoing(String date) {
+    return '$date · en cours';
+  }
 }

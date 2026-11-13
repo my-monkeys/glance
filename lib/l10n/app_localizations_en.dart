@@ -1751,4 +1751,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get credDomainPlaceholder => 'yourdomain.com';
+
+  @override
+  String chartWeekOf(String date) {
+    return 'Week of $date';
+  }
+
+  @override
+  String chartWeekOfOngoing(String date) {
+    return 'Week of $date · ongoing';
+  }
+
+  @override
+  String dashboardsOngoing(String date) {
+    return '$date · ongoing';
+  }
 }

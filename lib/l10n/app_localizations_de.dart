@@ -1777,4 +1777,19 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get credDomainPlaceholder => 'ihredomain.de';
+
+  @override
+  String chartWeekOf(String date) {
+    return 'Woche ab $date';
+  }
+
+  @override
+  String chartWeekOfOngoing(String date) {
+    return 'Woche ab $date · laufend';
+  }
+
+  @override
+  String dashboardsOngoing(String date) {
+    return '$date · laufend';
+  }
 }

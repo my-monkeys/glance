@@ -1,3 +1,5 @@
+import 'dart:ui' show Color;
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:glance/core/external_metrics.dart';
 import 'package:glance/data/models/indicator_result.dart';
@@ -419,6 +421,188 @@ void main() {
       ) as CounterData;
       expect(d.unpublished, isNull);
       expect(d.total, 6);
+    });
+  });
+
+  group('hebdomadaire', () {
+    // Les 6 semaines du 5 oct. au 9 nov. 2026 (GeoDaily) ; la dernière est en cours.
+    final mondays = [
+      DateTime(2026, 10, 5),
+      DateTime(2026, 10, 12),
+      DateTime(2026, 10, 19),
+      DateTime(2026, 10, 26), // passage à l'heure d'hiver le 25
+      DateTime(2026, 11, 2),
+      DateTime(2026, 11, 9),
+    ];
+    const totals = [170.0, 258.0, 360.0, 483.0, 519.0, 557.0];
+    const lastParts = {
+      'explorateur': 446.0,
+      'navigateur': 88.0,
+      'cartographe': 20.0,
+      'geographe': 1.0,
+      'globe_trotter': 1.0,
+      'legende': 1.0,
+    };
+    final points = [
+      for (final (i, t) in mondays.indexed)
+        MetricPoint(
+          t: t,
+          valeur: totals[i],
+          numerateur: 0,
+          denominateur: 0,
+          segments: i == 5 ? lastParts : {'explorateur': totals[i]},
+        ),
+    ];
+    final segments = [
+      for (final k in lastParts.keys) MetricSegment(id: k, libelle: k),
+    ];
+    // Un mercredi (7 oct.) jusqu'au lendemain de la semaine en cours.
+    final window = DateWindow(DateTime(2026, 10, 7), DateTime(2026, 11, 14), TimeUnit.day);
+    final now = DateTime(2026, 11, 13, 10);
+
+    CounterData run({
+      MetricAggregation aggregation = MetricAggregation.sum,
+      DateWindow? w,
+      DateTime? at,
+      List<MetricPoint>? pts,
+    }) =>
+        externalDataOf(
+          MetricUnit.count,
+          w ?? window,
+          pts ?? points,
+          now: at ?? now,
+          weekly: true,
+          aggregation: aggregation,
+          segments: segments,
+          totals: {'explorateur': 9999},
+        ) as CounterData;
+
+    test('un bucket par lundi, dès le lundi de la fenêtre, passage à l\'heure d\'hiver compris',
+        () {
+      final d = run();
+      expect(d.points.map((p) => p.t), mondays);
+      expect(d.points.map((p) => p.visitors), totals);
+      expect(d.weekly, isTrue);
+      expect(d.unit, TimeUnit.day);
+    });
+
+    test('un point daté d\'un autre jour de la semaine est rangé à son lundi', () {
+      final d = run(pts: [
+        MetricPoint(t: DateTime(2026, 10, 14), valeur: 7, numerateur: 0, denominateur: 0),
+      ]);
+      expect(d.points.map((p) => p.visitors), [0, 7, 0, 0, 0, 0]);
+    });
+
+    test('pas de semaine qui n\'a pas commencé', () {
+      final d = run(at: DateTime(2026, 11, 4)); // mercredi de la semaine du 2
+      expect(d.points.last.t, DateTime(2026, 11, 2));
+    });
+
+    test('somme par défaut', () {
+      expect(run().total, 2347);
+      expect(run().latest, isNull);
+    });
+
+    test('« dernier » : le total est le dernier bucket, pas la somme', () {
+      final d = run(aggregation: MetricAggregation.last);
+      expect(d.total, 557);
+      expect(d.latest, (t: DateTime(2026, 11, 9), ongoing: true));
+    });
+
+    test('« dernier » : les parts sont celles de la dernière semaine, `totaux` ignoré',
+        () {
+      final d = run(aggregation: MetricAggregation.last);
+      expect({for (final s in d.segments) s.label: s.periodTotal}, {
+        'explorateur': 446,
+        'navigateur': 88,
+        'cartographe': 20,
+        'geographe': 1,
+        'globe_trotter': 1,
+        'legende': 1,
+      });
+    });
+
+    test('« dernier » : la semaine n\'est plus en cours si la fenêtre s\'arrête avant', () {
+      final d = run(
+        aggregation: MetricAggregation.last,
+        w: DateWindow(DateTime(2026, 10, 7), DateTime(2026, 10, 26), TimeUnit.day),
+      );
+      expect(d.total, 360);
+      expect(d.latest, (t: DateTime(2026, 10, 19), ongoing: false));
+    });
+
+    test('« dernier » : une semaine non publiée est sautée', () {
+      final d = externalDataOf(
+        MetricUnit.count,
+        window,
+        points,
+        now: now,
+        weekly: true,
+        aggregation: MetricAggregation.last,
+        dataUntil: DateTime(2026, 11, 8),
+      ) as CounterData;
+      expect(d.total, 519);
+      expect(d.latest!.t, DateTime(2026, 11, 2));
+    });
+
+    test('« dernier » en jours et en mois', () {
+      final days = externalDataOf(
+        MetricUnit.count,
+        _w,
+        [_p(5, 3, 0, 0), _p(6, 8, 0, 0)],
+        now: DateTime(2026, 10, 7, 9),
+        aggregation: MetricAggregation.last,
+      ) as CounterData;
+      expect(days.total, 8);
+      expect(days.latest, (t: DateTime(2026, 10, 6), ongoing: false));
+
+      final months = externalDataOf(
+        MetricUnit.count,
+        DateWindow(DateTime(2026, 9, 1), DateTime(2026, 12, 1), TimeUnit.month),
+        [
+          MetricPoint(t: DateTime(2026, 10), valeur: 40, numerateur: 0, denominateur: 0),
+          MetricPoint(t: DateTime(2026, 11), valeur: 12, numerateur: 0, denominateur: 0),
+        ],
+        now: DateTime(2026, 11, 13),
+        aggregation: MetricAggregation.last,
+      ) as CounterData;
+      expect(months.total, 12);
+      expect(months.latest, (t: DateTime(2026, 11), ongoing: true));
+    });
+
+    test('un taux ignore l\'agrégation', () {
+      final d = externalDataOf(
+        MetricUnit.percent,
+        window,
+        [for (final t in mondays) MetricPoint(t: t, valeur: 50, numerateur: 5, denominateur: 10)],
+        now: now,
+        weekly: true,
+        aggregation: MetricAggregation.last,
+      ) as RatioData;
+      expect(d.weekly, isTrue);
+      expect(d.points.map((p) => p.t), mondays);
+      expect(d.denominatorTotal, 60);
+      expect(d.overall, closeTo(0.5, 1e-9));
+    });
+
+    test('les couleurs du catalogue passent aux parts', () {
+      final d = externalDataOf(
+        MetricUnit.count,
+        window,
+        points,
+        now: now,
+        weekly: true,
+        segments: const [
+          MetricSegment(
+            id: 'legende',
+            libelle: 'Légende',
+            couleur: Color(0xFF1E3241),
+            couleurSombre: Color(0xFF9FB3C8),
+          ),
+        ],
+      ) as CounterData;
+      expect(d.segments.single.color, const Color(0xFF1E3241));
+      expect(d.segments.single.darkColor, const Color(0xFF9FB3C8));
     });
   });
 }

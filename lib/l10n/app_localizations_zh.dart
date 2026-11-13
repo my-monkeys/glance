@@ -1700,4 +1700,19 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get credDomainPlaceholder => 'yourdomain.com';
+
+  @override
+  String chartWeekOf(String date) {
+    return '$date 当周';
+  }
+
+  @override
+  String chartWeekOfOngoing(String date) {
+    return '$date 当周 · 进行中';
+  }
+
+  @override
+  String dashboardsOngoing(String date) {
+    return '$date · 进行中';
+  }
 }

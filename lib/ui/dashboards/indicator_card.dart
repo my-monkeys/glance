@@ -275,13 +275,16 @@ class _CardBody extends StatelessWidget {
       for (final s in d.points)
         gaps != null && gaps.covers(s.t) ? null : s.visitors,
     ];
+    final latest = d.latest;
     return CardStat(
       fill: fill,
       big: fmtInt(d.total),
-      sub: sub,
+      sub: latest == null
+          ? sub
+          : latestLabel(context.l10n, latest, unit, weekly: d.weekly),
       notes: _notes(context, d.cohorts, d.member, gaps),
       child: hasSegmentData(d)
-          ? SegmentsBody(data: d, totals: values, unit: unit)
+          ? SegmentsBody(data: d, totals: values, unit: unit, weekly: d.weekly)
           : _plots(values)
               ? IndicatorChart(
                   points: [
@@ -289,6 +292,7 @@ class _CardBody extends StatelessWidget {
                       IndicatorPoint(d.points[i].t, values[i]),
                   ],
                   unit: unit,
+                  weekly: d.weekly,
                 )
               : null,
     );
@@ -335,6 +339,7 @@ class _CardBody extends StatelessWidget {
                           ),
                       ],
                       unit: unit,
+                      weekly: d.weekly,
                       percent: true,
                     )
                   : null,
