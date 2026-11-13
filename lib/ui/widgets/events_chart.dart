@@ -73,7 +73,6 @@ class EventsChart extends StatelessWidget {
     final maxY = chartNiceMax(rawMax);
     final yInterval = maxY / 4;
     final lastX = (len - 1).toDouble();
-    final labelStep = math.max(1, (len / 6).ceil());
     final times = series.first.points.map((e) => e.t).toList();
 
     return SizedBox(
@@ -122,15 +121,22 @@ class EventsChart extends StatelessWidget {
                 getTitlesWidget: (value, meta) {
                   final i = value.round();
                   if (i < 0 || i >= len) return const SizedBox.shrink();
-                  final isLast = i == len - 1;
-                  if (i % labelStep != 0 && !isLast) {
+                  if (!axisLabelShown(i, len, weekly: weekly)) {
                     return const SizedBox.shrink();
                   }
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Text(fmtAxis(context.l10n, times[i], unit, weekly: weekly),
-                        style: GT.mono(9.5, color: p.fg3)),
-                  );
+                  final label = Text(
+                      fmtAxis(context.l10n, times[i], unit, weekly: weekly),
+                      style: GT.mono(9.5, color: p.fg3));
+                  // « 9 nov. » déborderait du bord droit : on le garde dedans.
+                  return weekly
+                      ? SideTitleWidget(
+                          meta: meta,
+                          space: 8,
+                          fitInside: SideTitleFitInsideData.fromTitleMeta(meta),
+                          child: label,
+                        )
+                      : Padding(
+                          padding: const EdgeInsets.only(top: 8), child: label);
                 },
               ),
             ),

@@ -68,7 +68,6 @@ class IndicatorChart extends StatelessWidget {
     final rawMax = points.fold<double>(0, (m, e) => math.max(m, e.value ?? 0));
     final maxY = percent ? percentAxisMax(rawMax) : chartNiceMax(rawMax);
     final yInterval = maxY / 4;
-    final labelStep = math.max(1, (len / 6).ceil());
 
     final spots = [
       for (var i = 0; i < len; i++)
@@ -136,14 +135,22 @@ class IndicatorChart extends StatelessWidget {
                 getTitlesWidget: (value, meta) {
                   final i = value.round();
                   if (i < 0 || i >= len) return const SizedBox.shrink();
-                  if (i % labelStep != 0 && i != len - 1) {
+                  if (!axisLabelShown(i, len, weekly: weekly)) {
                     return const SizedBox.shrink();
                   }
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Text(fmtAxis(context.l10n, points[i].t, unit, weekly: weekly),
-                        style: GT.mono(9.5, color: p.fg3)),
-                  );
+                  final label = Text(
+                      fmtAxis(context.l10n, points[i].t, unit, weekly: weekly),
+                      style: GT.mono(9.5, color: p.fg3));
+                  // « 9 nov. » déborderait du bord droit : on le garde dedans.
+                  return weekly
+                      ? SideTitleWidget(
+                          meta: meta,
+                          space: 8,
+                          fitInside: SideTitleFitInsideData.fromTitleMeta(meta),
+                          child: label,
+                        )
+                      : Padding(
+                          padding: const EdgeInsets.only(top: 8), child: label);
                 },
               ),
             ),

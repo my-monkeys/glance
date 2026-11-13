@@ -490,7 +490,34 @@ void main() {
       final d = run(pts: [
         MetricPoint(t: DateTime(2026, 10, 14), valeur: 7, numerateur: 0, denominateur: 0),
       ]);
-      expect(d.points.map((p) => p.visitors), [0, 7, 0, 0, 0, 0]);
+      // La semaine du 5 oct., vide, précède la première valeur : pas tracée.
+      expect(d.points.first.t, DateTime(2026, 10, 12));
+      expect(d.points.map((p) => p.visitors), [7, 0, 0, 0, 0]);
+    });
+
+    test('12 m : les semaines vides d\'avant le lancement ne sont pas tracées', () {
+      final d = run(
+        w: DateWindow(DateTime(2025, 12), DateTime(2026, 12), TimeUnit.month),
+      );
+      expect(d.points.map((p) => p.t), mondays);
+    });
+
+    test('une semaine vide au milieu reste un zéro', () {
+      final d = run(pts: [
+        for (final (i, p) in points.indexed)
+          i == 2
+              ? MetricPoint(t: p.t, valeur: 0, numerateur: 0, denominateur: 0,
+                  segments: {'explorateur': 0})
+              : p,
+      ]);
+      expect(d.points, hasLength(6));
+      expect(d.points[2].visitors, 0);
+      expect(d.segments.first.values[2], 0);
+    });
+
+    test('tout vide : toutes les semaines, la carte dira 0', () {
+      final d = run(pts: const []);
+      expect(d.points.map((p) => p.t), mondays);
     });
 
     test('pas de semaine qui n\'a pas commencé', () {

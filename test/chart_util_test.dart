@@ -52,6 +52,19 @@ void main() {
       expect(chartWeekLabel(l10n, monday, DateTime(2026, 11, 8)), 'Semaine du 9 nov.');
     });
 
+    test('axe : quatre libellés, jamais collés au dernier', () {
+      List<int> shown(int len, {bool weekly = true}) => [
+            for (var i = 0; i < len; i++)
+              if (axisLabelShown(i, len, weekly: weekly)) i,
+          ];
+      expect(shown(5), [0, 2, 4]);
+      expect(shown(6), [0, 2, 5]);
+      expect(shown(52), [0, 13, 26, 51]);
+      expect(shown(1), [0]);
+      // En jours, rien ne change : un sur ceil(len / 6), plus le dernier.
+      expect(shown(30, weekly: false), [0, 5, 10, 15, 20, 25, 29]);
+    });
+
     test('axe : jour et mois abrégé', () {
       expect(fmtAxis(l10n, DateTime(2026, 10, 5), TimeUnit.day, weekly: true), '5 oct.');
     });

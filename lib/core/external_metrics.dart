@@ -110,7 +110,8 @@ IndicatorData externalDataOf(
     byBucket[bucketOf(measured)] =
         _Placed(p, delayDays == 0 || measured.isBefore(today));
   }
-  final buckets = weekly ? _weeksOf(window, t0) : bucketsOf(w);
+  final buckets =
+      weekly ? _fromFirstActivity(_weeksOf(window, t0), byBucket) : bucketsOf(w);
   final firstGap = buckets.where((t) => !published(t)).firstOrNull;
   final unpublished = firstGap == null
       ? null
@@ -225,6 +226,21 @@ List<DateTime> _weeksOf(DateWindow w, DateTime now) {
     out.add(c);
   }
   return out;
+}
+
+/// Les semaines à partir de la première qui a une valeur : avant le lancement
+/// d'une métrique hebdo, « 12 m » traçait 45 semaines à plat pour 6 de données.
+/// Tout vide : toutes les semaines (la carte dit alors « 0 »).
+List<DateTime> _fromFirstActivity(
+    List<DateTime> weeks, Map<DateTime, _Placed> byBucket) {
+  bool active(DateTime t) {
+    final p = byBucket[t]?.point;
+    return (p?.valeur ?? 0) != 0 ||
+        (p?.segments?.values.any((v) => v != 0) ?? false);
+  }
+
+  final first = weeks.indexWhere(active);
+  return first <= 0 ? weeks : weeks.sublist(first);
 }
 
 DateTime _bucketEnd(DateTime t, TimeUnit unit, bool weekly) =>

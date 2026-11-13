@@ -49,6 +49,17 @@ const double _kChartMaxHeight = 360;
 double chartHeightFor(double width, {required double base}) =>
     math.max(base, math.min(width * _kChartAspect, _kChartMaxHeight));
 
+/// Le point [i] (sur [len]) porte-t-il un libellé d'axe ? Environ six, plus
+/// le dernier. En semaines, quatre seulement (« 9 nov. » est plus long qu'un
+/// numéro de jour), et pas celui qui tomberait juste avant le dernier : ils se
+/// chevaucheraient.
+bool axisLabelShown(int i, int len, {bool weekly = false}) {
+  final step = math.max(1, (len / (weekly ? 4 : 6)).ceil());
+  if (i == len - 1) return true;
+  if (i % step != 0) return false;
+  return !weekly || len - 1 - i >= step;
+}
+
 /// « Semaine du 9 nov. », suivi de « · en cours » pour la semaine de [now].
 String chartWeekLabel(AppLocalizations l10n, DateTime monday, DateTime now) {
   final day = fmtDay(monday);

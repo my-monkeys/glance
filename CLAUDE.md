@@ -449,8 +449,8 @@ dans le code.
   `comptes_crees` ; heure de réception de la partie, donc la somme des heures
   d'un jour peut différer un peu du point du jour.
   `a` = le jour qui contient `w.end - 1 ms` (`end` est exclusif : pile à minuit,
-  c'est la veille ; `metricsRangeFor`, testé). `semaine` n'est jamais demandée :
-  Glance n'a pas de granularité hebdomadaire.
+  c'est la veille ; `metricsRangeFor`, testé). `semaine` n'est demandée que pour
+  une métrique qui n'annonce qu'elle (cf. « Semaines » plus bas).
 - **Stockage** : URL dans les prefs (`glance.metricsSources`), **jeton dans le
   secure storage** (`glance.metricsToken.<compte>.<site>`), jamais en prefs.
   `MetricsSourcesNotifier.remove` supprime aussi le jeton. L'URL s'accepte avec
@@ -586,6 +586,10 @@ dans le code.
   résultat porte `weekly: true` + `unit: day` (ses points sont des dates) ; axe
   « 5 oct. », infobulle « Semaine du 9 nov. · en cours » (`now` lu au tracé, pas
   dans une clé de provider). Une semaine qui n'a pas commencé n'est pas un bucket.
+  Les semaines vides **en tête** de fenêtre ne sont pas tracées (sur « 12 m »,
+  45 semaines à plat avant le lancement des ligues pour 6 de données) ; une
+  semaine vide au milieu reste un zéro. Axe : quatre libellés (`axisLabelShown`),
+  pas collés au dernier, gardés dans le cadre (`SideTitleFitInsideData`).
 - **Agrégation (`agregation: "dernier"`)** : un `nombre` qui est un niveau (joueurs
   par ligue), pas un flux, ne s'additionne pas. `total` = valeur du **dernier
   bucket publié**, les parts = celles de ce bucket (`totaux` ignoré), et
