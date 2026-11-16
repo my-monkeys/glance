@@ -72,7 +72,8 @@ class _Placed {
 /// jours (`unit: day`) : ses points sont des dates, pas un `TimeUnit.week`.
 ///
 /// [aggregation] `last` (un `nombre` seulement) : le total est la valeur du
-/// dernier bucket publié, pas la somme, et les parts celles de ce même bucket
+/// dernier bucket publié et terminé (celui en cours s'il est seul), pas la
+/// somme, et les parts celles de ce même bucket
 /// (`totaux` est ignoré : il additionnerait des niveaux). Un taux n'en dépend
 /// pas : Σnumérateur / Σdénominateur reste le bon taux global.
 IndicatorData externalDataOf(
@@ -138,8 +139,14 @@ IndicatorData externalDataOf(
     for (final t in buckets) {
       if (value(t) != null) seen(byBucket[t]!.point.t);
     }
+    // Un niveau se constitue pendant son bucket (on entre en ligue au fil de
+    // la semaine) : le lundi, la semaine en cours ne compte que quelques
+    // joueurs. Le chiffre résume donc le dernier bucket TERMINÉ ; celui en
+    // cours n'est retenu que s'il est seul.
+    bool ongoing(DateTime t) => t0.isBefore(_bucketEnd(t, w.unit, weekly));
+    final filled = buckets.reversed.where((t) => value(t) != null);
     final lastT = aggregation == MetricAggregation.last
-        ? buckets.reversed.where((t) => value(t) != null).firstOrNull
+        ? filled.where((t) => !ongoing(t)).firstOrNull ?? filled.firstOrNull
         : null;
     final total = lastT == null
         ? series.fold<double>(0, (a, s) => a + s.visitors)
@@ -155,9 +162,10 @@ IndicatorData externalDataOf(
         unpublished: unpublished,
         unit: outUnit,
         weekly: weekly,
-        latest: lastT == null
-            ? null
-            : (t: lastT, ongoing: t0.isBefore(_bucketEnd(lastT, w.unit, weekly))),
+        latest: lastT == null ? null : (t: lastT, ongoing: ongoing(lastT)),
+        lastInProgress: aggregation == MetricAggregation.last &&
+            buckets.isNotEmpty &&
+            ongoing(buckets.last),
         segments: [
           for (final s in segments)
             CounterSegment(

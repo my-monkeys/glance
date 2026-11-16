@@ -531,14 +531,35 @@ void main() {
     });
 
     test('« dernier » : le total est le dernier bucket, pas la somme', () {
+      // Lundi suivant : la semaine du 9 nov. est terminée.
+      final d = run(aggregation: MetricAggregation.last, at: DateTime(2026, 11, 16, 10));
+      expect(d.total, 557);
+      expect(d.latest, (t: DateTime(2026, 11, 9), ongoing: false));
+      expect(d.lastInProgress, isFalse);
+    });
+
+    test('« dernier » : la semaine en cours n\'est pas résumée, elle est en pointillé',
+        () {
+      // Vendredi 13 : la semaine du 9 se remplit encore, le chiffre est celle du 2.
       final d = run(aggregation: MetricAggregation.last);
+      expect(d.total, 519);
+      expect(d.latest, (t: DateTime(2026, 11, 2), ongoing: false));
+      expect(d.lastInProgress, isTrue);
+      expect(d.points.last.visitors, 557);
+    });
+
+    test('« dernier » : seule la semaine en cours → elle, marquée en cours', () {
+      final d = run(
+        aggregation: MetricAggregation.last,
+        w: DateWindow(DateTime(2026, 11, 13), DateTime(2026, 11, 14), TimeUnit.hour),
+      );
       expect(d.total, 557);
       expect(d.latest, (t: DateTime(2026, 11, 9), ongoing: true));
     });
 
     test('« dernier » : les parts sont celles de la dernière semaine, `totaux` ignoré',
         () {
-      final d = run(aggregation: MetricAggregation.last);
+      final d = run(aggregation: MetricAggregation.last, at: DateTime(2026, 11, 16, 10));
       expect({for (final s in d.segments) s.label: s.periodTotal}, {
         'explorateur': 446,
         'navigateur': 88,
@@ -593,8 +614,10 @@ void main() {
         now: DateTime(2026, 11, 13),
         aggregation: MetricAggregation.last,
       ) as CounterData;
-      expect(months.total, 12);
-      expect(months.latest, (t: DateTime(2026, 11), ongoing: true));
+      // Novembre est en cours : le chiffre est celui d'octobre.
+      expect(months.total, 40);
+      expect(months.latest, (t: DateTime(2026, 10), ongoing: false));
+      expect(months.lastInProgress, isTrue);
     });
 
     test('un taux ignore l\'agrégation', () {

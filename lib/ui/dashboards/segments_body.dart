@@ -69,6 +69,7 @@ class SegmentsBody extends StatelessWidget {
     return BreakdownBody(
       unit: unit,
       weekly: weekly,
+      dashedLast: data.lastInProgress,
       series: [
         _series(l10n.dashboardsTotal, times, totals, data.total),
         for (final (i, s) in segments.indexed)

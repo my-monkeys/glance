@@ -592,9 +592,14 @@ dans le code.
   pas collés au dernier, gardés dans le cadre (`SideTitleFitInsideData`).
 - **Agrégation (`agregation: "dernier"`)** : un `nombre` qui est un niveau (joueurs
   par ligue), pas un flux, ne s'additionne pas. `total` = valeur du **dernier
-  bucket publié**, les parts = celles de ce bucket (`totaux` ignoré), et
-  `CounterData.latest` nomme ce bucket sous le chiffre (« · en cours » s'il contient
-  maintenant). Absent ou inconnu → `somme`. Un taux l'ignore : Σnum/Σden reste juste.
+  bucket publié et terminé** (celui en cours seulement s'il est seul), les parts =
+  celles de ce bucket (`totaux` ignoré), et `CounterData.latest` nomme ce bucket
+  sous le chiffre. Absent ou inconnu → `somme`. Un taux l'ignore : Σnum/Σden reste juste.
+  ⚠️ Un niveau se remplit pendant son bucket : le lundi 16/11, la semaine en cours
+  comptait 89 joueurs contre 720 la veille. Le bucket en cours est donc tracé en
+  **pointillé** (`lastInProgress` → `EventsChart.dashedLast`, un 2ᵉ jeu de barres
+  sur les deux derniers points) et jamais résumé par le chiffre. Seul le graphique
+  découpé (`EventsChart`) le fait : aucune métrique « dernier » sans segments à ce jour.
 - **Couleurs de segments (`couleur`, `couleur_sombre`)** : `#RRGGBB` seulement, toute
   autre forme → null. Courbe, légende et barre d'une part partagent la même couleur
   (`darkColor ?? color` en thème sombre), à défaut la palette (`eventColorAt(i + 1)`).

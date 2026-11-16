@@ -142,6 +142,30 @@ void main() {
     expect(legendDot(tester, 'Site'), const Color(0xFF9FB3C8));
   });
 
+  testWidgets('dernier point en cours : son segment en pointillé, un seul par série',
+      (tester) async {
+    final d = _data(split: true);
+    await _pump(
+      tester,
+      CounterData(d.points, d.total, segments: d.segments, lastInProgress: true),
+    );
+    final bars = tester.widget<LineChart>(find.byType(LineChart)).data.lineBarsData;
+    expect(bars, hasLength(8)); // Total + 3 parts, puis leurs pointillés
+    for (final main in bars.take(4)) {
+      expect(main.dashArray, isNull);
+      expect(main.spots.last.isNull(), isTrue);
+    }
+    // Le pointillé ne relie que les deux derniers points (le 29 oct. des
+    // parts est inconnu : un trou, même en pointillé).
+    final dashes = bars.skip(4).toList();
+    expect([for (final s in dashes.first.spots) s.isNull()], [true, false, false]);
+    for (final dash in dashes) {
+      expect(dash.dashArray, isNotNull);
+      expect(dash.spots.first.isNull(), isTrue);
+      expect(dash.spots.last.isNull(), isFalse);
+    }
+  });
+
   testWidgets('Total masqué : un jour connu reste visible en pastille',
       (tester) async {
     await _pump(tester, _data(split: true));

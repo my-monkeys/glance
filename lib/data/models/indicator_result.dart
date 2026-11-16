@@ -119,7 +119,8 @@ class CounterData extends IndicatorData {
       this.segments = const [],
       this.unit,
       this.weekly = false,
-      this.latest});
+      this.latest,
+      this.lastInProgress = false});
   final List<SeriesPoint> points;
   final int total;
 
@@ -130,6 +131,11 @@ class CounterData extends IndicatorData {
   /// Non null quand [total] est la valeur du dernier bucket (agrégation
   /// « dernier ») et non la somme : le bucket résumé, et s'il est en cours.
   final ({DateTime t, bool ongoing})? latest;
+
+  /// Le dernier point est un niveau encore en constitution (agrégation
+  /// « dernier », bucket qui contient maintenant) : tracé en pointillé, sans
+  /// quoi la courbe plongerait chaque lundi.
+  final bool lastInProgress;
 
   /// Granularité des points quand elle diffère de celle de la fenêtre : une
   /// métrique de site sans heures se lit en jours. Null = celle de la fenêtre.

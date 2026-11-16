@@ -22,6 +22,7 @@ class BreakdownBody extends StatefulWidget {
     required this.unit,
     required this.bars,
     this.weekly = false,
+    this.dashedLast = false,
   });
 
   /// Une série par valeur, dans l'ordre des barres. Null : barres seules.
@@ -31,6 +32,9 @@ class BreakdownBody extends StatefulWidget {
 
   /// Cf. `EventsChart.weekly`.
   final bool weekly;
+
+  /// Cf. `EventsChart.dashedLast`.
+  final bool dashedLast;
 
   @override
   State<BreakdownBody> createState() => _BreakdownBodyState();
@@ -85,6 +89,7 @@ class _BreakdownBodyState extends State<BreakdownBody> {
       colors: colors,
       unit: widget.unit,
       weekly: widget.weekly,
+      dashedLast: widget.dashedLast,
       height: _chartHeight,
     );
 
