@@ -76,7 +76,10 @@ class MetricSectionGrid extends StatelessWidget {
             );
 
         if (columns == 1) {
+          // `stretch` : une carte vide (« Aucune donnée ») n'a pas de barre
+          // pour l'élargir, et se rétrécissait à la largeur de son texte.
           return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               for (var i = 0; i < sections.length; i++) ...[
                 if (i > 0) const SizedBox(height: _gutter),
