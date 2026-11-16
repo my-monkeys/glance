@@ -22,6 +22,7 @@ class SegmentsBody extends StatelessWidget {
     required this.data,
     required this.totals,
     required this.unit,
+    this.weekly = false,
   });
 
   final CounterData data;
@@ -29,6 +30,7 @@ class SegmentsBody extends StatelessWidget {
   /// Le total par point, null là où il n'est pas encore publié.
   final List<double?> totals;
   final TimeUnit unit;
+  final bool weekly;
 
   static String _label(AppLocalizations l10n, CounterSegment s) =>
       s.estimated ? l10n.dashboardsSegmentEstimated(s.label) : s.label;
@@ -37,8 +39,9 @@ class SegmentsBody extends StatelessWidget {
     String name,
     List<DateTime> times,
     List<double?> values,
-    int total,
-  ) =>
+    int total, {
+    Color? color,
+  }) =>
       EventSeries(
         name: name,
         points: [
@@ -46,22 +49,32 @@ class SegmentsBody extends StatelessWidget {
         ],
         total: total,
         gaps: {for (final (i, v) in values.indexed) if (v == null) i},
+        color: color,
       );
+
+  /// La couleur de la source (variante sombre en thème sombre), sinon la
+  /// palette ; la 1re est celle du total.
+  static Color _color(CounterSegment s, int i, bool dark) =>
+      (dark ? s.darkColor ?? s.color : s.color) ?? eventColorAt(i + 1);
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final times = [for (final p in data.points) p.t];
     final segments = data.segments;
+    final dark = Theme.of(context).brightness == Brightness.dark;
     // Les parts se lisent sur les totaux distincts de la période : leur somme
     // dépasse le total quand un joueur passe par deux plateformes.
     final sum = segments.fold<int>(0, (a, s) => a + (s.periodTotal ?? 0));
     return BreakdownBody(
       unit: unit,
+      weekly: weekly,
+      dashedLast: data.lastInProgress,
       series: [
         _series(l10n.dashboardsTotal, times, totals, data.total),
-        for (final s in segments)
-          _series(_label(l10n, s), times, s.values, s.periodTotal ?? 0),
+        for (final (i, s) in segments.indexed)
+          _series(_label(l10n, s), times, s.values, s.periodTotal ?? 0,
+              color: _color(s, i, dark)),
       ],
       bars: sum == 0
           ? const SizedBox.shrink()
@@ -76,7 +89,7 @@ class SegmentsBody extends StatelessWidget {
                       label: _label(l10n, s),
                       value: s.periodTotal!,
                       // Le total prend la 1re couleur des courbes.
-                      color: eventColorAt(i + 1),
+                      color: _color(s, i, dark),
                     ),
               ],
               total: sum,

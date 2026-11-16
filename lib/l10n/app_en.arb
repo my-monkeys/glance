@@ -488,5 +488,29 @@
   "credEmailHint": "Email + password: Glance lists your sites automatically. Otherwise, leave blank and enter a domain below.",
   "credPasswordOptional": "Password (optional)",
   "credDomainFallback": "Domain (if no email/password)",
-  "credDomainPlaceholder": "yourdomain.com"
+  "credDomainPlaceholder": "yourdomain.com",
+  "chartWeekOf": "Week of {date}",
+  "@chartWeekOf": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "chartWeekOfOngoing": "Week of {date} · ongoing",
+  "@chartWeekOfOngoing": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardsOngoing": "{date} · ongoing",
+  "@dashboardsOngoing": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -53,7 +53,8 @@ CounterData _data({required bool split}) => CounterData(
       ],
     );
 
-Future<void> _pump(WidgetTester tester, CounterData data) async {
+Future<void> _pump(WidgetTester tester, CounterData data,
+    {Brightness brightness = Brightness.light}) async {
   tester.view.physicalSize = const Size(900, 1400);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
@@ -70,7 +71,7 @@ Future<void> _pump(WidgetTester tester, CounterData data) async {
       locale: testLocale,
       localizationsDelegates: glanceLocalizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      theme: glanceTheme(Brightness.light),
+      theme: glanceTheme(brightness),
       home: Scaffold(
         body: SingleChildScrollView(
           child: IndicatorsTab(site: _site, window: _window),
@@ -105,6 +106,64 @@ void main() {
     }
     // Parts sur la somme des totaux de période : 25 / 40 = 62,5 %.
     expect(find.textContaining(RegExp(r'^63\s%$')), findsOneWidget);
+  });
+
+  testWidgets('une part prend la couleur du catalogue (variante sombre en sombre)',
+      (tester) async {
+    CounterData coloured() {
+      final d = _data(split: true);
+      return CounterData(d.points, d.total, segments: [
+        CounterSegment(
+          label: 'Site',
+          values: d.segments[0].values,
+          periodTotal: 25,
+          color: const Color(0xFFB45309),
+          darkColor: const Color(0xFF9FB3C8),
+        ),
+        d.segments[1],
+        d.segments[2],
+      ]);
+    }
+
+    Color? legendDot(WidgetTester t, String label) {
+      final chip = find.ancestor(of: find.text(label), matching: find.byType(EventChip));
+      final text = t.widget<Text>(find.descendant(of: chip, matching: find.text(label)));
+      return text.style?.color;
+    }
+
+    await _pump(tester, coloured());
+    expect(legendDot(tester, 'Site'), const Color(0xFFB45309));
+    // Sans couleur dans le catalogue : la palette, au rang de la part.
+    expect(legendDot(tester, 'Appli'), eventColorAt(2));
+    final line = tester.widget<LineChart>(find.byType(LineChart)).data.lineBarsData[1];
+    expect(line.color, const Color(0xFFB45309));
+
+    await _pump(tester, coloured(), brightness: Brightness.dark);
+    expect(legendDot(tester, 'Site'), const Color(0xFF9FB3C8));
+  });
+
+  testWidgets('dernier point en cours : son segment en pointillé, un seul par série',
+      (tester) async {
+    final d = _data(split: true);
+    await _pump(
+      tester,
+      CounterData(d.points, d.total, segments: d.segments, lastInProgress: true),
+    );
+    final bars = tester.widget<LineChart>(find.byType(LineChart)).data.lineBarsData;
+    expect(bars, hasLength(8)); // Total + 3 parts, puis leurs pointillés
+    for (final main in bars.take(4)) {
+      expect(main.dashArray, isNull);
+      expect(main.spots.last.isNull(), isTrue);
+    }
+    // Le pointillé ne relie que les deux derniers points (le 29 oct. des
+    // parts est inconnu : un trou, même en pointillé).
+    final dashes = bars.skip(4).toList();
+    expect([for (final s in dashes.first.spots) s.isNull()], [true, false, false]);
+    for (final dash in dashes) {
+      expect(dash.dashArray, isNotNull);
+      expect(dash.spots.first.isNull(), isTrue);
+      expect(dash.spots.last.isNull(), isFalse);
+    }
   });
 
   testWidgets('Total masqué : un jour connu reste visible en pastille',

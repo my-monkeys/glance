@@ -21,12 +21,20 @@ class BreakdownBody extends StatefulWidget {
     required this.series,
     required this.unit,
     required this.bars,
+    this.weekly = false,
+    this.dashedLast = false,
   });
 
   /// Une série par valeur, dans l'ordre des barres. Null : barres seules.
   final List<EventSeries>? series;
   final TimeUnit unit;
   final Widget bars;
+
+  /// Cf. `EventsChart.weekly`.
+  final bool weekly;
+
+  /// Cf. `EventsChart.dashedLast`.
+  final bool dashedLast;
 
   @override
   State<BreakdownBody> createState() => _BreakdownBodyState();
@@ -55,9 +63,10 @@ class _BreakdownBodyState extends State<BreakdownBody> {
       );
     }
 
-    // Couleur stable : le rang de la valeur, pas sa position parmi les visibles.
+    // Couleur stable : celle de la source, sinon le rang de la valeur, pas sa
+    // position parmi les visibles.
     final colors = {
-      for (final (i, s) in series.indexed) s.name: eventColorAt(i),
+      for (final (i, s) in series.indexed) s.name: s.color ?? eventColorAt(i),
     };
     final visible = series.where((s) => !_hidden.contains(s.name)).toList();
     final legend = Wrap(
@@ -79,6 +88,8 @@ class _BreakdownBodyState extends State<BreakdownBody> {
       series: visible,
       colors: colors,
       unit: widget.unit,
+      weekly: widget.weekly,
+      dashedLast: widget.dashedLast,
       height: _chartHeight,
     );
 

@@ -76,10 +76,14 @@ typedef MetricsRange = ({String de, String a, String granularite});
 ///
 /// [hourly] : l'indicateur annonce `heure` dans son catalogue ; une fenêtre
 /// horaire demande alors des heures (`t` = « AAAA-MM-JJTHH:00 » local).
+///
+/// [weekly] : l'indicateur n'existe qu'en semaines ; `de`/`a` restent des
+/// jours, le serveur rend les semaines entières qui touchent la plage.
 MetricsRange metricsRangeFor(
   DateWindow w, {
   int delayDays = 0,
   bool hourly = false,
+  bool weekly = false,
 }) {
   final last = w.end.subtract(const Duration(milliseconds: 1));
   final start =
@@ -94,6 +98,7 @@ MetricsRange metricsRangeFor(
     de: _date(de),
     a: _date(fin.isBefore(de) ? de : fin),
     granularite: switch (w.unit) {
+      _ when weekly => 'semaine',
       TimeUnit.month => 'mois',
       TimeUnit.hour when hourly => 'heure',
       _ => 'jour',

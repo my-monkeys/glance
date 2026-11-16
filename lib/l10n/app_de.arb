@@ -488,5 +488,29 @@
   "credEmailHint": "E-Mail + Passwort: Glance listet Ihre Websites automatisch auf. Andernfalls lassen Sie das Feld leer und geben unten eine Domain an.",
   "credPasswordOptional": "Passwort (optional)",
   "credDomainFallback": "Domain (ohne E-Mail/Passwort)",
-  "credDomainPlaceholder": "ihredomain.de"
+  "credDomainPlaceholder": "ihredomain.de",
+  "chartWeekOf": "Woche ab {date}",
+  "@chartWeekOf": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "chartWeekOfOngoing": "Woche ab {date} · laufend",
+  "@chartWeekOfOngoing": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardsOngoing": "{date} · laufend",
+  "@dashboardsOngoing": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  }
 }

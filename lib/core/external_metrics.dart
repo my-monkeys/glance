@@ -3,6 +3,7 @@ import '../data/models/metrics_source.dart';
 import '../data/models/models.dart';
 import '../data/models/period.dart';
 import '../data/providers/buckets.dart';
+import '../data/providers/provider_errors.dart';
 
 /// Sous ce dénominateur cumulé, le taux global n'est pas affiché : même seuil
 /// de confidentialité que celui du serveur, qui renvoie alors `valeur: null`.
@@ -64,6 +65,17 @@ class _Placed {
 ///
 /// [hourly] : la source a répondu en heures (fenêtre horaire, indicateur sans
 /// délai qui annonce `heure`) ; les points sont alors rangés heure par heure.
+///
+/// [weekly] : la source ne répond qu'en semaines. Un bucket par lundi, de celui
+/// de `window.start` jusqu'avant `window.end` (et jamais une semaine qui n'a
+/// pas commencé), chaque point rangé au lundi de son `t`. Le résultat se lit en
+/// jours (`unit: day`) : ses points sont des dates, pas un `TimeUnit.week`.
+///
+/// [aggregation] `last` (un `nombre` seulement) : le total est la valeur du
+/// dernier bucket publié et terminé (celui en cours s'il est seul), pas la
+/// somme, et les parts celles de ce même bucket
+/// (`totaux` est ignoré : il additionnerait des niveaux). Un taux n'en dépend
+/// pas : Σnumérateur / Σdénominateur reste le bon taux global.
 IndicatorData externalDataOf(
   MetricUnit unit,
   DateWindow window,
@@ -75,8 +87,12 @@ IndicatorData externalDataOf(
   List<MetricSegment> segments = const [],
   Map<String, int>? totals,
   bool hourly = false,
+  bool weekly = false,
+  MetricAggregation aggregation = MetricAggregation.sum,
 }) {
   final w = externalWindowOf(window, hourly: hourly);
+  final outUnit = weekly ? TimeUnit.day : w.unit;
+  DateTime bucketOf(DateTime t) => weekly ? mondayOf(t) : truncateBucket(t, w.unit);
   // Le dernier jour publié porte sur la date de la série ; son point est placé
   // à sa date de mesure, comme les autres.
   final lastPlaced = dataUntil == null
@@ -92,10 +108,11 @@ IndicatorData externalDataOf(
   for (final p in points) {
     final measured =
         DateTime(p.t.year, p.t.month, p.t.day + delayDays, p.t.hour);
-    byBucket[truncateBucket(measured, w.unit)] =
+    byBucket[bucketOf(measured)] =
         _Placed(p, delayDays == 0 || measured.isBefore(today));
   }
-  final buckets = bucketsOf(w);
+  final buckets =
+      weekly ? _fromFirstActivity(_weeksOf(window, t0), byBucket) : bucketsOf(w);
   final firstGap = buckets.where((t) => !published(t)).firstOrNull;
   final unpublished = firstGap == null
       ? null
@@ -122,7 +139,18 @@ IndicatorData externalDataOf(
     for (final t in buckets) {
       if (value(t) != null) seen(byBucket[t]!.point.t);
     }
-    final total = series.fold<double>(0, (a, s) => a + s.visitors);
+    // Un niveau se constitue pendant son bucket (on entre en ligue au fil de
+    // la semaine) : le lundi, la semaine en cours ne compte que quelques
+    // joueurs. Le chiffre résume donc le dernier bucket TERMINÉ ; celui en
+    // cours n'est retenu que s'il est seul.
+    bool ongoing(DateTime t) => t0.isBefore(_bucketEnd(t, w.unit, weekly));
+    final filled = buckets.reversed.where((t) => value(t) != null);
+    final lastT = aggregation == MetricAggregation.last
+        ? filled.where((t) => !ongoing(t)).firstOrNull ?? filled.firstOrNull
+        : null;
+    final total = lastT == null
+        ? series.fold<double>(0, (a, s) => a + s.visitors)
+        : value(lastT)!;
     double? part(DateTime t, String id) {
       final p = byBucket[t];
       return p == null || !p.done || !published(t) ? null : p.point.segments?[id];
@@ -132,14 +160,23 @@ IndicatorData externalDataOf(
         cohorts: span(),
         member: member,
         unpublished: unpublished,
-        unit: w.unit,
+        unit: outUnit,
+        weekly: weekly,
+        latest: lastT == null ? null : (t: lastT, ongoing: ongoing(lastT)),
+        lastInProgress: aggregation == MetricAggregation.last &&
+            buckets.isNotEmpty &&
+            ongoing(buckets.last),
         segments: [
           for (final s in segments)
             CounterSegment(
               label: s.libelle,
               estimated: s.estime,
               values: [for (final t in buckets) part(t, s.id)],
-              periodTotal: totals?[s.id],
+              periodTotal: lastT == null
+                  ? (totals?[s.id])
+                  : (byBucket[lastT]!.point.segments?[s.id])?.round(),
+              color: s.couleur,
+              darkColor: s.couleurSombre,
             ),
         ]);
   }
@@ -183,6 +220,36 @@ IndicatorData externalDataOf(
     pending: den == 0 && (anyDen > 0 || unfinished),
     delayDays: delayDays,
     unpublished: unpublished,
-    unit: w.unit,
+    unit: outUnit,
+    weekly: weekly,
   );
 }
+
+/// Les lundis des semaines de la fenêtre qui ont commencé ([now] inclus).
+List<DateTime> _weeksOf(DateWindow w, DateTime now) {
+  final end = w.end.isBefore(now) ? w.end : now;
+  final out = <DateTime>[];
+  for (var c = mondayOf(w.start); c.isBefore(end); c = advanceWeek(c)) {
+    if (out.length >= kMaxBuckets) throw const BucketsTooFine(kMaxBuckets);
+    out.add(c);
+  }
+  return out;
+}
+
+/// Les semaines à partir de la première qui a une valeur : avant le lancement
+/// d'une métrique hebdo, « 12 m » traçait 45 semaines à plat pour 6 de données.
+/// Tout vide : toutes les semaines (la carte dit alors « 0 »).
+List<DateTime> _fromFirstActivity(
+    List<DateTime> weeks, Map<DateTime, _Placed> byBucket) {
+  bool active(DateTime t) {
+    final p = byBucket[t]?.point;
+    return (p?.valeur ?? 0) != 0 ||
+        (p?.segments?.values.any((v) => v != 0) ?? false);
+  }
+
+  final first = weeks.indexWhere(active);
+  return first <= 0 ? weeks : weeks.sublist(first);
+}
+
+DateTime _bucketEnd(DateTime t, TimeUnit unit, bool weekly) =>
+    weekly ? advanceWeek(t) : advanceBucket(t, unit);

@@ -449,8 +449,8 @@ dans le code.
   `comptes_crees` ; heure de réception de la partie, donc la somme des heures
   d'un jour peut différer un peu du point du jour.
   `a` = le jour qui contient `w.end - 1 ms` (`end` est exclusif : pile à minuit,
-  c'est la veille ; `metricsRangeFor`, testé). `semaine` n'est jamais demandée :
-  Glance n'a pas de granularité hebdomadaire.
+  c'est la veille ; `metricsRangeFor`, testé). `semaine` n'est demandée que pour
+  une métrique qui n'annonce qu'elle (cf. « Semaines » plus bas).
 - **Stockage** : URL dans les prefs (`glance.metricsSources`), **jeton dans le
   secure storage** (`glance.metricsToken.<compte>.<site>`), jamais en prefs.
   `MetricsSourcesNotifier.remove` supprime aussi le jeton. L'URL s'accepte avec
@@ -576,6 +576,33 @@ dans le code.
     Tant qu'aucune part n'a de valeur (`hasSegmentData`), la carte reste un
     compteur simple. Une carte découpée démarre à 11 rangées dans la grille
     (la hauteur se décide sur la donnée reçue, pas sur l'indicateur).
+- **Semaines (`granularites: ["semaine"]`, sans `jour` ni `mois`)** :
+  `MetricDef.weeklyOnly`. Glance demande `granularite=semaine` (prioritaire sur
+  heure/jour/mois), `de`/`a` restent des jours, et `externalDataOf(weekly: true)`
+  range chaque point au **lundi** de son `t` (un bucket par lundi, calendaire :
+  jamais `Duration(days: 7)`, un changement d'heure ferait tomber 23 h). Pas de
+  `TimeUnit.week` : l'enum a ~17 switchs (Umami, Plausible, prévision) où une
+  semaine n'a aucun sens, et la semaine n'existe que pour ces métriques. Le
+  résultat porte `weekly: true` + `unit: day` (ses points sont des dates) ; axe
+  « 5 oct. », infobulle « Semaine du 9 nov. · en cours » (`now` lu au tracé, pas
+  dans une clé de provider). Une semaine qui n'a pas commencé n'est pas un bucket.
+  Les semaines vides **en tête** de fenêtre ne sont pas tracées (sur « 12 m »,
+  45 semaines à plat avant le lancement des ligues pour 6 de données) ; une
+  semaine vide au milieu reste un zéro. Axe : quatre libellés (`axisLabelShown`),
+  pas collés au dernier, gardés dans le cadre (`SideTitleFitInsideData`).
+- **Agrégation (`agregation: "dernier"`)** : un `nombre` qui est un niveau (joueurs
+  par ligue), pas un flux, ne s'additionne pas. `total` = valeur du **dernier
+  bucket publié et terminé** (celui en cours seulement s'il est seul), les parts =
+  celles de ce bucket (`totaux` ignoré), et `CounterData.latest` nomme ce bucket
+  sous le chiffre. Absent ou inconnu → `somme`. Un taux l'ignore : Σnum/Σden reste juste.
+  ⚠️ Un niveau se remplit pendant son bucket : le lundi 16/11, la semaine en cours
+  comptait 89 joueurs contre 720 la veille. Le bucket en cours est donc tracé en
+  **pointillé** (`lastInProgress` → `EventsChart.dashedLast`, un 2ᵉ jeu de barres
+  sur les deux derniers points) et jamais résumé par le chiffre. Seul le graphique
+  découpé (`EventsChart`) le fait : aucune métrique « dernier » sans segments à ce jour.
+- **Couleurs de segments (`couleur`, `couleur_sombre`)** : `#RRGGBB` seulement, toute
+  autre forme → null. Courbe, légende et barre d'une part partagent la même couleur
+  (`darkColor ?? color` en thème sombre), à défaut la palette (`eventColorAt(i + 1)`).
 - ⚠️ Le serveur refuse plus de 400 jours : `metricsRangeFor` ramène `de` à
   `a − 399 jours` (« Tout », période perso). Les buckets d'avant la borne restent
   vides : trou pour un %, 0 pour un nombre.

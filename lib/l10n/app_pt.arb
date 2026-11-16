@@ -488,5 +488,29 @@
   "credEmailHint": "E-mail + senha: o Glance lista seus sites automaticamente. Senão, deixe em branco e informe um domínio abaixo.",
   "credPasswordOptional": "Senha (opcional)",
   "credDomainFallback": "Domínio (sem e-mail/senha)",
-  "credDomainPlaceholder": "meudominio.com.br"
+  "credDomainPlaceholder": "meudominio.com.br",
+  "chartWeekOf": "Semana de {date}",
+  "@chartWeekOf": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "chartWeekOfOngoing": "Semana de {date} · em andamento",
+  "@chartWeekOfOngoing": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardsOngoing": "{date} · em andamento",
+  "@dashboardsOngoing": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  }
 }

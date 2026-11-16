@@ -20,6 +20,13 @@ DateTime advanceBucket(DateTime t, TimeUnit u) => switch (u) {
       TimeUnit.month => DateTime(t.year, t.month + 1, 1),
     };
 
+/// Le lundi 00:00 local de la semaine de [t]. ⚠️ Jours calendaires, jamais
+/// `Duration(days: 7)` : un changement d'heure ferait tomber le résultat à 23 h.
+DateTime mondayOf(DateTime t) => DateTime(t.year, t.month, t.day - (t.weekday - 1));
+
+DateTime advanceWeek(DateTime monday) =>
+    DateTime(monday.year, monday.month, monday.day + 7);
+
 /// Buckets continus de la fenêtre (les fournisseurs renvoient des séries
 /// creuses).
 List<DateTime> bucketsOf(DateWindow w) {

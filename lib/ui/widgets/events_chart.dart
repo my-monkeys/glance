@@ -41,12 +41,21 @@ class EventsChart extends StatelessWidget {
     required this.series,
     required this.colors,
     required this.unit,
+    this.weekly = false,
+    this.dashedLast = false,
     this.height = 200,
   });
 
   final List<EventSeries> series; // séries visibles
   final Map<String, Color> colors; // nom → couleur (stable)
   final TimeUnit unit;
+
+  /// Un point par semaine (le lundi) : axe et infobulle en « semaine du ».
+  final bool weekly;
+
+  /// Le dernier point est en cours (une semaine qui commence) : son segment
+  /// est tracé en pointillé, pour ne pas lire une chute dans un début.
+  final bool dashedLast;
   final double height;
 
   @override
@@ -69,8 +78,11 @@ class EventsChart extends StatelessWidget {
     final maxY = chartNiceMax(rawMax);
     final yInterval = maxY / 4;
     final lastX = (len - 1).toDouble();
-    final labelStep = math.max(1, (len / 6).ceil());
     final times = series.first.points.map((e) => e.t).toList();
+    final dashed = dashedLast && len >= 2;
+    FlSpot spot(EventSeries s, int i) => s.gaps.contains(i)
+        ? FlSpot.nullSpot
+        : FlSpot(i.toDouble(), s.points[i].visitors);
 
     return SizedBox(
       height: height,
@@ -118,15 +130,22 @@ class EventsChart extends StatelessWidget {
                 getTitlesWidget: (value, meta) {
                   final i = value.round();
                   if (i < 0 || i >= len) return const SizedBox.shrink();
-                  final isLast = i == len - 1;
-                  if (i % labelStep != 0 && !isLast) {
+                  if (!axisLabelShown(i, len, weekly: weekly)) {
                     return const SizedBox.shrink();
                   }
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Text(fmtAxis(context.l10n, times[i], unit),
-                        style: GT.mono(9.5, color: p.fg3)),
-                  );
+                  final label = Text(
+                      fmtAxis(context.l10n, times[i], unit, weekly: weekly),
+                      style: GT.mono(9.5, color: p.fg3));
+                  // « 9 nov. » déborderait du bord droit : on le garde dedans.
+                  return weekly
+                      ? SideTitleWidget(
+                          meta: meta,
+                          space: 8,
+                          fitInside: SideTitleFitInsideData.fromTitleMeta(meta),
+                          child: label,
+                        )
+                      : Padding(
+                          padding: const EdgeInsets.only(top: 8), child: label);
                 },
               ),
             ),
@@ -144,25 +163,31 @@ class EventsChart extends StatelessWidget {
                 final i = touched.isEmpty
                     ? 0
                     : touched.first.x.round().clamp(0, len - 1);
-                final date = chartTooltipDate(context.l10n, times[i], unit);
+                final date = chartTooltipDate(context.l10n, times[i], unit, weekly: weekly);
+                // Le segment pointillé double chaque série (barIndex décalé de
+                // series.length) : une ligne par série, la première touchée.
+                final seen = <int>{};
                 return [
-                  for (var k = 0; k < touched.length; k++)
-                    LineTooltipItem(
-                      k == 0 ? '$date\n' : '',
-                      GT.mono(10, color: p.fg3),
-                      children: [
-                        TextSpan(
-                          text: '${fmtInt(touched[k].y)} ',
-                          style: GT.stat(13, color: p.bg),
-                        ),
-                        TextSpan(
-                          text: series[touched[k].barIndex].name,
-                          style: GT.mono(9,
-                              color: colors[series[touched[k].barIndex].name] ??
-                                  p.fg3),
-                        ),
-                      ],
-                    ),
+                  for (final t in touched)
+                    if (!seen.add(t.barIndex % series.length))
+                      null
+                    else
+                      LineTooltipItem(
+                        seen.length == 1 ? '$date\n' : '',
+                        GT.mono(10, color: p.fg3),
+                        children: [
+                          TextSpan(
+                            text: '${fmtInt(t.y)} ',
+                            style: GT.stat(13, color: p.bg),
+                          ),
+                          TextSpan(
+                            text: series[t.barIndex % series.length].name,
+                            style: GT.mono(9,
+                                color: colors[series[t.barIndex % series.length].name] ??
+                                    p.fg3),
+                          ),
+                        ],
+                      ),
                 ];
               },
             ),
@@ -172,9 +197,7 @@ class EventsChart extends StatelessWidget {
               LineChartBarData(
                 spots: [
                   for (var i = 0; i < len; i++)
-                    series[s].gaps.contains(i)
-                        ? FlSpot.nullSpot
-                        : FlSpot(i.toDouble(), series[s].points[i].visitors),
+                    dashed && i == len - 1 ? FlSpot.nullSpot : spot(series[s], i),
                 ],
                 isCurved: true,
                 curveSmoothness: 0.32,
@@ -195,6 +218,19 @@ class EventsChart extends StatelessWidget {
                   ),
                 ),
               ),
+            if (dashed)
+              for (var s = 0; s < series.length; s++)
+                LineChartBarData(
+                  spots: [
+                    for (var i = 0; i < len; i++)
+                      i >= len - 2 ? spot(series[s], i) : FlSpot.nullSpot,
+                  ],
+                  color: colors[series[s].name] ?? eventColorAt(s),
+                  barWidth: 2.2,
+                  isStrokeCapRound: true,
+                  dashArray: const [3, 4],
+                  dotData: const FlDotData(show: false),
+                ),
           ],
         ),
         duration: const Duration(milliseconds: 350),

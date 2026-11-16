@@ -3039,6 +3039,24 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'mondomaine.fr'**
   String get credDomainPlaceholder;
+
+  /// Date d'un point d'une série hebdomadaire (axe, infobulle) ; date = le lundi, « 5 oct. »
+  ///
+  /// In fr, this message translates to:
+  /// **'Semaine du {date}'**
+  String chartWeekOf(String date);
+
+  /// Idem pour la semaine qui contient aujourd'hui, encore partielle
+  ///
+  /// In fr, this message translates to:
+  /// **'Semaine du {date} · en cours'**
+  String chartWeekOfOngoing(String date);
+
+  /// Bucket (jour, mois) encore en cours, sous le chiffre d'un compteur qui montre le dernier bucket ; date = « 13 nov. » ou « novembre 2026 »
+  ///
+  /// In fr, this message translates to:
+  /// **'{date} · en cours'**
+  String dashboardsOngoing(String date);
 }
 
 class _AppLocalizationsDelegate

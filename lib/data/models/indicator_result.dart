@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart' show Color;
 
 import 'indicator.dart';
 import 'models.dart';
@@ -90,7 +91,13 @@ class CounterSegment {
     required this.values,
     this.estimated = false,
     this.periodTotal,
+    this.color,
+    this.darkColor,
   });
+
+  /// Couleur voulue par la source, et sa variante pour le thème sombre.
+  final Color? color;
+  final Color? darkColor;
 
   final String label;
   final bool estimated;
@@ -110,9 +117,25 @@ class CounterData extends IndicatorData {
       this.member,
       this.unpublished,
       this.segments = const [],
-      this.unit});
+      this.unit,
+      this.weekly = false,
+      this.latest,
+      this.lastInProgress = false});
   final List<SeriesPoint> points;
   final int total;
+
+  /// Un point par semaine, [SeriesPoint.t] = le lundi (métrique de site
+  /// hebdomadaire). L'axe et l'infobulle disent alors « semaine du … ».
+  final bool weekly;
+
+  /// Non null quand [total] est la valeur du dernier bucket (agrégation
+  /// « dernier ») et non la somme : le bucket résumé, et s'il est en cours.
+  final ({DateTime t, bool ongoing})? latest;
+
+  /// Le dernier point est un niveau encore en constitution (agrégation
+  /// « dernier », bucket qui contient maintenant) : tracé en pointillé, sans
+  /// quoi la courbe plongerait chaque lundi.
+  final bool lastInProgress;
 
   /// Granularité des points quand elle diffère de celle de la fenêtre : une
   /// métrique de site sans heures se lit en jours. Null = celle de la fenêtre.
@@ -144,9 +167,13 @@ class RatioData extends IndicatorData {
     this.delayDays = 0,
     this.unit,
     this.unpublished,
+    this.weekly = false,
   });
 
   final List<RatioPoint> points;
+
+  /// Cf. [CounterData.weekly].
+  final bool weekly;
 
   /// Cf. [CounterData.unit].
   final TimeUnit? unit;

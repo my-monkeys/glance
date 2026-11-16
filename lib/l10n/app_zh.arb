@@ -488,5 +488,29 @@
   "credEmailHint": "邮箱加密码：Glance 会自动列出您的站点。否则请留空，并在下方输入域名。",
   "credPasswordOptional": "密码（可选）",
   "credDomainFallback": "域名（未填邮箱/密码时）",
-  "credDomainPlaceholder": "yourdomain.com"
+  "credDomainPlaceholder": "yourdomain.com",
+  "chartWeekOf": "{date} 当周",
+  "@chartWeekOf": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "chartWeekOfOngoing": "{date} 当周 · 进行中",
+  "@chartWeekOfOngoing": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardsOngoing": "{date} · 进行中",
+  "@dashboardsOngoing": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  }
 }

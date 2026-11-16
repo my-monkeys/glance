@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart' show Color;
 
 import 'period.dart';
 
@@ -131,10 +132,14 @@ class EventSeries {
     required this.points,
     required this.total,
     this.gaps = const {},
+    this.color,
   });
   final String name;
   final List<SeriesPoint> points;
   final int total;
+
+  /// Couleur imposée par la source ; null = celle de la palette, au rang.
+  final Color? color;
 
   /// Indices des points inconnus, dessinés en trou (pas à zéro).
   final Set<int> gaps;
