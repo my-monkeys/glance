@@ -61,6 +61,17 @@ class AppLocalizationsZh extends AppLocalizations {
   String get navLastMonth => '上月';
 
   @override
+  String get navThisWeek => '本周';
+
+  @override
+  String get navLastWeek => '上周';
+
+  @override
+  String navWeekOf(String date) {
+    return '$date 当周';
+  }
+
+  @override
   String get navThisYear => '今年';
 
   @override
@@ -865,6 +876,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsDefaultPeriodHint => '应用打开时';
 
   @override
+  String get settingsWeekStart => '每周开始于';
+
+  @override
+  String get settingsWeekStartHint => '「本周」的第一天';
+
+  @override
+  String get weekStartMonday => '星期一';
+
+  @override
+  String get weekStartSunday => '星期日';
+
+  @override
   String get settingsRefresh => '自动刷新';
 
   @override
@@ -1516,6 +1539,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get period24h => '24 小时';
+
+  @override
+  String get periodThisWeek => '本周';
 
   @override
   String get period7d => '7 天';

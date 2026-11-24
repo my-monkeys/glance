@@ -223,6 +223,13 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                   ),
                 ),
                 GlanceReveal(
+                  show: periodState.canNavigateWeeks,
+                  child: const Padding(
+                    padding: EdgeInsets.fromLTRB(20, 14, 20, 0),
+                    child: WeekNav(),
+                  ),
+                ),
+                GlanceReveal(
                   show: periodState.canNavigateMonths,
                   child: const Padding(
                     padding: EdgeInsets.fromLTRB(20, 14, 20, 0),

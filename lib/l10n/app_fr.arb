@@ -46,6 +46,24 @@
   "navDayBeforeYesterday": "Avant-hier",
   "navThisMonth": "Ce mois-ci",
   "navLastMonth": "Mois dernier",
+  "navThisWeek": "Cette semaine",
+  "@navThisWeek": {
+    "description": "Navigation semaine par semaine : la semaine en cours"
+  },
+  "navLastWeek": "Semaine dernière",
+  "@navLastWeek": {
+    "description": "Navigation semaine par semaine : la semaine précédente"
+  },
+  "navWeekOf": "Semaine du {date}",
+  "@navWeekOf": {
+    "description": "Navigation semaine par semaine : une semaine passée, désignée par son premier jour",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "9 nov."
+      }
+    }
+  },
   "navThisYear": "Cette année",
   "navLastYear": "Année dernière",
   "workspaceSheetTitle": "Périmètre",
@@ -709,6 +727,22 @@
   "settingsChartBars": "Barres",
   "settingsDefaultPeriod": "Période par défaut",
   "settingsDefaultPeriodHint": "À l'ouverture de l'application",
+  "settingsWeekStart": "Début de semaine",
+  "@settingsWeekStart": {
+    "description": "Réglages : premier jour de la semaine (lundi ou dimanche)"
+  },
+  "settingsWeekStartHint": "Premier jour de « Cette semaine »",
+  "@settingsWeekStartHint": {
+    "description": "Réglages : sous-titre du choix du premier jour de la semaine"
+  },
+  "weekStartMonday": "Lundi",
+  "@weekStartMonday": {
+    "description": "Réglages : puce, la semaine commence le lundi"
+  },
+  "weekStartSunday": "Dimanche",
+  "@weekStartSunday": {
+    "description": "Réglages : puce, la semaine commence le dimanche"
+  },
   "settingsRefresh": "Actualisation auto",
   "settingsRefreshSeconds": "{count} s",
   "@settingsRefreshSeconds": {
@@ -1157,6 +1191,10 @@
   "period24h": "24 h",
   "@period24h": {
     "description": "Libellé court d'une période, dans la barre de contrôles"
+  },
+  "periodThisWeek": "Cette semaine",
+  "@periodThisWeek": {
+    "description": "Libellé court d'une période, dans la barre de contrôles : la semaine civile en cours"
   },
   "period7d": "7 jours",
   "@period7d": {

@@ -25,9 +25,9 @@ class ForecastSpec {
 /// par fenêtre (et non par [Period]) est volontaire : deux périodes qui
 /// résolvent la même fenêtre (ex. « 12 m » en décembre ≡ « Cette année »)
 /// affichent les mêmes données, donc la même prévision.
-/// Ce qu'une fenêtre recouvre : une journée, un mois, une année, ou rien de
-/// calendaire (fenêtre glissante).
-enum CalendarScope { day, month, year, sliding }
+/// Ce qu'une fenêtre recouvre : une journée, une semaine, un mois, une année,
+/// ou rien de calendaire (fenêtre glissante).
+enum CalendarScope { day, week, month, year, sliding }
 
 /// Portée calendaire d'une fenêtre, déduite de son début, de sa fin **et** de
 /// sa granularité — les trois sont nécessaires.
@@ -44,6 +44,9 @@ enum CalendarScope { day, month, year, sliding }
 /// là où un horizon surestimé donne un chiffre aberrant.
 CalendarScope calendarScopeOf(DateWindow w) {
   if (w.allTime) return CalendarScope.sliding;
+  // Lue sur la fenêtre, pas devinée : un lundi, la semaine en heures a la
+  // forme d'« aujourd'hui », et un 1er du mois, celle de « ce mois-ci ».
+  if (w.week) return CalendarScope.week;
   final dayStart = DateTime(w.start.year, w.start.month, w.start.day);
   final monthStart = DateTime(w.start.year, w.start.month, 1);
   final yearStart = DateTime(w.start.year, 1, 1);
@@ -79,6 +82,13 @@ ForecastSpec? forecastSpecFor(DateWindow w, {DateTime? now}) {
           dayStart,
           w.unit,
         ),
+      );
+    case CalendarScope.week:
+      final s = w.start;
+      return ForecastSpec(
+        until: DateTime(s.year, s.month, s.day + 7),
+        reference:
+            DateWindow(DateTime(s.year, s.month, s.day - 7), s, w.unit),
       );
     case CalendarScope.month:
       final monthStart = DateTime(n.year, n.month, 1);
@@ -174,6 +184,9 @@ DateWindow? previousPeriodWindow(
         DateTime(from.year, from.month, from.day + 1),
         w.unit,
       );
+    case CalendarScope.week:
+      final s = w.start;
+      return DateWindow(DateTime(s.year, s.month, s.day - 7), s, w.unit);
     case CalendarScope.month:
       final monthStart = DateTime(w.start.year, w.start.month, 1);
       return DateWindow(
@@ -234,6 +247,7 @@ DateWindow? previousPeriodSoFar(
       );
   final cut = switch (calendarScopeOf(w)) {
     CalendarScope.day => shifted(days: base.daysBack),
+    CalendarScope.week => shifted(days: 7),
     CalendarScope.month => shifted(months: 1),
     CalendarScope.year => shifted(years: 1),
     CalendarScope.sliding => n.subtract(w.end.difference(w.start)),

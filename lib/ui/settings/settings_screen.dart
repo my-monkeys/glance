@@ -276,6 +276,29 @@ class SettingsScreen extends ConsumerWidget {
                 ],
               ),
             ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 13, 16, 14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(l10n.settingsWeekStart, style: GT.body(15, color: p.fg)),
+                  const SizedBox(height: 4),
+                  Text(l10n.settingsWeekStartHint,
+                      style: GT.body(12.5, color: p.fg3)),
+                  const SizedBox(height: 12),
+                  ChipRow(
+                    children: [
+                      for (final start in WeekStart.values)
+                        GlanceChip(
+                          label: start.localized(l10n),
+                          selected: settings.weekStart == start,
+                          onTap: () => notifier.setWeekStart(start),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 22),

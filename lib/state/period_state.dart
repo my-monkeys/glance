@@ -14,6 +14,7 @@ class PeriodState {
     this.customStart,
     this.customEnd,
     this.dayOffset = 0,
+    this.weekOffset = 0,
     this.monthOffset = 0,
     this.yearOffset = 0,
     this.compare = false,
@@ -42,6 +43,10 @@ class PeriodState {
   /// -1 = hier, …). Permet de naviguer jour par jour.
   final int dayOffset;
 
+  /// Décalage en semaines, uniquement pour [Period.thisWeek] (0 = cette
+  /// semaine, -1 = la semaine dernière, …).
+  final int weekOffset;
+
   /// Décalage en mois, uniquement pour [Period.thisMonth] (0 = ce mois-ci,
   /// -1 = le mois dernier, …). Permet de naviguer mois par mois.
   final int monthOffset;
@@ -55,6 +60,7 @@ class PeriodState {
     DateTime? customStart,
     DateTime? customEnd,
     int? dayOffset,
+    int? weekOffset,
     int? monthOffset,
     int? yearOffset,
     bool? compare,
@@ -65,6 +71,7 @@ class PeriodState {
     customStart: customStart ?? this.customStart,
     customEnd: customEnd ?? this.customEnd,
     dayOffset: dayOffset ?? this.dayOffset,
+    weekOffset: weekOffset ?? this.weekOffset,
     monthOffset: monthOffset ?? this.monthOffset,
     yearOffset: yearOffset ?? this.yearOffset,
     compare: compare ?? this.compare,
@@ -76,10 +83,16 @@ class PeriodState {
   ///
   /// Les écrans passent par `windowProvider`, qui y injecte la date de première
   /// donnée pour « Tout ». Appeler `resolve()` sans elle cadre large.
-  DateWindow resolve({DateTime? allTimeStart}) => period.window(
+  DateWindow resolve({
+    DateTime? allTimeStart,
+    int firstWeekday = DateTime.monday,
+  }) =>
+      period.window(
         customStart: customStart,
         customEnd: customEnd,
         dayOffset: dayOffset,
+        weekOffset: weekOffset,
+        firstWeekday: firstWeekday,
         monthOffset: monthOffset,
         yearOffset: yearOffset,
         unit: unit,
@@ -89,6 +102,7 @@ class PeriodState {
   /// La navigation par jour/mois/année n'a de sens que pour la période
   /// calendaire correspondante.
   bool get canNavigateDays => period == Period.today;
+  bool get canNavigateWeeks => period == Period.thisWeek;
   bool get canNavigateMonths => period == Period.thisMonth;
   bool get canNavigateYears => period == Period.thisYear;
 }
@@ -118,6 +132,13 @@ class PeriodNotifier extends Notifier<PeriodState> {
   void shiftDay(int delta) {
     if (state.period != Period.today) return;
     state = state.copyWith(dayOffset: (state.dayOffset + delta).clamp(-3650, 0));
+  }
+
+  /// Décale d'une semaine (borné : on ne va pas dans le futur).
+  void shiftWeek(int delta) {
+    if (state.period != Period.thisWeek) return;
+    state =
+        state.copyWith(weekOffset: (state.weekOffset + delta).clamp(-520, 0));
   }
 
   /// Décale d'un mois (borné : on ne va pas dans le futur).
@@ -152,6 +173,13 @@ final periodProvider =
 /// seconde sur la bonne.
 final windowProvider = Provider<DateWindow?>((ref) {
   final state = ref.watch(periodProvider);
+  if (state.period == Period.thisWeek) {
+    // Le réglage n'est écouté que pour la semaine : ailleurs, le changer
+    // recalculerait la fenêtre pour rien.
+    return state.resolve(
+        firstWeekday:
+            ref.watch(settingsProvider.select((s) => s.weekStart)).weekday);
+  }
   if (state.period != Period.allTime) return state.resolve();
   final start = ref.watch(allTimeStartProvider);
   return start == null ? null : state.resolve(allTimeStart: start);

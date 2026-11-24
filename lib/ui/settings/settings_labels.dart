@@ -25,6 +25,13 @@ String? compareLabelFor(AppLocalizations l10n, DateWindow w, CompareBase base) =
         ? l10n.compareBaseWeekBefore
         : null;
 
+extension WeekStartLabel on WeekStart {
+  String localized(AppLocalizations l10n) => switch (this) {
+    WeekStart.monday => l10n.weekStartMonday,
+    WeekStart.sunday => l10n.weekStartSunday,
+  };
+}
+
 extension ChartStyleLabel on ChartStyle {
   String localized(AppLocalizations l10n) => switch (this) {
     ChartStyle.curve => l10n.settingsChartCurve,

@@ -47,7 +47,7 @@ Français (langue source) et anglais ; l'allemand, l'espagnol, le portugais (Br�
 1. **Accueil vide brandé** (aucun compte) → « Ajouter une source ».
 2. **Ajout en 2 étapes** : fournisseur + identifiants → `listSites()` → **écran de choix des sites** (`site_picker`) : *tous les sites* (suit aussi les futurs) **ou** sélection explicite.
 3. Plusieurs comptes/fournisseurs coexistent. Home = union des sites sélectionnés de chaque compte.
-4. Détail par site : périodes (`today/24h/7j/30j/mois/12m/annee/perso`), graphe, KPIs, live, top pages/sources/pays. `mois` (« Ce mois-ci ») et `annee` (« Cette année ») sont calendaires : du 1er du mois / 1er janvier à maintenant.
+4. Détail par site : périodes (`today/24h/semaine/7j/30j/mois/12m/annee/perso`), graphe, KPIs, live, top pages/sources/pays. `semaine` (« Cette semaine »), `mois` (« Ce mois-ci ») et `annee` (« Cette année ») sont calendaires : du premier jour de la semaine / 1er du mois / 1er janvier à maintenant.
 
 La sélection de sites est éditable après coup : Réglages → tap sur le compte → « Choisir les sites ».
 
@@ -283,6 +283,21 @@ La fin reste `_ceil(now, unit)`, comme pour toutes les autres périodes.
 fenêtres par site y additionneraient 2019 avec 2024. Corollaire assumé : changer
 de groupe pendant que « Tout » est actif peut déplacer la borne commune, donc
 tout recharger. C'est le prix d'un total juste.
+
+### « Cette semaine »
+
+Semaine civile, du **lundi** par défaut ; Réglages → « Début de semaine » propose le
+dimanche (`WeekStart`, clé `glance.week.start`). `windowProvider` passe ce réglage à
+`Period.window(firstWeekday:)`, et ne l'écoute que sur cette période. Navigation
+semaine par semaine (`weekOffset`, `WeekNav` : « Semaine du 9 nov. »).
+- ⚠️ La fenêtre porte **`DateWindow.week`** (comme `allTime`) : un lundi en heures,
+  elle a la forme d'« aujourd'hui » ; un 1er du mois, celle de « ce mois-ci » ; une
+  semaine en cours celle d'une période personnalisée. `calendarScopeOf` la lit en
+  premier (`CalendarScope.week`). Le dimanche, elle a les bornes de « 7 jours » mais
+  pas la même clé.
+- Prévision jusqu'à la fin de la semaine, comparaison à la semaine d'avant (bucket
+  à bucket : lundi face à lundi), « au même avancement » = 7 jours plus tôt.
+- Cache disque : une clé par début de semaine (`semaine@day`, `semaine-dim@day`).
 
 ### La portée d'une fenêtre ne se devine pas de son début seul
 
