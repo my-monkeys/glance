@@ -16,7 +16,7 @@ final _series = [
 ];
 
 Future<ProviderContainer> _pump(WidgetTester tester,
-    {bool comparable = true}) async {
+    {bool comparable = true, String? compareLabel}) async {
   SharedPreferences.setMockInitialValues({});
   final prefs = await SharedPreferences.getInstance();
   await tester.pumpWidget(ProviderScope(
@@ -38,6 +38,7 @@ Future<ProviderContainer> _pump(WidgetTester tester,
             onToggleCompare: comparable
                 ? ref.read(periodProvider.notifier).toggleCompare
                 : null,
+            compareLabel: compareLabel,
           ),
         ),
       ),
@@ -79,6 +80,13 @@ void main() {
   testWidgets('absent quand la fenêtre n\'a pas d\'« avant » comparable',
       (tester) async {
     await _pump(tester, comparable: false);
+    expect(item, findsNothing);
+  });
+
+  testWidgets('une journée comparée à 7 jours avant le dit dans la légende',
+      (tester) async {
+    await _pump(tester, compareLabel: '7 jours avant');
+    expect(find.text('7 jours avant'), findsOneWidget);
     expect(item, findsNothing);
   });
 }

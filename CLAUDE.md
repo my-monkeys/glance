@@ -214,6 +214,19 @@ lancement). C'est lui qui déclenche le chargement de la période précédente
 quand `previousPeriodWindow(window) == null` (« Tout », période personnalisée trop
 large) : `onToggleCompare` vaut alors `null`.
 
+**Une journée se compare à la veille ou à 7 jours avant** (`CompareBase`, réglage
+persisté `glance.compare.base`, veille par défaut) : le même jour de la semaine
+d'avant, parce qu'un lundi ne ressemble pas à un dimanche. Section « Comparer à » du
+menu « Affichage », visible seulement quand `compareBaseApplies(window)` (journée en
+cours **ou** passée) ; ailleurs la comparaison reste la période d'avant.
+- Choisir une journée **coche aussi la comparaison** : sinon le choix ne changerait
+  rien de visible et passerait pour inopérant.
+- `siteCompareSeriesProvider` n'écoute le réglage que sur une journée : le changer
+  ne relance que la série comparée.
+- La légende et l'infobulle disent « 7 jours avant » au lieu de « Période
+  précédente » (`compareLabelFor` → `GlanceChart.compareLabel`).
+- Les deltas des KPI restent ceux d'Umami (`comparison` de `/stats`) : la veille.
+
 ### Découpage du graphique (heure / jour / mois)
 
 Dans le menu « Affichage », le découpage n'offre que

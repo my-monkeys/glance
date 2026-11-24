@@ -124,6 +124,21 @@ DateWindow? forecastHistoryWindow(DateWindow w, {DateTime? now}) {
   );
 }
 
+/// Journée à laquelle se compare une journée affichée : la veille, ou le même
+/// jour de la semaine d'avant (un lundi ne ressemble pas à un dimanche).
+enum CompareBase {
+  dayBefore(1),
+  weekBefore(7);
+
+  const CompareBase(this.daysBack);
+  final int daysBack;
+}
+
+/// Vrai si [CompareBase] change la comparaison de [w] : une journée, en cours
+/// ou passée. Les autres fenêtres se comparent à la période d'avant.
+bool compareBaseApplies(DateWindow w) =>
+    calendarScopeOf(w) == CalendarScope.day;
+
 /// Fenêtre « période précédente équivalente », pour la comparaison superposée
 /// sur le graphique (bascule « Comparer »). Distincte de [forecastReferenceWindow] :
 /// celle-ci ne sert qu'aux fenêtres calendaires en cours (pour profiler la
@@ -135,8 +150,12 @@ DateWindow? forecastHistoryWindow(DateWindow w, {DateTime? now}) {
 /// (même s'il est plus court/long que [w] — un mois « en cours » se compare au
 /// mois précédent en entier) ; sinon on décale [w] d'un cran de sa propre durée
 /// (24 h avant, 7/30 j avant, 12 m avant…). Null pour une fenêtre trop large
-/// (« Tout », > 400 j) où un « avant » n'a pas de sens.
-DateWindow? previousPeriodWindow(DateWindow w) {
+/// (« Tout », > 400 j) où un « avant » n'a pas de sens. Une journée se compare
+/// à la veille ou au même jour de la semaine d'avant, selon [base].
+DateWindow? previousPeriodWindow(
+  DateWindow w, {
+  CompareBase base = CompareBase.dayBefore,
+}) {
   // « Tout » n'a pas d'« avant » : l'historique complet se compare au néant, ce
   // qui donnait un delta « ×N » trompeur.
   if (w.allTime) return null;
@@ -148,10 +167,11 @@ DateWindow? previousPeriodWindow(DateWindow w) {
   // comparerait alors à la veille au lieu du mois précédent.
   switch (calendarScopeOf(w)) {
     case CalendarScope.day:
-      final dayStart = DateTime(w.start.year, w.start.month, w.start.day);
+      final from = DateTime(
+          w.start.year, w.start.month, w.start.day - base.daysBack);
       return DateWindow(
-        DateTime(dayStart.year, dayStart.month, dayStart.day - 1),
-        dayStart,
+        from,
+        DateTime(from.year, from.month, from.day + 1),
         w.unit,
       );
     case CalendarScope.month:

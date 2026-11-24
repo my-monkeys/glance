@@ -20,6 +20,7 @@ import '../../theme/motion.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
 import '../dashboards/indicators_tab.dart';
+import '../settings/settings_labels.dart';
 import '../widgets/chart_util.dart';
 import '../widgets/custom_range_picker.dart';
 import '../widgets/common.dart';
@@ -362,6 +363,8 @@ class _DetailBody extends ConsumerWidget {
                 pageviewsTotal: s.pageviews,
                 forecast: forecast,
                 compareSeries: compareSeries,
+                compareLabel: compareLabelFor(context.l10n, window,
+                    ref.watch(settingsProvider.select((s) => s.compareBase))),
                 compareOn: compare,
                 onToggleCompare: previousPeriodWindow(window) == null
                     ? null

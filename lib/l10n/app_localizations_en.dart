@@ -1413,6 +1413,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get periodControlsChart => 'Chart';
 
   @override
+  String get periodControlsCompare => 'Compare with';
+
+  @override
+  String get compareBaseDayBefore => 'Day before';
+
+  @override
+  String get compareBaseWeekBefore => '7 days before';
+
+  @override
   String get periodUnitHour => 'Hour';
 
   @override

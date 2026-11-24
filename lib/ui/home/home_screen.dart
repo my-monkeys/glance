@@ -21,6 +21,7 @@ import '../../theme/palette.dart';
 import '../../theme/type.dart';
 import '../network/internal_screen.dart';
 import '../root_scaffold.dart';
+import '../settings/settings_labels.dart';
 import '../settings/workspaces_screen.dart';
 import '../widgets/custom_range_picker.dart';
 import '../widgets/common.dart';
@@ -548,6 +549,8 @@ class _TotalCard extends ConsumerWidget {
             pageviewsTotal: data.totalPageviews,
             forecast: forecast,
             compareSeries: data.totalCompareSeries,
+            compareLabel: compareLabelFor(context.l10n, window,
+                ref.watch(settingsProvider.select((s) => s.compareBase))),
             compareOn: compare,
             onToggleCompare: previousPeriodWindow(window) == null
                 ? null

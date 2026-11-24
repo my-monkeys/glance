@@ -19,6 +19,7 @@ import '../data/stats_cache.dart';
 import '../core/predict.dart';
 import '../core/semaphore.dart';
 import 'home_data.dart';
+import 'settings.dart';
 import 'workspaces.dart';
 
 /// Garde le résultat d'un provider autoDispose en cache pendant [duration] après
@@ -415,7 +416,12 @@ final siteCompareSeriesProvider = FutureProvider.autoDispose
     .family<List<SeriesPoint>?, (Site, DateWindow)>((ref, key) async {
   cacheSession(ref);
   final (site, w) = key;
-  final prevW = previousPeriodWindow(w);
+  // Le réglage n'est écouté que sur une journée : ailleurs, le changer
+  // relancerait la comparaison pour rien.
+  final base = compareBaseApplies(w)
+      ? ref.watch(settingsProvider.select((s) => s.compareBase))
+      : CompareBase.dayBefore;
+  final prevW = previousPeriodWindow(w, base: base);
   if (prevW == null) return null;
   final gate = ref.watch(fetchGateProvider);
   final p = await analyticsProviderFor(ref, site);

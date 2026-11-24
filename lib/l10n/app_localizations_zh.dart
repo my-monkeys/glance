@@ -1369,6 +1369,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get periodControlsChart => '图表';
 
   @override
+  String get periodControlsCompare => '对比';
+
+  @override
+  String get compareBaseDayBefore => '前一天';
+
+  @override
+  String get compareBaseWeekBefore => '7 天前';
+
+  @override
   String get periodUnitHour => '小时';
 
   @override

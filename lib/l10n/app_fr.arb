@@ -1040,6 +1040,18 @@
   "@periodControlsChart": {
     "description": "Titre de section du menu Affichage : courbe ou barres"
   },
+  "periodControlsCompare": "Comparer à",
+  "@periodControlsCompare": {
+    "description": "Titre de section du menu Affichage : journée à laquelle se compare le jour affiché (seulement sur Aujourd'hui)"
+  },
+  "compareBaseDayBefore": "La veille",
+  "@compareBaseDayBefore": {
+    "description": "Puce du menu Affichage : comparer le jour affiché à la veille"
+  },
+  "compareBaseWeekBefore": "7 jours avant",
+  "@compareBaseWeekBefore": {
+    "description": "Puce du menu Affichage, et légende de la courbe comparée : le même jour, une semaine avant le jour affiché"
+  },
   "periodUnitHour": "Heure",
   "@periodUnitHour": {
     "description": "Granularité du graphique, libellé de puce très court"

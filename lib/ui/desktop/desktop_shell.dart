@@ -22,6 +22,7 @@ import '../../theme/type.dart';
 import '../detail/detail_screen.dart';
 import '../root_scaffold.dart';
 import '../settings/settings_screen.dart';
+import '../settings/settings_labels.dart';
 import '../settings/workspaces_screen.dart';
 import '../widgets/chart_util.dart';
 import '../widgets/custom_range_picker.dart';
@@ -775,6 +776,8 @@ class _OverviewState extends ConsumerState<_Overview> {
                       daily: data.totalDaily,
                     ),
                     compareSeries: data.totalCompareSeries,
+                    compareLabel: compareLabelFor(context.l10n, window,
+                        ref.watch(settingsProvider.select((s) => s.compareBase))),
                     compareOn: periodState.compare,
                     onToggleCompare: previousPeriodWindow(window) == null
                         ? null

@@ -28,6 +28,7 @@ class GlanceChart extends StatelessWidget {
     this.compareSeries,
     this.compareOn = false,
     this.onToggleCompare,
+    this.compareLabel,
     this.hidden = const {},
     this.onToggle,
     this.style = ChartStyle.curve,
@@ -66,6 +67,11 @@ class GlanceChart extends StatelessWidget {
   /// légende disparaît alors.
   final VoidCallback? onToggleCompare;
 
+  /// Nom de la courbe comparée dans la légende et l'infobulle quand
+  /// « Période précédente » ne dit pas assez (une journée comparée à la
+  /// semaine d'avant). Null : « Période précédente ».
+  final String? compareLabel;
+
   /// Séries masquées (clés [kVisitors]/[kPageviews]/[kForecast]) et bascule via
   /// la légende.
   final Set<String> hidden;
@@ -93,8 +99,10 @@ class GlanceChart extends StatelessWidget {
       child: model.drawn.isEmpty
           ? const SizedBox.shrink()
           : switch (style) {
-              ChartStyle.curve => _CurveBody(model: model, palette: p),
-              ChartStyle.bars => _BarsBody(model: model, palette: p),
+              ChartStyle.curve => _CurveBody(
+                  model: model, palette: p, compareLabel: compareLabel),
+              ChartStyle.bars => _BarsBody(
+                  model: model, palette: p, compareLabel: compareLabel),
             },
     );
 
@@ -140,7 +148,7 @@ class GlanceChart extends StatelessWidget {
               if (onToggleCompare != null)
                 _LegendItem(
                   color: p.fg3,
-                  label: context.l10n.chartLegendPrevious,
+                  label: compareLabel ?? context.l10n.chartLegendPrevious,
                   on: compareOn,
                   onTap: onToggleCompare,
                 ),
@@ -153,12 +161,16 @@ class GlanceChart extends StatelessWidget {
   }
 }
 
-String _tooltipLabel(AppLocalizations l10n, ChartSeriesRole role) =>
+String _tooltipLabel(
+  AppLocalizations l10n,
+  ChartSeriesRole role,
+  String? compareLabel,
+) =>
     switch (role) {
       ChartSeriesRole.visitors => l10n.chartTooltipVisitors,
       ChartSeriesRole.pageviews => l10n.chartTooltipPageviews,
       ChartSeriesRole.forecast => l10n.chartTooltipForecast,
-      ChartSeriesRole.compare => l10n.chartTooltipPrevious,
+      ChartSeriesRole.compare => compareLabel ?? l10n.chartTooltipPrevious,
     };
 
 /// Contenu du tooltip, partagé par les deux moteurs : une date en entête, puis
@@ -171,6 +183,7 @@ List<TextSpan> _tooltipLines({
   required ChartModel model,
   required int x,
   required GlancePalette p,
+  String? compareLabel,
   Iterable<ChartSeries>? only,
 }) {
   final spans = <TextSpan>[];
@@ -186,7 +199,7 @@ List<TextSpan> _tooltipLines({
       style: GT.stat(14, color: fc ? p.forecast : p.bg),
     ));
     spans.add(TextSpan(
-      text: '${_tooltipLabel(l10n, s.role)}\n',
+      text: '${_tooltipLabel(l10n, s.role, compareLabel)}\n',
       style: GT.mono(9, color: p.fg3),
     ));
   }
@@ -200,9 +213,14 @@ List<TextSpan> _tooltipLines({
 
 /// Rendu en courbes lissées (défaut).
 class _CurveBody extends StatelessWidget {
-  const _CurveBody({required this.model, required this.palette});
+  const _CurveBody({
+    required this.model,
+    required this.palette,
+    this.compareLabel,
+  });
   final ChartModel model;
   final GlancePalette palette;
+  final String? compareLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -290,7 +308,12 @@ class _CurveBody extends StatelessWidget {
                 LineTooltipItem(
                   '$date\n',
                   GT.mono(10, color: p.fg3),
-                  children: _tooltipLines(l10n: context.l10n, model: m, x: x, p: p),
+                  children: _tooltipLines(
+                      l10n: context.l10n,
+                      model: m,
+                      x: x,
+                      p: p,
+                      compareLabel: compareLabel),
                 ),
                 for (var i = 1; i < touched.length; i++) null,
               ];
@@ -325,9 +348,14 @@ class _CurveBody extends StatelessWidget {
 /// remplissage atténué bordée de pointillés — une barre ne peut pas être
 /// tracée en trait discontinu.
 class _BarsBody extends StatelessWidget {
-  const _BarsBody({required this.model, required this.palette});
+  const _BarsBody({
+    required this.model,
+    required this.palette,
+    this.compareLabel,
+  });
   final ChartModel model;
   final GlancePalette palette;
+  final String? compareLabel;
 
   /// Largeur plancher d'une barre. Un découpage fin en donne des centaines :
   /// elles deviennent des traits, et c'est très bien — on a demandé des barres,
@@ -392,7 +420,12 @@ class _BarsBody extends StatelessWidget {
                 getTooltipItem: (group, gi, rod, ri) => BarTooltipItem(
                   '${chartTooltipDate(context.l10n, m.timeAt(group.x), m.unit)}\n',
                   GT.mono(10, color: p.fg3),
-                  children: _tooltipLines(l10n: context.l10n, model: m, x: group.x, p: p),
+                  children: _tooltipLines(
+                      l10n: context.l10n,
+                      model: m,
+                      x: group.x,
+                      p: p,
+                      compareLabel: compareLabel),
                 ),
               ),
             ),

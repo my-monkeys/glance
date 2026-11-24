@@ -2404,6 +2404,24 @@ abstract class AppLocalizations {
   /// **'Graphique'**
   String get periodControlsChart;
 
+  /// Titre de section du menu Affichage : journée à laquelle se compare le jour affiché (seulement sur Aujourd'hui)
+  ///
+  /// In fr, this message translates to:
+  /// **'Comparer à'**
+  String get periodControlsCompare;
+
+  /// Puce du menu Affichage : comparer le jour affiché à la veille
+  ///
+  /// In fr, this message translates to:
+  /// **'La veille'**
+  String get compareBaseDayBefore;
+
+  /// Puce du menu Affichage, et légende de la courbe comparée : le même jour, une semaine avant le jour affiché
+  ///
+  /// In fr, this message translates to:
+  /// **'7 jours avant'**
+  String get compareBaseWeekBefore;
+
   /// Granularité du graphique, libellé de puce très court
   ///
   /// In fr, this message translates to:

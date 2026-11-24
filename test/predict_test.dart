@@ -52,6 +52,42 @@ void main() {
   });
 
   group('previousPeriodWindow', () {
+    test("aujourd'hui comparé à 7 jours avant → même jour de la semaine d'avant",
+        () {
+      final w = Period.today.window(now: now);
+      final prev = previousPeriodWindow(w, base: CompareBase.weekBefore)!;
+      expect(prev.start, DateTime(2026, 8, 4));
+      expect(prev.end, DateTime(2026, 8, 5));
+      expect(prev.unit, TimeUnit.hour);
+    });
+
+    test('un jour passé se compare au même jour une semaine plus tôt', () {
+      final w = Period.today.window(now: now, dayOffset: -3); // samedi 8
+      final prev = previousPeriodWindow(w, base: CompareBase.weekBefore)!;
+      expect(prev.start, DateTime(2026, 8, 1));
+      expect(prev.end, DateTime(2026, 8, 2));
+    });
+
+    test('7 jours avant franchit le début du mois', () {
+      final now = DateTime(2026, 9, 3, 9, 0);
+      final prev = previousPeriodWindow(Period.today.window(now: now),
+          base: CompareBase.weekBefore)!;
+      expect(prev.start, DateTime(2026, 8, 27));
+      expect(prev.end, DateTime(2026, 8, 28));
+    });
+
+    test('la base ne change que la journée', () {
+      for (final period in [Period.h24, Period.d7, Period.thisMonth]) {
+        final w = period.window(now: now);
+        expect(compareBaseApplies(w), isFalse, reason: period.name);
+        expect(previousPeriodWindow(w, base: CompareBase.weekBefore),
+            previousPeriodWindow(w), reason: period.name);
+      }
+      expect(compareBaseApplies(Period.today.window(now: now)), isTrue);
+      expect(compareBaseApplies(Period.today.window(now: now, dayOffset: -1)),
+          isTrue);
+    });
+
     test('today : la journée calendaire d\'avant (pas un décalage de span)',
         () {
       final w = Period.today.window(now: now);

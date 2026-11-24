@@ -1431,6 +1431,15 @@ class AppLocalizationsDe extends AppLocalizations {
   String get periodControlsChart => 'Diagramm';
 
   @override
+  String get periodControlsCompare => 'Vergleichen mit';
+
+  @override
+  String get compareBaseDayBefore => 'Vortag';
+
+  @override
+  String get compareBaseWeekBefore => '7 Tage davor';
+
+  @override
   String get periodUnitHour => 'Stunde';
 
   @override
