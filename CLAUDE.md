@@ -225,7 +225,14 @@ cours **ou** passée) ; ailleurs la comparaison reste la période d'avant.
   ne relance que la série comparée.
 - La légende et l'infobulle disent « 7 jours avant » au lieu de « Période
   précédente » (`compareLabelFor` → `GlanceChart.compareLabel`).
-- Les deltas des KPI restent ceux d'Umami (`comparison` de `/stats`) : la veille.
+- **Le delta des visiteurs suit la même référence que la légende**
+  (`deltaUsesPreviousSoFar`) : comparaison cochée, ou journée face à 7 jours avant
+  → le chiffre de « Période précédente » (`siteCompareVisitorsProvider`) ; sinon le
+  `comparison` d'Umami, gratuit. Vécu : « ▼ 25,6 % » (contre hier) à côté de
+  « 183 · 7 jours avant » pour 201 visiteurs. Pendant que la référence charge, pas
+  de delta (`SiteCard.deltaBase` null, **sans repli** sur `summary.prevVisitors`),
+  et le total ne compare que les cartes qui ont la leur (`comparedVisitors`). Les
+  widgets natifs publient le même delta que l'app.
 
 **Le chiffre de « Période précédente »** dans la légende = visiteurs uniques de la
 période comparée **arrêtée au même point d'avancement** (`previousPeriodSoFar`) : à

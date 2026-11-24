@@ -414,9 +414,15 @@ class _SiteStatSlot extends ConsumerWidget {
       return grid ? const _GridSkeleton() : const _TileSkeleton();
     }
 
+    final soFar = deltaUsesPreviousSoFar(window,
+        compare: ref.watch(periodProvider.select((s) => s.compare)),
+        base: ref.watch(settingsProvider.select((s) => s.compareBase)));
     final card = SiteCard(
       site: site,
       summary: sv.summary,
+      deltaBase: soFar
+          ? ref.watch(siteCompareVisitorsProvider((site, window))).value
+          : sv.summary.prevVisitors,
       // Rogne le préfixe vide sur une fenêtre large (« Tout ») : sans effet
       // ailleurs — sinon la sparkline reste plate jusqu'à la vraie 1ère donnée.
       series: displaySeries(sv.series, window),

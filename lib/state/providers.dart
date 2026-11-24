@@ -469,12 +469,15 @@ final homeTotalsProvider =
   var pending = 0;
   var loading = sitesAsync.isLoading;
 
+  final soFar = deltaUsesPreviousSoFar(w,
+      compare: compare,
+      base: ref.watch(settingsProvider.select((s) => s.compareBase)));
   for (final s in sites) {
     final stats = ref.watch(siteStatsProvider((s, w)));
     final live = ref.watch(siteLiveProvider(s));
     final cmp = compare ? ref.watch(siteCompareSeriesProvider((s, w))) : null;
     final cmpVisitors =
-        compare ? ref.watch(siteCompareVisitorsProvider((s, w))) : null;
+        soFar ? ref.watch(siteCompareVisitorsProvider((s, w))) : null;
     if (stats.isLoading || live.isLoading) loading = true;
     // Seed depuis le cache disque au démarrage à froid : la carte s'affiche
     // avec la dernière valeur connue au lieu d'un squelette, le refresh corrige.
@@ -489,6 +492,9 @@ final homeTotalsProvider =
         daily: sv.daily,
         compareSeries: cmp?.value,
         compareVisitors: cmpVisitors?.value,
+        // Rien plutôt qu'un delta contre la mauvaise référence le temps
+        // qu'elle arrive.
+        deltaBase: soFar ? cmpVisitors?.value : sv.summary.prevVisitors,
       ));
     } else {
       pending++;

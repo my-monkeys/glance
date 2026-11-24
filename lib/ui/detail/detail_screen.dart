@@ -327,9 +327,14 @@ class _DetailBody extends ConsumerWidget {
     final compareSeries = compare
         ? ref.watch(siteCompareSeriesProvider((site, window))).value
         : null;
-    final compareVisitors = compare
+    final soFar = deltaUsesPreviousSoFar(window,
+        compare: compare,
+        base: ref.watch(settingsProvider.select((s) => s.compareBase)));
+    final compareVisitors = soFar
         ? ref.watch(siteCompareVisitorsProvider((site, window))).value
         : null;
+    final delta = visitorsDelta(
+        s.visitors, soFar ? compareVisitors : s.prevVisitors);
     final live = ref.watch(siteLiveProvider(site)).value ?? 0;
     final livePages =
         ref.watch(siteLivePagesProvider(site)).value ?? const <LivePage>[];
@@ -352,7 +357,7 @@ class _DetailBody extends ConsumerWidget {
                   const SizedBox(width: 12),
                   Padding(
                     padding: const EdgeInsets.only(bottom: 10),
-                    child: DeltaText(s.visitorsDeltaPct, fontSize: 13),
+                    child: DeltaText(delta, fontSize: 13),
                   ),
                 ],
               ),

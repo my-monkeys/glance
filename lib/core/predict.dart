@@ -193,6 +193,19 @@ DateWindow? previousPeriodWindow(
   }
 }
 
+/// Le delta des visiteurs se compare au chiffre de « Période précédente » de la
+/// légende ([previousPeriodSoFar]) quand elle l'affiche, ou quand une journée se
+/// compare à 7 jours avant : deux références différentes à l'écran donnaient
+/// « ▼ 25 % » à côté d'une période précédente plus basse que le chiffre du
+/// jour. Sinon, la période précédente de même durée qu'Umami rend avec les
+/// stats, sans requête de plus.
+bool deltaUsesPreviousSoFar(
+  DateWindow w, {
+  required bool compare,
+  required CompareBase base,
+}) =>
+    compare || (compareBaseApplies(w) && base == CompareBase.weekBefore);
+
 /// Période précédente arrêtée au même point d'avancement que [w] : à 14 h 30,
 /// hier (ou le même jour de la semaine d'avant) de 0 h à 14 h 30 ; le 24, le
 /// mois dernier du 1er au 24 à la même heure. Une fenêtre terminée se compare

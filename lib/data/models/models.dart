@@ -66,12 +66,7 @@ class StatsSummary {
   );
 
   /// Delta visiteurs vs période précédente, en %. null si non calculable.
-  double? get visitorsDeltaPct => _delta(visitors, prevVisitors);
-
-  static double? _delta(int cur, int? prev) {
-    if (prev == null || prev == 0) return null;
-    return (cur - prev) / prev * 100;
-  }
+  double? get visitorsDeltaPct => visitorsDelta(visitors, prevVisitors);
 
   Duration get avgVisit => Duration(seconds: avgVisitSec);
 }
@@ -164,4 +159,10 @@ class EventsData {
   /// Répartition par nom d'événement (dérivée des totaux).
   List<MetricRow> get breakdown =>
       series.map((e) => MetricRow(label: e.name, value: e.total)).toList();
+}
+
+/// Évolution en % de [prev] à [cur] ; null sans référence ou face à zéro.
+double? visitorsDelta(int cur, int? prev) {
+  if (prev == null || prev == 0) return null;
+  return (cur - prev) / prev * 100;
 }
