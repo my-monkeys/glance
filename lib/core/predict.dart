@@ -206,18 +206,32 @@ DateWindow? previousPeriodWindow(
   }
 }
 
-/// Le delta des visiteurs se compare au chiffre de « Période précédente » de la
-/// légende ([previousPeriodSoFar]) quand elle l'affiche, ou quand une journée se
-/// compare à 7 jours avant : deux références différentes à l'écran donnaient
-/// « ▼ 25 % » à côté d'une période précédente plus basse que le chiffre du
-/// jour. Sinon, la période précédente de même durée qu'Umami rend avec les
-/// stats, sans requête de plus.
+/// Vrai quand le delta des visiteurs se compare à [previousPeriodSoFar] (le
+/// chiffre de « Période précédente » dans la légende) plutôt qu'au
+/// `comparison` qu'Umami rend avec les stats, sans requête de plus :
+/// - comparaison affichée : deux références différentes à l'écran donnaient
+///   « ▼ 25 % » à côté d'une période précédente plus basse que le chiffre du
+///   jour ;
+/// - semaine, mois, année : Umami compare à la même **durée** juste avant. Un
+///   mardi à 14 h 30, « cette semaine » se comparait au week-end ; le 24,
+///   « ce mois-ci » aux 24 derniers jours d'octobre. Ici, à la semaine, au mois
+///   ou à l'année d'avant, au même avancement ;
+/// - journée face à 7 jours avant. Face à la veille, le `comparison` d'Umami
+///   est déjà « hier jusqu'à la même heure » (la requête s'arrête à maintenant).
+///
+/// Une fenêtre glissante (24 h, 7 j…) se compare bien à la durée d'avant.
 bool deltaUsesPreviousSoFar(
   DateWindow w, {
   required bool compare,
   required CompareBase base,
-}) =>
-    compare || (compareBaseApplies(w) && base == CompareBase.weekBefore);
+}) {
+  if (compare) return true;
+  return switch (calendarScopeOf(w)) {
+    CalendarScope.day => base == CompareBase.weekBefore,
+    CalendarScope.week || CalendarScope.month || CalendarScope.year => true,
+    CalendarScope.sliding => false,
+  };
+}
 
 /// Période précédente arrêtée au même point d'avancement que [w] : à 14 h 30,
 /// hier (ou le même jour de la semaine d'avant) de 0 h à 14 h 30 ; le 24, le

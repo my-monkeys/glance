@@ -73,6 +73,24 @@ void main() {
           isTrue);
     });
 
+    test('semaine, mois, année : la période civile d’avant, même avancement',
+        () {
+      for (final period in [Period.thisWeek, Period.thisMonth, Period.thisYear]) {
+        expect(
+            deltaUsesPreviousSoFar(period.window(now: now),
+                compare: false, base: CompareBase.dayBefore),
+            isTrue,
+            reason: period.name);
+      }
+      // Un mois passé aussi : octobre face à septembre, pas aux 31 jours d'avant.
+      expect(
+          deltaUsesPreviousSoFar(
+              Period.thisMonth.window(now: now, monthOffset: -1),
+              compare: false,
+              base: CompareBase.dayBefore),
+          isTrue);
+    });
+
     test('sinon, la référence d’Umami suffit (aucune requête de plus)', () {
       expect(
           deltaUsesPreviousSoFar(today,
