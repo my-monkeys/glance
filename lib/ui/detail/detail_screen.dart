@@ -87,6 +87,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
     final w = ref.read(windowProvider);
     if (w == null) return;
     ref.invalidate(siteStatsProvider((widget.site, w)));
+    ref.invalidate(siteCompareVisitorsProvider((widget.site, w)));
     ref.invalidate(siteLiveProvider(widget.site));
     ref.invalidate(siteLivePagesProvider(widget.site));
     if (_tab == _DetailTab.events) {
@@ -326,6 +327,9 @@ class _DetailBody extends ConsumerWidget {
     final compareSeries = compare
         ? ref.watch(siteCompareSeriesProvider((site, window))).value
         : null;
+    final compareVisitors = compare
+        ? ref.watch(siteCompareVisitorsProvider((site, window))).value
+        : null;
     final live = ref.watch(siteLiveProvider(site)).value ?? 0;
     final livePages =
         ref.watch(siteLivePagesProvider(site)).value ?? const <LivePage>[];
@@ -363,6 +367,7 @@ class _DetailBody extends ConsumerWidget {
                 pageviewsTotal: s.pageviews,
                 forecast: forecast,
                 compareSeries: compareSeries,
+                compareTotal: compareVisitors,
                 compareLabel: compareLabelFor(context.l10n, window,
                     ref.watch(settingsProvider.select((s) => s.compareBase))),
                 compareOn: compare,

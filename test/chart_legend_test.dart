@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:glance/core/format.dart';
 import 'package:glance/data/models/models.dart';
 import 'package:glance/data/models/period.dart';
 import 'package:glance/state/period_state.dart';
@@ -16,7 +17,7 @@ final _series = [
 ];
 
 Future<ProviderContainer> _pump(WidgetTester tester,
-    {bool comparable = true, String? compareLabel}) async {
+    {bool comparable = true, String? compareLabel, int? compareTotal}) async {
   SharedPreferences.setMockInitialValues({});
   final prefs = await SharedPreferences.getInstance();
   await tester.pumpWidget(ProviderScope(
@@ -39,6 +40,7 @@ Future<ProviderContainer> _pump(WidgetTester tester,
                 ? ref.read(periodProvider.notifier).toggleCompare
                 : null,
             compareLabel: compareLabel,
+            compareTotal: compareTotal,
           ),
         ),
       ),
@@ -88,5 +90,14 @@ void main() {
     await _pump(tester, compareLabel: '7 jours avant');
     expect(find.text('7 jours avant'), findsOneWidget);
     expect(item, findsNothing);
+  });
+
+  testWidgets('le total comparé ne s’affiche que comparaison cochée',
+      (tester) async {
+    final container = await _pump(tester, compareTotal: 4321);
+    expect(find.text(fmtInt(4321)), findsNothing);
+    container.read(periodProvider.notifier).toggleCompare();
+    await tester.pumpAndSettle();
+    expect(find.text(fmtInt(4321)), findsOneWidget);
   });
 }

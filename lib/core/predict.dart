@@ -193,6 +193,43 @@ DateWindow? previousPeriodWindow(
   }
 }
 
+/// Période précédente arrêtée au même point d'avancement que [w] : à 14 h 30,
+/// hier (ou le même jour de la semaine d'avant) de 0 h à 14 h 30 ; le 24, le
+/// mois dernier du 1er au 24 à la même heure. Une fenêtre terminée se compare
+/// à la période précédente entière. Null si [w] n'a pas d'« avant ».
+///
+/// Le décalage suit le calendrier (jours, mois, années), pas une durée : un
+/// changement d'heure entre les deux périodes décalerait la borne d'une heure.
+/// Il est borné à la fin de la période précédente (le 31 mars face à février).
+DateWindow? previousPeriodSoFar(
+  DateWindow w, {
+  CompareBase base = CompareBase.dayBefore,
+  DateTime? now,
+}) {
+  final prev = previousPeriodWindow(w, base: base);
+  if (prev == null) return null;
+  final n = now ?? DateTime.now();
+  if (!w.end.isAfter(n)) return prev;
+
+  DateTime shifted({int years = 0, int months = 0, int days = 0}) => DateTime(
+        n.year - years,
+        n.month - months,
+        n.day - days,
+        n.hour,
+        n.minute,
+        n.second,
+      );
+  final cut = switch (calendarScopeOf(w)) {
+    CalendarScope.day => shifted(days: base.daysBack),
+    CalendarScope.month => shifted(months: 1),
+    CalendarScope.year => shifted(years: 1),
+    CalendarScope.sliding => n.subtract(w.end.difference(w.start)),
+  };
+  final end = cut.isAfter(prev.end) ? prev.end : cut;
+  return DateWindow(prev.start, end.isBefore(prev.start) ? prev.start : end,
+      prev.unit);
+}
+
 /// Série prête à afficher pour la période « Tout » : écarte les buckets vides
 /// en tête pour ne pas peindre un long trait plat avant la première vraie
 /// donnée. Sans effet sur les autres fenêtres.

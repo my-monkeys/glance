@@ -29,6 +29,7 @@ class GlanceChart extends StatelessWidget {
     this.compareOn = false,
     this.onToggleCompare,
     this.compareLabel,
+    this.compareTotal,
     this.hidden = const {},
     this.onToggle,
     this.style = ChartStyle.curve,
@@ -71,6 +72,10 @@ class GlanceChart extends StatelessWidget {
   /// « Période précédente » ne dit pas assez (une journée comparée à la
   /// semaine d'avant). Null : « Période précédente ».
   final String? compareLabel;
+
+  /// Visiteurs de la période comparée au même point d'avancement, affichés
+  /// dans sa légende comme les totaux des autres courbes.
+  final int? compareTotal;
 
   /// Séries masquées (clés [kVisitors]/[kPageviews]/[kForecast]) et bascule via
   /// la légende.
@@ -149,6 +154,7 @@ class GlanceChart extends StatelessWidget {
                 _LegendItem(
                   color: p.fg3,
                   label: compareLabel ?? context.l10n.chartLegendPrevious,
+                  value: compareOn ? compareTotal : null,
                   on: compareOn,
                   onTap: onToggleCompare,
                 ),

@@ -48,6 +48,7 @@ class SiteCard {
     this.refSeries,
     this.daily,
     this.compareSeries,
+    this.compareVisitors,
   });
 
   final Site site;
@@ -61,6 +62,10 @@ class SiteCard {
   /// quand la comparaison est activée (cf. `PeriodState.compare`). Null tant
   /// qu'elle n'a pas été demandée ou que la période n'a pas d'équivalent.
   final List<SeriesPoint>? compareSeries;
+
+  /// Visiteurs de la période comparée au même point d'avancement (cf.
+  /// `previousPeriodSoFar`). Null tant qu'ils ne sont pas arrivés.
+  final int? compareVisitors;
 
   double? get deltaPct => summary.visitorsDeltaPct;
   bool get up => (deltaPct ?? 0) >= 0;
@@ -79,6 +84,7 @@ class HomeData {
     this.totalRefSeries,
     this.totalDaily,
     this.totalCompareSeries,
+    this.totalCompareVisitors,
   });
 
   final List<SiteCard> cards;
@@ -109,6 +115,10 @@ class HomeData {
   /// Série de comparaison cumulée (période précédente, toutes cartes).
   final List<SeriesPoint>? totalCompareSeries;
 
+  /// Visiteurs de la période comparée au même point d'avancement, sommés sur
+  /// les cartes qui les ont reçus (comme [totalVisitors]). Null : aucune.
+  final int? totalCompareVisitors;
+
   double? get totalDeltaPct {
     final p = prevTotalVisitors;
     if (p == null || p == 0) return null;
@@ -127,7 +137,10 @@ class HomeData {
     var totalVisits = 0;
     var totalPageviews = 0;
     var totalLive = 0;
+    int? totalCompareVisitors;
     for (final c in cards) {
+      final cv = c.compareVisitors;
+      if (cv != null) totalCompareVisitors = (totalCompareVisitors ?? 0) + cv;
       totalVisitors += c.summary.visitors;
       totalVisits += c.summary.visits;
       totalPageviews += c.summary.pageviews;
@@ -204,6 +217,7 @@ class HomeData {
       totalRefSeries: totalRef,
       totalDaily: _sumByDate([for (final c in cards) c.daily]),
       totalCompareSeries: totalCompare,
+      totalCompareVisitors: totalCompareVisitors,
     );
   }
 }

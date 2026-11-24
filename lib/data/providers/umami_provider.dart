@@ -152,10 +152,16 @@ class UmamiProvider extends AnalyticsProvider {
   }
 
   @override
-  Future<StatsSummary> summary(Site site, DateWindow w) async {
+  Future<StatsSummary> summary(Site site, DateWindow w, {DateTime? now}) async {
+    // La fenêtre finit à la fin de l'heure en cours (clé de provider stable).
+    // La requête, elle, s'arrête à maintenant : Umami compare à la même durée
+    // juste avant, et à 14 h 30 il comparait 14 h 30 d'aujourd'hui à 15 h
+    // d'hier — un delta biaisé vers le bas, jusqu'à une heure de trafic.
+    final nowMs = (now ?? DateTime.now()).millisecondsSinceEpoch;
+    final endMs = w.endMs < nowMs ? w.endMs : nowMs;
     final d = await _get('$_api/websites/${site.id}/stats', {
       'startAt': w.startMs,
-      'endAt': w.endMs,
+      'endAt': endMs,
     }) as Map;
     // v3 peuple `comparison` avec la période précédente de même durée — vérifié
     // au chiffre près contre un appel manuel. Un 2e aller-retour serait payé
@@ -163,7 +169,7 @@ class UmamiProvider extends AnalyticsProvider {
     final prev = d['comparison'] is Map
         ? (d['comparison'] as Map)
         : await _get('$_api/websites/${site.id}/stats', {
-            'startAt': w.start.subtract(w.end.difference(w.start)).millisecondsSinceEpoch,
+            'startAt': 2 * w.startMs - endMs,
             'endAt': w.startMs,
           }).catchError((_) => <String, dynamic>{}) as Map;
 

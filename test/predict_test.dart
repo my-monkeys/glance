@@ -186,6 +186,56 @@ void main() {
     });
   });
 
+  group('previousPeriodSoFar', () {
+    test("aujourd'hui à 12 h 30 → hier de 0 h à 12 h 30", () {
+      final prev = previousPeriodSoFar(Period.today.window(now: now), now: now)!;
+      expect(prev.start, DateTime(2026, 8, 10));
+      expect(prev.end, DateTime(2026, 8, 10, 12, 30));
+    });
+
+    test('7 jours avant → le même jour de la semaine, à la même heure', () {
+      final prev = previousPeriodSoFar(Period.today.window(now: now),
+          base: CompareBase.weekBefore, now: now)!;
+      expect(prev.start, DateTime(2026, 8, 4));
+      expect(prev.end, DateTime(2026, 8, 4, 12, 30));
+    });
+
+    test('un jour terminé se compare à la veille entière', () {
+      final prev = previousPeriodSoFar(
+          Period.today.window(now: now, dayOffset: -1), now: now)!;
+      expect(prev.start, DateTime(2026, 8, 9));
+      expect(prev.end, DateTime(2026, 8, 10));
+    });
+
+    test('ce mois-ci le 11 → le mois dernier du 1er au 11, même heure', () {
+      final prev =
+          previousPeriodSoFar(Period.thisMonth.window(now: now), now: now)!;
+      expect(prev.start, DateTime(2026, 7, 1));
+      expect(prev.end, DateTime(2026, 7, 11, 12, 30));
+    });
+
+    test('le 31 mars face à février : borné à la fin de février', () {
+      final now = DateTime(2026, 3, 31, 10);
+      final prev =
+          previousPeriodSoFar(Period.thisMonth.window(now: now), now: now)!;
+      expect(prev.start, DateTime(2026, 2, 1));
+      expect(prev.end, DateTime(2026, 3, 1));
+    });
+
+    test('fenêtre glissante : la même durée écoulée, une période plus tôt', () {
+      final w = Period.d7.window(now: now);
+      final prev = previousPeriodSoFar(w, now: now)!;
+      final span = w.end.difference(w.start);
+      expect(prev.start, w.start.subtract(span));
+      expect(prev.end, now.subtract(span));
+    });
+
+    test('« Tout » n’a pas d’avant', () {
+      final w = DateWindow(DateTime(2020), now, TimeUnit.month, allTime: true);
+      expect(previousPeriodSoFar(w, now: now), isNull);
+    });
+  });
+
   group('displaySeries', () {
     // « Tout » : le rognage se déclenche sur ce drapeau, pas sur la durée — un
     // site jeune a un « Tout » de trois mois.

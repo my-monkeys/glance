@@ -62,6 +62,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       if (w == null) return;
       for (final s in ref.read(visibleSitesProvider).value ?? const <Site>[]) {
         ref.invalidate(siteStatsProvider((s, w)));
+        ref.invalidate(siteCompareVisitorsProvider((s, w)));
       }
       ref.invalidate(siteLiveProvider);
     });
@@ -122,7 +123,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             // Ne réactualise que la fenêtre courante (cache des autres périodes
             // préservé) ; les valeurs se mettent à jour en place.
             for (final s in sites) {
-              if (window != null) ref.invalidate(siteStatsProvider((s, window)));
+              if (window == null) continue;
+              ref.invalidate(siteStatsProvider((s, window)));
+              ref.invalidate(siteCompareVisitorsProvider((s, window)));
             }
             ref.invalidate(siteLiveProvider);
             // Tirer pour rafraîchir fait aussi apparaître un site créé depuis le
@@ -549,6 +552,7 @@ class _TotalCard extends ConsumerWidget {
             pageviewsTotal: data.totalPageviews,
             forecast: forecast,
             compareSeries: data.totalCompareSeries,
+            compareTotal: data.totalCompareVisitors,
             compareLabel: compareLabelFor(context.l10n, window,
                 ref.watch(settingsProvider.select((s) => s.compareBase))),
             compareOn: compare,

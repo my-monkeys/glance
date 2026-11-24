@@ -207,4 +207,50 @@ void main() {
     expect([for (final l in pages) (l.path, l.count)], [('/a', 2), ('/b', 1)]);
     expect(fake.seen.single.uri.path, '/v1/realtime/w1');
   });
+
+  group('Résumé', () {
+    const site = Site(id: 'w1', accountId: 'a', name: 'Blog', domain: 'b');
+    const stats = {'visitors': 12, 'pageviews': 30, 'visits': 15, 'bounces': 3};
+    final now = DateTime(2026, 11, 24, 14, 30);
+
+    test("s'arrête à maintenant, pas à la fin de l'heure : delta à durée égale",
+        () async {
+      final (p, fake) = _provider(UmamiProvider.cloudBase, {'apiKey': 'k'}, {
+        '/v1/websites/w1/stats': (
+          200,
+          {...stats, 'comparison': {'visitors': 10, 'pageviews': 25}},
+        ),
+      });
+      final w = Period.today.window(now: now); // 0 h → 15 h
+      final s = await p.summary(site, w, now: now);
+
+      final q = fake.seen.single.uri.queryParameters;
+      expect(q['startAt'], '${DateTime(2026, 11, 24).millisecondsSinceEpoch}');
+      expect(q['endAt'], '${now.millisecondsSinceEpoch}');
+      expect(s.prevVisitors, 10);
+    });
+
+    test('une fenêtre terminée garde sa fin', () async {
+      final (p, fake) = _provider(UmamiProvider.cloudBase, {'apiKey': 'k'}, {
+        '/v1/websites/w1/stats': (200, {...stats, 'comparison': stats}),
+      });
+      final w = Period.today.window(now: now, dayOffset: -1);
+      await p.summary(site, w, now: now);
+      expect(fake.seen.single.uri.queryParameters['endAt'], '${w.endMs}');
+    });
+
+    test('sans `comparison`, la période d’avant a la même durée écoulée',
+        () async {
+      final (p, fake) = _provider(UmamiProvider.cloudBase, {'apiKey': 'k'}, {
+        '/v1/websites/w1/stats': (200, stats),
+      });
+      final w = Period.today.window(now: now);
+      await p.summary(site, w, now: now);
+
+      final prev = fake.seen[1].uri.queryParameters;
+      expect(prev['startAt'],
+          '${DateTime(2026, 11, 23, 9, 30).millisecondsSinceEpoch}');
+      expect(prev['endAt'], '${w.startMs}');
+    });
+  });
 }

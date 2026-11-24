@@ -660,6 +660,7 @@ class _OverviewState extends ConsumerState<_Overview> {
       if (w == null) return;
       for (final s in ref.read(visibleSitesProvider).value ?? const <Site>[]) {
         ref.invalidate(siteStatsProvider((s, w)));
+        ref.invalidate(siteCompareVisitorsProvider((s, w)));
       }
       ref.invalidate(siteLiveProvider);
     });
@@ -776,6 +777,7 @@ class _OverviewState extends ConsumerState<_Overview> {
                       daily: data.totalDaily,
                     ),
                     compareSeries: data.totalCompareSeries,
+                    compareTotal: data.totalCompareVisitors,
                     compareLabel: compareLabelFor(context.l10n, window,
                         ref.watch(settingsProvider.select((s) => s.compareBase))),
                     compareOn: periodState.compare,

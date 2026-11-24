@@ -227,6 +227,22 @@ cours **ou** passée) ; ailleurs la comparaison reste la période d'avant.
   précédente » (`compareLabelFor` → `GlanceChart.compareLabel`).
 - Les deltas des KPI restent ceux d'Umami (`comparison` de `/stats`) : la veille.
 
+**Le chiffre de « Période précédente »** dans la légende = visiteurs uniques de la
+période comparée **arrêtée au même point d'avancement** (`previousPeriodSoFar`) : à
+14 h 30, hier (ou 7 jours avant) de 0 h à 14 h 30 ; le 24, le mois dernier du 1er au
+24. Décalage calendaire, pas une durée (un changement d'heure décalerait d'une
+heure), borné à la fin de la période d'avant. Une fenêtre terminée se compare à la
+période d'avant entière. Une requête `/stats` par site (`siteCompareVisitorsProvider`),
+seulement comparaison cochée, **invalidée avec `siteStatsProvider`** à chaque tick :
+le chiffre avance avec l'heure. Plausible ne prend que des dates : il compte la
+journée entière.
+
+⚠️ **`/stats` s'arrête à maintenant, pas à `w.end`** (`UmamiProvider.summary`). La
+fenêtre finit à la fin de l'heure en cours (clé stable), et Umami calcule
+`comparison` sur la même durée juste avant : à 14 h 30, il comparait 14 h 30
+d'aujourd'hui à 15 h d'hier, un delta biaisé vers le bas (jusqu'à une heure de
+trafic en trop dans la référence). Seule la requête est bornée, jamais la fenêtre.
+
 ### Découpage du graphique (heure / jour / mois)
 
 Dans le menu « Affichage », le découpage n'offre que
