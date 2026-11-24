@@ -19,6 +19,7 @@ import '../data/stats_cache.dart';
 import '../core/predict.dart';
 import '../core/semaphore.dart';
 import 'home_data.dart';
+import 'settings.dart';
 import 'workspaces.dart';
 
 /// Garde le résultat d'un provider autoDispose en cache pendant [duration] après
@@ -415,13 +416,40 @@ final siteCompareSeriesProvider = FutureProvider.autoDispose
     .family<List<SeriesPoint>?, (Site, DateWindow)>((ref, key) async {
   cacheSession(ref);
   final (site, w) = key;
-  final prevW = previousPeriodWindow(w);
+  // Le réglage n'est écouté que sur une journée : ailleurs, le changer
+  // relancerait la comparaison pour rien.
+  final base = compareBaseApplies(w)
+      ? ref.watch(settingsProvider.select((s) => s.compareBase))
+      : CompareBase.dayBefore;
+  final prevW = previousPeriodWindow(w, base: base);
   if (prevW == null) return null;
   final gate = ref.watch(fetchGateProvider);
   final p = await analyticsProviderFor(ref, site);
   return gate
       .run(() => p.series(site, prevW), urgent: _urgent(ref, site))
       .catchError((_) => <SeriesPoint>[]);
+});
+
+/// Visiteurs uniques de la période comparée, arrêtée au même point
+/// d'avancement que [w] (cf. [previousPeriodSoFar]) : le chiffre de « Période
+/// précédente » dans la légende. Une requête de plus par site, seulement quand
+/// la comparaison est affichée ; rafraîchi avec les stats, puisqu'il avance
+/// avec l'heure.
+final siteCompareVisitorsProvider =
+    FutureProvider.autoDispose.family<int?, (Site, DateWindow)>((ref, key) async {
+  cacheSession(ref);
+  final (site, w) = key;
+  final base = compareBaseApplies(w)
+      ? ref.watch(settingsProvider.select((s) => s.compareBase))
+      : CompareBase.dayBefore;
+  final soFar = previousPeriodSoFar(w, base: base);
+  if (soFar == null) return null;
+  final gate = ref.watch(fetchGateProvider);
+  final p = await analyticsProviderFor(ref, site);
+  return gate
+      .run(() => p.summary(site, soFar), urgent: _urgent(ref, site))
+      .then<int?>((s) => s.visitors)
+      .catchError((_) => null);
 });
 
 /// Agrégat vivant de la home : recalculé à chaque site qui se charge (watch de
@@ -441,10 +469,15 @@ final homeTotalsProvider =
   var pending = 0;
   var loading = sitesAsync.isLoading;
 
+  final soFar = deltaUsesPreviousSoFar(w,
+      compare: compare,
+      base: ref.watch(settingsProvider.select((s) => s.compareBase)));
   for (final s in sites) {
     final stats = ref.watch(siteStatsProvider((s, w)));
     final live = ref.watch(siteLiveProvider(s));
     final cmp = compare ? ref.watch(siteCompareSeriesProvider((s, w))) : null;
+    final cmpVisitors =
+        soFar ? ref.watch(siteCompareVisitorsProvider((s, w))) : null;
     if (stats.isLoading || live.isLoading) loading = true;
     // Seed depuis le cache disque au démarrage à froid : la carte s'affiche
     // avec la dernière valeur connue au lieu d'un squelette, le refresh corrige.
@@ -458,6 +491,10 @@ final homeTotalsProvider =
         refSeries: sv.refSeries,
         daily: sv.daily,
         compareSeries: cmp?.value,
+        compareVisitors: cmpVisitors?.value,
+        // Rien plutôt qu'un delta contre la mauvaise référence le temps
+        // qu'elle arrive.
+        deltaBase: soFar ? cmpVisitors?.value : sv.summary.prevVisitors,
       ));
     } else {
       pending++;

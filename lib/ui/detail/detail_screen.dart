@@ -20,6 +20,7 @@ import '../../theme/motion.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
 import '../dashboards/indicators_tab.dart';
+import '../settings/settings_labels.dart';
 import '../widgets/chart_util.dart';
 import '../widgets/custom_range_picker.dart';
 import '../widgets/common.dart';
@@ -86,6 +87,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
     final w = ref.read(windowProvider);
     if (w == null) return;
     ref.invalidate(siteStatsProvider((widget.site, w)));
+    ref.invalidate(siteCompareVisitorsProvider((widget.site, w)));
     ref.invalidate(siteLiveProvider(widget.site));
     ref.invalidate(siteLivePagesProvider(widget.site));
     if (_tab == _DetailTab.events) {
@@ -221,6 +223,13 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                   ),
                 ),
                 GlanceReveal(
+                  show: periodState.canNavigateWeeks,
+                  child: const Padding(
+                    padding: EdgeInsets.fromLTRB(20, 14, 20, 0),
+                    child: WeekNav(),
+                  ),
+                ),
+                GlanceReveal(
                   show: periodState.canNavigateMonths,
                   child: const Padding(
                     padding: EdgeInsets.fromLTRB(20, 14, 20, 0),
@@ -325,6 +334,14 @@ class _DetailBody extends ConsumerWidget {
     final compareSeries = compare
         ? ref.watch(siteCompareSeriesProvider((site, window))).value
         : null;
+    final soFar = deltaUsesPreviousSoFar(window,
+        compare: compare,
+        base: ref.watch(settingsProvider.select((s) => s.compareBase)));
+    final compareVisitors = soFar
+        ? ref.watch(siteCompareVisitorsProvider((site, window))).value
+        : null;
+    final delta = visitorsDelta(
+        s.visitors, soFar ? compareVisitors : s.prevVisitors);
     final live = ref.watch(siteLiveProvider(site)).value ?? 0;
     final livePages =
         ref.watch(siteLivePagesProvider(site)).value ?? const <LivePage>[];
@@ -347,7 +364,7 @@ class _DetailBody extends ConsumerWidget {
                   const SizedBox(width: 12),
                   Padding(
                     padding: const EdgeInsets.only(bottom: 10),
-                    child: DeltaText(s.visitorsDeltaPct, fontSize: 13),
+                    child: DeltaText(delta, fontSize: 13),
                   ),
                 ],
               ),
@@ -362,6 +379,9 @@ class _DetailBody extends ConsumerWidget {
                 pageviewsTotal: s.pageviews,
                 forecast: forecast,
                 compareSeries: compareSeries,
+                compareTotal: compareVisitors,
+                compareLabel: compareLabelFor(context.l10n, window,
+                    ref.watch(settingsProvider.select((s) => s.compareBase))),
                 compareOn: compare,
                 onToggleCompare: previousPeriodWindow(window) == null
                     ? null

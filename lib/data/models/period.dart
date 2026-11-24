@@ -35,7 +35,13 @@ extension TimeUnitApi on TimeUnit {
 /// Fenêtre temporelle résolue à un instant donné.
 @immutable
 class DateWindow {
-  const DateWindow(this.start, this.end, this.unit, {this.allTime = false});
+  const DateWindow(
+    this.start,
+    this.end,
+    this.unit, {
+    this.allTime = false,
+    this.week = false,
+  });
   final DateTime start;
   final DateTime end;
   final TimeUnit unit;
@@ -45,6 +51,12 @@ class DateWindow {
   /// la fenêtre plutôt que d'être redevinée à partir de sa durée, qui vaut
   /// trois mois pour un site jeune comme dix ans pour un site ancien.
   final bool allTime;
+
+  /// Fenêtre « une semaine civile » (« Cette semaine »). Même raison que
+  /// [allTime] : en cours de semaine, elle ne se distingue d'une période
+  /// personnalisée que par cette information, et sa prévision va jusqu'au
+  /// bout de la semaine.
+  final bool week;
 
   int get startMs => start.millisecondsSinceEpoch;
   int get endMs => end.millisecondsSinceEpoch;
@@ -63,10 +75,11 @@ class DateWindow {
       other.startMs == startMs &&
       other.endMs == endMs &&
       other.unit == unit &&
-      other.allTime == allTime;
+      other.allTime == allTime &&
+      other.week == week;
 
   @override
-  int get hashCode => Object.hash(startMs, endMs, unit, allTime);
+  int get hashCode => Object.hash(startMs, endMs, unit, allTime, week);
 }
 
 /// Granularité la plus fine qu'Umami accepte pour une durée donnée — règle
@@ -121,6 +134,7 @@ List<TimeUnit> allowedUnits(
 enum Period {
   today('today'),
   h24('24h'),
+  thisWeek('semaine'),
   d7('7j'),
   d30('30j'),
   thisMonth('mois'),
@@ -135,6 +149,7 @@ enum Period {
   String label(AppLocalizations l10n) => switch (this) {
     today => l10n.periodToday,
     h24 => l10n.period24h,
+    thisWeek => l10n.periodThisWeek,
     d7 => l10n.period7d,
     d30 => l10n.period30d,
     thisMonth => l10n.periodThisMonth,
@@ -145,6 +160,11 @@ enum Period {
   };
 
   static DateTime _startOfDay(DateTime d) => DateTime(d.year, d.month, d.day);
+
+  /// Premier jour de la semaine qui contient [d], à minuit. [firstWeekday] :
+  /// `DateTime.monday` ou `DateTime.sunday`.
+  static DateTime startOfWeek(DateTime d, int firstWeekday) =>
+      DateTime(d.year, d.month, d.day - (d.weekday - firstWeekday) % 7);
 
   /// Plafond de [d] au début de l'unité suivante. La fenêtre est ainsi alignée
   /// sur la grille (heure/jour/mois) : sa clé reste stable pendant toute l'unité
@@ -172,8 +192,9 @@ enum Period {
 
   /// Résout la fenêtre. Pour [custom], passer [customStart]/[customEnd].
   /// [dayOffset] décale d'un nombre de jours pour [today] (0 = aujourd'hui).
-  /// [monthOffset]/[yearOffset] font de même pour [thisMonth]/[thisYear] :
-  /// naviguer mois par mois ou année par année (0 = période courante).
+  /// [weekOffset]/[monthOffset]/[yearOffset] font de même pour
+  /// [thisWeek]/[thisMonth]/[thisYear] (0 = période courante). La semaine
+  /// commence le [firstWeekday] (lundi par défaut, réglable).
   ///
   /// [unit] force la granularité (sélecteur au-dessus du graphique) : elle est
   /// appliquée **avant** le calcul des bornes, sinon la fin resterait alignée
@@ -188,8 +209,10 @@ enum Period {
     DateTime? customStart,
     DateTime? customEnd,
     int dayOffset = 0,
+    int weekOffset = 0,
     int monthOffset = 0,
     int yearOffset = 0,
+    int firstWeekday = DateTime.monday,
     TimeUnit? unit,
     DateTime? allTimeStart,
   }) {
@@ -207,6 +230,16 @@ enum Period {
         final u = unit ?? TimeUnit.hour;
         final end = _ceil(n, u);
         return DateWindow(end.subtract(const Duration(hours: 24)), end, u);
+      case Period.thisWeek:
+        final u = unit ?? TimeUnit.day;
+        final current = startOfWeek(n, firstWeekday);
+        final start = DateTime(
+            current.year, current.month, current.day + 7 * weekOffset);
+        // Semaine courante : fin qui grandit avec « aujourd'hui », comme le mois.
+        final end = weekOffset == 0
+            ? _ceil(n, u)
+            : DateTime(start.year, start.month, start.day + 7);
+        return DateWindow(start, end, u, week: true);
       case Period.d7:
         final u = unit ?? TimeUnit.day;
         final end = _ceil(n, u);

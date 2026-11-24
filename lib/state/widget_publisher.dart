@@ -87,7 +87,7 @@ class WidgetPublisher {
       values['site_${i}_name'] = c.site.name;
       values['site_${i}_domain'] = c.site.domain;
       values['site_${i}_value'] = c.summary.visitors;
-      values['site_${i}_delta'] = c.summary.visitorsDeltaPct;
+      values['site_${i}_delta'] = c.deltaPct;
       values['site_${i}_spark'] = _spark(spark(c.series));
     }
 
@@ -99,8 +99,7 @@ class WidgetPublisher {
           'n': c.site.name,
           'v': c.summary.visitors,
           'p': c.summary.pageviews,
-          if (c.summary.visitorsDeltaPct != null)
-            'd': c.summary.visitorsDeltaPct,
+          if (c.deltaPct != null) 'd': c.deltaPct,
           's': _spark(spark(c.series)),
         }
     ];

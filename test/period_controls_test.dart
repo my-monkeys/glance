@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:glance/core/predict.dart';
 import 'package:glance/data/models/period.dart';
 import 'package:glance/l10n/app_localizations_fr.dart';
 import 'package:glance/state/period_state.dart';
@@ -114,5 +115,41 @@ void main() {
     expect(find.text('DÉCOUPAGE'), findsOneWidget);
     // Une seule rangée par réglage : les puces ne passent pas à la ligne.
     expect(_dy(tester, find.text('Courbe')), _dy(tester, find.text('Barres')));
+  });
+
+  testWidgets("« Aujourd'hui » se compare à la veille ou à 7 jours avant",
+      (tester) async {
+    final container = await _pump(tester, _wide);
+    container.read(periodProvider.notifier).set(Period.today);
+    await tester.pumpAndSettle();
+    await tester.tap(button);
+    await tester.pumpAndSettle();
+    expect(find.text('COMPARER À'), findsOneWidget);
+    expect(container.read(periodProvider).compare, isFalse);
+
+    await tester.tap(find.text('7 jours avant'));
+    await tester.pumpAndSettle();
+    expect(container.read(settingsProvider).compareBase, CompareBase.weekBefore);
+    expect(container.read(sharedPrefsProvider).getString('glance.compare.base'),
+        'weekBefore');
+    // Choisir la journée affiche la comparaison, sinon rien ne bougerait.
+    expect(container.read(periodProvider).compare, isTrue);
+    // Le menu reste ouvert, comme pour les autres réglages.
+    expect(find.text('COMPARER À'), findsOneWidget);
+
+    await tester.tap(find.text('La veille'));
+    await tester.pumpAndSettle();
+    expect(container.read(settingsProvider).compareBase, CompareBase.dayBefore);
+    expect(container.read(periodProvider).compare, isTrue);
+  });
+
+  testWidgets('hors journée, pas de choix de comparaison', (tester) async {
+    final container = await _pump(tester, _wide);
+    container.read(periodProvider.notifier).set(Period.d30);
+    await tester.pumpAndSettle();
+    await tester.tap(button);
+    await tester.pumpAndSettle();
+    expect(find.text('GRAPHIQUE'), findsOneWidget);
+    expect(find.text('COMPARER À'), findsNothing);
   });
 }

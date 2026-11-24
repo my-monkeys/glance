@@ -202,6 +202,24 @@ abstract class AppLocalizations {
   /// **'Mois dernier'**
   String get navLastMonth;
 
+  /// Navigation semaine par semaine : la semaine en cours
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette semaine'**
+  String get navThisWeek;
+
+  /// Navigation semaine par semaine : la semaine précédente
+  ///
+  /// In fr, this message translates to:
+  /// **'Semaine dernière'**
+  String get navLastWeek;
+
+  /// Navigation semaine par semaine : une semaine passée, désignée par son premier jour
+  ///
+  /// In fr, this message translates to:
+  /// **'Semaine du {date}'**
+  String navWeekOf(String date);
+
   /// No description provided for @navThisYear.
   ///
   /// In fr, this message translates to:
@@ -1558,6 +1576,30 @@ abstract class AppLocalizations {
   /// **'À l\'ouverture de l\'application'**
   String get settingsDefaultPeriodHint;
 
+  /// Réglages : premier jour de la semaine (lundi ou dimanche)
+  ///
+  /// In fr, this message translates to:
+  /// **'Début de semaine'**
+  String get settingsWeekStart;
+
+  /// Réglages : sous-titre du choix du premier jour de la semaine
+  ///
+  /// In fr, this message translates to:
+  /// **'Premier jour de « Cette semaine »'**
+  String get settingsWeekStartHint;
+
+  /// Réglages : puce, la semaine commence le lundi
+  ///
+  /// In fr, this message translates to:
+  /// **'Lundi'**
+  String get weekStartMonday;
+
+  /// Réglages : puce, la semaine commence le dimanche
+  ///
+  /// In fr, this message translates to:
+  /// **'Dimanche'**
+  String get weekStartSunday;
+
   /// No description provided for @settingsRefresh.
   ///
   /// In fr, this message translates to:
@@ -2404,6 +2446,24 @@ abstract class AppLocalizations {
   /// **'Graphique'**
   String get periodControlsChart;
 
+  /// Titre de section du menu Affichage : journée à laquelle se compare le jour affiché (seulement sur Aujourd'hui)
+  ///
+  /// In fr, this message translates to:
+  /// **'Comparer à'**
+  String get periodControlsCompare;
+
+  /// Puce du menu Affichage : comparer le jour affiché à la veille
+  ///
+  /// In fr, this message translates to:
+  /// **'La veille'**
+  String get compareBaseDayBefore;
+
+  /// Puce du menu Affichage, et légende de la courbe comparée : le même jour, une semaine avant le jour affiché
+  ///
+  /// In fr, this message translates to:
+  /// **'7 jours avant'**
+  String get compareBaseWeekBefore;
+
   /// Granularité du graphique, libellé de puce très court
   ///
   /// In fr, this message translates to:
@@ -2655,6 +2715,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'24 h'**
   String get period24h;
+
+  /// Libellé court d'une période, dans la barre de contrôles : la semaine civile en cours
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette semaine'**
+  String get periodThisWeek;
 
   /// Libellé court d'une période, dans la barre de contrôles
   ///

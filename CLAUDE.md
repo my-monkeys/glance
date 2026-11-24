@@ -47,7 +47,7 @@ Français (langue source) et anglais ; l'allemand, l'espagnol, le portugais (Br�
 1. **Accueil vide brandé** (aucun compte) → « Ajouter une source ».
 2. **Ajout en 2 étapes** : fournisseur + identifiants → `listSites()` → **écran de choix des sites** (`site_picker`) : *tous les sites* (suit aussi les futurs) **ou** sélection explicite.
 3. Plusieurs comptes/fournisseurs coexistent. Home = union des sites sélectionnés de chaque compte.
-4. Détail par site : périodes (`today/24h/7j/30j/mois/12m/annee/perso`), graphe, KPIs, live, top pages/sources/pays. `mois` (« Ce mois-ci ») et `annee` (« Cette année ») sont calendaires : du 1er du mois / 1er janvier à maintenant.
+4. Détail par site : périodes (`today/24h/semaine/7j/30j/mois/12m/annee/perso`), graphe, KPIs, live, top pages/sources/pays. `semaine` (« Cette semaine »), `mois` (« Ce mois-ci ») et `annee` (« Cette année ») sont calendaires : du premier jour de la semaine / 1er du mois / 1er janvier à maintenant.
 
 La sélection de sites est éditable après coup : Réglages → tap sur le compte → « Choisir les sites ».
 
@@ -214,6 +214,45 @@ lancement). C'est lui qui déclenche le chargement de la période précédente
 quand `previousPeriodWindow(window) == null` (« Tout », période personnalisée trop
 large) : `onToggleCompare` vaut alors `null`.
 
+**Une journée se compare à la veille ou à 7 jours avant** (`CompareBase`, réglage
+persisté `glance.compare.base`, veille par défaut) : le même jour de la semaine
+d'avant, parce qu'un lundi ne ressemble pas à un dimanche. Section « Comparer à » du
+menu « Affichage », visible seulement quand `compareBaseApplies(window)` (journée en
+cours **ou** passée) ; ailleurs la comparaison reste la période d'avant.
+- Choisir une journée **coche aussi la comparaison** : sinon le choix ne changerait
+  rien de visible et passerait pour inopérant.
+- `siteCompareSeriesProvider` n'écoute le réglage que sur une journée : le changer
+  ne relance que la série comparée.
+- La légende et l'infobulle disent « 7 jours avant » au lieu de « Période
+  précédente » (`compareLabelFor` → `GlanceChart.compareLabel`).
+- **Le delta des visiteurs suit la même référence que la légende**
+  (`deltaUsesPreviousSoFar`) : comparaison cochée, semaine / mois / année, ou
+  journée face à 7 jours avant → le chiffre de « Période précédente »
+  (`siteCompareVisitorsProvider`, une requête par site) ; sinon (glissantes, journée
+  face à la veille) le `comparison` d'Umami, gratuit. Umami compare à la même
+  **durée** juste avant : un mardi, « cette semaine » face au week-end ; le 24,
+  « ce mois-ci » face aux 24 derniers jours d'octobre. Vécu : « ▼ 25,6 % » (contre hier) à côté de
+  « 183 · 7 jours avant » pour 201 visiteurs. Pendant que la référence charge, pas
+  de delta (`SiteCard.deltaBase` null, **sans repli** sur `summary.prevVisitors`),
+  et le total ne compare que les cartes qui ont la leur (`comparedVisitors`). Les
+  widgets natifs publient le même delta que l'app.
+
+**Le chiffre de « Période précédente »** dans la légende = visiteurs uniques de la
+période comparée **arrêtée au même point d'avancement** (`previousPeriodSoFar`) : à
+14 h 30, hier (ou 7 jours avant) de 0 h à 14 h 30 ; le 24, le mois dernier du 1er au
+24. Décalage calendaire, pas une durée (un changement d'heure décalerait d'une
+heure), borné à la fin de la période d'avant. Une fenêtre terminée se compare à la
+période d'avant entière. Une requête `/stats` par site (`siteCompareVisitorsProvider`),
+seulement comparaison cochée, **invalidée avec `siteStatsProvider`** à chaque tick :
+le chiffre avance avec l'heure. Plausible ne prend que des dates : il compte la
+journée entière.
+
+⚠️ **`/stats` s'arrête à maintenant, pas à `w.end`** (`UmamiProvider.summary`). La
+fenêtre finit à la fin de l'heure en cours (clé stable), et Umami calcule
+`comparison` sur la même durée juste avant : à 14 h 30, il comparait 14 h 30
+d'aujourd'hui à 15 h d'hier, un delta biaisé vers le bas (jusqu'à une heure de
+trafic en trop dans la référence). Seule la requête est bornée, jamais la fenêtre.
+
 ### Découpage du graphique (heure / jour / mois)
 
 Dans le menu « Affichage », le découpage n'offre que
@@ -247,6 +286,21 @@ La fin reste `_ceil(now, unit)`, comme pour toutes les autres périodes.
 fenêtres par site y additionneraient 2019 avec 2024. Corollaire assumé : changer
 de groupe pendant que « Tout » est actif peut déplacer la borne commune, donc
 tout recharger. C'est le prix d'un total juste.
+
+### « Cette semaine »
+
+Semaine civile, du **lundi** par défaut ; Réglages → « Début de semaine » propose le
+dimanche (`WeekStart`, clé `glance.week.start`). `windowProvider` passe ce réglage à
+`Period.window(firstWeekday:)`, et ne l'écoute que sur cette période. Navigation
+semaine par semaine (`weekOffset`, `WeekNav` : « Semaine du 9 nov. »).
+- ⚠️ La fenêtre porte **`DateWindow.week`** (comme `allTime`) : un lundi en heures,
+  elle a la forme d'« aujourd'hui » ; un 1er du mois, celle de « ce mois-ci » ; une
+  semaine en cours celle d'une période personnalisée. `calendarScopeOf` la lit en
+  premier (`CalendarScope.week`). Le dimanche, elle a les bornes de « 7 jours » mais
+  pas la même clé.
+- Prévision jusqu'à la fin de la semaine, comparaison à la semaine d'avant (bucket
+  à bucket : lundi face à lundi), « au même avancement » = 7 jours plus tôt.
+- Cache disque : une clé par début de semaine (`semaine@day`, `semaine-dim@day`).
 
 ### La portée d'une fenêtre ne se devine pas de son début seul
 

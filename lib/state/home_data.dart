@@ -48,6 +48,8 @@ class SiteCard {
     this.refSeries,
     this.daily,
     this.compareSeries,
+    this.compareVisitors,
+    required this.deltaBase,
   });
 
   final Site site;
@@ -62,7 +64,16 @@ class SiteCard {
   /// qu'elle n'a pas été demandée ou que la période n'a pas d'équivalent.
   final List<SeriesPoint>? compareSeries;
 
-  double? get deltaPct => summary.visitorsDeltaPct;
+  /// Visiteurs de la période comparée au même point d'avancement (cf.
+  /// `previousPeriodSoFar`). Null tant qu'ils ne sont pas arrivés.
+  final int? compareVisitors;
+
+  /// Visiteurs auxquels se compare le delta (cf. `deltaUsesPreviousSoFar`).
+  /// Null pendant que la référence charge : pas de delta plutôt qu'un delta
+  /// contre la mauvaise référence. Pas de repli sur `summary.prevVisitors`.
+  final int? deltaBase;
+
+  double? get deltaPct => visitorsDelta(summary.visitors, deltaBase);
   bool get up => (deltaPct ?? 0) >= 0;
 }
 
@@ -72,6 +83,7 @@ class HomeData {
     required this.cards,
     required this.totalVisitors,
     required this.prevTotalVisitors,
+    int? comparedVisitors,
     required this.totalVisits,
     required this.totalPageviews,
     required this.totalLive,
@@ -79,11 +91,17 @@ class HomeData {
     this.totalRefSeries,
     this.totalDaily,
     this.totalCompareSeries,
-  });
+    this.totalCompareVisitors,
+  }) : comparedVisitors = comparedVisitors ?? totalVisitors;
 
   final List<SiteCard> cards;
   final int totalVisitors;
   final int? prevTotalVisitors;
+
+  /// Visiteurs des seules cartes qui ont une référence de delta : pendant le
+  /// chargement, comparer le total de toutes les cartes à la référence de
+  /// quelques-unes donnerait une hausse qui n'existe pas.
+  final int comparedVisitors;
   final int totalVisits;
   final int totalPageviews;
   final int totalLive;
@@ -109,11 +127,11 @@ class HomeData {
   /// Série de comparaison cumulée (période précédente, toutes cartes).
   final List<SeriesPoint>? totalCompareSeries;
 
-  double? get totalDeltaPct {
-    final p = prevTotalVisitors;
-    if (p == null || p == 0) return null;
-    return (totalVisitors - p) / p * 100;
-  }
+  /// Visiteurs de la période comparée au même point d'avancement, sommés sur
+  /// les cartes qui les ont reçus (comme [totalVisitors]). Null : aucune.
+  final int? totalCompareVisitors;
+
+  double? get totalDeltaPct => visitorsDelta(comparedVisitors, prevTotalVisitors);
 
   bool get up => (totalDeltaPct ?? 0) >= 0;
 
@@ -123,16 +141,22 @@ class HomeData {
   static HomeData fromCards(List<SiteCard> cards) {
     var totalVisitors = 0;
     var prevTotal = 0;
+    var compared = 0;
     var hasPrev = false;
     var totalVisits = 0;
     var totalPageviews = 0;
     var totalLive = 0;
+    int? totalCompareVisitors;
     for (final c in cards) {
+      final cv = c.compareVisitors;
+      if (cv != null) totalCompareVisitors = (totalCompareVisitors ?? 0) + cv;
       totalVisitors += c.summary.visitors;
       totalVisits += c.summary.visits;
       totalPageviews += c.summary.pageviews;
-      if (c.summary.prevVisitors != null) {
-        prevTotal += c.summary.prevVisitors!;
+      final base = c.deltaBase;
+      if (base != null) {
+        prevTotal += base;
+        compared += c.summary.visitors;
         hasPrev = true;
       }
       totalLive += c.live;
@@ -197,6 +221,7 @@ class HomeData {
       cards: cards,
       totalVisitors: totalVisitors,
       prevTotalVisitors: hasPrev ? prevTotal : null,
+      comparedVisitors: compared,
       totalVisits: totalVisits,
       totalPageviews: totalPageviews,
       totalLive: totalLive,
@@ -204,6 +229,7 @@ class HomeData {
       totalRefSeries: totalRef,
       totalDaily: _sumByDate([for (final c in cards) c.daily]),
       totalCompareSeries: totalCompare,
+      totalCompareVisitors: totalCompareVisitors,
     );
   }
 }

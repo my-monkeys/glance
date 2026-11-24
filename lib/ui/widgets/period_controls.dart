@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/predict.dart';
 import '../../data/models/period.dart';
 import '../../l10n/l10n.dart';
 import '../../state/period_state.dart';
@@ -166,7 +167,7 @@ class _DisplayMenu extends ConsumerWidget {
     final window = ref.watch(windowProvider);
     final shift = alignEnd
         ? _DisplayButton.widthOf(context, compact: compact) -
-            _DisplayPanel.widthOf(context, _DisplayPanel.unitsOf(window))
+            _DisplayPanel.widthOf(context, window)
         : 0.0;
     return MenuAnchor(
       alignmentOffset: Offset(shift, _gap),
@@ -261,7 +262,8 @@ class _DisplayButton extends StatelessWidget {
   }
 }
 
-/// Contenu du menu : découpage et style de graphique. Des `Row` plutôt que
+/// Contenu du menu : découpage, style de graphique et, sur une journée, celle
+/// à laquelle elle se compare. Des `Row` plutôt que
 /// `ChipRow` : un menu mesure sa largeur intrinsèque, qu'une zone défilante
 /// n'a pas. Trois puces au plus par rangée, qui tiennent toujours.
 class _DisplayPanel extends ConsumerWidget {
@@ -274,16 +276,24 @@ class _DisplayPanel extends ConsumerWidget {
   static List<TimeUnit> unitsOf(DateWindow? w) =>
       w == null ? const [] : allowedUnits(w);
 
+  /// Le choix de la journée comparée ne vaut que pour une journée : ailleurs,
+  /// la comparaison porte sur la période d'avant.
+  static bool showsCompareBase(DateWindow? w) =>
+      w != null && compareBaseApplies(w);
+
   /// Largeur de la plus longue rangée de puces : le menu se cale sur la droite
   /// du bouton, il faut donc l'estimer avant de l'ouvrir (le menu, lui, prend
   /// sa largeur réelle ; l'écart de l'arrondi est invisible).
-  static double widthOf(BuildContext context, List<TimeUnit> units) {
+  static double widthOf(BuildContext context, DateWindow? window) {
+    final units = unitsOf(window);
     double row(Iterable<String> labels) =>
         labels.fold<double>(0, (w, l) => w + GlanceChip.widthOf(context, l)) +
         _chipGap * (labels.length - 1);
     final rows = [
       row(ChartStyle.values.map((s) => s.localized(context.l10n))),
       if (units.length > 1) row(units.map((u) => u.localized(context.l10n))),
+      if (showsCompareBase(window))
+        row(CompareBase.values.map((b) => b.localized(context.l10n))),
     ];
     return 2 * _pad + rows.reduce((a, b) => a > b ? a : b);
   }
@@ -294,6 +304,8 @@ class _DisplayPanel extends ConsumerWidget {
     final window = ref.watch(windowProvider);
     final units = unitsOf(window);
     final style = ref.watch(settingsProvider.select((s) => s.chartStyle));
+    final base = ref.watch(settingsProvider.select((s) => s.compareBase));
+    final compareOn = ref.watch(periodProvider.select((s) => s.compare));
 
     Widget section(String title, List<Widget> chips) => Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -338,9 +350,29 @@ class _DisplayPanel extends ConsumerWidget {
                       ref.read(settingsProvider.notifier).setChartStyle(s),
                 ),
             ]),
+            if (showsCompareBase(window)) ...[
+              const SizedBox(height: 14),
+              section(context.l10n.periodControlsCompare, [
+                for (final b in CompareBase.values)
+                  GlanceChip(
+                    label: b.localized(context.l10n),
+                    selected: compareOn && b == base,
+                    onTap: () => _chooseCompareBase(ref, b),
+                  ),
+              ]),
+            ],
           ],
         ),
     );
+  }
+}
+
+/// Choisir la journée comparée affiche aussi la comparaison : sans elle, le
+/// choix ne changerait rien de visible et passerait pour inopérant.
+void _chooseCompareBase(WidgetRef ref, CompareBase base) {
+  ref.read(settingsProvider.notifier).setCompareBase(base);
+  if (!ref.read(periodProvider).compare) {
+    ref.read(periodProvider.notifier).toggleCompare();
   }
 }
 

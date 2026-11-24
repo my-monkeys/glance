@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../core/predict.dart';
 import '../data/models/period.dart';
 import '../l10n/l10n.dart';
 import 'period_state.dart';
@@ -18,6 +19,15 @@ enum ThemeChoice {
 
 /// Disposition de la liste des sites sur l'accueil.
 enum HomeViewMode { list, grid }
+
+/// Premier jour de « Cette semaine ».
+enum WeekStart {
+  monday(DateTime.monday),
+  sunday(DateTime.sunday);
+
+  const WeekStart(this.weekday);
+  final int weekday;
+}
 
 /// Rendu des grands graphiques.
 enum ChartStyle {
@@ -36,6 +46,8 @@ class Settings {
     this.defaultPeriod = Period.d7,
     this.hideZeroSites = false,
     this.chartStyle = ChartStyle.curve,
+    this.compareBase = CompareBase.dayBefore,
+    this.weekStart = WeekStart.monday,
     this.locale,
   });
 
@@ -47,6 +59,8 @@ class Settings {
   final Period defaultPeriod; // période affichée au lancement
   final bool hideZeroSites; // masque les sites à 0 visiteur (liste desktop)
   final ChartStyle chartStyle; // courbe lissée ou barres
+  final CompareBase compareBase; // journée comparée à une journée affichée
+  final WeekStart weekStart; // premier jour de « Cette semaine »
   final Locale? locale; // null = langue du système
 
   Settings copyWith({
@@ -58,6 +72,8 @@ class Settings {
     Period? defaultPeriod,
     bool? hideZeroSites,
     ChartStyle? chartStyle,
+    CompareBase? compareBase,
+    WeekStart? weekStart,
     Locale? Function()? locale,
   }) => Settings(
     theme: theme ?? this.theme,
@@ -68,6 +84,8 @@ class Settings {
     defaultPeriod: defaultPeriod ?? this.defaultPeriod,
     hideZeroSites: hideZeroSites ?? this.hideZeroSites,
     chartStyle: chartStyle ?? this.chartStyle,
+    compareBase: compareBase ?? this.compareBase,
+    weekStart: weekStart ?? this.weekStart,
     locale: locale != null ? locale() : this.locale,
   );
 }
@@ -81,6 +99,8 @@ class SettingsNotifier extends Notifier<Settings> {
   static const _kDefaultPeriod = 'glance.period.default';
   static const _kHideZeroSites = 'glance.sites.hideZero';
   static const _kChartStyle = 'glance.chart.style';
+  static const _kCompareBase = 'glance.compare.base';
+  static const _kWeekStart = 'glance.week.start';
   static const _kLocale = 'glance.locale';
 
   SharedPreferences get _p => ref.read(sharedPrefsProvider);
@@ -106,6 +126,14 @@ class SettingsNotifier extends Notifier<Settings> {
       chartStyle: ChartStyle.values.firstWhere(
         (v) => v.name == _p.getString(_kChartStyle),
         orElse: () => ChartStyle.curve,
+      ),
+      compareBase: CompareBase.values.firstWhere(
+        (v) => v.name == _p.getString(_kCompareBase),
+        orElse: () => CompareBase.dayBefore,
+      ),
+      weekStart: WeekStart.values.firstWhere(
+        (v) => v.name == _p.getString(_kWeekStart),
+        orElse: () => WeekStart.monday,
       ),
       locale: _savedLocale(),
     );
@@ -146,6 +174,16 @@ class SettingsNotifier extends Notifier<Settings> {
   void setChartStyle(ChartStyle v) {
     _p.setString(_kChartStyle, v.name);
     state = state.copyWith(chartStyle: v);
+  }
+
+  void setCompareBase(CompareBase v) {
+    _p.setString(_kCompareBase, v.name);
+    state = state.copyWith(compareBase: v);
+  }
+
+  void setWeekStart(WeekStart v) {
+    _p.setString(_kWeekStart, v.name);
+    state = state.copyWith(weekStart: v);
   }
 
   void setHideZeroSites(bool v) {

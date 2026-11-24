@@ -25,9 +25,9 @@ class ForecastSpec {
 /// par fenêtre (et non par [Period]) est volontaire : deux périodes qui
 /// résolvent la même fenêtre (ex. « 12 m » en décembre ≡ « Cette année »)
 /// affichent les mêmes données, donc la même prévision.
-/// Ce qu'une fenêtre recouvre : une journée, un mois, une année, ou rien de
-/// calendaire (fenêtre glissante).
-enum CalendarScope { day, month, year, sliding }
+/// Ce qu'une fenêtre recouvre : une journée, une semaine, un mois, une année,
+/// ou rien de calendaire (fenêtre glissante).
+enum CalendarScope { day, week, month, year, sliding }
 
 /// Portée calendaire d'une fenêtre, déduite de son début, de sa fin **et** de
 /// sa granularité — les trois sont nécessaires.
@@ -44,6 +44,9 @@ enum CalendarScope { day, month, year, sliding }
 /// là où un horizon surestimé donne un chiffre aberrant.
 CalendarScope calendarScopeOf(DateWindow w) {
   if (w.allTime) return CalendarScope.sliding;
+  // Lue sur la fenêtre, pas devinée : un lundi, la semaine en heures a la
+  // forme d'« aujourd'hui », et un 1er du mois, celle de « ce mois-ci ».
+  if (w.week) return CalendarScope.week;
   final dayStart = DateTime(w.start.year, w.start.month, w.start.day);
   final monthStart = DateTime(w.start.year, w.start.month, 1);
   final yearStart = DateTime(w.start.year, 1, 1);
@@ -79,6 +82,13 @@ ForecastSpec? forecastSpecFor(DateWindow w, {DateTime? now}) {
           dayStart,
           w.unit,
         ),
+      );
+    case CalendarScope.week:
+      final s = w.start;
+      return ForecastSpec(
+        until: DateTime(s.year, s.month, s.day + 7),
+        reference:
+            DateWindow(DateTime(s.year, s.month, s.day - 7), s, w.unit),
       );
     case CalendarScope.month:
       final monthStart = DateTime(n.year, n.month, 1);
@@ -124,6 +134,21 @@ DateWindow? forecastHistoryWindow(DateWindow w, {DateTime? now}) {
   );
 }
 
+/// Journée à laquelle se compare une journée affichée : la veille, ou le même
+/// jour de la semaine d'avant (un lundi ne ressemble pas à un dimanche).
+enum CompareBase {
+  dayBefore(1),
+  weekBefore(7);
+
+  const CompareBase(this.daysBack);
+  final int daysBack;
+}
+
+/// Vrai si [CompareBase] change la comparaison de [w] : une journée, en cours
+/// ou passée. Les autres fenêtres se comparent à la période d'avant.
+bool compareBaseApplies(DateWindow w) =>
+    calendarScopeOf(w) == CalendarScope.day;
+
 /// Fenêtre « période précédente équivalente », pour la comparaison superposée
 /// sur le graphique (bascule « Comparer »). Distincte de [forecastReferenceWindow] :
 /// celle-ci ne sert qu'aux fenêtres calendaires en cours (pour profiler la
@@ -135,8 +160,12 @@ DateWindow? forecastHistoryWindow(DateWindow w, {DateTime? now}) {
 /// (même s'il est plus court/long que [w] — un mois « en cours » se compare au
 /// mois précédent en entier) ; sinon on décale [w] d'un cran de sa propre durée
 /// (24 h avant, 7/30 j avant, 12 m avant…). Null pour une fenêtre trop large
-/// (« Tout », > 400 j) où un « avant » n'a pas de sens.
-DateWindow? previousPeriodWindow(DateWindow w) {
+/// (« Tout », > 400 j) où un « avant » n'a pas de sens. Une journée se compare
+/// à la veille ou au même jour de la semaine d'avant, selon [base].
+DateWindow? previousPeriodWindow(
+  DateWindow w, {
+  CompareBase base = CompareBase.dayBefore,
+}) {
   // « Tout » n'a pas d'« avant » : l'historique complet se compare au néant, ce
   // qui donnait un delta « ×N » trompeur.
   if (w.allTime) return null;
@@ -148,12 +177,16 @@ DateWindow? previousPeriodWindow(DateWindow w) {
   // comparerait alors à la veille au lieu du mois précédent.
   switch (calendarScopeOf(w)) {
     case CalendarScope.day:
-      final dayStart = DateTime(w.start.year, w.start.month, w.start.day);
+      final from = DateTime(
+          w.start.year, w.start.month, w.start.day - base.daysBack);
       return DateWindow(
-        DateTime(dayStart.year, dayStart.month, dayStart.day - 1),
-        dayStart,
+        from,
+        DateTime(from.year, from.month, from.day + 1),
         w.unit,
       );
+    case CalendarScope.week:
+      final s = w.start;
+      return DateWindow(DateTime(s.year, s.month, s.day - 7), s, w.unit);
     case CalendarScope.month:
       final monthStart = DateTime(w.start.year, w.start.month, 1);
       return DateWindow(
@@ -171,6 +204,71 @@ DateWindow? previousPeriodWindow(DateWindow w) {
     case CalendarScope.sliding:
       return DateWindow(w.start.subtract(span), w.start, w.unit);
   }
+}
+
+/// Vrai quand le delta des visiteurs se compare à [previousPeriodSoFar] (le
+/// chiffre de « Période précédente » dans la légende) plutôt qu'au
+/// `comparison` qu'Umami rend avec les stats, sans requête de plus :
+/// - comparaison affichée : deux références différentes à l'écran donnaient
+///   « ▼ 25 % » à côté d'une période précédente plus basse que le chiffre du
+///   jour ;
+/// - semaine, mois, année : Umami compare à la même **durée** juste avant. Un
+///   mardi à 14 h 30, « cette semaine » se comparait au week-end ; le 24,
+///   « ce mois-ci » aux 24 derniers jours d'octobre. Ici, à la semaine, au mois
+///   ou à l'année d'avant, au même avancement ;
+/// - journée face à 7 jours avant. Face à la veille, le `comparison` d'Umami
+///   est déjà « hier jusqu'à la même heure » (la requête s'arrête à maintenant).
+///
+/// Une fenêtre glissante (24 h, 7 j…) se compare bien à la durée d'avant.
+bool deltaUsesPreviousSoFar(
+  DateWindow w, {
+  required bool compare,
+  required CompareBase base,
+}) {
+  if (compare) return true;
+  return switch (calendarScopeOf(w)) {
+    CalendarScope.day => base == CompareBase.weekBefore,
+    CalendarScope.week || CalendarScope.month || CalendarScope.year => true,
+    CalendarScope.sliding => false,
+  };
+}
+
+/// Période précédente arrêtée au même point d'avancement que [w] : à 14 h 30,
+/// hier (ou le même jour de la semaine d'avant) de 0 h à 14 h 30 ; le 24, le
+/// mois dernier du 1er au 24 à la même heure. Une fenêtre terminée se compare
+/// à la période précédente entière. Null si [w] n'a pas d'« avant ».
+///
+/// Le décalage suit le calendrier (jours, mois, années), pas une durée : un
+/// changement d'heure entre les deux périodes décalerait la borne d'une heure.
+/// Il est borné à la fin de la période précédente (le 31 mars face à février).
+DateWindow? previousPeriodSoFar(
+  DateWindow w, {
+  CompareBase base = CompareBase.dayBefore,
+  DateTime? now,
+}) {
+  final prev = previousPeriodWindow(w, base: base);
+  if (prev == null) return null;
+  final n = now ?? DateTime.now();
+  if (!w.end.isAfter(n)) return prev;
+
+  DateTime shifted({int years = 0, int months = 0, int days = 0}) => DateTime(
+        n.year - years,
+        n.month - months,
+        n.day - days,
+        n.hour,
+        n.minute,
+        n.second,
+      );
+  final cut = switch (calendarScopeOf(w)) {
+    CalendarScope.day => shifted(days: base.daysBack),
+    CalendarScope.week => shifted(days: 7),
+    CalendarScope.month => shifted(months: 1),
+    CalendarScope.year => shifted(years: 1),
+    CalendarScope.sliding => n.subtract(w.end.difference(w.start)),
+  };
+  final end = cut.isAfter(prev.end) ? prev.end : cut;
+  return DateWindow(prev.start, end.isBefore(prev.start) ? prev.start : end,
+      prev.unit);
 }
 
 /// Série prête à afficher pour la période « Tout » : écarte les buckets vides

@@ -13,6 +13,7 @@ Future<int> testAccountConnection(ProviderContainer c, String accountId) async {
   c.invalidate(accountSitesProvider(accountId));
   c.invalidate(sitesProvider);
   c.invalidate(siteStatsProvider);
+  c.invalidate(siteCompareVisitorsProvider);
   c.invalidate(siteLiveProvider);
   return sites;
 }

@@ -21,6 +21,7 @@ import '../../theme/palette.dart';
 import '../../theme/type.dart';
 import '../network/internal_screen.dart';
 import '../root_scaffold.dart';
+import '../settings/settings_labels.dart';
 import '../settings/workspaces_screen.dart';
 import '../widgets/custom_range_picker.dart';
 import '../widgets/common.dart';
@@ -61,6 +62,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       if (w == null) return;
       for (final s in ref.read(visibleSitesProvider).value ?? const <Site>[]) {
         ref.invalidate(siteStatsProvider((s, w)));
+        ref.invalidate(siteCompareVisitorsProvider((s, w)));
       }
       ref.invalidate(siteLiveProvider);
     });
@@ -121,7 +123,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             // Ne réactualise que la fenêtre courante (cache des autres périodes
             // préservé) ; les valeurs se mettent à jour en place.
             for (final s in sites) {
-              if (window != null) ref.invalidate(siteStatsProvider((s, window)));
+              if (window == null) continue;
+              ref.invalidate(siteStatsProvider((s, window)));
+              ref.invalidate(siteCompareVisitorsProvider((s, window)));
             }
             ref.invalidate(siteLiveProvider);
             // Tirer pour rafraîchir fait aussi apparaître un site créé depuis le
@@ -154,6 +158,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 child: const Padding(
                   padding: EdgeInsets.fromLTRB(20, 14, 20, 0),
                   child: DayNav(),
+                ),
+              ),
+              GlanceReveal(
+                show: periodState.canNavigateWeeks,
+                child: const Padding(
+                  padding: EdgeInsets.fromLTRB(20, 14, 20, 0),
+                  child: WeekNav(),
                 ),
               ),
               GlanceReveal(
@@ -410,9 +421,15 @@ class _SiteStatSlot extends ConsumerWidget {
       return grid ? const _GridSkeleton() : const _TileSkeleton();
     }
 
+    final soFar = deltaUsesPreviousSoFar(window,
+        compare: ref.watch(periodProvider.select((s) => s.compare)),
+        base: ref.watch(settingsProvider.select((s) => s.compareBase)));
     final card = SiteCard(
       site: site,
       summary: sv.summary,
+      deltaBase: soFar
+          ? ref.watch(siteCompareVisitorsProvider((site, window))).value
+          : sv.summary.prevVisitors,
       // Rogne le préfixe vide sur une fenêtre large (« Tout ») : sans effet
       // ailleurs — sinon la sparkline reste plate jusqu'à la vraie 1ère donnée.
       series: displaySeries(sv.series, window),
@@ -548,6 +565,9 @@ class _TotalCard extends ConsumerWidget {
             pageviewsTotal: data.totalPageviews,
             forecast: forecast,
             compareSeries: data.totalCompareSeries,
+            compareTotal: data.totalCompareVisitors,
+            compareLabel: compareLabelFor(context.l10n, window,
+                ref.watch(settingsProvider.select((s) => s.compareBase))),
             compareOn: compare,
             onToggleCompare: previousPeriodWindow(window) == null
                 ? null

@@ -61,6 +61,17 @@ class AppLocalizationsPt extends AppLocalizations {
   String get navLastMonth => 'Mês passado';
 
   @override
+  String get navThisWeek => 'Esta semana';
+
+  @override
+  String get navLastWeek => 'Semana passada';
+
+  @override
+  String navWeekOf(String date) {
+    return 'Semana de $date';
+  }
+
+  @override
   String get navThisYear => 'Este ano';
 
   @override
@@ -890,6 +901,18 @@ class AppLocalizationsPt extends AppLocalizations {
   String get settingsDefaultPeriodHint => 'Ao abrir o aplicativo';
 
   @override
+  String get settingsWeekStart => 'Início da semana';
+
+  @override
+  String get settingsWeekStartHint => 'Primeiro dia de “Esta semana”';
+
+  @override
+  String get weekStartMonday => 'Segunda-feira';
+
+  @override
+  String get weekStartSunday => 'Domingo';
+
+  @override
   String get settingsRefresh => 'Atualização auto';
 
   @override
@@ -1426,6 +1449,15 @@ class AppLocalizationsPt extends AppLocalizations {
   String get periodControlsChart => 'Gráfico';
 
   @override
+  String get periodControlsCompare => 'Comparar com';
+
+  @override
+  String get compareBaseDayBefore => 'Dia anterior';
+
+  @override
+  String get compareBaseWeekBefore => '7 dias antes';
+
+  @override
   String get periodUnitHour => 'Hora';
 
   @override
@@ -1573,6 +1605,9 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get period24h => '24 h';
+
+  @override
+  String get periodThisWeek => 'Esta semana';
 
   @override
   String get period7d => '7 dias';

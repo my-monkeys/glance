@@ -30,6 +30,7 @@ class StatsCache {
   static const _buckets = [
     Period.today,
     Period.h24,
+    Period.thisWeek,
     Period.d7,
     Period.d30,
     Period.thisMonth,
@@ -52,6 +53,12 @@ class StatsCache {
       // granularité forcée ne trouverait aucune correspondance et le cache
       // disque s'éteindrait sans rien dire.
       if (per.window(unit: w.unit) == w) return '${per.key}@${w.unit.api}';
+      // La semaine dépend du réglage « Début de semaine » : chaque début a sa
+      // clé, sinon une semaine du lundi servirait celle du dimanche.
+      if (per == Period.thisWeek &&
+          per.window(unit: w.unit, firstWeekday: DateTime.sunday) == w) {
+        return '${per.key}-dim@${w.unit.api}';
+      }
     }
     return null;
   }

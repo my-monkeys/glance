@@ -7,7 +7,7 @@ import '../../state/period_state.dart';
 import '../../theme/palette.dart';
 import '../../theme/type.dart';
 
-/// Ligne « ‹ label › » partagée par [DayNav]/[MonthNav]/[YearNav]. La flèche
+/// Ligne « ‹ label › » partagée par [DayNav]/[WeekNav]/[MonthNav]/[YearNav]. La flèche
 /// droite se désactive quand [canGoForward] est faux (pas de futur).
 class _NavRow extends StatelessWidget {
   const _NavRow({
@@ -97,6 +97,35 @@ class DayNav extends ConsumerWidget {
         return DateFormat.MMMMEEEEd().format(day);
     }
   }
+}
+
+/// Navigation semaine par semaine (visible quand « Cette semaine » est
+/// sélectionnée) : ‹ Semaine dernière / Cette semaine / Semaine du 9 nov. ›.
+/// Le premier jour vient de la fenêtre, qui suit le réglage « Début de
+/// semaine ».
+class WeekNav extends ConsumerWidget {
+  const WeekNav({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final offset = ref.watch(periodProvider.select((s) => s.weekOffset));
+    final start = ref.watch(windowProvider)?.start;
+    return _NavRow(
+      label: _label(context.l10n, offset, start),
+      canGoForward: offset < 0,
+      onPrev: () => ref.read(periodProvider.notifier).shiftWeek(-1),
+      onNext: () => ref.read(periodProvider.notifier).shiftWeek(1),
+    );
+  }
+
+  static String _label(AppLocalizations l10n, int offset, DateTime? start) =>
+      switch (offset) {
+        0 => l10n.navThisWeek,
+        -1 => l10n.navLastWeek,
+        _ => start == null
+            ? l10n.navLastWeek
+            : l10n.navWeekOf(DateFormat.MMMd().format(start)),
+      };
 }
 
 /// Navigation mois par mois (visible quand « Ce mois-ci » est sélectionné) :
